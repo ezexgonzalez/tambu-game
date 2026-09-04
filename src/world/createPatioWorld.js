@@ -475,80 +475,269 @@ function drawBar(scene, graphics) {
   const { bar } = PATIO_LAYOUT;
   const { body, counter, inset, label, bottles } = bar;
 
-  graphics.fillStyle(0x392632, 1);
+  graphics.fillStyle(0x090b12, 0.34);
+  graphics.fillRect(bar.x + 6, bar.y + 9, bar.width + 7, bar.height + 4);
+  graphics.fillStyle(0x241525, 1);
   graphics.fillRect(bar.x + body.offsetX, bar.y + body.offsetY, body.width, body.height);
-  graphics.fillStyle(0x765066, 1);
-  graphics.fillRect(bar.x + counter.offsetX, bar.y + counter.offsetY, counter.width, counter.height);
-  graphics.fillStyle(0x1f1720, 0.92);
-  graphics.fillRect(bar.x + inset.offsetX, bar.y + inset.offsetY, inset.width, inset.height);
-  scene.add.text(bar.x + label.offsetX, bar.y + label.offsetY, 'BARRA', {
+  graphics.fillStyle(0x49304b, 1);
+  graphics.fillRect(bar.x + body.offsetX, bar.y + body.offsetY, body.width, 43);
+  graphics.fillStyle(0xa73984, 0.35);
+  graphics.fillRect(bar.x + body.offsetX + 4, bar.y + body.offsetY + 38, body.width - 8, 3);
+  graphics.fillStyle(0xff5ad4, 0.08);
+  graphics.fillRect(bar.x + body.offsetX + 12, bar.y + body.offsetY + 35, body.width - 24, 10);
+
+  graphics.fillStyle(0x15121c, 1);
+  graphics.fillRect(bar.x + inset.offsetX, bar.y + inset.offsetY + 21, inset.width, inset.height + 36);
+  graphics.fillStyle(0x72516b, 0.7);
+  graphics.fillRect(bar.x + inset.offsetX, bar.y + inset.offsetY + 50, inset.width, 3);
+  graphics.fillRect(bar.x + inset.offsetX, bar.y + inset.offsetY + 79, inset.width, 3);
+
+  graphics.fillStyle(0x63405b, 1);
+  graphics.fillRect(bar.x + 10, bar.y + 42, 10, 92);
+  graphics.fillRect(bar.x + bar.width - 20, bar.y + 42, 10, 92);
+  graphics.fillStyle(0xb27691, 0.45);
+  graphics.fillRect(bar.x + 13, bar.y + 45, 2, 83);
+  graphics.fillRect(bar.x + bar.width - 17, bar.y + 45, 2, 83);
+
+  drawBarLamp(graphics, bar.x + 27, bar.y + 57);
+  drawBarLamp(graphics, bar.x + bar.width - 27, bar.y + 57);
+
+  const barLabel = scene.add.text(bar.x + label.offsetX, bar.y + label.offsetY, 'BARRA', {
     fontFamily: 'monospace',
     fontSize: '18px',
-    color: '#ffe5ed',
+    color: '#ffb8ee',
     fontStyle: 'bold',
   }).setOrigin(0.5);
+  barLabel.setShadow(0, 0, '#ff45cd', 7, true, true);
+
+  graphics.lineStyle(2, 0xffa6e4, 0.9);
+  graphics.lineBetween(bar.x + 251, bar.y + 9, bar.x + 267, bar.y + 9);
+  graphics.lineBetween(bar.x + 254, bar.y + 9, bar.x + 260, bar.y + 18);
+  graphics.lineBetween(bar.x + 264, bar.y + 9, bar.x + 260, bar.y + 18);
+  graphics.lineBetween(bar.x + 260, bar.y + 18, bar.x + 260, bar.y + 25);
+  graphics.lineBetween(bar.x + 255, bar.y + 25, bar.x + 265, bar.y + 25);
 
   const bottleColors = [0x7ccf8d, 0xf0bd5f, 0x91a9ff, 0xd96868, 0xc38ed8];
   for (let i = 0; i < bottles.count; i += 1) {
     const x = bar.x + bottles.offsetX + (i % bottles.columns) * bottles.columnGap;
     const y = bar.y + bottles.offsetY + Math.floor(i / bottles.columns) * bottles.rowGap;
+    graphics.fillStyle(0x090b12, 0.75);
+    graphics.fillRect(x - 2, y - 6, bottles.width + 4, bottles.height + 8);
     graphics.fillStyle(bottleColors[i % bottleColors.length], 1);
     graphics.fillRect(x, y, bottles.width, bottles.height);
     graphics.fillRect(x + 3, y - 5, 2, 6);
+    graphics.fillStyle(0xf5f1df, 0.82);
+    graphics.fillRect(x + 2, y + 6, bottles.width - 4, 4);
+    graphics.fillStyle(0xffffff, 0.42);
+    graphics.fillRect(x + 1, y + 2, 2, 7);
+    graphics.fillStyle(0x31222e, 1);
+    graphics.fillRect(x + 2, y - 7, 4, 2);
   }
+
+  graphics.fillStyle(0x9a637e, 1);
+  graphics.fillRect(bar.x + counter.offsetX, bar.y + counter.offsetY, counter.width, counter.height);
+  graphics.fillStyle(0xd59ab3, 0.65);
+  graphics.fillRect(bar.x + counter.offsetX, bar.y + counter.offsetY, counter.width, 4);
+  graphics.fillStyle(0x33202f, 1);
+  graphics.fillRect(bar.x + counter.offsetX + 8, bar.y + counter.offsetY + 20, counter.width - 16, 8);
+  graphics.fillStyle(0xff4fc5, 0.2);
+  graphics.fillRect(bar.x + counter.offsetX + 14, bar.y + counter.offsetY + 25, counter.width - 28, 3);
+}
+
+function drawBarLamp(graphics, x, y) {
+  graphics.fillStyle(0xffba57, 0.055);
+  graphics.fillCircle(x, y, 22);
+  graphics.fillStyle(0xffca67, 0.13);
+  graphics.fillCircle(x, y, 13);
+  graphics.fillStyle(0x3d2832, 1);
+  graphics.fillRect(x - 2, y - 17, 4, 11);
+  graphics.fillStyle(0xffd778, 1);
+  graphics.fillRect(x - 4, y - 7, 8, 12);
+  graphics.fillStyle(0xfff0b2, 1);
+  graphics.fillRect(x - 1, y - 5, 3, 8);
 }
 
 function drawDj(scene, graphics) {
   const { dj } = PATIO_LAYOUT;
   const { booth, counter, label } = dj;
 
-  graphics.fillStyle(0x23212f, 1);
+  graphics.fillStyle(0x080a12, 0.4);
+  graphics.fillRect(dj.x + 8, dj.y + 9, dj.width + 5, dj.height + 5);
+  graphics.fillStyle(0x171525, 1);
   graphics.fillRect(dj.x + booth.offsetX, dj.y + booth.offsetY, booth.width, booth.height);
-  graphics.fillStyle(0x4c4763, 1);
-  graphics.fillRect(dj.x + counter.offsetX, dj.y + counter.offsetY, counter.width, counter.height);
-  scene.add.text(dj.x + label.offsetX, dj.y + label.offsetY, 'DJ', {
+  graphics.fillStyle(0x0b0d19, 1);
+  graphics.fillRect(dj.x + booth.offsetX + 8, dj.y + booth.offsetY + 18, booth.width - 16, 71);
+
+  graphics.fillStyle(0x45415f, 1);
+  graphics.fillRect(dj.x + booth.offsetX, dj.y + booth.offsetY, booth.width, 8);
+  graphics.fillRect(dj.x + booth.offsetX, dj.y + booth.offsetY, 8, 89);
+  graphics.fillRect(dj.x + booth.offsetX + booth.width - 8, dj.y + booth.offsetY, 8, 89);
+  graphics.lineStyle(2, 0x7a75a0, 0.7);
+  for (let x = dj.x + booth.offsetX + 10; x < dj.x + booth.offsetX + booth.width - 10; x += 24) {
+    graphics.lineBetween(x, dj.y + booth.offsetY + 2, x + 12, dj.y + booth.offsetY + 7);
+    graphics.lineBetween(x + 12, dj.y + booth.offsetY + 2, x, dj.y + booth.offsetY + 7);
+  }
+
+  graphics.fillStyle(0x7b45ff, 0.05);
+  graphics.fillTriangle(dj.x + 75, dj.y + 30, dj.x + 26, dj.y + 99, dj.x + 131, dj.y + 99);
+  graphics.fillStyle(0x4aa9ff, 0.05);
+  graphics.fillTriangle(dj.x + 245, dj.y + 30, dj.x + 190, dj.y + 99, dj.x + 296, dj.y + 99);
+  drawDjLight(graphics, dj.x + 74, dj.y + 25, 0xa45bff);
+  drawDjLight(graphics, dj.x + 246, dj.y + 25, 0x61bcff);
+
+  graphics.fillStyle(0x5a5475, 1);
+  graphics.fillRect(dj.x + counter.offsetX, dj.y + counter.offsetY - 10, counter.width, counter.height + 10);
+  graphics.fillStyle(0x8f7bc2, 0.55);
+  graphics.fillRect(dj.x + counter.offsetX, dj.y + counter.offsetY - 10, counter.width, 4);
+  graphics.fillStyle(0x232036, 1);
+  graphics.fillRect(dj.x + counter.offsetX + 8, dj.y + counter.offsetY - 4, counter.width - 16, 20);
+
+  for (let deck = 0; deck < 3; deck += 1) {
+    const deckX = dj.x + counter.offsetX + 20 + deck * 68;
+    graphics.fillStyle(0x0d101b, 1);
+    graphics.fillRect(deckX, dj.y + counter.offsetY, 48, 11);
+    graphics.fillStyle(deck === 1 ? 0xd66bd1 : 0x679ee8, 0.9);
+    graphics.fillRect(deckX + 5, dj.y + counter.offsetY + 3, 8, 3);
+    graphics.fillRect(deckX + 33, dj.y + counter.offsetY + 3, 8, 3);
+  }
+
+  graphics.fillStyle(0x2b263e, 1);
+  graphics.fillRect(dj.x + booth.offsetX, dj.y + booth.offsetY + 89, booth.width, 33);
+  graphics.fillStyle(0x594d77, 0.65);
+  for (let x = dj.x + booth.offsetX + 12; x < dj.x + booth.offsetX + booth.width - 8; x += 34) {
+    graphics.fillRect(x, dj.y + booth.offsetY + 96, 22, 3);
+  }
+
+  const djLabel = scene.add.text(dj.x + label.offsetX, dj.y + label.offsetY + 81, 'DJ', {
     fontFamily: 'monospace',
     fontSize: '18px',
-    color: '#ffffff',
+    color: '#e7dcff',
     fontStyle: 'bold',
   }).setOrigin(0.5);
+  djLabel.setShadow(0, 0, '#8d65ff', 5, true, true);
 
   dj.speakers.forEach(({ x, y, width, height }) => {
-    graphics.fillStyle(0x171820, 1);
+    graphics.fillStyle(0x080910, 0.35);
+    graphics.fillRect(x + 4, y + 6, width, height);
+    graphics.fillStyle(0x151722, 1);
     graphics.fillRect(x, y, width, height);
-    graphics.fillStyle(0x343746, 1);
-    graphics.fillCircle(x + 24, y + 27, 13);
-    graphics.fillCircle(x + 24, y + 63, 19);
+    graphics.lineStyle(2, 0x515369, 0.85);
+    graphics.strokeRect(x + 3, y + 3, width - 6, height - 6);
+    drawSpeakerCone(graphics, x + 24, y + 27, 13);
+    drawSpeakerCone(graphics, x + 24, y + 63, 19);
+    graphics.fillStyle(0x8c69c9, 0.7);
+    graphics.fillRect(x + 6, y + height - 8, width - 12, 2);
   });
 }
 
+function drawDjLight(graphics, x, y, color) {
+  graphics.fillStyle(color, 0.05);
+  graphics.fillCircle(x, y, 19);
+  graphics.fillStyle(color, 0.16);
+  graphics.fillCircle(x, y, 10);
+  graphics.fillStyle(color, 1);
+  graphics.fillRect(x - 5, y - 4, 10, 8);
+  graphics.fillStyle(0xffffff, 0.8);
+  graphics.fillRect(x - 2, y - 2, 4, 3);
+}
+
+function drawSpeakerCone(graphics, x, y, radius) {
+  graphics.fillStyle(0x090b12, 1);
+  graphics.fillCircle(x, y, radius + 2);
+  graphics.lineStyle(2, 0x3f4359, 1);
+  graphics.strokeCircle(x, y, radius);
+  graphics.fillStyle(0x262a3a, 1);
+  graphics.fillCircle(x, y, radius - 4);
+  graphics.fillStyle(0x0d0f18, 1);
+  graphics.fillCircle(x, y, Math.max(4, radius - 10));
+  graphics.fillStyle(0x6c7191, 0.45);
+  graphics.fillCircle(x - 3, y - 4, 3);
+}
+
 function drawPartyTable(graphics, x, y) {
-  graphics.fillStyle(0x5b4337, 1);
+  graphics.fillStyle(0x070b0e, 0.32);
+  graphics.fillEllipse(x + 5, y + 8, 72, 28);
+  graphics.fillStyle(0x38251f, 1);
+  graphics.fillCircle(x, y, 34);
+  graphics.fillStyle(0x76513a, 1);
   graphics.fillCircle(x, y, 32);
+  graphics.lineStyle(2, 0xa9794d, 0.55);
+  graphics.strokeCircle(x, y, 26);
+  graphics.lineStyle(1, 0x432a21, 0.65);
+  graphics.lineBetween(x - 28, y - 5, x + 27, y + 4);
+  graphics.lineBetween(x - 24, y + 9, x + 22, y + 14);
+  graphics.fillStyle(0x2e201b, 1);
   graphics.fillRect(x - 4, y + 24, 8, 36);
-  graphics.fillStyle(0xefddbd, 1);
-  graphics.fillRect(x - 18, y - 9, 7, 12);
+
+  graphics.fillStyle(0xffcb64, 0.07);
+  graphics.fillCircle(x + 4, y - 6, 18);
+  graphics.fillStyle(0xf2d195, 1);
+  graphics.fillRect(x, y - 13, 8, 14);
+  graphics.fillStyle(0xfff0b0, 1);
+  graphics.fillRect(x + 2, y - 17, 4, 7);
+  graphics.fillStyle(0xffc94e, 0.9);
+  graphics.fillRect(x + 3, y - 19, 2, 3);
+
+  graphics.fillStyle(0x17130f, 1);
+  graphics.fillRect(x - 20, y - 12, 8, 17);
+  graphics.fillStyle(0xc99b62, 1);
+  graphics.fillRect(x - 18, y - 9, 4, 11);
   graphics.fillStyle(0x9bc7d1, 1);
   graphics.fillRect(x + 8, y - 13, 7, 14);
+  graphics.fillStyle(0xdaf4f1, 0.72);
+  graphics.fillRect(x + 10, y - 11, 2, 8);
 }
 
 function drawCooler(graphics) {
   const { cooler } = PATIO_LAYOUT;
-  graphics.fillStyle(0xd7e2e4, 1);
+  graphics.fillStyle(0x081015, 0.28);
+  graphics.fillRect(cooler.x + 5, cooler.y + 7, cooler.width + 2, cooler.height + 2);
+  graphics.fillStyle(0xb8c9cd, 1);
   graphics.fillRect(cooler.x, cooler.y, cooler.width, cooler.height);
-  graphics.fillStyle(0x89a8b0, 1);
+  graphics.fillStyle(0xe6eeee, 1);
+  graphics.fillRect(cooler.x + 2, cooler.y + 2, cooler.width - 4, 7);
+  graphics.fillStyle(0x71949e, 1);
   graphics.fillRect(cooler.x + 8, cooler.y + 8, 42, 10);
+  graphics.fillStyle(0x3f6672, 1);
+  graphics.fillRect(cooler.x + 4, cooler.y + 22, cooler.width - 8, 3);
+  graphics.fillStyle(0xe9f3f3, 0.82);
+  graphics.fillRect(cooler.x + 7, cooler.y + 27, 8, 5);
+  graphics.fillRect(cooler.x + 43, cooler.y + 27, 8, 5);
+
+  [cooler.x + 16, cooler.x + 29, cooler.x + 42].forEach((x, index) => {
+    graphics.fillStyle(index === 1 ? 0xd56678 : 0x67a8a0, 1);
+    graphics.fillRect(x, cooler.y - 5, 7, 13);
+    graphics.fillStyle(0x263139, 1);
+    graphics.fillRect(x + 2, cooler.y - 9, 3, 5);
+    graphics.fillStyle(0xd7f1eb, 0.6);
+    graphics.fillRect(x + 1, cooler.y - 2, 2, 6);
+  });
 }
 
 function drawPlants(graphics) {
   PATIO_LAYOUT.plants.forEach(({ x, y }) => {
-    graphics.fillStyle(0x8e6749, 1);
+    graphics.fillStyle(0x080c0b, 0.28);
+    graphics.fillEllipse(x + 4, y + 24, 38, 13);
+    graphics.fillStyle(0x5d3f32, 1);
     graphics.fillRect(x - 12, y + 8, 24, 22);
-    graphics.fillStyle(0x1f6a3d, 1);
-    graphics.fillCircle(x, y, 21);
-    graphics.fillStyle(0x337e4f, 1);
-    graphics.fillCircle(x - 14, y - 6, 11);
-    graphics.fillCircle(x + 14, y - 4, 11);
+    graphics.fillStyle(0x9a6541, 1);
+    graphics.fillRect(x - 14, y + 7, 28, 5);
+    graphics.fillStyle(0xc28757, 0.55);
+    graphics.fillRect(x - 9, y + 13, 3, 13);
+
+    const leaves = [
+      { offsetX: 0, offsetY: -15, width: 8, height: 27, color: 0x347447 },
+      { offsetX: -11, offsetY: -8, width: 10, height: 23, color: 0x245f3c },
+      { offsetX: 11, offsetY: -7, width: 10, height: 22, color: 0x3c8250 },
+      { offsetX: -17, offsetY: 0, width: 9, height: 17, color: 0x1f5437 },
+      { offsetX: 17, offsetY: 1, width: 9, height: 17, color: 0x2f7147 },
+    ];
+    leaves.forEach((leaf) => {
+      graphics.fillStyle(leaf.color, 1);
+      graphics.fillEllipse(x + leaf.offsetX, y + leaf.offsetY, leaf.width, leaf.height);
+      graphics.fillStyle(0x7faf63, 0.35);
+      graphics.fillRect(x + leaf.offsetX, y + leaf.offsetY - 5, 2, 9);
+    });
   });
 }
 
