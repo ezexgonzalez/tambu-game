@@ -1,13 +1,28 @@
 import Phaser from 'phaser';
 import { fillerGroups, patioFriends, patioWomen } from '../data/patioCharacters.js';
+import { TERRAIN_TILE, TILE_SIZE } from '../data/terrainTiles.js';
 
 const WORLD = { width: 1680, height: 960 };
 const PLAYER_SPEED = 225;
 const INTERACT_DISTANCE = 82;
 
+const POOL = {
+  x: 512,
+  y: 432,
+  width: 624,
+  height: 304,
+};
+
 export class PatioScene extends Phaser.Scene {
   constructor() {
     super('PatioScene');
+  }
+
+  preload() {
+    this.load.spritesheet('terrain', '/assets/tiles/terrain/terrain.png', {
+      frameWidth: TILE_SIZE,
+      frameHeight: TILE_SIZE,
+    });
   }
 
   create() {
@@ -19,7 +34,8 @@ export class PatioScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, WORLD.width, WORLD.height);
     this.cameras.main.setBackgroundColor('#10151f');
 
-    this.drawPatio();
+    this.drawTerrain();
+    this.drawArchitectureAndProps();
     this.createCharacters();
     this.createPlayer();
     this.createCollisions();
@@ -30,36 +46,142 @@ export class PatioScene extends Phaser.Scene {
     this.cameras.main.setZoom(1);
   }
 
-  drawPatio() {
-    const g = this.add.graphics();
+  drawTerrain() {
+    this.add.tileSprite(0, 150, WORLD.width, WORLD.height - 150, 'terrain', TERRAIN_TILE.GRASS_BASE)
+      .setOrigin(0)
+      .setDepth(-30);
 
-    // Césped con variación sutil.
-    g.fillStyle(0x315b3b, 1);
-    g.fillRect(0, 150, WORLD.width, WORLD.height - 150);
-    for (let y = 150; y < WORLD.height; y += 32) {
-      for (let x = 0; x < WORLD.width; x += 32) {
-        if (((x / 32) + (y / 32)) % 3 === 0) {
-          g.fillStyle(0x2a5235, 0.62);
-          g.fillRect(x, y, 32, 32);
+    const grassVariants = [
+      TERRAIN_TILE.GRASS_A,
+      TERRAIN_TILE.GRASS_B,
+      TERRAIN_TILE.GRASS_WORN,
+      TERRAIN_TILE.GRASS_DARK,
+      TERRAIN_TILE.GRASS_LEAF,
+    ];
+
+    for (let y = 294; y < WORLD.height; y += 80) {
+      for (let x = 32; x < WORLD.width; x += 96) {
+        const seed = ((x / 16) * 3 + (y / 16) * 7) % 11;
+        if (seed < 6) {
+          const frame = grassVariants[seed % grassVariants.length];
+          this.add.image(x + (seed % 3) * 8, y + (seed % 2) * 8, 'terrain', frame)
+            .setOrigin(0)
+            .setDepth(-28)
+            .setAlpha(seed === 2 ? 0.78 : 1);
         }
       }
     }
 
-    // Casa / fondo.
+    this.add.tileSprite(0, 150, WORLD.width, 120, 'terrain', TERRAIN_TILE.DECK_A)
+      .setOrigin(0)
+      .setDepth(-24);
+
+    this.add.tileSprite(0, 254, WORLD.width, 16, 'terrain', TERRAIN_TILE.DECK_EDGE_BOTTOM)
+      .setOrigin(0)
+      .setDepth(-23);
+
+    for (let x = 64; x < WORLD.width; x += 160) {
+      this.add.tileSprite(x, 166, 48, 72, 'terrain', TERRAIN_TILE.DECK_B)
+        .setOrigin(0)
+        .setDepth(-22)
+        .setAlpha(0.34);
+    }
+
+    this.add.tileSprite(1392, 720, 176, 240, 'terrain', TERRAIN_TILE.PATH_A)
+      .setOrigin(0)
+      .setDepth(-18);
+
+    for (let y = 720; y < 960; y += 48) {
+      this.add.tileSprite(1408, y, 128, 16, 'terrain', TERRAIN_TILE.PATH_B)
+        .setOrigin(0)
+        .setDepth(-17)
+        .setAlpha(0.45);
+    }
+
+    this.add.tileSprite(1392, 720, 16, 240, 'terrain', TERRAIN_TILE.PATH_EDGE_LEFT)
+      .setOrigin(0)
+      .setDepth(-16);
+    this.add.tileSprite(1552, 720, 16, 240, 'terrain', TERRAIN_TILE.PATH_EDGE_RIGHT)
+      .setOrigin(0)
+      .setDepth(-16);
+
+    this.drawPixelPool();
+  }
+
+  drawPixelPool() {
+    const { x, y, width, height } = POOL;
+    const innerX = x + TILE_SIZE;
+    const innerY = y + TILE_SIZE;
+    const innerWidth = width - TILE_SIZE * 2;
+    const innerHeight = height - TILE_SIZE * 2;
+
+    this.add.rectangle(x + width / 2 + 6, y + height / 2 + 9, width, height, 0x071017, 0.28)
+      .setDepth(-14);
+
+    this.add.tileSprite(innerX, innerY, innerWidth, innerHeight, 'terrain', TERRAIN_TILE.WATER_A)
+      .setOrigin(0)
+      .setDepth(-12);
+
+    for (let rowY = innerY + 32; rowY < innerY + innerHeight - 16; rowY += 64) {
+      this.add.tileSprite(innerX + 16, rowY, innerWidth - 32, 16, 'terrain', TERRAIN_TILE.WATER_B)
+        .setOrigin(0)
+        .setDepth(-11)
+        .setAlpha(0.45);
+    }
+
+    const glints = this.add.tileSprite(innerX, innerY, innerWidth, innerHeight, 'terrain', TERRAIN_TILE.WATER_GLINT)
+      .setOrigin(0)
+      .setDepth(-10)
+      .setAlpha(0.23);
+
+    this.tweens.add({
+      targets: glints,
+      tilePositionX: TILE_SIZE,
+      duration: 2100,
+      ease: 'Linear',
+      repeat: -1,
+    });
+
+    this.add.tileSprite(x + TILE_SIZE, y, width - TILE_SIZE * 2, TILE_SIZE, 'terrain', TERRAIN_TILE.POOL_EDGE_TOP)
+      .setOrigin(0)
+      .setDepth(-8);
+    this.add.tileSprite(x + TILE_SIZE, y + height - TILE_SIZE, width - TILE_SIZE * 2, TILE_SIZE, 'terrain', TERRAIN_TILE.POOL_EDGE_BOTTOM)
+      .setOrigin(0)
+      .setDepth(-8);
+    this.add.tileSprite(x, y + TILE_SIZE, TILE_SIZE, height - TILE_SIZE * 2, 'terrain', TERRAIN_TILE.POOL_EDGE_LEFT)
+      .setOrigin(0)
+      .setDepth(-8);
+    this.add.tileSprite(x + width - TILE_SIZE, y + TILE_SIZE, TILE_SIZE, height - TILE_SIZE * 2, 'terrain', TERRAIN_TILE.POOL_EDGE_RIGHT)
+      .setOrigin(0)
+      .setDepth(-8);
+
+    this.add.image(x, y, 'terrain', TERRAIN_TILE.POOL_CORNER_TL).setOrigin(0).setDepth(-7);
+    this.add.image(x + width - TILE_SIZE, y, 'terrain', TERRAIN_TILE.POOL_CORNER_TR).setOrigin(0).setDepth(-7);
+    this.add.image(x, y + height - TILE_SIZE, 'terrain', TERRAIN_TILE.POOL_CORNER_BL).setOrigin(0).setDepth(-7);
+    this.add.image(x + width - TILE_SIZE, y + height - TILE_SIZE, 'terrain', TERRAIN_TILE.POOL_CORNER_BR)
+      .setOrigin(0)
+      .setDepth(-7);
+
+    const g = this.add.graphics().setDepth(-5);
+    g.lineStyle(4, 0xd3d7d8, 1);
+    g.strokeCircle(x + width - 58, y + 48, 18);
+    g.lineBetween(x + width - 40, y + 38, x + width - 40, y + 88);
+    g.lineBetween(x + width - 62, y + 64, x + width - 42, y + 64);
+
+    g.fillStyle(0xf4c95e, 1);
+    g.fillCircle(x + 148, y + 128, 22);
+    g.fillStyle(0x2a879f, 1);
+    g.fillCircle(x + 148, y + 128, 10);
+  }
+
+  drawArchitectureAndProps() {
+    const g = this.add.graphics();
+
     g.fillStyle(0xd2cab8, 1);
     g.fillRect(0, 0, WORLD.width, 150);
     g.fillStyle(0x9b927f, 1);
     g.fillRect(0, 136, WORLD.width, 14);
 
-    // Deck de madera.
-    g.fillStyle(0x806651, 1);
-    g.fillRect(0, 150, WORLD.width, 120);
-    g.lineStyle(2, 0x604b3d, 0.55);
-    for (let y = 165; y < 270; y += 18) {
-      g.lineBetween(0, y, WORLD.width, y);
-    }
-
-    // Ventanales grandes.
     [80, 330, 590, 850].forEach((x, i) => {
       g.fillStyle(0x282b3a, 1);
       g.fillRect(x, 28, 190, 74);
@@ -71,7 +193,6 @@ export class PatioScene extends Phaser.Scene {
       g.lineBetween(x + 95, 28, x + 95, 102);
     });
 
-    // Puerta del baño.
     g.fillStyle(0x554237, 1);
     g.fillRect(1460, 18, 118, 132);
     g.lineStyle(4, 0x806654, 1);
@@ -87,22 +208,6 @@ export class PatioScene extends Phaser.Scene {
     g.fillCircle(1531, 91, 5);
     g.fillRect(1526, 97, 10, 18);
 
-    // Piscina central.
-    g.fillStyle(0xe8e2d7, 1);
-    g.fillRoundedRect(520, 430, 620, 310, 18);
-    g.fillStyle(0x2a879f, 1);
-    g.fillRoundedRect(542, 452, 576, 266, 12);
-    g.fillStyle(0x5bc4d5, 0.42);
-    for (let y = 485; y < 700; y += 46) g.fillRect(580, y, 500, 5);
-    g.lineStyle(5, 0xd3d7d8, 1);
-    g.strokeCircle(1070, 480, 18);
-    g.lineBetween(1088, 470, 1088, 520);
-    g.fillStyle(0xf4c95e, 1);
-    g.fillCircle(660, 560, 22);
-    g.fillStyle(0x2a879f, 1);
-    g.fillCircle(660, 560, 10);
-
-    // Barra lateral derecha.
     g.fillStyle(0x392632, 1);
     g.fillRect(1200, 178, 390, 185);
     g.fillStyle(0x765066, 1);
@@ -122,7 +227,6 @@ export class PatioScene extends Phaser.Scene {
       g.fillRect(x + 3, y - 6, 3, 7);
     }
 
-    // DJ y parlantes.
     g.fillStyle(0x23212f, 1);
     g.fillRect(110, 205, 330, 145);
     g.fillStyle(0x4c4763, 1);
@@ -130,6 +234,7 @@ export class PatioScene extends Phaser.Scene {
     this.add.text(275, 225, 'DJ', {
       fontFamily: 'monospace', fontSize: '20px', color: '#ffffff', fontStyle: 'bold',
     }).setOrigin(0.5);
+
     [75, 462].forEach((x) => {
       g.fillStyle(0x171820, 1);
       g.fillRect(x, 220, 55, 105);
@@ -138,16 +243,9 @@ export class PatioScene extends Phaser.Scene {
       g.fillCircle(x + 27, 292, 22);
     });
 
-    // Camino de entrada.
-    g.fillStyle(0xa98a70, 1);
-    g.fillRect(1390, 720, 170, 240);
-    for (let y = 735; y < 960; y += 30) {
-      g.fillStyle(0xb89a7e, 0.55);
-      g.fillRect(1405, y, 140, 5);
-    }
-
     this.drawPartyTable(g, 1180, 530);
     this.drawPartyTable(g, 360, 565);
+
     g.fillStyle(0xd7e2e4, 1);
     g.fillRect(1325, 500, 70, 45);
     g.fillStyle(0x89a8b0, 1);
@@ -280,7 +378,7 @@ export class PatioScene extends Phaser.Scene {
   createCollisions() {
     const zones = [
       { x: WORLD.width / 2, y: 75, w: WORLD.width, h: 150 },
-      { x: 830, y: 585, w: 620, h: 310 },
+      { x: POOL.x + POOL.width / 2, y: POOL.y + POOL.height / 2, w: POOL.width, h: POOL.height },
       { x: 1395, y: 271, w: 418, h: 190 },
       { x: 275, y: 278, w: 410, h: 150 },
       { x: 1180, y: 565, w: 80, h: 90 },
@@ -363,8 +461,7 @@ export class PatioScene extends Phaser.Scene {
     }).setScrollFactor(0).setDepth(6001);
 
     const line = this.add.text(92, 510, this.currentWoman.intro, {
-      fontFamily: 'monospace', fontSize: '17px', color: '#f4f4ef',
-      wordWrap: { width: 1080 },
+      fontFamily: 'monospace', fontSize: '17px', color: '#f4f4ef', wordWrap: { width: 1080 },
     }).setScrollFactor(0).setDepth(6001);
 
     const answerTexts = this.currentWoman.answers.map((answer, i) => this.add.text(
