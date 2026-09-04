@@ -30,11 +30,11 @@ export class PatioSceneV012 extends PatioSceneV011 {
       0,
     );
 
-    this.player.setScale(1.24);
+    this.player.setScale(TAMBU_SPRITE.scale);
     this.player.setCollideWorldBounds(true);
     this.player.setDepth(2000);
-    this.player.body.setSize(13, 15);
-    this.player.body.setOffset(9, 31);
+    this.player.body.setSize(TAMBU_SPRITE.bodyWidth, TAMBU_SPRITE.bodyHeight);
+    this.player.body.setOffset(TAMBU_SPRITE.bodyOffsetX, TAMBU_SPRITE.bodyOffsetY);
 
     this.playerFacing = 'down';
     this.player.play('tambu-idle-down');
