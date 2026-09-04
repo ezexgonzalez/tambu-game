@@ -3,10 +3,10 @@ export const TAMBU_SPRITE = {
   path: '/assets/characters/tambu/tambu.png',
   frameWidth: 32,
   frameHeight: 48,
-  scale: 1,
-  bodyWidth: 16,
-  bodyHeight: 16,
-  bodyOffsetX: 8,
+  scale: 1.24,
+  bodyWidth: 13,
+  bodyHeight: 15,
+  bodyOffsetX: 9,
   bodyOffsetY: 31,
 };
 
