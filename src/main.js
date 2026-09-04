@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import './styles.css';
-import { PatioScene } from './scenes/PatioScene.js';
+import { PatioSceneV011 } from './scenes/PatioSceneV011.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -22,7 +22,7 @@ const config = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [PatioScene],
+  scene: [PatioSceneV011],
 };
 
 new Phaser.Game(config);
