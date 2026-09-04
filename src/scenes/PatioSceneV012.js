@@ -6,6 +6,7 @@ import { createTambuAnimations } from '../animations/createTambuAnimations.js';
 const PLAYER_START = { x: 1504, y: 890 };
 const WORLD_WIDTH = 1680;
 const HOUSE_HEIGHT = 150;
+const POOL = { x: 512, y: 432, width: 624, height: 304 };
 
 export class PatioSceneV012 extends PatioSceneV011 {
   preload() {
@@ -190,7 +191,7 @@ export class PatioSceneV012 extends PatioSceneV011 {
       for (let i = 0; i <= 8; i += 1) {
         const t = i / 8;
         const x = Phaser.Math.Linear(x1, x2, t);
-        const y = Phaser.Math.Linear(x1, x2, t) * 0 + Phaser.Math.Linear(y1, y2, t)
+        const y = Phaser.Math.Linear(y1, y2, t)
           + (row === 0 ? Math.sin(t * Math.PI) * 4 : Math.sin(t * Math.PI) * 3);
         g.fillStyle(bulbs[(i + row) % bulbs.length], 1);
         g.fillRect(x - 4, y - 4, 8, 8);
@@ -223,6 +224,7 @@ export class PatioSceneV012 extends PatioSceneV011 {
   createCollisions() {
     const zones = [
       { x: WORLD_WIDTH / 2, y: HOUSE_HEIGHT / 2, w: WORLD_WIDTH, h: HOUSE_HEIGHT },
+      { x: POOL.x + POOL.width / 2, y: POOL.y + POOL.height / 2, w: POOL.width, h: POOL.height },
       { x: 1386, y: 258, w: 320, h: 156 },
       { x: 267, y: 275, w: 322, h: 126 },
       { x: 1178, y: 558, w: 72, h: 80 },
