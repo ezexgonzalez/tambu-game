@@ -15,10 +15,10 @@ const HOUSE = {
   bottomBand: { y: 138, height: 12 },
   verticalCuts: [180, 440, 700, 960],
   windows: [
-    { x: 36, y: 28, width: 150, height: 54, warm: true },
-    { x: 240, y: 28, width: 162, height: 54, warm: false },
-    { x: 470, y: 28, width: 162, height: 54, warm: true },
-    { x: 680, y: 28, width: 162, height: 54, warm: false },
+    { x: 36, y: 28, width: 150, height: 54, warm: true, silhouettes: 2 },
+    { x: 240, y: 28, width: 162, height: 54, warm: false, silhouettes: 0 },
+    { x: 470, y: 28, width: 162, height: 54, warm: true, silhouettes: 3 },
+    { x: 680, y: 28, width: 162, height: 54, warm: false, silhouettes: 1 },
   ],
   secondaryDoor: { x: 880, y: 18, width: 72, height: 102 },
   bathroom: { x: 1288, y: 10, width: 110, height: 122 },
@@ -33,6 +33,7 @@ const POOL = {
   y: 432,
   width: 624,
   height: 304,
+  internalLights: [0.12, 0.34, 0.56, 0.78],
 };
 
 const BAR = {
@@ -76,9 +77,24 @@ export const PATIO_LAYOUT = {
   terrain: {
     grass: { x: 0, y: 150, width: WORLD.width, height: WORLD.height - 150 },
     grassDetails: { startX: 32, startY: 294, stepX: 96, stepY: 80 },
+    grassPatches: [
+      { x: 70, y: 330, width: 360, height: 210, color: 0x173f2b, alpha: 0.16 },
+      { x: 1150, y: 350, width: 430, height: 250, color: 0x285c34, alpha: 0.12 },
+      { x: 190, y: 690, width: 460, height: 220, color: 0x2b6038, alpha: 0.1 },
+      { x: 1030, y: 720, width: 500, height: 220, color: 0x143924, alpha: 0.14 },
+    ],
+    flowerClusters: [
+      { x: 116, y: 548, color: 0xf08aa9 },
+      { x: 310, y: 735, color: 0xffc966 },
+      { x: 438, y: 410, color: 0xb693ff },
+      { x: 1185, y: 760, color: 0x78cfff },
+      { x: 1450, y: 610, color: 0xf08aa9 },
+      { x: 1570, y: 835, color: 0xffc966 },
+    ],
     deck: { x: 0, y: 150, width: WORLD.width, height: 120 },
     deckEdge: { x: 0, y: 254, width: WORLD.width, height: 16 },
     deckDetails: { startX: 64, y: 166, width: 48, height: 72, stepX: 160 },
+    deckLights: [116, 350, 584, 818, 1052, 1286, 1520],
     entry: { x: 1456, y: 800, width: 96, height: 160, playerSpawnY: 890 },
   },
   pool: POOL,
