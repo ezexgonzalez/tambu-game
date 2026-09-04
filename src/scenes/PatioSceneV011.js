@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { PatioScene } from './PatioScene.js';
-import { TERRAIN_TILE, TILE_SIZE } from '../data/terrainTiles.js';
+import { TERRAIN_TILE } from '../data/terrainTiles.js';
 
 const WORLD = { width: 1680, height: 960 };
 
@@ -9,6 +9,12 @@ const ENTRY = {
   y: 800,
   width: 96,
   height: 160,
+};
+
+const FACADE = {
+  height: 150,
+  topBand: 18,
+  baseBand: 18,
 };
 
 export class PatioSceneV011 extends PatioScene {
@@ -53,7 +59,6 @@ export class PatioSceneV011 extends PatioScene {
         .setAlpha(0.34);
     }
 
-    // Acceso angosto: deja de competir visualmente con la piscina.
     this.add.tileSprite(ENTRY.x, ENTRY.y, ENTRY.width, ENTRY.height, 'terrain', TERRAIN_TILE.PATH_A)
       .setOrigin(0)
       .setDepth(-18);
@@ -78,40 +83,9 @@ export class PatioSceneV011 extends PatioScene {
   drawArchitectureAndProps() {
     const g = this.add.graphics();
 
-    // Casa / fondo provisional.
-    g.fillStyle(0xd2cab8, 1);
-    g.fillRect(0, 0, WORLD.width, 150);
-    g.fillStyle(0x9b927f, 1);
-    g.fillRect(0, 136, WORLD.width, 14);
+    this.drawHouseFacade(g);
 
-    [80, 330, 590, 850].forEach((x, i) => {
-      g.fillStyle(0x282b3a, 1);
-      g.fillRect(x, 28, 190, 74);
-      g.fillStyle(i % 2 ? 0x514b68 : 0xd0b85d, 0.8);
-      g.fillRect(x + 9, 37, 82, 56);
-      g.fillStyle(0x45415d, 1);
-      g.fillRect(x + 99, 37, 82, 56);
-      g.lineStyle(3, 0x191b25, 1);
-      g.lineBetween(x + 95, 28, x + 95, 102);
-    });
-
-    // Baño provisional.
-    g.fillStyle(0x554237, 1);
-    g.fillRect(1460, 18, 118, 132);
-    g.lineStyle(4, 0x806654, 1);
-    g.strokeRect(1460, 18, 118, 132);
-    g.fillStyle(0xede8da, 1);
-    g.fillRect(1480, 38, 78, 30);
-    this.add.text(1519, 53, 'BAÑO', {
-      fontFamily: 'monospace', fontSize: '16px', color: '#25242b', fontStyle: 'bold',
-    }).setOrigin(0.5);
-    g.fillStyle(0xe8e2d4, 1);
-    g.fillCircle(1507, 91, 5);
-    g.fillRect(1502, 97, 10, 18);
-    g.fillCircle(1531, 91, 5);
-    g.fillRect(1526, 97, 10, 18);
-
-    // Barra provisional.
+    // Barra provisional: se mantiene para el siguiente batch visual.
     g.fillStyle(0x392632, 1);
     g.fillRect(1200, 178, 390, 185);
     g.fillStyle(0x765066, 1);
@@ -131,7 +105,7 @@ export class PatioSceneV011 extends PatioScene {
       g.fillRect(x + 3, y - 6, 3, 7);
     }
 
-    // DJ provisional.
+    // DJ provisional: se mantiene para el siguiente batch visual.
     g.fillStyle(0x23212f, 1);
     g.fillRect(110, 205, 330, 145);
     g.fillStyle(0x4c4763, 1);
@@ -166,7 +140,7 @@ export class PatioSceneV011 extends PatioScene {
       g.fillCircle(x + 16, y - 5, 13);
     });
 
-    // Guirnaldas locales: no atraviesan la piscina ni cortan la composición.
+    // Guirnaldas locales: limpias y sin invadir la piscina.
     this.drawGarland(g, {
       x1: 500, y1: 330, x2: 1120, y2: 330, bulbs: 10, sag: 16, offset: 0,
     });
@@ -174,7 +148,7 @@ export class PatioSceneV011 extends PatioScene {
       x1: 1180, y1: 405, x2: 1620, y2: 385, bulbs: 8, sag: 12, offset: 1,
     });
 
-    // Acceso: dos postes bajos y vegetación lateral, sin sensación de portón gigante.
+    // Entrada baja y discreta.
     g.fillStyle(0x6b6257, 1);
     g.fillRect(1438, 790, 14, 38);
     g.fillRect(1556, 790, 14, 38);
@@ -198,13 +172,151 @@ export class PatioSceneV011 extends PatioScene {
       [470, 755], [1180, 870], [840, 805], [1600, 860], [310, 870], [60, 700],
     ];
     clutter.forEach(([x, y], i) => {
-      // Evitar basura visual en el sendero de entrada.
       const onEntry = x >= ENTRY.x - 12 && x <= ENTRY.x + ENTRY.width + 12 && y >= ENTRY.y - 12;
       if (onEntry) return;
       g.fillStyle(i % 3 === 0 ? 0xf1d2a1 : (i % 3 === 1 ? 0x8dc8a1 : 0xcc6f83), 1);
       g.fillRect(x, y, 7, 13);
       if (i % 4 === 0) g.fillRect(x - 5, y + 10, 15, 4);
     });
+  }
+
+  drawHouseFacade(g) {
+    // Sombra sobre el deck: separa casa y patio.
+    g.fillStyle(0x0b1015, 0.28);
+    g.fillRect(0, FACADE.height - 4, WORLD.width, 26);
+
+    // Cuerpo principal de la fachada.
+    g.fillStyle(0xcac2b0, 1);
+    g.fillRect(0, 0, WORLD.width, FACADE.height);
+
+    // Banda superior e inferior para dar profundidad arquitectónica.
+    g.fillStyle(0xb2a996, 1);
+    g.fillRect(0, 0, WORLD.width, FACADE.topBand);
+    g.fillStyle(0x8f8778, 1);
+    g.fillRect(0, FACADE.height - FACADE.baseBand, WORLD.width, FACADE.baseBand);
+
+    // Línea de sombra y pequeños cortes verticales para evitar una pared infinita.
+    g.fillStyle(0x716b61, 0.55);
+    g.fillRect(0, FACADE.height - FACADE.baseBand - 5, WORLD.width, 5);
+
+    [300, 565, 830, 1110, 1370].forEach((x) => {
+      g.fillStyle(0xa59d8d, 0.55);
+      g.fillRect(x, 20, 4, 106);
+      g.fillStyle(0xd9d2c2, 0.36);
+      g.fillRect(x + 4, 20, 2, 106);
+    });
+
+    // Ventanales cálidos. Tienen variaciones para sugerir un interior vivo.
+    this.drawWindowModule(g, { x: 72, y: 34, width: 210, height: 76, warmth: 0 });
+    this.drawWindowModule(g, { x: 338, y: 34, width: 210, height: 76, warmth: 1 });
+    this.drawWindowModule(g, { x: 604, y: 34, width: 210, height: 76, warmth: 2 });
+    this.drawWindowModule(g, { x: 870, y: 34, width: 210, height: 76, warmth: 3 });
+
+    // Puerta secundaria decorativa: da ritmo a la fachada sin competir con el baño.
+    this.drawSecondaryDoor(g, 1134, 28);
+
+    // El baño funciona como módulo propio integrado en la casa.
+    this.drawBathroomModule(g, 1424, 18);
+
+    // Dos apliques cálidos ayudan a que la fachada se sienta nocturna.
+    this.drawWallLamp(g, 1112, 48);
+    this.drawWallLamp(g, 1388, 48);
+  }
+
+  drawWindowModule(g, { x, y, width, height, warmth }) {
+    const frame = 0x242630;
+    const recess = 0x181a22;
+    const warm = [0xd7b75d, 0xc69d55, 0xe0c773, 0xb88f54][warmth % 4];
+    const cool = [0x41465a, 0x373b50, 0x4d5267, 0x343849][warmth % 4];
+
+    // Hueco y marco.
+    g.fillStyle(recess, 1);
+    g.fillRect(x - 5, y - 5, width + 10, height + 10);
+    g.fillStyle(frame, 1);
+    g.fillRect(x, y, width, height);
+
+    // Cristales interiores.
+    g.fillStyle(warm, 0.9);
+    g.fillRect(x + 8, y + 8, 88, height - 16);
+    g.fillStyle(cool, 1);
+    g.fillRect(x + 108, y + 8, width - 116, height - 16);
+
+    // Reflejo vertical y división central.
+    g.fillStyle(0xf3ddb0, 0.18);
+    g.fillRect(x + 18, y + 12, 8, height - 24);
+    g.fillRect(x + 118, y + 12, 6, height - 24);
+    g.fillStyle(0x171923, 1);
+    g.fillRect(x + 101, y, 6, height);
+
+    // Sombra inferior del marco.
+    g.fillStyle(0x11131b, 0.85);
+    g.fillRect(x, y + height - 6, width, 6);
+  }
+
+  drawSecondaryDoor(g, x, y) {
+    g.fillStyle(0x777064, 1);
+    g.fillRect(x - 6, y - 6, 112, 128);
+    g.fillStyle(0x3d3935, 1);
+    g.fillRect(x, y, 100, 122);
+    g.fillStyle(0x4b4540, 1);
+    g.fillRect(x + 8, y + 8, 84, 106);
+    g.fillStyle(0x24262d, 1);
+    g.fillRect(x + 18, y + 14, 64, 38);
+    g.fillStyle(0xc5aa65, 0.5);
+    g.fillRect(x + 23, y + 19, 54, 28);
+    g.fillStyle(0xc9b37a, 1);
+    g.fillCircle(x + 78, y + 78, 4);
+  }
+
+  drawBathroomModule(g, x, y) {
+    const width = 156;
+    const height = 132;
+
+    // Receso oscuro para integrar la puerta en la fachada.
+    g.fillStyle(0x82796c, 1);
+    g.fillRect(x - 8, y - 5, width + 16, height + 10);
+    g.fillStyle(0x2d2b2b, 1);
+    g.fillRect(x, y, width, height);
+
+    // Puerta interior con paneles sencillos.
+    g.fillStyle(0x4a4038, 1);
+    g.fillRect(x + 10, y + 10, width - 20, height - 10);
+    g.fillStyle(0x5a4d43, 1);
+    g.fillRect(x + 18, y + 55, width - 36, 58);
+    g.fillStyle(0x372f2a, 1);
+    g.fillRect(x + 23, y + 61, width - 46, 6);
+
+    // Cartel BAÑO tipo señalética local y clara.
+    g.fillStyle(0xf1ede1, 1);
+    g.fillRect(x + 24, y + 14, width - 48, 34);
+    g.fillStyle(0x2a2b30, 1);
+    g.fillRect(x + 24, y + 45, width - 48, 3);
+
+    this.add.text(x + width / 2, y + 31, 'BAÑO', {
+      fontFamily: 'monospace', fontSize: '16px', color: '#24262b', fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    // Iconos simples y neutros debajo del cartel.
+    g.fillStyle(0xd9d4c8, 1);
+    g.fillCircle(x + 61, y + 79, 5);
+    g.fillRect(x + 56, y + 85, 10, 18);
+    g.fillCircle(x + 94, y + 79, 5);
+    g.fillRect(x + 89, y + 85, 10, 18);
+
+    // Picaporte y pequeña placa inferior.
+    g.fillStyle(0xd0b06a, 1);
+    g.fillCircle(x + width - 27, y + 94, 4);
+    g.fillStyle(0x75665a, 1);
+    g.fillRect(x + 43, y + 113, 70, 6);
+  }
+
+  drawWallLamp(g, x, y) {
+    g.fillStyle(0x4a463f, 1);
+    g.fillRect(x - 7, y - 9, 14, 28);
+    g.fillStyle(0xe1be6d, 0.95);
+    g.fillRect(x - 5, y - 5, 10, 14);
+    g.fillStyle(0xf2d995, 0.14);
+    g.fillCircle(x, y + 2, 26);
   }
 
   drawGarland(g, { x1, y1, x2, y2, bulbs, sag, offset }) {
