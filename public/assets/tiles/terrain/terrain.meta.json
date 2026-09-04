@@ -1,0 +1,7 @@
+{
+  "tileWidth": 16,
+  "tileHeight": 16,
+  "columns": 8,
+  "rows": 4,
+  "image": "terrain.png"
+}
