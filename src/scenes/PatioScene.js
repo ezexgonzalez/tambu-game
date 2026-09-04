@@ -81,7 +81,6 @@ export class PatioScene extends Phaser.Scene {
     this.add.text(1519, 53, 'BAÑO', {
       fontFamily: 'monospace', fontSize: '16px', color: '#25242b', fontStyle: 'bold',
     }).setOrigin(0.5);
-    // Señal simple de personas.
     g.fillStyle(0xe8e2d4, 1);
     g.fillCircle(1507, 91, 5);
     g.fillRect(1502, 97, 10, 18);
@@ -95,7 +94,6 @@ export class PatioScene extends Phaser.Scene {
     g.fillRoundedRect(542, 452, 576, 266, 12);
     g.fillStyle(0x5bc4d5, 0.42);
     for (let y = 485; y < 700; y += 46) g.fillRect(580, y, 500, 5);
-    // Escalera y flotador.
     g.lineStyle(5, 0xd3d7d8, 1);
     g.strokeCircle(1070, 480, 18);
     g.lineBetween(1088, 470, 1088, 520);
@@ -148,7 +146,6 @@ export class PatioScene extends Phaser.Scene {
       g.fillRect(1405, y, 140, 5);
     }
 
-    // Mesas altas y hielera.
     this.drawPartyTable(g, 1180, 530);
     this.drawPartyTable(g, 360, 565);
     g.fillStyle(0xd7e2e4, 1);
@@ -156,7 +153,6 @@ export class PatioScene extends Phaser.Scene {
     g.fillStyle(0x89a8b0, 1);
     g.fillRect(1334, 510, 52, 12);
 
-    // Plantas decorativas.
     [[70, 430], [1600, 470], [1160, 825]].forEach(([x, y]) => {
       g.fillStyle(0x8e6749, 1);
       g.fillRect(x - 14, y + 6, 28, 28);
@@ -167,7 +163,6 @@ export class PatioScene extends Phaser.Scene {
       g.fillCircle(x + 16, y - 5, 13);
     });
 
-    // Guirnaldas cruzadas.
     const bulbs = [0xffd45b, 0xff6f91, 0x55d7ff, 0xc58cff];
     [[40, 385, 1640, 385], [280, 165, 1030, 850]].forEach(([x1, y1, x2, y2], row) => {
       g.lineStyle(3, 0x24202f, 0.9);
@@ -181,7 +176,6 @@ export class PatioScene extends Phaser.Scene {
       }
     });
 
-    // Vasos, botellas y pequeños restos de fiesta.
     const clutter = [
       [485, 350], [1090, 385], [1190, 740], [1280, 610], [410, 805], [1040, 830],
       [720, 790], [280, 500], [1560, 580], [850, 360], [200, 720], [1240, 450],
@@ -312,7 +306,12 @@ export class PatioScene extends Phaser.Scene {
     });
     this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
     this.escapeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-    this.choiceKeys = [1, 2, 3, 4].map((n) => this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes[`NUM_${n}`]));
+    this.choiceKeys = [
+      this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE),
+      this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO),
+      this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE),
+      this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR),
+    ];
   }
 
   createHud() {
