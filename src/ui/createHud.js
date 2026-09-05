@@ -25,11 +25,12 @@ export function createHud(scene, gameState) {
   hudDecor.fillRect(1037, 49, 112, 8);
   hudDecor.lineStyle(1, 0x8994a7, 0.68);
   hudDecor.strokeRect(1037, 49, 112, 8);
-  if (gameState.player.alcohol > 0) {
-    const fillWidth = Math.round(110 * Math.min(gameState.player.alcohol, 100) / 100);
-    hudDecor.fillStyle(0xf0b849, 1);
-    hudDecor.fillRect(1038, 50, fillWidth, 6);
-  }
+
+  const alcoholFill = scene.add.rectangle(1038, 50, 1, 6, 0xf0b849, 1)
+    .setOrigin(0)
+    .setScrollFactor(0)
+    .setDepth(5002)
+    .setVisible(false);
 
   const hearts = scene.add.text(935, 27, Array(gameState.player.lives).fill('♥').join(' '), {
     fontFamily: 'monospace',
@@ -39,14 +40,14 @@ export function createHud(scene, gameState) {
   }).setScrollFactor(0).setDepth(5002);
   hearts.setShadow(0, 0, '#ff4059', 4, true, true);
 
-  scene.add.text(1035, 29, `ALCOHOL  ${gameState.player.alcohol}%`, {
+  const alcohol = scene.add.text(1035, 29, '', {
     fontFamily: 'monospace',
     fontSize: '15px',
     color: '#f1d18a',
     fontStyle: 'bold',
   }).setScrollFactor(0).setDepth(5002);
 
-  const points = scene.add.text(1188, 29, `★ ${String(gameState.player.points).padStart(4, '0')}`, {
+  const points = scene.add.text(1188, 29, '', {
     fontFamily: 'monospace',
     fontSize: '15px',
     color: '#f4cd63',
@@ -64,5 +65,17 @@ export function createHud(scene, gameState) {
   }).setOrigin(0.5).setScrollFactor(0).setDepth(5002).setVisible(false);
   interactionPrompt.setShadow(2, 2, '#000000', 3, true, true);
 
-  return { interactionPrompt };
+  function update(nextState) {
+    const playerState = nextState.player;
+    hearts.setText(Array(playerState.lives).fill('♥').join(' '));
+    alcohol.setText(`ALCOHOL  ${playerState.alcohol}%`);
+    points.setText(`★ ${String(playerState.points).padStart(4, '0')}`);
+
+    const alcoholPercent = Math.max(0, Math.min(playerState.alcohol, 100));
+    const fillWidth = Math.round(110 * alcoholPercent / 100);
+    alcoholFill.setDisplaySize(Math.max(fillWidth, 1), 6).setVisible(fillWidth > 0);
+  }
+
+  update(gameState);
+  return { interactionPrompt, update };
 }

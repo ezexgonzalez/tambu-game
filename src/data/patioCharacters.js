@@ -15,19 +15,17 @@ export const patioWomen = [
     x: 920,
     y: 350,
     palette: 8,
-    intro: '¿Vos sos el que llegó recién? Tenés cara de estar pensando demasiado.',
-    answers: [
-      'Puede ser.',
-      'Estoy viendo si esta fiesta zafa.',
-      '¿Y vos siempre arrancás interrogando?',
-      'No pienso tanto como parece.',
-    ],
-    reactions: [
-      'Mmm. Respuesta sospechosa.',
-      '¿Y? ¿Zafa o todavía no?',
-      'Sí. ¿Te molesta?',
-      'Eso lo vamos a comprobar.',
-    ],
+    conversation: {
+      rounds: [{
+        line: '¿Vos sos el que llegó recién? Tenés cara de estar pensando demasiado.',
+        answers: [
+          { text: 'Puede ser.', reaction: 'Mmm. Respuesta sospechosa.' },
+          { text: 'Estoy viendo si esta fiesta zafa.', reaction: '¿Y? ¿Zafa o todavía no?' },
+          { text: '¿Y vos siempre arrancás interrogando?', reaction: 'Sí. ¿Te molesta?' },
+          { text: 'No pienso tanto como parece.', reaction: 'Eso lo vamos a comprobar.' },
+        ],
+      }],
+    },
   },
   {
     id: 'cami',
@@ -35,19 +33,17 @@ export const patioWomen = [
     x: 1235,
     y: 635,
     palette: 9,
-    intro: '¿Necesitás algo o estabas dando vueltas nomás?',
-    answers: [
-      'Estoy explorando.',
-      'Buscaba una conversación decente.',
-      'Me descubriste.',
-      'Todavía no decidí.',
-    ],
-    reactions: [
-      '¿Explorando? Qué misterioso.',
-      'Qué presión. Espero estar a la altura.',
-      'Por lo menos lo admitís.',
-      'Bueno, avisame cuando decidas.',
-    ],
+    conversation: {
+      rounds: [{
+        line: '¿Necesitás algo o estabas dando vueltas nomás?',
+        answers: [
+          { text: 'Estoy explorando.', reaction: '¿Explorando? Qué misterioso.' },
+          { text: 'Buscaba una conversación decente.', reaction: 'Qué presión. Espero estar a la altura.' },
+          { text: 'Me descubriste.', reaction: 'Por lo menos lo admitís.' },
+          { text: 'Todavía no decidí.', reaction: 'Bueno, avisame cuando decidas.' },
+        ],
+      }],
+    },
   },
 ];
 

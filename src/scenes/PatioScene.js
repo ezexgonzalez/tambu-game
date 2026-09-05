@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { createCharacters } from '../characters/createCharacters.js';
 import { createPlayer, preloadPlayer } from '../player/createPlayer.js';
 import { updatePlayer } from '../player/updatePlayer.js';
-import { createGameState } from '../state/gameState.js';
+import { canInteractWithCharacter, createGameState } from '../state/gameState.js';
 import { createDialogueSystem } from '../systems/dialogueSystem.js';
 import { createInteractionSystem } from '../systems/interactionSystem.js';
 import { createHud } from '../ui/createHud.js';
@@ -30,13 +30,17 @@ export class PatioScene extends Phaser.Scene {
     this.obstacles = createPatioCollisions(this, this.player.sprite);
 
     const hud = createHud(this, this.gameState);
-    this.dialogueSystem = createDialogueSystem(this);
+    this.dialogueSystem = createDialogueSystem(this, {
+      gameState: this.gameState,
+      onGameStateChange: hud.update,
+    });
     this.interactionSystem = createInteractionSystem({
       scene: this,
       player: this.player.sprite,
       interactables: this.interactables,
       prompt: hud.interactionPrompt,
       onInteract: this.dialogueSystem.open,
+      canInteract: ({ character }) => canInteractWithCharacter(this.gameState, character.id),
     });
 
     this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
@@ -60,6 +64,11 @@ export class PatioScene extends Phaser.Scene {
     }
 
     this.interactionSystem.update();
+    if (this.dialogueSystem.isOpen()) {
+      this.interactionSystem.hidePrompt();
+      updatePlayer(this.player, { canMove: false });
+      return;
+    }
     updatePlayer(this.player);
   }
 }

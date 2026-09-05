@@ -2,7 +2,14 @@ import Phaser from 'phaser';
 
 const INTERACTION_DISTANCE = 82;
 
-export function createInteractionSystem({ scene, player, interactables, prompt, onInteract }) {
+export function createInteractionSystem({
+  scene,
+  player,
+  interactables,
+  prompt,
+  onInteract,
+  canInteract = () => true,
+}) {
   const interactKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
 
   function findNearestInteractable() {
@@ -10,6 +17,7 @@ export function createInteractionSystem({ scene, player, interactables, prompt, 
     let bestDistance = Infinity;
 
     interactables.forEach((interactable) => {
+      if (!canInteract(interactable)) return;
       const distance = Phaser.Math.Distance.Between(
         player.x,
         player.y,
