@@ -1,3 +1,5 @@
+import { SOFI_CONVERSATION } from './conversations/sofiConversation.js';
+
 export const patioWomen = [
   {
     id: 'sofi',
@@ -5,19 +7,7 @@ export const patioWomen = [
     x: 400,
     y: 690,
     palette: 7,
-    intro: 'Che, ¿vos sos amigo de los chicos de allá?',
-    answers: [
-      'Sí, lamentablemente.',
-      'Sí, aunque algunos tendrían que estar presos.',
-      'Sí. Soy Tambu.',
-      'Más o menos, vine por la comida.',
-    ],
-    reactions: [
-      'JAJA. Bueno, por lo menos sos sincero.',
-      '¿Tan mal están? Ahora quiero saber.',
-      'Ah, ¿vos sos Tambu?',
-      'Banco venir por prioridades claras.',
-    ],
+    conversation: SOFI_CONVERSATION,
   },
   {
     id: 'mili',
