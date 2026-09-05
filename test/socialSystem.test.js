@@ -70,3 +70,58 @@ test('el outcome se guarda una sola vez y las vidas no bajan de cero', () => {
   assert.equal(gameState.player.lives, 0);
   assert.equal(gameState.relationships.sofi.outcome, 'rejection');
 });
+
+test('Sofi tiene exactamente tres rondas de cuatro respuestas', () => {
+  assert.equal(SOFI_CONVERSATION.rounds.length, 3);
+  SOFI_CONVERSATION.rounds.forEach((round) => assert.equal(round.answers.length, 4));
+});
+
+test('las rutas de Sofi permiten alcanzar los cuatro outcomes', () => {
+  const outcomes = new Set();
+
+  for (let first = 0; first < 4; first += 1) {
+    for (let second = 0; second < 4; second += 1) {
+      for (let third = 0; third < 4; third += 1) {
+        let stats = createConversationSession('sofi').stats;
+        [first, second, third].forEach((answerIndex, roundIndex) => {
+          stats = applySocialEffects(
+            stats,
+            SOFI_CONVERSATION.rounds[roundIndex].answers[answerIndex].effects,
+          );
+        });
+        outcomes.add(resolveOutcome(stats, outcomeRules));
+      }
+    }
+  }
+
+  assert.deepEqual([...outcomes].sort(), ['date', 'friendzone', 'instagram', 'rejection']);
+});
+
+test('las decisiones quedan temporales hasta confirmar el outcome', () => {
+  const gameState = createGameState();
+  const session = createConversationSession('sofi');
+  const route = [1, 3, 0];
+
+  route.forEach((answerIndex, roundIndex) => {
+    session.stats = applySocialEffects(
+      session.stats,
+      SOFI_CONVERSATION.rounds[roundIndex].answers[answerIndex].effects,
+    );
+  });
+
+  assert.deepEqual(gameState.relationships, {});
+  assert.equal(gameState.player.points, 0);
+
+  const outcomeId = resolveOutcome(session.stats, outcomeRules);
+  commitConversationOutcome(gameState, session, SOFI_CONVERSATION.outcomes[outcomeId]);
+
+  assert.equal(outcomeId, 'date');
+  assert.equal(gameState.player.points, 500);
+  assert.deepEqual(gameState.relationships.sofi, {
+    attraction: 17,
+    trust: 13,
+    intensity: 8,
+    resolved: true,
+    outcome: 'date',
+  });
+});
