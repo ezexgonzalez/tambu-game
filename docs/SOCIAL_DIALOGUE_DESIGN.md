@@ -12,9 +12,9 @@ Estados sociales base:
 - **Trust**: comodidad, confianza y buena impresión.
 - **Intensity**: cuánto está empujando Tambu la interacción.
 
-Los valores son internos. El jugador no debe ver números ni barras.
+Los valores son internos. El jugador no debe ver números ni barras, salvo eventualmente en debug.
 
-Una conversación puede ir muy bien en términos de confianza y aun terminar en friendzone si Tambu nunca genera intención romántica. Del mismo modo, una respuesta arriesgada puede funcionar muy bien si el contexto ya la sostiene.
+Una conversación puede ir muy bien en términos de confianza y aun terminar en friendzone si Tambu nunca genera intención romántica. Del mismo modo, una respuesta arriesgada puede funcionar si el contexto ya la sostiene.
 
 ## Principio central
 
@@ -22,81 +22,146 @@ Una conversación puede ir muy bien en términos de confianza y aun terminar en 
 
 El sistema debe premiar lectura social y timing, no memorizar opciones.
 
-## Identidad adulta y humor del grupo
+---
 
-Tambu Game es un juego para adultos basado en la dinámica real y absurda del grupo. Las conversaciones deben mantener suficiente credibilidad para que los momentos desubicados, intensos o ridículos tengan impacto.
+# Identidad adulta y humor del grupo
+
+Tambu Game es un juego privado para adultos basado en la dinámica real y absurda del grupo.
 
 Regla tonal aproximada:
 
 - **75% conversación creíble**.
-- **25% absurdo, intensidad, desubicación o humor interno**.
+- **25% absurdo, intensidad, desubicación, humor interno o contenido adulto**.
 
 No convertir todas las respuestas en chistes. Si todo es absurdo, nada sorprende.
 
-El humor puede ser fuerte, incómodo, adulto o sexual de forma no gráfica cuando encaje con la situación y los personajes.
+El juego no debe autocensurar artificialmente el lenguaje del grupo. Puede haber comentarios fuertes, vulgares, sexuales, negros o desubicados cuando correspondan a la persona y al momento. La gracia está en que suenen auténticos, tengan timing y no aparezcan porque sí.
 
-## Diseño de opciones
+Las barbaridades privadas del grupo no implican que todos hablen así delante de una chica. El contexto social importa.
 
-Como regla general, una ronda puede tener cuatro respuestas:
+---
 
-1. **Natural / segura** — respuesta socialmente razonable.
-2. **Coqueteo / humor** — genera más intención o personalidad.
-3. **Prudente / amistosa** — suele aumentar confianza, pero puede acercar a friendzone.
-4. **Tambu sin filtro** — la opción menos controlada o más personal de Tambu.
+# Canon de Tambu relevante al diálogo
 
-La cuarta opción **NO es automáticamente la opción meme ni la opción mala**.
+- Tambu **ya es Licenciado en Psicopedagogía**.
+- No usar líneas antiguas como "me queda la tesis" o "estoy terminando la carrera".
+- Puede usar Psicopedagogía como recurso humorístico y llevarla a lugares donde nadie se la pidió.
+- A veces se refiere a sí mismo como **"papi"**, pero debe usarse poco.
+- "Papi" es un recurso, no una catchphrase obligatoria.
 
-Debe rotar entre distintos rasgos llevados al extremo:
+Línea canon para Sofi:
 
-- intensidad romántica demasiado rápida;
-- sinceridad excesiva;
-- confianza injustificada;
-- comentario accidentalmente desubicado;
-- psicopedagogía usada donde nadie la pidió;
-- chiste interno sin contexto;
+> **"Sí, soy yo, te habla papi."**
+
+---
+
+# Regla de diseño de opciones
+
+Cada opción debe hacer **algo socialmente diferente**, no ser la misma respuesta reescrita con otro tono.
+
+Las intenciones posibles incluyen:
+
+- humor;
+- misterio;
+- vulnerabilidad;
+- seguridad;
+- coqueteo;
+- sinceridad;
+- apertura;
+- prudencia;
+- desafío/juego;
+- Tambu sin filtro.
+
+No fijar siempre una intención al mismo número. El jugador no debe poder aprender que "2 = coqueteo" o "3 = amistad".
+
+La opción 4 suele representar **Tambu sin filtro**, pero no es automáticamente meme ni mala. Puede ser:
+
 - ego absurdo;
+- intensidad romántica rápida;
+- sinceridad excesiva;
+- comentario adulto/desubicado;
+- Psicopedagogía fuera de lugar;
+- confianza injustificada;
 - vulnerabilidad inesperada;
 - romanticismo exagerado;
-- humor adulto;
-- uso ocasional de "papi".
+- humor interno sin contexto.
 
-La cuarta opción tampoco debe irse siempre al carajo. A veces puede ser simplemente una respuesta más vulnerable o menos filtrada.
+---
 
-## Uso de "papi"
+# Estructura de ramificación
 
-Tambu a veces se refiere a sí mismo como **"papi"**. Es un recurso cómico útil, pero debe aparecer con poca frecuencia para que conserve gracia.
+Las conversaciones deben sentirse continuas, no como:
 
-Ejemplos:
+> Sofi pregunta → Tambu responde → nueva pregunta desconectada.
 
-> "Papi es un hombre de paz."
+La estructura base es:
 
-> "Papi sabe cuándo tiene que aparecer."
+> NPC dice algo → Tambu responde → reacción propia → pequeño intercambio/puente → siguiente beat.
 
-La reacción debe depender de la chica y del contexto. Puede provocar mucha risa, incomodidad o rechazo.
+## Niveles de branch
 
-No usar "papi" como muletilla en todas las rondas.
+### 1. Micro-branch — mayoría de respuestas
 
-## Respuestas contextuales
+Cada opción tiene reacción propia y un pequeño intercambio propio. Después converge.
 
-Una de las reglas más importantes para la evolución del sistema:
+### 2. Branch contextual — algunas respuestas
 
-> La misma respuesta puede funcionar o fracasar dependiendo de cómo viene la conversación.
+La elección cambia el puente hacia el siguiente tema o incluso la formulación del siguiente beat.
 
-Ejemplo:
+### 3. Branch persistente — pocas decisiones
 
-> "Porque quería pedirte el Instagram."
+Una decisión fuerte puede cambiar la ruta durante varios beats o empujar directamente a un outcome.
 
-Si existe atracción, confianza y Tambu no viene demasiado intenso, puede funcionar muy bien.
+Proporción orientativa:
 
-Si casi no hubo conexión o Tambu ya viene acelerado, la misma respuesta puede sentirse apresurada y aumentar el riesgo de rechazo.
+- 70% micro-branches;
+- 25% branches contextuales;
+- 5% branches persistentes.
 
-Esto evita que el jugador aprenda reglas simples como "opción 4 = buena" o "opción 2 = coqueteo correcto".
+No crear un árbol exponencial de 4 → 16 → 64 → 256 opciones. La conversación debe reconocer lo que pasó y volver a converger cuando tenga sentido.
 
-## Sofi — concepto social
+---
 
-Sofi es tranquila, observadora, amable y tiene humor seco. No es simplemente "la chica fácil/tranquila".
+# Historial narrativo y señales
 
-### Lo que valora
+La conversación debe guardar más que stats.
+
+Ejemplo conceptual:
+
+```js
+history: [
+  { beat: 1, choice: 4 },
+  { beat: 2, choice: 3 }
+]
+```
+
+También pueden existir señales semánticas derivadas de lo ocurrido, por ejemplo:
+
+```js
+signals: [
+  'sofi_played_along_with_papi',
+  'sofi_returned_flirt',
+  'tambu_playing_too_safe'
+]
+```
+
+Estas señales sirven para:
+
+- reacciones contextuales;
+- puentes narrativos;
+- outcomes;
+- El Consejo;
+- referencias posteriores a cosas concretas que Tambu dijo.
+
+La misma respuesta puede funcionar o fracasar dependiendo del historial, stats y tono construido.
+
+---
+
+# Sofi — concepto social
+
+Sofi es tranquila, observadora, amable y tiene humor seco. No es tímida.
+
+## Lo que valora
 
 - naturalidad;
 - humor tranquilo;
@@ -104,7 +169,7 @@ Sofi es tranquila, observadora, amable y tiene humor seco. No es simplemente "la
 - seguridad sin exhibición;
 - intención clara cuando llega el momento.
 
-### Lo que castiga
+## Lo que castiga
 
 - intentar impresionar demasiado;
 - intensidad temprana;
@@ -112,174 +177,595 @@ Sofi es tranquila, observadora, amable y tiene humor seco. No es simplemente "la
 - buscar aprobación constantemente;
 - confundir su amabilidad con atracción.
 
-### Mecánica narrativa de Sofi
+## Mecánica narrativa de Sofi
 
 > **El peligro con Sofi es confundir comodidad con interés.**
 
 Sofi puede reírse, hacer preguntas y sostener una conversación aunque solo vea a Tambu como alguien agradable.
 
-Una ruta con mucha confianza y poca atracción debe poder sentirse exitosa hasta revelar finalmente:
+Una ruta con mucha Trust y poca Attraction debe poder sentirse exitosa hasta revelar finalmente:
 
 **💀 FRIENDZONE**
 
 Esto es intencional.
 
-## Sofi V2 — estructura propuesta
+---
 
-La versión narrativa definitiva debería apuntar a **4 rondas**:
+# Sofi V5 — base narrativa congelada
 
-1. **Primera impresión** — quién es Tambu y cómo entra a la charla.
-2. **Complicidad** — humor, personalidad y comodidad.
-3. **Conocer a Tambu** — facu, gym, fútbol, psicopedagogía y vida real.
-4. **Intención** — el jugador finalmente tiene que mostrar qué quiere.
+Esta es la versión narrativa aprobada como base para implementación. El wording puede recibir microajustes al playtest, pero no cambiar su estructura sin una razón clara.
 
-La ruta ideal no es elegir cuatro respuestas "buenas". Conceptualmente es:
+La conversación tiene **4 beats conectados**.
 
-> generar comodidad → generar chispa → mostrar intención → no pasarse.
+## Beat 1 — Reputación / primera impresión
 
-## Ejemplos de cuarta opción para Sofi
+**SOFI**
 
-### Primera impresión
+> —Vos sos Tambu, ¿no? Escuché tu nombre como tres veces desde que llegué.
 
-Sofi:
+### Opción 1 — misterio
 
-> "¿Vos sos Tambu? Escuché tu nombre como tres veces desde que llegué."
+> **Tambu:** —Depende. ¿Qué versión te llegó?
 
-Opción Tambu:
+Reacción sugerida:
 
-> "Sí. Tratá de disimular la emoción."
+> **Sofi:** —¿Hay más de una?
+>
+> **Tambu:** —Siempre.
+>
+> **Sofi:** —Bueno, por ahora ninguna demasiado grave.
 
-Puede funcionar como absurdo ligero y confianza injustificada.
+### Opción 2 — humor sobre el grupo
 
-### Papi
+> **Tambu:** —Sí. ¿Quién está haciendo prensa por mí?
 
-Sofi:
+Reacción sugerida:
 
-> "Me dijeron que sos el más tranquilo del grupo."
+> **Sofi:** —No sé si prensa. Pero tu nombre circula bastante.
+>
+> **Tambu:** —Excelente, marketing orgánico.
 
-Tambu:
+### Opción 3 — genuino/autoconsciente
 
-> "Papi es un hombre de paz."
+> **Tambu:** —Sí, soy yo. Espero no decepcionar.
 
-Sofi:
+Reacción sugerida:
 
-> "No podés decirte papi solo."
+> **Sofi:** —Todavía tenés tiempo.
+>
+> **Tambu:** —Perfecto, llegué con margen.
 
-Tambu:
+### Opción 4 — Tambu sin filtro / ego absurdo
 
-> "Acabo de hacerlo."
+> **Tambu:** —Sí, soy yo, te habla papi.
 
-### Psicopedagogía fuera de lugar
+Reacción canon:
 
-Sofi:
+> **Sofi:** —¿Te habla quién?
+>
+> **Tambu:** —Papi.
+>
+> **Sofi:** —No podés presentarte así.
+>
+> **Tambu:** —Pero ya lo hice.
 
-> "¿Y qué hacés cuando no estás con estos?"
+Sofi se ríe.
 
-Tambu:
+### Puente al Beat 2
 
-> "Estoy terminando Psicopedagogía. De hecho ya te analicé bastante."
+La charla queda naturalmente hablando de la reputación de Tambu.
 
-Sofi:
+> **Sofi:** —Igual me habían dicho que eras el tranquilo del grupo. Me parece que exageraron un poco.
 
-> "¿Perdón?"
+---
 
-Tambu:
+# Beat 2 — El tranquilo del grupo
 
-> "No hay devolución hoy."
+### Opción 1 — humor seco
 
-### Intensidad romántica absurda
+> **Tambu:** —Es que los dejo cansarse solos.
 
-Sofi:
+Reacción sugerida:
 
-> "Para ser tan tranquilo viniste bastante decidido."
+> **Sofi:** —Estrategia inteligente.
+>
+> **Tambu:** —Sobreviví bastante así.
 
-Tambu:
+El puente debe llevar naturalmente a que Sofi note que Tambu observa bastante y aparezca Psicopedagogía.
 
-> "No sé cómo decirte esto, pero creo que sos el amor de mi vida."
+### Opción 2 — vulnerabilidad
 
-Sofi:
+> **Tambu:** —Con gente que no conozco arranco bastante lento.
 
-> "Tambu, hace diez minutos que hablamos."
+Reacción sugerida:
 
-Tambu:
+> **Sofi:** —¿Y ya dejé de ser gente que no conocés?
 
-> "Fueron diez minutos fuertes."
+La charla se vuelve un poco más personal. El puente lleva a cómo Tambu piensa/observa y luego a Psicopedagogía.
 
-Si la conversación venía bien y el tono ya era humorístico, puede hacerla reír y hasta sumar atracción. Si Tambu ya estaba demasiado intenso, puede empujar la interacción al rechazo.
+### Opción 3 — seguridad / coqueteo
+
+> **Tambu:** —No soy tranquilo. Soy selectivo.
+
+Reacción sugerida:
+
+> **Sofi:** —Ah, mirá. ¿Y pasé la selección?
+
+Esta línea de Sofi es una señal importante: **Sofi devuelve el juego**.
+
+El puente puede hacer que Tambu explique que suele observar bastante y mencionar que es Licenciado en Psicopedagogía.
+
+### Opción 4 — Tambu sin filtro / psicopedagogo delirante
+
+> **Tambu:** —Estoy tranquilo porque ya analicé psicológicamente a todos los que están acá.
+
+Reacción sugerida:
+
+> **Sofi:** —¿A todos?
+>
+> **Tambu:** —A vos todavía te estoy cerrando.
+>
+> **Sofi:** —Ah, buenísimo. Cero presión.
+>
+> **Tambu:** —Después te paso el informe.
+>
+> **Sofi:** —No, gracias.
+
+Después:
+
+> **Sofi:** —Pará... ¿vos estudiás algo de eso de verdad o estás diciendo pelotudeces?
+>
+> **Tambu:** —Soy Licenciado en Psicopedagogía.
+>
+> **Sofi:** —Eso hace que todo esto sea un poco más preocupante.
+>
+> **Tambu:** —Al contrario. Ahora está respaldado académicamente.
+
+### Convergencia al Beat 3
+
+Las cuatro rutas deben llegar de forma coherente al mismo tema, no usar un texto que asuma que Tambu mencionó Psicopedagogía si no ocurrió.
+
+Pregunta de convergencia:
+
+> **Sofi:** —¿Y siempre analizás tanto a la gente?
+
+---
+
+# Beat 3 — Analizar demasiado / interés
+
+### Opción 1 — genuino
+
+> **Tambu:** —A veces. Es medio automático ya.
+
+Reacción sugerida:
+
+> **Sofi:** —Debe ser agotador.
+>
+> **Tambu:** —Más para los demás que para mí.
+
+### Opción 2 — coqueteo directo
+
+> **Tambu:** —Solo cuando alguien me interesa.
+
+Reacción sugerida:
+
+> **Sofi:** —Ah...
+>
+> —Qué conveniente.
+
+Esta respuesta marca intención sin necesidad de decir explícitamente "me gustás".
+
+### Opción 3 — autocrítica / vulnerabilidad
+
+> **Tambu:** —Intento no hacerlo. Después termino flasheando cosas que capaz ni existen.
+
+Reacción sugerida:
+
+> **Sofi:** —Por lo menos sos consciente.
+>
+> **Tambu:** —A veces demasiado.
+
+Puede construir mucha Trust sin generar necesariamente la misma Attraction que el coqueteo directo.
+
+### Opción 4 — Tambu sin filtro / diagnóstico
+
+> **Tambu:** —Con vos ya tengo diagnóstico.
+
+Reacción sugerida:
+
+> **Sofi:** —A ver.
+>
+> **Tambu:** —No puedo revelarlo. Secreto profesional.
+>
+> **Sofi:** —Qué conveniente tu carrera.
+
+### Puente contextual al Beat 4
+
+La formulación de Sofi debe poder reconocer qué respondió Tambu.
+
+Ejemplos:
+
+- si fue genuino: Sofi nota que igual está bastante pendiente de ella;
+- si fue coqueteo directo: Sofi puede devolver "bueno, entonces te la hago fácil...";
+- si fue vulnerable: Sofi puede pasar a una pregunta más directa antes de que Tambu siga pensando demasiado;
+- si fue diagnóstico: Sofi puede llamarlo "señor profesional" o hacer referencia al chiste.
+
+---
+
+# Beat 4 — La intención real
+
+La pregunta base es:
+
+> **Sofi:** —Bueno... ¿viniste a hablarme porque te caí bien o porque te gusté?
+
+La línea exacta puede variar según el Beat 3 para mantener continuidad.
+
+### Opción 1 — directo / seguro
+
+> **Tambu:** —Me gustaste y después me caíste bien. En ese orden.
+
+Reacción sugerida:
+
+> **Sofi:** —Ah, bueno. Clarito.
+
+Intención: mostrar interés sin dar demasiadas vueltas.
+
+### Opción 2 — natural / romántico sin forzar
+
+> **Tambu:** —Al principio vine porque estabas acá. Después me dieron ganas de quedarme.
+
+Reacción sugerida:
+
+> **Sofi:** —Esa respuesta estuvo bastante bien.
+>
+> **Tambu:** —No estaba preparada.
+
+Intención: una respuesta más romántica, pero desde algo ocurrido durante la charla.
+
+### Opción 3 — sincero / abierto
+
+> **Tambu:** —No sabía muy bien qué quería cuando vine. Ahora quiero seguir hablando con vos.
+
+Reacción sugerida:
+
+> **Sofi:** —Bueno... eso te lo compro.
+
+Intención: apertura genuina sin sobreactuar ni negar interés.
+
+### Opción 4 — Tambu sin filtro / sinceridad desubicada
+
+> **Tambu:** —La verdad quería ver si terminábamos chapando, pero estoy intentando desarrollar una personalidad primero.
+
+Esta respuesta debe ser **fuertemente contextual**.
+
+#### Si ya hay química
+
+Sofi puede reírse y seguir el juego.
+
+Ejemplo:
+
+> **Sofi:** —¿Ese era todo el plan?
+>
+> **Tambu:** —Fue evolucionando.
+>
+> **Sofi:** —Menos mal.
+>
+> **Tambu:** —Todavía estamos a tiempo de volver al original.
+>
+> **Sofi:** —No te agrandes.
+
+#### Si venían en modo amistad
+
+Puede generar sorpresa y confirmar que Tambu interpretó de más.
+
+#### Si Tambu ya venía demasiado intenso
+
+Puede provocar rechazo.
+
+La misma línea no debe tener siempre la misma reacción.
+
+---
+
+# Outcomes de Sofi
+
+Outcomes objetivo:
+
+- ❤️ **Cita**
+- 📱 **Instagram**
+- 💀 **Friendzone**
+- 👋 **Rechazo**
+
+El cálculo final debe considerar:
+
+- Attraction;
+- Trust;
+- Intensity;
+- historial;
+- señales narrativas relevantes.
+
+No cerrar todavía thresholds definitivos como canon narrativo. Deben balancearse después de enumerar rutas y playtestear.
 
 ## Friendzone bien diseñada
 
 La ruta friendzone no debe sentirse como una sucesión de errores obvios.
 
-Ejemplo conceptual:
+Una ruta muy prudente puede generar:
 
-- respuesta educada;
-- respuesta tranquila;
-- hablar honestamente de Psicopedagogía;
-- cerrar con "me caíste bien, quería conocerte".
+- mucha comodidad;
+- mucha Trust;
+- poca Attraction;
+- casi nada de Intensity.
 
-Sofi puede responder positivamente durante toda la charla.
+Sofi puede reaccionar positivamente durante toda la charla.
 
-El jugador piensa que viene perfecto.
+Resultado posible:
 
-Resultado:
-
-> "Sos re buena onda, Tambu. Me caíste muy bien."
+> **Sofi:** —Sos re buena onda, Tambu. Me caíste muy bien.
 
 **💀 FRIENDZONE**
 
-La gracia es que Tambu generó mucha confianza pero nunca suficiente tensión romántica.
-
-## No premiar ser un forro
-
-El diseño NO debe transmitir:
+El juego NO debe transmitir:
 
 > ser amable = friendzone
 >
 > ser arrogante = atracción
 
-La ruta romántica debe poder construirse con normalidad, humor y respeto.
-
-El problema no es ser amable. El problema es no mostrar intención nunca.
-
 La combinación buscada es:
 
 > **confianza + personalidad + intención + timing**
 
-## Diferencias entre personajes
+---
 
-No debe existir una estrategia universal.
+# EL CONSEJO — sistema
 
-### Sofi
+El Consejo no es un solucionador de respuestas.
 
-- tolerancia a intensidad: baja/media;
-- naturalidad: alta;
-- humor absurdo: media/alta si está bien ejecutado;
-- vulgaridad gratuita: baja;
-- demasiada prudencia: riesgo de friendzone.
+> **El Consejo interpreta. No resuelve.**
 
-### Mili — dirección futura
+Los amigos reciben información de la situación y la interpretan según su propia personalidad.
 
-- audacia: alta;
-- humor absurdo: muy alto;
-- tolerancia a intensidad: bastante mayor;
-- demasiada prudencia: puede aburrirla.
+Conceptualmente:
 
-Una respuesta que Sofi considere demasiado rápida podría gustarle a Mili.
+```text
+historial + stats + señales + beat actual
+                ↓
+        situación social actual
+                ↓
+    Pitity / Eze / Tobi interpretan
+```
 
-### Cami — dirección futura
+El jugador jamás debe ver mensajes como:
 
-- ironía: muy alta;
-- aprecia rapidez mental;
-- castiga tryhard;
-- puede disfrutar una respuesta ridícula si Tambu la sostiene bien;
-- probablemente convierta muchos intentos de Tambu en material para descansarlo.
+- "Attraction alta";
+- "Intensity 14";
+- "elegí la opción 2".
 
-## Alcohol — dirección futura
+Los amigos hablan como amigos mirando la situación desde la fiesta.
 
-El alcohol puede degradar el conjunto de opciones en lugar de limitarse a modificar estadísticas.
+## Uso en Sofi
 
-Ejemplo conceptual:
+Para el primer slice:
+
+- disponible desde Beat 2;
+- **1 consulta por conversación**;
+- el jugador elige entre Pitity, Eze o Tobi;
+- no cambia stats;
+- puede usar historial y señales concretas;
+- una vez usado queda marcado como utilizado para esa conversación.
+
+No convertirlo en una interrupción constante.
+
+---
+
+# Arquitectura conceptual de El Consejo
+
+Separar:
+
+1. **lectura objetiva de la situación**;
+2. **interpretación/personaje del consejero**;
+3. **selección de línea concreta**.
+
+Ejemplo de lectura interna:
+
+```text
+Sofi está cómoda
+Attraction alta
+Intensity moderada
+Sofi devolvió un coqueteo
+Tambu ya mostró intención
+```
+
+Pitity, Eze y Tobi reciben esa misma situación, pero no hablan igual.
+
+La lógica no debe ser un único bloque de `if attraction > X`.
+
+También debe usar eventos del historial.
+
+Ejemplo:
+
+```text
+signal: sofi_played_along_with_papi
+```
+
+Eso permite comentarios como:
+
+> "Lo de papi funcionó de pedo. No abuses."
+
+En lugar de una frase genérica sobre atracción.
+
+---
+
+# Regla anti-repetición del Consejo
+
+Las frases icónicas son **remates especiales**, no respuestas por defecto.
+
+Cada consejero debe tener pools de líneas posibles para una misma lectura.
+
+La selección debería contemplar:
+
+- condición/contexto;
+- prioridad;
+- historial reciente;
+- cooldown de repetición;
+- rareza de la frase.
+
+Cuanto más icónica sea una línea, menos debe repetirse.
+
+Esto también aplica a Tambu (`papi`, Psicopedagogía, etc.).
+
+---
+
+# PITITY — canon actual
+
+Pitity habla poco. No explica de más.
+
+Sus tres lecturas icónicas son:
+
+## La cosa viene bien
+
+> **Pitity:** —Parece bastante EZ.
+
+## Atracción realmente fuerte
+
+> **Pitity:** —Optimus.
+
+Nada más.
+
+`Optimus` debe ser raro y preferentemente requerir una señal narrativa fuerte además de stats altos, por ejemplo Sofi devolviendo claramente un coqueteo.
+
+## Pinta friendzone / situación complicada
+
+> **Pitity:** —Y la verdad que está bastante hard.
+
+Nada más.
+
+No convertir estas frases en spam. Pitity también puede tener respuestas más mínimas/neutras en otros estados.
+
+---
+
+# EZE — canon actual
+
+Eze observa bastante bien las señales, pero puede sobreanalizar.
+
+No debe sonar como terapeuta ni como una IA leyendo stats. Habla como parte del grupo.
+
+## Frases y lenguaje propios
+
+Para una chica muy linda puede decir:
+
+> —Es un avión.
+
+> —Tremendo camión.
+
+> —Es un chiche.
+
+Cuando cree que una chica realmente puede ser **la indicada para Tambu**, puede usar:
+
+> —Es una princesa.
+
+`Es una princesa` debe ser más rara y tener más peso que simplemente decir que es muy linda.
+
+## Lecturas típicas
+
+Cuando Sofi devuelve juego:
+
+> —Esa te la dejó picando bastante.
+
+> —Ojo que ahí hubo algo.
+
+> —Te está dando bola.
+
+Cuando Tambu está jugando demasiado seguro:
+
+> —La charla está buena, pero estás jugando demasiado de amigo.
+
+> —Está cómoda, sí. Pero no significa necesariamente que te esté dando bola.
+
+> —En algún momento acordate de que te gusta.
+
+Cuando una locura funcionó:
+
+> —Lo de papi funcionó de pedo. No abuses.
+
+Cuando Tambu pregunta por una señal ambigua, Eze puede dudar y sobreanalizar en vez de fingir certeza.
+
+## Alcohol y tono sexual — futuro
+
+Cuando Eze está serio/sobrio puede leer la situación con bastante fineza.
+
+Cuando está en modo joda, y especialmente con alcohol, puede llevar conversaciones privadas con Tambu o el grupo hacia lo sexual y volverse más desubicado.
+
+Esto NO significa que queme a Tambu delante de la chica. Su versión más sexual/desubicada ocurre principalmente dentro del grupo.
+
+La degradación del filtro de Eze con alcohol es una dirección futura y no se implementa todavía en Slice 0.1.
+
+---
+
+# TOBI — canon actual
+
+Tobi desprecia el sobreanálisis y empuja a Tambu a actuar cuando cree que la situación es obvia.
+
+No usar una sola catchphrase todo el tiempo.
+
+## Recursos propios
+
+### "¿Sos pelotudo?"
+
+Se usa cuando Tambu:
+
+- no ve algo que Tobi considera obvio;
+- duda demasiado;
+- interpreta una señal de manera ridícula;
+- pregunta algo que para Tobi no necesita análisis.
+
+Ejemplos:
+
+> —¿Sos pelotudo? Te está hablando bien. Hacé algo.
+
+> —¿Sos pelotudo? ¿Entonces para qué viniste a hablarle?
+
+### "Nao, nao..."
+
+Tobi menea la cabeza de lado a lado y dice **"Nao, nao..."** como agregado a otra frase.
+
+No debe quedar como línea solitaria.
+
+Ejemplos:
+
+> —Nao, nao... ¿sos pelotudo? No dijo eso.
+
+> —Nao, nao... ya estás inventando cualquier cosa. Seguí hablando normal.
+
+> —Nao, nao... ya está. No digas más nada.
+
+## Otros remates ya compatibles con su personalidad
+
+- "Andá, cagón."
+- "Hacelo."
+- "Hacé algo."
+- "¿Qué estás esperando?"
+- "Ya está."
+- "Callate la boca."
+
+Tobi no siempre debe empujar más intensidad. Si Tambu ya se está pasando, puede ser justamente quien le diga que se calle y no arruine algo que venía funcionando.
+
+---
+
+# Los otros miembros del Consejo
+
+Thiago, Uriel y Santygamer quedan **deferidos**.
+
+Hay ideas previas útiles, pero todavía necesitan correcciones de personalidad, vocabulario y timing antes de considerarlas canon.
+
+No implementar sus voces definitivas hasta hacer esa pasada.
+
+---
+
+# Alcohol — dirección futura
+
+El alcohol puede degradar el conjunto de opciones de Tambu en lugar de limitarse a modificar estadísticas.
+
+Concepto:
 
 ### Sobrio
 
@@ -295,32 +781,78 @@ Ejemplo conceptual:
 
 Tambu empieza a perder alternativas razonables.
 
-Ejemplo extremo:
+El alcohol también puede alterar el filtro de ciertos consejeros, especialmente Eze.
 
-1. "Me caíste bien."
-2. "Me pareciste linda."
-3. "Creo que sos el amor de mi vida."
-4. "¿Dónde está el baño?"
+No implementar todavía alcohol en el slice de Sofi.
 
-La pérdida de control sobre las respuestas puede convertirse en parte del humor y de la mecánica, pero se implementará después de validar el núcleo social.
+---
 
-## Regla de diseño para futuras conversaciones
+# Contrato de implementación para Work
 
-> Las respuestas 1–3 representan estrategias socialmente plausibles. La 4 suele representar a Tambu con menos filtro: exagerado, raro, intenso, demasiado sincero, absurdamente confiado, vulnerable o desubicado. No necesariamente es mala y no necesariamente siempre es un chiste.
+La implementación de Sofi + Consejo debe respetar estos principios:
 
-## Estado actual
+1. **Data-driven**: no meter lógica narrativa específica de Sofi directamente dentro de `PatioScene`.
+2. `PatioScene` sigue siendo coordinadora, no vuelve a concentrar sistemas.
+3. Cada beat debe poder definir:
+   - prompt del NPC;
+   - opciones;
+   - intención conceptual;
+   - reacción propia;
+   - efectos sociales;
+   - señales emitidas;
+   - puente/transición;
+   - próximo beat.
+4. El sistema debe guardar `history` y `signals` durante la sesión.
+5. Las reacciones y puentes pueden depender de estado previo.
+6. El Consejo recibe un snapshot de:
+   - beat actual;
+   - stats temporales;
+   - history;
+   - signals.
+7. Separar la lectura objetiva de la situación de la voz de Pitity/Eze/Tobi.
+8. El Consejo no revela stats ni opciones correctas.
+9. Implementar una consulta por conversación, desde Beat 2.
+10. Implementar anti-repetición/pools de líneas de forma extensible, sin sobrearquitectura.
+11. Mantener Atracción / Trust / Intensity ocultas al jugador.
+12. No implementar alcohol todavía.
+13. No implementar todavía voces definitivas de Thiago, Uriel o Santygamer.
+14. No modificar mapa, Tambu visual, NPC art ni arquitectura modular fuera de lo necesario.
+15. Mantener tests del resolver/outcomes y agregar tests puros donde la nueva lógica lo permita.
 
-Estas decisiones son dirección de diseño narrativa/social. No implican que todo esté implementado todavía.
+## Importante sobre balance
 
-El primer vertical slice técnico de Sofi sirve para validar el sistema. Después se hará una pasada narrativa y de balance usando estas reglas.
+Los textos y estructura narrativa de Sofi V5 están congelados como base.
 
-Este archivo debe actualizarse a medida que se definan:
+Los valores exactos de Attraction / Trust / Intensity y thresholds de outcomes **no están congelados**. Deben ajustarse después de enumerar rutas posibles y probar si Cita, Instagram, Friendzone y Rechazo son alcanzables de forma interesante.
 
-- Sofi definitiva;
-- El Consejo;
+---
+
+# Estado actual
+
+Congelado como base:
+
+- principios del sistema social;
+- ramificación por micro-branches/contexto;
+- necesidad de historial y señales;
+- Sofi V5 narrativa;
+- Tambu como Licenciado en Psicopedagogía;
+- uso puntual de `papi`;
+- sistema conceptual de El Consejo;
+- Pitity;
+- Eze;
+- Tobi;
+- regla anti-repetición;
+- tono adulto/no autocensurado del grupo.
+
+Pendiente:
+
+- balance numérico definitivo de Sofi;
+- playtest de rutas;
+- outcomes finales y recompensas si requieren ajuste;
+- alcohol;
 - Mili;
 - Cami;
-- alcohol;
-- outcomes;
-- eventos sociales;
-- reglas generales de escritura y balance.
+- Thiago;
+- Uriel;
+- Santygamer;
+- eventos sociales futuros.
