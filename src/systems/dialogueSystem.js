@@ -24,6 +24,10 @@ import {
   createOutcomeUi,
   destroyDialogueUi,
 } from '../ui/dialogueUi.js';
+import {
+  createDialoguePresentation,
+  normalizeDialogueSequence,
+} from '../ui/dialoguePresentation.js';
 
 const DIALOGUE_MODE = {
   IDLE: 'idle',
@@ -52,6 +56,7 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
   let currentCouncilMember = null;
   let pendingNextBeat = null;
   let uiElements = null;
+  let presentation = null;
 
   function open(interactable) {
     const character = interactable?.character;
@@ -74,6 +79,7 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
   function replaceUi(nextUi) {
     destroyDialogueUi(uiElements);
     uiElements = nextUi;
+    presentation = null;
   }
 
   function councilIsAvailable() {
@@ -84,17 +90,21 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
     );
   }
 
-  function renderQuestion() {
+  function renderQuestion(alreadyRead = false) {
     const beat = getConversationBeat(conversation, session.currentBeat);
     const beatIndex = getConversationBeatIndex(conversation, session.currentBeat);
     replaceUi(createDialogueQuestionUi(scene, {
       character: currentCharacter,
       beat,
-      prompt: resolveBeatPrompt(beat, session),
       beatIndex,
       totalBeats: conversation.beats.length,
       councilAvailable: councilIsAvailable(),
     }));
+    presentation = createDialoguePresentation([
+      { speaker: currentCharacter.name, text: resolveBeatPrompt(beat, session) },
+    ]);
+    if (alreadyRead) presentation.complete();
+    uiElements.update(presentation.current());
   }
 
   function selectAnswer(index) {
@@ -109,12 +119,11 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
 
     const hasNextBeat = Boolean(pendingNextBeat);
     const hasOutcome = Boolean(conversation.outcomeRules && conversation.outcomes);
-    replaceUi(createDialogueReactionUi(
-      scene,
-      currentCharacter,
-      result.presentation,
-      hasNextBeat || hasOutcome,
-    ));
+    replaceUi(createDialogueReactionUi(scene, hasNextBeat || hasOutcome));
+    presentation = createDialoguePresentation(
+      normalizeDialogueSequence(result.presentation, currentCharacter.name),
+    );
+    uiElements.update(presentation.current());
   }
 
   function continueAfterReaction() {
@@ -158,12 +167,13 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
     currentCouncilMember = null;
     pendingNextBeat = null;
     mode = DIALOGUE_MODE.QUESTION;
-    renderQuestion();
+    renderQuestion(true);
   }
 
   function resetDialogue() {
     destroyDialogueUi(uiElements);
     uiElements = null;
+    presentation = null;
     currentCharacter = null;
     conversation = null;
     session = null;
@@ -172,63 +182,87 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
     mode = DIALOGUE_MODE.IDLE;
   }
 
-  function advancePressed() {
-    return Phaser.Input.Keyboard.JustDown(enterKey)
-      || Phaser.Input.Keyboard.JustDown(spaceKey);
+  function readInput() {
+    // Consume every edge, including disabled inputs and both advance keys.
+    // Short-circuiting JustDown would leave the second key queued for another line.
+    const enter = Phaser.Input.Keyboard.JustDown(enterKey);
+    const space = Phaser.Input.Keyboard.JustDown(spaceKey);
+    return {
+      advance: enter || space,
+      escape: Phaser.Input.Keyboard.JustDown(escapeKey),
+      council: Phaser.Input.Keyboard.JustDown(councilKey),
+      choices: choiceKeys.map((key) => Phaser.Input.Keyboard.JustDown(key)),
+    };
   }
 
-  function updateQuestion() {
-    if (Phaser.Input.Keyboard.JustDown(escapeKey)) {
+  function updateQuestion(input) {
+    if (input.escape) {
       resetDialogue();
       return;
     }
-    if (councilIsAvailable() && Phaser.Input.Keyboard.JustDown(councilKey)) {
+    if (!presentation.isComplete()) {
+      if (input.advance) presentation.complete();
+      return;
+    }
+    if (councilIsAvailable() && input.council) {
       openCouncil();
       return;
     }
 
-    const answerIndex = choiceKeys.findIndex((key) => Phaser.Input.Keyboard.JustDown(key));
+    const answerIndex = input.choices.findIndex(Boolean);
     if (answerIndex >= 0) selectAnswer(answerIndex);
   }
 
-  function updateReaction() {
-    if (Phaser.Input.Keyboard.JustDown(escapeKey)) {
+  function updateReaction(input) {
+    if (input.escape) {
       resetDialogue();
       return;
     }
-    if (advancePressed()) continueAfterReaction();
+    if (input.advance && presentation.advance() === 'finished') continueAfterReaction();
   }
 
-  function updateCouncil() {
+  function updateCouncil(input) {
     if (!currentCouncilMember) {
-      if (Phaser.Input.Keyboard.JustDown(escapeKey)) {
+      if (input.escape) {
         returnFromCouncil();
         return;
       }
-      const memberIndex = choiceKeys
+      const memberIndex = input.choices
         .slice(0, conversation.council.members.length)
-        .findIndex((key) => Phaser.Input.Keyboard.JustDown(key));
+        .findIndex(Boolean);
       if (memberIndex >= 0) selectCouncilMember(memberIndex);
       return;
     }
 
-    if (advancePressed()) returnFromCouncil();
+    if (input.advance) returnFromCouncil();
   }
 
-  function updateOutcome() {
-    if (advancePressed()) resetDialogue();
+  function updateOutcome(input) {
+    if (input.advance) resetDialogue();
   }
 
   function update() {
+    const input = readInput();
     if (mode === DIALOGUE_MODE.IDLE) return false;
 
-    if (mode === DIALOGUE_MODE.QUESTION) updateQuestion();
-    else if (mode === DIALOGUE_MODE.REACTION) updateReaction();
-    else if (mode === DIALOGUE_MODE.COUNCIL) updateCouncil();
-    else if (mode === DIALOGUE_MODE.OUTCOME) updateOutcome();
+    const previousPresentation = presentation;
+    if (mode === DIALOGUE_MODE.QUESTION) updateQuestion(input);
+    else if (mode === DIALOGUE_MODE.REACTION) updateReaction(input);
+    else if (mode === DIALOGUE_MODE.COUNCIL) updateCouncil(input);
+    else if (mode === DIALOGUE_MODE.OUTCOME) updateOutcome(input);
+
+    if (presentation) {
+      // New lines start empty; input always acts on what was visible last frame.
+      if (presentation === previousPresentation && !input.advance) {
+        presentation.update(scene.game.loop.delta);
+      }
+      uiElements.update(presentation.current());
+    }
 
     return true;
   }
+
+  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, resetDialogue);
 
   return {
     open,

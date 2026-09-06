@@ -20,7 +20,6 @@ function createText(scene, x, y, text, style) {
 export function createDialogueQuestionUi(scene, {
   character,
   beat,
-  prompt,
   beatIndex,
   totalBeats,
   councilAvailable,
@@ -35,7 +34,7 @@ export function createDialogueQuestionUi(scene, {
     fontSize: '12px',
     color: '#8e95a2',
   }).setOrigin(1, 0.5);
-  const line = createText(scene, 92, 510, prompt, {
+  const line = createText(scene, 92, 510, '', {
     fontSize: '17px',
     color: '#f4f4ef',
     wordWrap: { width: 1080 },
@@ -64,36 +63,27 @@ export function createDialogueQuestionUi(scene, {
     color: '#8e95a2',
   }).setOrigin(1, 0.5);
 
-  return [panel, name, progress, line, ...answers, council, help].filter(Boolean);
+  function update({ text, complete }) {
+    line.setText(text);
+    answers.forEach((answer) => answer.setVisible(complete));
+    council?.setVisible(complete);
+    help.setText(complete ? '1–4 elegir · ESC abandonar' : 'ENTER / SPACE · CONTINUAR');
+  }
+  update({ text: '', complete: false });
+  return {
+    elements: [panel, name, progress, line, ...answers, council, help].filter(Boolean),
+    update,
+  };
 }
 
-function formatExchangePart(part, defaultSpeaker) {
-  if (typeof part === 'string') return `${defaultSpeaker.toUpperCase()}: ${part}`;
-  if (!part.speaker) return part.text;
-  return `${part.speaker.toUpperCase()}: ${part.text}`;
-}
-
-function formatExchange(presentation, defaultSpeaker) {
-  const reaction = Array.isArray(presentation.reaction)
-    ? presentation.reaction
-    : [presentation.reaction];
-  const bridge = Array.isArray(presentation.bridge)
-    ? presentation.bridge
-    : [presentation.bridge];
-  return [...reaction, ...bridge]
-    .filter(Boolean)
-    .map((part) => formatExchangePart(part, defaultSpeaker))
-    .join('\n');
-}
-
-export function createDialogueReactionUi(scene, character, presentation, canContinue) {
+export function createDialogueReactionUi(scene, canContinue) {
   const panel = createPanel(scene, 640, 535, 1160, 320);
-  const name = createText(scene, 92, 395, character.name.toUpperCase(), {
+  const name = createText(scene, 92, 395, '', {
     fontSize: '18px',
     color: '#ffe8a8',
     fontStyle: 'bold',
   });
-  const line = createText(scene, 92, 433, formatExchange(presentation, character.name), {
+  const line = createText(scene, 92, 433, '', {
     fontSize: '15px',
     color: '#f4f4ef',
     wordWrap: { width: 1040 },
@@ -107,7 +97,18 @@ export function createDialogueReactionUi(scene, character, presentation, canCont
     color: '#8e95a2',
   }).setOrigin(1, 0.5);
 
-  return [panel, name, line, help];
+  return {
+    elements: [panel, name, line, help],
+    update({ entry, text, complete }) {
+      name.setText(entry?.speaker?.toUpperCase() ?? '');
+      line.setText(text);
+      line.setStyle({
+        fontStyle: entry?.speaker ? 'normal' : 'italic',
+        color: entry?.speaker ? '#f4f4ef' : '#aeb5c2',
+      });
+      help.setText(!complete ? 'ENTER / SPACE · CONTINUAR' : instruction);
+    },
+  };
 }
 
 export function createCouncilSelectionUi(scene, members) {
@@ -186,5 +187,5 @@ export function createOutcomeUi(scene, outcome) {
 }
 
 export function destroyDialogueUi(elements) {
-  elements?.forEach((element) => element.destroy());
+  (elements?.elements ?? elements)?.forEach((element) => element.destroy());
 }
