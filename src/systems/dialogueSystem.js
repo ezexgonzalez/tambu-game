@@ -34,10 +34,15 @@ const DIALOGUE_MODE = {
   QUESTION: 'question',
   REACTION: 'reaction',
   COUNCIL: 'council',
+  OUTCOME_CLOSING: 'outcome-closing',
   OUTCOME: 'outcome',
 };
 
-export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
+export function createDialogueSystem(scene, {
+  gameState,
+  onGameStateChange,
+  onOutcomeEvent = () => false,
+}) {
   const escapeKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
   const enterKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
   const spaceKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -50,9 +55,11 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
   ];
 
   let mode = DIALOGUE_MODE.IDLE;
+  let currentInteractable = null;
   let currentCharacter = null;
   let conversation = null;
   let session = null;
+  let currentOutcome = null;
   let currentCouncilMember = null;
   let pendingNextBeat = null;
   let uiElements = null;
@@ -66,6 +73,7 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
       || !canInteractWithCharacter(gameState, character.id)
     ) return;
 
+    currentInteractable = interactable;
     currentCharacter = character;
     conversation = character.conversation;
     session = createConversationSession(
@@ -138,13 +146,38 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
     if (!conversation.outcomeRules || !conversation.outcomes) return;
 
     const outcomeId = resolveOutcome(session, conversation.outcomeRules);
-    const outcome = conversation.outcomes[outcomeId];
-    if (!outcome) return;
+    currentOutcome = conversation.outcomes[outcomeId];
+    if (!currentOutcome) return;
 
-    commitConversationOutcome(gameState, session, outcome);
+    commitConversationOutcome(gameState, session, currentOutcome);
     onGameStateChange(gameState);
+
+    if (currentOutcome.event?.type && currentOutcome.closingSequence?.length) {
+      mode = DIALOGUE_MODE.OUTCOME_CLOSING;
+      replaceUi(createDialogueReactionUi(scene, true, { canAbandon: false }));
+      presentation = createDialoguePresentation(currentOutcome.closingSequence);
+      uiElements.update(presentation.current());
+      return;
+    }
+
     mode = DIALOGUE_MODE.OUTCOME;
-    replaceUi(createOutcomeUi(scene, outcome));
+    replaceUi(createOutcomeUi(scene, currentOutcome));
+  }
+
+  function startOutcomeEvent() {
+    const started = onOutcomeEvent({
+      type: currentOutcome.event.type,
+      characterId: currentCharacter.id,
+      interactable: currentInteractable,
+      outcome: currentOutcome,
+    });
+    if (started) {
+      resetDialogue();
+      return;
+    }
+
+    mode = DIALOGUE_MODE.OUTCOME;
+    replaceUi(createOutcomeUi(scene, currentOutcome));
   }
 
   function openCouncil() {
@@ -174,9 +207,11 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
     destroyDialogueUi(uiElements);
     uiElements = null;
     presentation = null;
+    currentInteractable = null;
     currentCharacter = null;
     conversation = null;
     session = null;
+    currentOutcome = null;
     currentCouncilMember = null;
     pendingNextBeat = null;
     mode = DIALOGUE_MODE.IDLE;
@@ -241,6 +276,10 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
     if (input.advance) resetDialogue();
   }
 
+  function updateOutcomeClosing(input) {
+    if (input.advance && presentation.advance() === 'finished') startOutcomeEvent();
+  }
+
   function update() {
     const input = readInput();
     if (mode === DIALOGUE_MODE.IDLE) return false;
@@ -249,6 +288,7 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
     if (mode === DIALOGUE_MODE.QUESTION) updateQuestion(input);
     else if (mode === DIALOGUE_MODE.REACTION) updateReaction(input);
     else if (mode === DIALOGUE_MODE.COUNCIL) updateCouncil(input);
+    else if (mode === DIALOGUE_MODE.OUTCOME_CLOSING) updateOutcomeClosing(input);
     else if (mode === DIALOGUE_MODE.OUTCOME) updateOutcome(input);
 
     if (presentation) {

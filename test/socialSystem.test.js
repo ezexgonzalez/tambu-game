@@ -20,7 +20,11 @@ import {
   resolveOutcome,
 } from '../src/systems/socialSystem.js';
 import { resolveSocialSituation } from '../src/systems/socialSituation.js';
-import { commitConversationOutcome, createGameState } from '../src/state/gameState.js';
+import {
+  canInteractWithCharacter,
+  commitConversationOutcome,
+  createGameState,
+} from '../src/state/gameState.js';
 
 function playRoute(route) {
   let session = createConversationSession('sofi', SOFI_CONVERSATION.initialBeat);
@@ -156,7 +160,7 @@ test('la opción del plan de chapar funciona cuando ya había química', () => {
 
   assert.equal(result.presentation.variantId, 'chemistry');
   assert.ok(result.session.signals.includes('sofi_played_along_with_kiss_plan'));
-  assert.equal(result.outcome, 'date');
+  assert.equal(result.outcome, 'bathroom');
 });
 
 test('la misma opción cae rara cuando la charla venía amistosa', () => {
@@ -176,10 +180,15 @@ test('la misma opción provoca rechazo cuando Tambu ya venía intenso', () => {
 });
 
 test('resuelve los cuatro outcomes con rutas narrativamente distintas', () => {
-  assert.equal(playRoute([0, 0, 1, 0]).outcome, 'date');
+  assert.equal(playRoute([0, 0, 1, 0]).outcome, 'bathroom');
   assert.equal(playRoute([0, 0, 1, 2]).outcome, 'instagram');
   assert.equal(playRoute([0, 0, 0, 2]).outcome, 'friendzone');
   assert.equal(playRoute([0, 0, 0, 0]).outcome, 'rejection');
+});
+
+test('Sofi ya no conserva date como outcome', () => {
+  assert.equal(SOFI_CONVERSATION.outcomes.date, undefined);
+  enumerateRoutes().forEach(({ outcome }) => assert.notEqual(outcome, 'date'));
 });
 
 test('Pitity usa Optimus solo con señal fuerte, progreso alto e historial suficiente', () => {
@@ -304,7 +313,7 @@ test('las 256 rutas quedan balanceadas y todos los outcomes son alcanzables', ()
   assert.deepEqual(distribution, {
     rejection: 73,
     friendzone: 41,
-    date: 54,
+    bathroom: 54,
     instagram: 88,
   });
   assert.deepEqual({
@@ -343,7 +352,8 @@ test('el outcome persiste stats, historia y señales una sola vez', () => {
   assert.equal(gameState.player.points, 500);
   assert.equal(gameState.relationships.sofi.history.length, 4);
   assert.ok(gameState.relationships.sofi.signals.includes('tambu_showed_romantic_intent'));
-  assert.equal(gameState.relationships.sofi.outcome, 'date');
+  assert.equal(gameState.relationships.sofi.outcome, 'bathroom');
+  assert.equal(canInteractWithCharacter(gameState, 'sofi'), false);
 });
 
 test('las vidas nunca bajan de cero', () => {

@@ -71,6 +71,30 @@ const DJ = {
   ],
 };
 
+const BATHROOM_EVENT = {
+  speed: 460,
+  actorSpacing: 14,
+  path: [
+    { x: POOL.x - 48, y: POOL.y + POOL.height + 60 },
+    { x: POOL.x + POOL.width + 112, y: POOL.y + POOL.height + 60 },
+    { x: POOL.x + POOL.width + 112, y: POOL.y - 48 },
+    { x: POOL.x + POOL.width + 52, y: POOL.y - 48 },
+    { x: POOL.x + POOL.width + 52, y: HOUSE.height + 20 },
+    {
+      x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2,
+      y: HOUSE.height + 20,
+    },
+    {
+      x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2,
+      y: HOUSE.height - 8,
+    },
+  ],
+  exit: {
+    x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2,
+    y: HOUSE.height + 32,
+  },
+};
+
 export const PATIO_LAYOUT = {
   world: WORLD,
   house: HOUSE,
@@ -100,6 +124,9 @@ export const PATIO_LAYOUT = {
   pool: POOL,
   bar: BAR,
   dj: DJ,
+  events: {
+    bathroom: BATHROOM_EVENT,
+  },
   partyTables: [
     { x: 1178, y: 530, colliderCenterOffsetY: 28, colliderWidth: 72, colliderHeight: 80 },
     { x: 360, y: 565, colliderCenterOffsetY: 27, colliderWidth: 72, colliderHeight: 80 },

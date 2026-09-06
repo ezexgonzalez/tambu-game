@@ -331,7 +331,7 @@ export const SOFI_CONVERSATION = {
         when: { stats: { intensity: { gte: 19 } } },
       },
       {
-        outcome: 'date',
+        outcome: 'bathroom',
         when: {
           allSignals: ['sofi_played_along_with_kiss_plan'],
           stats: {
@@ -342,7 +342,7 @@ export const SOFI_CONVERSATION = {
         },
       },
       {
-        outcome: 'date',
+        outcome: 'bathroom',
         when: {
           anySignals: [
             'sofi_returned_flirt',
@@ -385,14 +385,24 @@ export const SOFI_CONVERSATION = {
     fallback: 'rejection',
   },
   outcomes: {
-    date: {
-      id: 'date',
-      icon: '❤️',
-      label: 'CITA',
-      lines: [
-        'Sofi sonríe.',
-        '"Bueno, Tambu. Otro día podemos seguir esta charla con menos gente alrededor."',
+    bathroom: {
+      id: 'bathroom',
+      icon: '🚻',
+      label: 'BAÑO',
+      lines: ['Sofi y Tambu se alejaron juntos de la fiesta.'],
+      closingSequence: [
+        { speaker: 'Sofi', text: 'Bueno... me cansé de hablar con media fiesta escuchando.' },
+        { speaker: 'Tambu', text: 'Podemos seguir en un lugar más tranquilo.' },
+        { speaker: 'Sofi', text: '¿Tenés alguno en mente?' },
+        { speaker: 'Tambu', text: 'El baño tiene puerta.' },
+        { speaker: 'Sofi', text: 'Sos un pelotudo.' },
+        { speaker: 'Sofi', text: 'Dale, antes de que me arrepienta.' },
       ],
+      event: {
+        type: 'bathroom',
+        resultLabel: 'BAÑO CONSEGUIDO',
+        resultText: 'Sofi y Tambu entraron juntos al baño.',
+      },
       reward: { points: 500, lives: 0 },
     },
     instagram: {

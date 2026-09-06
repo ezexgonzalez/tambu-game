@@ -65,6 +65,8 @@ Esto es intencional y forma parte de la fantasía/comedia central de la V1.
 
 Conseguir Baño una segunda vez no debe considerarse inválido ni narrativamente prohibido por haber ocurrido antes esa noche.
 
+En el vertical slice actual de Sofi, las rutas del anterior outcome máximo `date` pasan a resolver `bathroom` sin modificar su balance. La cita queda disponible como outcome posible para situaciones futuras, pero no es un resultado de Sofi V5.
+
 ## Evento del Baño
 
 Llegar a 🚻 BAÑO no debe resolverse únicamente con una tarjeta de puntos.
@@ -249,6 +251,12 @@ regreso a la fiesta
 ```
 
 Evitar meter movimiento de sprites, cámara o lógica específica del baño dentro del resolver social.
+
+### Implementación actual — fase 1
+
+La primera fase llega hasta la entrada al baño: el diálogo presenta un cierre narrativo, `BathroomEvent` conduce a Tambu y Sofi hasta la puerta real del patio, confirma el outcome y devuelve a Tambu al mapa. El outcome ya queda persistido y no puede farmearse.
+
+**RESISTENCIA DEL BAÑO todavía no está implementado.** Se conectará después de esta transición sin cambiar el resultado social ya obtenido.
 
 ## Fin de la noche
 

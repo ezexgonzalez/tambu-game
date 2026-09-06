@@ -827,7 +827,9 @@ La implementación de Sofi + Consejo debe respetar estos principios:
 
 Los textos y estructura narrativa de Sofi V5 están congelados como base.
 
-Los valores exactos de Attraction / Trust / Intensity y thresholds de outcomes **no están congelados**. Deben ajustarse después de enumerar rutas posibles y probar si Cita, Instagram, Friendzone y Rechazo son alcanzables de forma interesante.
+Los valores exactos de Attraction / Trust / Intensity y thresholds de outcomes **no están congelados**. Deben ajustarse después de enumerar rutas posibles y probar si Baño, Instagram, Friendzone y Rechazo son alcanzables de forma interesante.
+
+En Sofi V5, 🚻 **BAÑO** reemplaza a Cita como outcome máximo sin cambiar los thresholds ni la distribución vigente. El cierre narrativo pertenece a los datos del outcome; el desplazamiento hasta la puerta pertenece a la capa de eventos, fuera del resolver social.
 
 ---
 
@@ -846,6 +848,7 @@ Congelado como base:
 - Eze;
 - Tobi;
 - regla anti-repetición;
+- Baño como outcome máximo de Sofi V5;
 - tono adulto/no autocensurado del grupo.
 
 Pendiente:

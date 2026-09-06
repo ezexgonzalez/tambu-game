@@ -37,20 +37,20 @@ export function createCharacters(scene) {
 
   return patioWomen.map((character) => {
     const sprite = drawPerson(scene, character.x, character.y, character.palette, true);
-    scene.add.text(character.x, character.y + 36, character.name, {
+    const label = scene.add.text(character.x, character.y + 36, character.name, {
       fontFamily: 'monospace',
       fontSize: '12px',
       color: '#fff0b8',
       fontStyle: 'bold',
     }).setOrigin(0.5);
-    scene.add.text(character.x, character.y - 55, '!', {
+    const marker = scene.add.text(character.x, character.y - 55, '!', {
       fontFamily: 'monospace',
       fontSize: '20px',
       color: '#f4cd63',
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    return { sprite, character };
+    return { sprite, label, marker, character };
   });
 }
 

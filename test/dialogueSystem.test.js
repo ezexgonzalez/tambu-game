@@ -26,9 +26,11 @@ const hooks = registerHooks({
 const { createDialogueSystem } = await import('../src/systems/dialogueSystem.js');
 hooks.deregister();
 
-function harness(character = patioWomen[0]) {
+function harness(character = patioWomen[0], options = {}) {
   const keys = {};
   const objects = [];
+  const eventRequests = [];
+  const interactable = options.interactable ?? { character };
   let onShutdown;
   let hudUpdates = 0;
   function display(x, y, text = '') {
@@ -55,6 +57,10 @@ function harness(character = patioWomen[0]) {
   const state = createGameState();
   const system = createDialogueSystem(scene, {
     gameState: state, onGameStateChange() { hudUpdates += 1; },
+    onOutcomeEvent(request) {
+      eventRequests.push(request);
+      return options.startOutcomeEvent ?? false;
+    },
   });
   function frame(delta = 0) {
     scene.game.loop.delta = delta;
@@ -70,11 +76,35 @@ function harness(character = patioWomen[0]) {
     return objects.findLast((object) => !object.destroyed && object.visible && object.y === y)?.text;
   }
   return {
-    system, state, objects, keys, frame, press, textAt,
-    open() { system.open({ character }); },
+    system, state, objects, keys, frame, press, textAt, eventRequests, interactable,
+    open() { system.open(interactable); },
     shutdown() { onShutdown(); },
     hudUpdates: () => hudUpdates,
   };
+}
+
+function completeSequence(h, sequence) {
+  for (const entry of sequence) {
+    assert.equal(h.press('ENTER'), true);
+    assert.equal(h.textAt(433), entry.text);
+    assert.equal(h.press('SPACE'), true);
+  }
+}
+
+function playDialogueRoute(h, route) {
+  const choiceKeys = ['ONE', 'TWO', 'THREE', 'FOUR'];
+  h.open();
+  route.forEach((choiceIndex, beatIndex) => {
+    h.press('ENTER');
+    h.press(choiceKeys[choiceIndex]);
+    completeSequence(
+      h,
+      normalizeDialogueSequence(
+        patioWomen[0].conversation.beats[beatIndex].choices[choiceIndex],
+        'Sofi',
+      ),
+    );
+  });
 }
 
 test('prompt bloquea opciones/C y descarta teclas anticipadas, incluso al completarse', () => {
@@ -167,6 +197,31 @@ test('reaction + bridge completo, Consejo, outcome/HUD y bloqueo siguen funciona
   h.open();
   assert.equal(h.system.isOpen(), false);
   assert.deepEqual(h.state, result);
+});
+
+test('bathroom agrega cierre secuencial y recién después dispara el evento', () => {
+  const h = harness(patioWomen[0], {
+    startOutcomeEvent: true,
+    interactable: { character: patioWomen[0], sprite: { id: 'sofi-sprite' } },
+  });
+
+  playDialogueRoute(h, [0, 0, 1, 0]);
+
+  assert.equal(h.system.getMode(), 'outcome-closing');
+  assert.equal(h.state.relationships.sofi.outcome, 'bathroom');
+  assert.equal(h.state.player.points, 500);
+  assert.equal(h.eventRequests.length, 0);
+  h.press('ESC');
+  assert.equal(h.system.getMode(), 'outcome-closing');
+
+  completeSequence(h, patioWomen[0].conversation.outcomes.bathroom.closingSequence);
+
+  assert.equal(h.eventRequests.length, 1);
+  assert.equal(h.eventRequests[0].type, 'bathroom');
+  assert.equal(h.eventRequests[0].characterId, 'sofi');
+  assert.strictEqual(h.eventRequests[0].interactable, h.interactable);
+  assert.equal(h.system.isOpen(), false);
+  assert.ok(h.objects.every(({ text }) => !String(text).includes('CITA')));
 });
 
 test('ESC y shutdown descartan presentación; reabrir comienza vacío sin recompensa', () => {

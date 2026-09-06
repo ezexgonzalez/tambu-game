@@ -144,5 +144,10 @@ test('consultar a cualquier amigo en cualquier beat conserva las 256 rutas socia
       }
     }
   }
-  assert.deepEqual(distribution, { rejection: 73, friendzone: 41, date: 54, instagram: 88 });
+  assert.deepEqual(distribution, {
+    rejection: 73,
+    friendzone: 41,
+    bathroom: 54,
+    instagram: 88,
+  });
 });

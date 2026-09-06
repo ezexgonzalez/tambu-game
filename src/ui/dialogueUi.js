@@ -76,7 +76,7 @@ export function createDialogueQuestionUi(scene, {
   };
 }
 
-export function createDialogueReactionUi(scene, canContinue) {
+export function createDialogueReactionUi(scene, canContinue, { canAbandon = true } = {}) {
   const panel = createPanel(scene, 640, 535, 1160, 320);
   const name = createText(scene, 92, 395, '', {
     fontSize: '18px',
@@ -90,7 +90,7 @@ export function createDialogueReactionUi(scene, canContinue) {
     lineSpacing: 4,
   });
   const instruction = canContinue
-    ? 'ENTER / SPACE · CONTINUAR  ·  ESC abandonar'
+    ? `ENTER / SPACE · CONTINUAR${canAbandon ? '  ·  ESC abandonar' : ''}`
     : 'ESC cerrar';
   const help = createText(scene, 1175, 675, instruction, {
     fontSize: '12px',
