@@ -20,17 +20,51 @@ export function canUseCouncil(session, beatIndex, councilConfig) {
   );
 }
 
+function hashContext(value) {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+export function selectCouncilLine(lines, contextKey, recentLineIds = []) {
+  const availableLines = lines.filter(({ id }) => !recentLineIds.includes(id));
+  const candidates = availableLines.length > 0 ? availableLines : lines;
+  if (candidates.length === 1) return candidates[0];
+  return candidates[hashContext(contextKey) % candidates.length];
+}
+
+function createLineContextKey(snapshot, member, matchingRule) {
+  const choices = snapshot.history.map(({ beatId, choiceId }) => `${beatId}:${choiceId}`);
+  const stats = ['attraction', 'trust', 'intensity']
+    .map((stat) => snapshot.stats[stat] ?? 0);
+
+  return [
+    snapshot.characterId,
+    snapshot.currentBeat,
+    member.id,
+    matchingRule?.id ?? 'fallback',
+    choices.join('|'),
+    [...snapshot.signals].sort().join('|'),
+    stats.join('|'),
+  ].join('::');
+}
+
 export function resolveCouncilAdvice(session, member) {
   const snapshot = createCouncilSnapshot(session);
   const matchingRule = [...member.rules]
     .sort((left, right) => (right.priority ?? 0) - (left.priority ?? 0))
     .find((rule) => matchesConversationConditions(snapshot, rule.when));
   const lines = matchingRule?.lines ?? member.fallbackLines;
-  const line = lines.find(({ id }) => !session.councilLineHistory.includes(id)) ?? lines[0];
+  const contextKey = createLineContextKey(snapshot, member, matchingRule);
+  const line = selectCouncilLine(lines, contextKey, session.councilLineHistory);
 
   return {
     ...line,
     advisorId: member.id,
+    ruleId: matchingRule?.id ?? 'fallback',
     situation: snapshot.situation,
   };
 }

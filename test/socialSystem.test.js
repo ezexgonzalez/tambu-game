@@ -12,6 +12,7 @@ import {
   createCouncilSnapshot,
   markCouncilUsed,
   resolveCouncilAdvice,
+  selectCouncilLine,
 } from '../src/systems/councilSystem.js';
 import {
   applySocialEffects,
@@ -213,6 +214,34 @@ test('Tobi frena a Tambu cuando ya se está pasando', () => {
   assert.notEqual(advice.text, 'Nao, nao...');
 });
 
+test('una regla con varias líneas varía de forma determinística según el contexto', () => {
+  const lines = [
+    { id: 'one', text: 'Primera' },
+    { id: 'two', text: 'Segunda' },
+    { id: 'three', text: 'Tercera' },
+  ];
+  const selections = new Set(
+    Array.from({ length: 12 }, (_, index) => (
+      selectCouncilLine(lines, `context-${index}`).id
+    )),
+  );
+
+  assert.ok(selections.size > 1);
+  assert.ok([...selections].some((id) => id !== 'one'));
+  assert.equal(
+    selectCouncilLine(lines, 'same-context').id,
+    selectCouncilLine(lines, 'same-context').id,
+  );
+});
+
+test('la prioridad de reglas se resuelve antes de variar el pool', () => {
+  const eze = SOFI_CONVERSATION.council.members[1];
+  const advice = resolveCouncilAdvice(playRoute([3, 2, 1]).session, eze);
+
+  assert.equal(advice.ruleId, 'eze-intense');
+  assert.match(advice.text, /Bajá un cambio|no sigas empujando/i);
+});
+
 test('ningún consejero revela stats ni indica una opción correcta', () => {
   const allLines = SOFI_CONVERSATION.council.members.flatMap((member) => [
     ...member.rules.flatMap((rule) => rule.lines),
@@ -229,7 +258,9 @@ test('la selección de línea evita repetir IDs recientes', () => {
   const session = playRoute([1, 2]).session;
   session.councilLineHistory = ['eze-flirt-1'];
 
-  assert.equal(resolveCouncilAdvice(session, eze).id, 'eze-flirt-2');
+  const advice = resolveCouncilAdvice(session, eze);
+  assert.notEqual(advice.id, 'eze-flirt-1');
+  assert.ok(['eze-flirt-2', 'eze-flirt-3'].includes(advice.id));
 });
 
 test('El Consejo recibe un snapshot independiente y no modifica stats', () => {
