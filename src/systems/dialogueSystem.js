@@ -1,11 +1,21 @@
 import Phaser from 'phaser';
 import { canInteractWithCharacter, commitConversationOutcome } from '../state/gameState.js';
 import {
-  applySocialEffects,
   createConversationSession,
-  resolveContextualAdvice,
   resolveOutcome,
 } from './socialSystem.js';
+import {
+  advanceConversationSession,
+  applyConversationChoice,
+  getConversationBeat,
+  getConversationBeatIndex,
+  resolveBeatPrompt,
+} from './conversationFlow.js';
+import {
+  canUseCouncil,
+  markCouncilUsed,
+  resolveCouncilAdvice,
+} from './councilSystem.js';
 import {
   createCouncilAdviceUi,
   createCouncilSelectionUi,
@@ -40,19 +50,23 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
   let conversation = null;
   let session = null;
   let currentCouncilMember = null;
+  let pendingNextBeat = null;
   let uiElements = null;
 
   function open(interactable) {
     const character = interactable?.character;
     if (
       mode !== DIALOGUE_MODE.IDLE
-      || !character?.conversation?.rounds?.length
+      || !character?.conversation?.beats?.length
       || !canInteractWithCharacter(gameState, character.id)
     ) return;
 
     currentCharacter = character;
     conversation = character.conversation;
-    session = createConversationSession(character.id);
+    session = createConversationSession(
+      character.id,
+      conversation.initialBeat ?? conversation.beats[0].id,
+    );
     mode = DIALOGUE_MODE.QUESTION;
     renderQuestion();
   }
@@ -63,44 +77,50 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
   }
 
   function councilIsAvailable() {
-    return Boolean(
-      conversation.council
-      && session.roundIndex >= conversation.council.availableFromRound
-      && !session.councilUsed,
+    return canUseCouncil(
+      session,
+      getConversationBeatIndex(conversation, session.currentBeat),
+      conversation.council,
     );
   }
 
   function renderQuestion() {
+    const beat = getConversationBeat(conversation, session.currentBeat);
+    const beatIndex = getConversationBeatIndex(conversation, session.currentBeat);
     replaceUi(createDialogueQuestionUi(scene, {
       character: currentCharacter,
-      round: conversation.rounds[session.roundIndex],
-      roundIndex: session.roundIndex,
-      totalRounds: conversation.rounds.length,
+      beat,
+      prompt: resolveBeatPrompt(beat, session),
+      beatIndex,
+      totalBeats: conversation.beats.length,
       councilAvailable: councilIsAvailable(),
     }));
   }
 
   function selectAnswer(index) {
-    const round = conversation.rounds[session.roundIndex];
-    const answer = round.answers[index];
-    if (!answer) return;
+    const beat = getConversationBeat(conversation, session.currentBeat);
+    const choice = beat.choices[index];
+    if (!choice) return;
 
-    session.stats = applySocialEffects(session.stats, answer.effects);
+    const result = applyConversationChoice(session, beat, choice);
+    session = result.session;
+    pendingNextBeat = result.presentation.nextBeat;
     mode = DIALOGUE_MODE.REACTION;
 
-    const hasNextRound = session.roundIndex < conversation.rounds.length - 1;
+    const hasNextBeat = Boolean(pendingNextBeat);
     const hasOutcome = Boolean(conversation.outcomeRules && conversation.outcomes);
     replaceUi(createDialogueReactionUi(
       scene,
       currentCharacter,
-      answer.reaction,
-      hasNextRound || hasOutcome,
+      result.presentation,
+      hasNextBeat || hasOutcome,
     ));
   }
 
   function continueAfterReaction() {
-    if (session.roundIndex < conversation.rounds.length - 1) {
-      session.roundIndex += 1;
+    if (pendingNextBeat) {
+      session = advanceConversationSession(session, pendingNextBeat);
+      pendingNextBeat = null;
       mode = DIALOGUE_MODE.QUESTION;
       renderQuestion();
       return;
@@ -108,7 +128,7 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
 
     if (!conversation.outcomeRules || !conversation.outcomes) return;
 
-    const outcomeId = resolveOutcome(session.stats, conversation.outcomeRules);
+    const outcomeId = resolveOutcome(session, conversation.outcomeRules);
     const outcome = conversation.outcomes[outcomeId];
     if (!outcome) return;
 
@@ -120,7 +140,6 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
 
   function openCouncil() {
     if (!councilIsAvailable()) return;
-    session.councilUsed = true;
     currentCouncilMember = null;
     mode = DIALOGUE_MODE.COUNCIL;
     replaceUi(createCouncilSelectionUi(scene, conversation.council.members));
@@ -130,12 +149,14 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
     const member = conversation.council.members[index];
     if (!member) return;
     currentCouncilMember = member;
-    const advice = resolveContextualAdvice(session.stats, member.advice);
-    replaceUi(createCouncilAdviceUi(scene, member, advice));
+    const advice = resolveCouncilAdvice(session, member);
+    session = markCouncilUsed(session, advice);
+    replaceUi(createCouncilAdviceUi(scene, member, advice.text));
   }
 
   function returnFromCouncil() {
     currentCouncilMember = null;
+    pendingNextBeat = null;
     mode = DIALOGUE_MODE.QUESTION;
     renderQuestion();
   }
@@ -147,6 +168,7 @@ export function createDialogueSystem(scene, { gameState, onGameStateChange }) {
     conversation = null;
     session = null;
     currentCouncilMember = null;
+    pendingNextBeat = null;
     mode = DIALOGUE_MODE.IDLE;
   }
 

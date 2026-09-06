@@ -16,13 +16,15 @@ export const patioWomen = [
     y: 350,
     palette: 8,
     conversation: {
-      rounds: [{
-        line: '¿Vos sos el que llegó recién? Tenés cara de estar pensando demasiado.',
-        answers: [
-          { text: 'Puede ser.', reaction: 'Mmm. Respuesta sospechosa.' },
-          { text: 'Estoy viendo si esta fiesta zafa.', reaction: '¿Y? ¿Zafa o todavía no?' },
-          { text: '¿Y vos siempre arrancás interrogando?', reaction: 'Sí. ¿Te molesta?' },
-          { text: 'No pienso tanto como parece.', reaction: 'Eso lo vamos a comprobar.' },
+      initialBeat: 'prototype',
+      beats: [{
+        id: 'prototype',
+        prompt: '¿Vos sos el que llegó recién? Tenés cara de estar pensando demasiado.',
+        choices: [
+          { id: 'one', text: 'Puede ser.', reaction: 'Mmm. Respuesta sospechosa.' },
+          { id: 'two', text: 'Estoy viendo si esta fiesta zafa.', reaction: '¿Y? ¿Zafa o todavía no?' },
+          { id: 'three', text: '¿Y vos siempre arrancás interrogando?', reaction: 'Sí. ¿Te molesta?' },
+          { id: 'four', text: 'No pienso tanto como parece.', reaction: 'Eso lo vamos a comprobar.' },
         ],
       }],
     },
@@ -34,13 +36,15 @@ export const patioWomen = [
     y: 635,
     palette: 9,
     conversation: {
-      rounds: [{
-        line: '¿Necesitás algo o estabas dando vueltas nomás?',
-        answers: [
-          { text: 'Estoy explorando.', reaction: '¿Explorando? Qué misterioso.' },
-          { text: 'Buscaba una conversación decente.', reaction: 'Qué presión. Espero estar a la altura.' },
-          { text: 'Me descubriste.', reaction: 'Por lo menos lo admitís.' },
-          { text: 'Todavía no decidí.', reaction: 'Bueno, avisame cuando decidas.' },
+      initialBeat: 'prototype',
+      beats: [{
+        id: 'prototype',
+        prompt: '¿Necesitás algo o estabas dando vueltas nomás?',
+        choices: [
+          { id: 'one', text: 'Estoy explorando.', reaction: '¿Explorando? Qué misterioso.' },
+          { id: 'two', text: 'Buscaba una conversación decente.', reaction: 'Qué presión. Espero estar a la altura.' },
+          { id: 'three', text: 'Me descubriste.', reaction: 'Por lo menos lo admitís.' },
+          { id: 'four', text: 'Todavía no decidí.', reaction: 'Bueno, avisame cuando decidas.' },
         ],
       }],
     },

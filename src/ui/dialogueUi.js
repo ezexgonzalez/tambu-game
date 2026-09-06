@@ -19,9 +19,10 @@ function createText(scene, x, y, text, style) {
 
 export function createDialogueQuestionUi(scene, {
   character,
-  round,
-  roundIndex,
-  totalRounds,
+  beat,
+  prompt,
+  beatIndex,
+  totalBeats,
   councilAvailable,
 }) {
   const panel = createPanel(scene, 640, 575, 1160, 248);
@@ -30,20 +31,20 @@ export function createDialogueQuestionUi(scene, {
     color: '#ffe8a8',
     fontStyle: 'bold',
   });
-  const progress = createText(scene, 1175, 478, `${roundIndex + 1} / ${totalRounds}`, {
+  const progress = createText(scene, 1175, 478, `${beatIndex + 1} / ${totalBeats}`, {
     fontSize: '12px',
     color: '#8e95a2',
   }).setOrigin(1, 0.5);
-  const line = createText(scene, 92, 510, round.line, {
+  const line = createText(scene, 92, 510, prompt, {
     fontSize: '17px',
     color: '#f4f4ef',
     wordWrap: { width: 1080 },
   });
-  const answers = round.answers.map((answer, index) => createText(
+  const answers = beat.choices.map((choice, index) => createText(
     scene,
     110 + (index % 2) * 555,
     568 + Math.floor(index / 2) * 46,
-    `${index + 1}. ${answer.text}`,
+    `${index + 1}. ${choice.text}`,
     {
       fontSize: '14px',
       color: '#d8dce5',
@@ -66,17 +67,37 @@ export function createDialogueQuestionUi(scene, {
   return [panel, name, progress, line, ...answers, council, help].filter(Boolean);
 }
 
-export function createDialogueReactionUi(scene, character, reaction, canContinue) {
-  const panel = createPanel(scene, 640, 610, 1160, 180);
-  const name = createText(scene, 92, 547, character.name.toUpperCase(), {
+function formatExchangePart(part, defaultSpeaker) {
+  if (typeof part === 'string') return `${defaultSpeaker.toUpperCase()}: ${part}`;
+  if (!part.speaker) return part.text;
+  return `${part.speaker.toUpperCase()}: ${part.text}`;
+}
+
+function formatExchange(presentation, defaultSpeaker) {
+  const reaction = Array.isArray(presentation.reaction)
+    ? presentation.reaction
+    : [presentation.reaction];
+  const bridge = Array.isArray(presentation.bridge)
+    ? presentation.bridge
+    : [presentation.bridge];
+  return [...reaction, ...bridge]
+    .filter(Boolean)
+    .map((part) => formatExchangePart(part, defaultSpeaker))
+    .join('\n');
+}
+
+export function createDialogueReactionUi(scene, character, presentation, canContinue) {
+  const panel = createPanel(scene, 640, 535, 1160, 320);
+  const name = createText(scene, 92, 395, character.name.toUpperCase(), {
     fontSize: '18px',
     color: '#ffe8a8',
     fontStyle: 'bold',
   });
-  const line = createText(scene, 92, 585, reaction, {
-    fontSize: '17px',
+  const line = createText(scene, 92, 433, formatExchange(presentation, character.name), {
+    fontSize: '15px',
     color: '#f4f4ef',
     wordWrap: { width: 1040 },
+    lineSpacing: 4,
   });
   const instruction = canContinue
     ? 'ENTER / SPACE · CONTINUAR  ·  ESC abandonar'

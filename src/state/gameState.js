@@ -18,6 +18,14 @@ export function commitConversationOutcome(gameState, session, outcome) {
 
   gameState.relationships[session.characterId] = {
     ...session.stats,
+    history: session.history.map((entry) => ({
+      beatId: entry.beatId,
+      choiceId: entry.choiceId,
+      intent: entry.intent,
+      variantId: entry.variantId,
+      emittedSignals: [...entry.emittedSignals],
+    })),
+    signals: [...session.signals],
     resolved: true,
     outcome: outcome.id,
   };
