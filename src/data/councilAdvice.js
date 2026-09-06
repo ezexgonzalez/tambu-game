@@ -62,7 +62,7 @@ export const COUNCIL_CONFIG = {
           lines: [
             { id: 'eze-flirt-1', text: 'Esa te la dejó picando bastante.' },
             { id: 'eze-flirt-2', text: 'Ojo que ahí hubo algo.' },
-            { id: 'eze-flirt-3', text: 'Te está dando bola.' },
+            { id: 'eze-flirt-3', text: 'Na bueno... esta quiere keke.' },
           ],
         },
         {
