@@ -120,7 +120,7 @@ export function createBathroomResolutionUi(scene, result) {
     isSuccess ? 'Afuera finalmente se rinden.' : 'La puerta se abre de golpe.\n\nTAMBU: ¿Qué?',
     { fontSize: '16px', color: '#f4f4ef', align: 'center', lineSpacing: 5 },
   ).setOrigin(0.5);
-  const help = createText(scene, 640, 438, 'ENTER / SPACE · VOLVER AL PATIO', {
+  const help = createText(scene, 640, 438, 'ENTER · VOLVER AL PATIO', {
     fontSize: '12px', color: '#8e95a2',
   }).setOrigin(0.5);
 

@@ -213,8 +213,7 @@ export function createBathroomEvent(scene, {
 
   function updateResolution() {
     const enter = Phaser.Input.Keyboard.JustDown(enterKey);
-    const space = Phaser.Input.Keyboard.JustDown(spaceKey);
-    if (enter || space) return finish();
+    if (enter) return finish();
     return true;
   }
 

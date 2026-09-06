@@ -108,6 +108,11 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
   while (event.getMode() === 'resistance') event.update();
   assert.equal(event.getMode(), 'failure');
   assert.ok(objects.some(({ text }) => text.includes('LA PUERTA CEDIÓ')));
+  assert.ok(objects.some(({ text }) => text.includes('ENTER · VOLVER AL PATIO')));
+
+  keys.SPACE.edge = true;
+  assert.equal(event.update(), true);
+  assert.equal(event.getMode(), 'failure');
 
   keys.ENTER.edge = true;
   assert.equal(event.update(), false);
@@ -157,6 +162,7 @@ test('SPACE sostenido mediante pulsaciones físicas permite asegurar la puerta',
   event.update();
   assert.equal(event.getMode(), 'resistance');
   assert.equal(event.getResistanceState().resistance, resistanceBeforeEnter);
+  keys.ENTER.edge = false;
 
   scene.game.loop.delta = 50;
   while (event.getMode() === 'resistance') {
@@ -166,6 +172,14 @@ test('SPACE sostenido mediante pulsaciones físicas permite asegurar la puerta',
 
   assert.equal(event.getMode(), 'success');
   assert.ok(objects.some(({ text }) => text.includes('PUERTA ASEGURADA')));
+
+  keys.SPACE.edge = true;
+  assert.equal(event.update(), true);
+  assert.equal(event.getMode(), 'success');
+
+  keys.ENTER.edge = true;
+  assert.equal(event.update(), false);
+  assert.equal(event.getMode(), 'complete');
 });
 
 test('interrumpir la pantalla de resultado nunca deja a Tambu invisible', () => {
