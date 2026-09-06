@@ -252,11 +252,13 @@ regreso a la fiesta
 
 Evitar meter movimiento de sprites, cámara o lógica específica del baño dentro del resolver social.
 
-### Implementación actual — fase 1
+### Implementación actual — V1
 
-La primera fase llega hasta la entrada al baño: el diálogo presenta un cierre narrativo, `BathroomEvent` conduce a Tambu y Sofi hasta la puerta real del patio, confirma el outcome y devuelve a Tambu al mapa. El outcome ya queda persistido y no puede farmearse.
+`BathroomEvent` ya cubre el flujo completo de la primera versión: cierre narrativo, caminata al baño real, confirmación de BAÑO CONSEGUIDO, pausa cómica, golpes, **RESISTENCIA DEL BAÑO**, resultado y regreso seguro al patio.
 
-**RESISTENCIA DEL BAÑO todavía no está implementado.** Se conectará después de esta transición sin cambiar el resultado social ya obtenido.
+BAÑO se consigue antes del minijuego: éxito y fracaso no modifican el outcome persistido, los +500 puntos ni la resolución de Sofi. La dificultad inicial —duración, resistencia, drenaje, ganancia por SPACE y secuencia de golpes— está centralizada para playtestearla y ajustarla sin tocar la lógica social.
+
+Una pasada futura de polish podrá agregar audio, amigos específicos, animación real de la puerta y variantes, sin alterar este contrato de gameplay.
 
 ## Fin de la noche
 

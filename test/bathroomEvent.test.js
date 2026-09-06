@@ -45,13 +45,16 @@ function display(x, y, text = '') {
     setDepth() { return this; },
     setStrokeStyle() { return this; },
     setOrigin() { return this; },
+    setScale() { return this; },
+    setFillStyle() { return this; },
     setPosition(nextX, nextY) { this.x = nextX; this.y = nextY; return this; },
     setVisible(visible) { this.visible = visible; return this; },
+    setText(text) { this.text = text; return this; },
     destroy() { this.destroyed = true; },
   };
 }
 
-test('Sofi y Tambu llegan al acceso real, entran y Tambu vuelve controlable', () => {
+test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', () => {
   const keys = {};
   const objects = [];
   const scene = {
@@ -87,10 +90,24 @@ test('Sofi y Tambu llegan al acceso real, entran y Tambu vuelve controlable', ()
   }
 
   assert.ok(frames < 200);
-  assert.equal(event.getMode(), 'result');
+  assert.equal(event.getMode(), 'bathroom-achieved');
   assert.equal(player.sprite.visible, false);
   assert.equal(interactable.sprite.visible, false);
   assert.ok(objects.some(({ text }) => text.includes('BAÑO CONSEGUIDO')));
+
+  keys.ENTER.edge = true;
+  assert.equal(event.update(), true);
+  assert.equal(event.getMode(), 'anticipation');
+  scene.game.loop.delta = 3000;
+  event.update();
+  assert.equal(event.getMode(), 'resistance');
+  assert.equal(event.getResistanceState().resistance, 65);
+  assert.ok(objects.some(({ text }) => text.includes('RESISTENCIA DEL BAÑO')));
+
+  scene.game.loop.delta = 1000;
+  while (event.getMode() === 'resistance') event.update();
+  assert.equal(event.getMode(), 'failure');
+  assert.ok(objects.some(({ text }) => text.includes('LA PUERTA CEDIÓ')));
 
   keys.ENTER.edge = true;
   assert.equal(event.update(), false);
@@ -101,6 +118,54 @@ test('Sofi y Tambu llegan al acceso real, entran y Tambu vuelve controlable', ()
   assert.equal(player.sprite.y, PATIO_LAYOUT.events.bathroom.exit.y);
   assert.equal(interactable.sprite.visible, false);
   assert.ok(objects.filter(({ text }) => text).every(({ destroyed }) => destroyed));
+});
+
+test('SPACE sostenido mediante pulsaciones físicas permite asegurar la puerta', () => {
+  const keys = {};
+  const objects = [];
+  const scene = {
+    input: { keyboard: { addKey(code) { keys[code] = { edge: false }; return keys[code]; } } },
+    add: {
+      rectangle(x, y) { const object = display(x, y); objects.push(object); return object; },
+      text(x, y, text) { const object = display(x, y, text); objects.push(object); return object; },
+    },
+    game: { loop: { delta: 50 } },
+  };
+  const player = { sprite: actor(400, 690), label: display(400, 724), facing: 'up' };
+  const interactable = {
+    sprite: actor(400, 690),
+    label: display(400, 726),
+    marker: display(400, 635),
+  };
+  const event = createBathroomEvent(scene, {
+    player,
+    interactable,
+    outcome: SOFI_CONVERSATION.outcomes.bathroom,
+    layout: PATIO_LAYOUT.events.bathroom,
+  });
+
+  while (event.getMode() === 'walking') event.update();
+  keys.SPACE.edge = true;
+  event.update();
+  scene.game.loop.delta = 3000;
+  event.update();
+  assert.equal(event.getMode(), 'resistance');
+
+  const resistanceBeforeEnter = event.getResistanceState().resistance;
+  keys.ENTER.edge = true;
+  scene.game.loop.delta = 0;
+  event.update();
+  assert.equal(event.getMode(), 'resistance');
+  assert.equal(event.getResistanceState().resistance, resistanceBeforeEnter);
+
+  scene.game.loop.delta = 50;
+  while (event.getMode() === 'resistance') {
+    keys.SPACE.edge = true;
+    event.update();
+  }
+
+  assert.equal(event.getMode(), 'success');
+  assert.ok(objects.some(({ text }) => text.includes('PUERTA ASEGURADA')));
 });
 
 test('interrumpir la pantalla de resultado nunca deja a Tambu invisible', () => {

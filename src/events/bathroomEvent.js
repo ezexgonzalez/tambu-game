@@ -1,6 +1,18 @@
 import Phaser from 'phaser';
 import { PLAYER_CONFIG } from '../player/playerConfig.js';
-import { createOutcomeEventUi, destroyEventUi } from '../ui/eventUi.js';
+import {
+  BATHROOM_RESISTANCE_CONFIG,
+  advanceBathroomResistance,
+  createBathroomResistanceState,
+  recoverBathroomResistance,
+} from './bathroomResistance.js';
+import {
+  createBathroomAnticipationUi,
+  createBathroomResistanceUi,
+  createBathroomResolutionUi,
+  createOutcomeEventUi,
+  destroyEventUi,
+} from '../ui/eventUi.js';
 
 function setPosition(target, x, y) {
   if (target.setPosition) target.setPosition(x, y);
@@ -45,6 +57,7 @@ export function createBathroomEvent(scene, {
   interactable,
   outcome,
   layout,
+  resistanceConfig = BATHROOM_RESISTANCE_CONFIG,
 }) {
   if (!player?.sprite || !interactable?.sprite || !outcome || !layout?.path?.length) return null;
 
@@ -63,6 +76,10 @@ export function createBathroomEvent(scene, {
   let pathIndex = 0;
   let mode = 'walking';
   let uiElements = null;
+  let anticipationElapsedMs = 0;
+  let anticipationBeatIndex = 0;
+  let resistanceState = null;
+  let outsideText = '';
   let destroyed = false;
 
   player.sprite.setVelocity?.(0, 0);
@@ -78,7 +95,7 @@ export function createBathroomEvent(scene, {
   }
 
   function enterBathroom() {
-    mode = 'result';
+    mode = 'bathroom-achieved';
     player.sprite.setVelocity?.(0, 0);
     setVisible(player.sprite, false);
     setVisible(player.label, false);
@@ -124,14 +141,89 @@ export function createBathroomEvent(scene, {
     return true;
   }
 
+  function startAnticipation() {
+    destroyEventUi(uiElements);
+    uiElements = createBathroomAnticipationUi(scene);
+    uiElements.update('');
+    anticipationElapsedMs = 0;
+    anticipationBeatIndex = 0;
+    mode = 'anticipation';
+  }
+
+  function startResistance() {
+    destroyEventUi(uiElements);
+    resistanceState = createBathroomResistanceState(resistanceConfig);
+    outsideText = '';
+    uiElements = createBathroomResistanceUi(scene, resistanceConfig);
+    uiElements.update({ state: resistanceState, outsideText });
+    mode = 'resistance';
+  }
+
+  function updateAnticipation() {
+    anticipationElapsedMs += Math.max(0, scene.game.loop.delta);
+    const beats = resistanceConfig.anticipation.beats;
+    while (
+      anticipationBeatIndex < beats.length
+      && beats[anticipationBeatIndex].at <= anticipationElapsedMs
+    ) {
+      uiElements.update(beats[anticipationBeatIndex].text);
+      anticipationBeatIndex += 1;
+    }
+    if (anticipationElapsedMs >= resistanceConfig.anticipation.durationMs) startResistance();
+    return true;
+  }
+
+  function showResistanceResolution(result) {
+    destroyEventUi(uiElements);
+    uiElements = createBathroomResolutionUi(scene, result);
+    mode = result;
+  }
+
+  function updateResistance() {
+    const space = Phaser.Input.Keyboard.JustDown(spaceKey);
+    if (space) resistanceState = recoverBathroomResistance(resistanceState, resistanceConfig);
+
+    const update = advanceBathroomResistance(
+      resistanceState,
+      Math.max(0, scene.game.loop.delta),
+      resistanceConfig,
+    );
+    resistanceState = update.state;
+    const hit = update.hits.at(-1);
+    if (hit) {
+      outsideText = hit.text;
+      scene.cameras?.main?.shake?.(80, 0.002);
+    }
+    uiElements.update({
+      state: resistanceState,
+      outsideText,
+      feedback: hit ? 'hit' : space ? 'recover' : 'idle',
+    });
+
+    if (resistanceState.status !== 'active') showResistanceResolution(resistanceState.status);
+    return true;
+  }
+
+  function updateBathroomAchieved() {
+    const enter = Phaser.Input.Keyboard.JustDown(enterKey);
+    const space = Phaser.Input.Keyboard.JustDown(spaceKey);
+    if (enter || space) startAnticipation();
+    return true;
+  }
+
+  function updateResolution() {
+    const enter = Phaser.Input.Keyboard.JustDown(enterKey);
+    const space = Phaser.Input.Keyboard.JustDown(spaceKey);
+    if (enter || space) return finish();
+    return true;
+  }
+
   function update() {
     if (mode === 'walking') return updateWalking();
-    if (mode === 'result') {
-      const enter = Phaser.Input.Keyboard.JustDown(enterKey);
-      const space = Phaser.Input.Keyboard.JustDown(spaceKey);
-      if (enter || space) return finish();
-      return true;
-    }
+    if (mode === 'bathroom-achieved') return updateBathroomAchieved();
+    if (mode === 'anticipation') return updateAnticipation();
+    if (mode === 'resistance') return updateResistance();
+    if (mode === 'success' || mode === 'failure') return updateResolution();
     return false;
   }
 
@@ -147,7 +239,7 @@ export function createBathroomEvent(scene, {
       setVisible(npc, originalNpc.visible);
       setVisible(interactable.label, originalNpc.labelVisible);
       setVisible(interactable.marker, originalNpc.markerVisible);
-    } else if (mode === 'result') {
+    } else if (mode !== 'complete') {
       restorePlayer();
     }
   }
@@ -156,5 +248,6 @@ export function createBathroomEvent(scene, {
     update,
     destroy,
     getMode: () => mode,
+    getResistanceState: () => resistanceState,
   };
 }
