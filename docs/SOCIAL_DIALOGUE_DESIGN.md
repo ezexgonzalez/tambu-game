@@ -520,7 +520,11 @@ La combinación buscada es:
 
 El Consejo no es un solucionador de respuestas.
 
-> **El Consejo interpreta. No resuelve.**
+> **El Consejo interpreta o entretiene. No resuelve.**
+
+Una consulta nunca debe ser vacía, incluso cuando todavía no hay suficiente evidencia social. Puede aportar una lectura, humor o una observación concreta con la voz del amigo; no debe inventar interés romántico para justificar una consulta temprana.
+
+Los callbacks priorizan lo que acaba de pasar. Las condiciones `latestSignals` consultan las señales emitidas por la última elección del historial, no las señales acumuladas de toda la conversación. Las lecturas generales quedan como respaldo. El exceso puede hacer que Eze o Tobi frenen a Tambu, y los veredictos especiales de Pitity conservan sus condiciones y prioridad. La variación dentro de cada pool sigue siendo determinística por contexto.
 
 Los amigos reciben información de la situación y la interpretan según su propia personalidad.
 

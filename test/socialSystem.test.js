@@ -239,7 +239,7 @@ test('la prioridad de reglas se resuelve antes de variar el pool', () => {
   const advice = resolveCouncilAdvice(playRoute([3, 2, 1]).session, eze);
 
   assert.equal(advice.ruleId, 'eze-intense');
-  assert.match(advice.text, /Bajá un cambio|no sigas empujando/i);
+  assert.match(advice.text, /Ya está boludo|Venía bien/);
 });
 
 test('ningún consejero revela stats ni indica una opción correcta', () => {

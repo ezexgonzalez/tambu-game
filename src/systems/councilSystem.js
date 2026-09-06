@@ -56,7 +56,12 @@ export function resolveCouncilAdvice(session, member) {
   const snapshot = createCouncilSnapshot(session);
   const matchingRule = [...member.rules]
     .sort((left, right) => (right.priority ?? 0) - (left.priority ?? 0))
-    .find((rule) => matchesConversationConditions(snapshot, rule.when));
+    .find((rule) => (
+      matchesConversationConditions(snapshot, rule.when)
+      && (rule.when?.latestSignals ?? []).every((signal) => (
+        snapshot.history.at(-1)?.emittedSignals?.includes(signal)
+      ))
+    ));
   const lines = matchingRule?.lines ?? member.fallbackLines;
   const contextKey = createLineContextKey(snapshot, member, matchingRule);
   const line = selectCouncilLine(lines, contextKey, session.councilLineHistory);
