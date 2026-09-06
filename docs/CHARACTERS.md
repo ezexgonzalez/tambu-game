@@ -30,6 +30,15 @@ Directo y confrontativo. Frases/energía: `hacelo`, `callate la boca`, `cagón`.
 
 Desarrollo personal, gimnasio, proyectos, observador, amante del reggaetón/perreo, baila y toma bastante. Puede sumarse a chistes fuertes, pero no suele quemar a Tambu frente a una mujer. A mayor alcohol, menor filtro en comentarios privados, manteniendo la intención de ayudar.
 
+### Voz y vocabulario
+
+- Eze **no usa `hermano`** como forma habitual de dirigirse a Tambu. No escribir sus líneas con esa palabra.
+- Cuando ve una señal fuerte de interés puede decir **`esta quiere keke`**.
+- Si la señal es todavía más evidente, también puede decir **`está pidiendo keke`**.
+- Estas frases deben ser especiales y no repetirse constantemente.
+- En estados ambiguos debe poder dudar, no sonar como un sistema que siempre conoce la respuesta correcta.
+- Su forma de hablar con Tambu debe sonar directa, informal y de grupo; evitar lenguaje terapéutico o demasiado analítico aunque la lógica detrás del Consejo sí sea sofisticada.
+
 ## Lore puntual
 
 - `Furiosos los viernes`: foto oficial de un boliche con Tambu besándose en primer plano; running gag recurrente.
