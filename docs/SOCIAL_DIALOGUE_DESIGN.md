@@ -833,6 +833,16 @@ En Sofi V5, 🚻 **BAÑO** reemplaza a Cita como outcome máximo sin cambiar los
 
 ---
 
+## Mili V1 — implementada
+
+Mili usa la misma conversación data-driven, sesión social, historial, señales, Consejo y resolver de outcomes que Sofi, pero con una fantasía distinta: **Mili te corre el ritmo**. Es rápida, provocadora y toma iniciativa; la energía, el humor y la respuesta al juego funcionan mejor que la pasividad.
+
+En cada beat, las opciones 1–3 alternan entre buena, amistosa y mala. La opción 4 es siempre **Tambu sin filtro**: puede generar mucha química o pasar a ser cargosa según el historial y la intensidad previa. Sus cuatro outcomes son Baño, Instagram, Friendzone y Rechazo. Cuando resuelve Baño reutiliza el evento genérico `OutcomeEventSystem → BathroomEvent → BathroomResistance`.
+
+El Consejo comparte la lectura social general, pero tiene callbacks propios de las señales de Mili para que Pitity, Eze y Tobi interpreten lo que realmente ocurrió sin arrastrar referencias narrativas de Sofi.
+
+---
+
 # Estado actual
 
 Congelado como base:
@@ -849,6 +859,7 @@ Congelado como base:
 - Tobi;
 - regla anti-repetición;
 - Baño como outcome máximo de Sofi V5;
+- Mili V1 social;
 - tono adulto/no autocensurado del grupo.
 
 Pendiente:
@@ -857,7 +868,6 @@ Pendiente:
 - playtest de rutas;
 - outcomes finales y recompensas si requieren ajuste;
 - alcohol;
-- Mili;
 - Cami;
 - Thiago;
 - Uriel;

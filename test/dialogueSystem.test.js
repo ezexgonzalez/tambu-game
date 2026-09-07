@@ -243,13 +243,16 @@ test('ESC y shutdown descartan presentación; reabrir comienza vacío sin recomp
   assert.ok(h.objects.every(({ destroyed }) => destroyed));
 });
 
-test('Mili conserva su reacción y ESC para cerrar', () => {
+test('Mili inicia su intercambio secuencial y ESC todavía descarta la sesión', () => {
   const h = harness(patioWomen[1]);
   h.open();
   h.frame(10000);
   h.press('ONE');
   h.press('ENTER');
-  assert.equal(h.textAt(433), patioWomen[1].conversation.beats[0].choices[0].reaction);
+  assert.equal(
+    h.textAt(433),
+    patioWomen[1].conversation.beats[0].choices[0].reaction[0].text,
+  );
   h.press('ENTER');
   assert.equal(h.system.getMode(), 'reaction');
   h.press('ESC');

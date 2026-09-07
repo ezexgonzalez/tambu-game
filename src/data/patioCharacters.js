@@ -1,4 +1,5 @@
 import { SOFI_CONVERSATION } from './conversations/sofiConversation.js';
+import { MILI_CONVERSATION } from './conversations/miliConversation.js';
 
 export const patioWomen = [
   {
@@ -15,19 +16,7 @@ export const patioWomen = [
     x: 920,
     y: 350,
     palette: 8,
-    conversation: {
-      initialBeat: 'prototype',
-      beats: [{
-        id: 'prototype',
-        prompt: '¿Vos sos el que llegó recién? Tenés cara de estar pensando demasiado.',
-        choices: [
-          { id: 'one', text: 'Puede ser.', reaction: 'Mmm. Respuesta sospechosa.' },
-          { id: 'two', text: 'Estoy viendo si esta fiesta zafa.', reaction: '¿Y? ¿Zafa o todavía no?' },
-          { id: 'three', text: '¿Y vos siempre arrancás interrogando?', reaction: 'Sí. ¿Te molesta?' },
-          { id: 'four', text: 'No pienso tanto como parece.', reaction: 'Eso lo vamos a comprobar.' },
-        ],
-      }],
-    },
+    conversation: MILI_CONVERSATION,
   },
   {
     id: 'cami',

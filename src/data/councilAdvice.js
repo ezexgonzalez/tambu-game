@@ -17,10 +17,10 @@ export const COUNCIL_CONFIG = {
       rules: [
         {
           id: 'pitity-optimus',
-          priority: 100,
+          priority: 200,
           when: {
             allSituations: ['strong_attraction', 'returned_flirt'],
-            allSignals: ['sofi_returned_flirt', 'tambu_showed_romantic_intent'],
+            allSignals: ['npc_returned_flirt', 'tambu_showed_romantic_intent'],
             historyLength: { gte: 3 },
           },
           lines: [{ id: 'pitity-optimus-line', text: 'Optimus.' }],
@@ -274,4 +274,80 @@ export const COUNCIL_CONFIG = {
       ],
     },
   ],
+};
+
+function miliRecentAdvice(id, signal, text, priority = 160) {
+  return recentAdvice(id, signal, [text], priority);
+}
+
+const MILI_COUNCIL_RULES = {
+  pitity: [
+    miliRecentAdvice('pitity-mili-drink-trust', 'mili_trusted_drink_to_tambu', 'Te dejó el vaso. Confianza inmediata.'),
+    miliRecentAdvice('pitity-mili-friendly', 'mili_called_tambu_educated', 'Cumpliste de mozo.'),
+    miliRecentAdvice('pitity-mili-rude', 'mili_called_tambu_tempered', 'Duró poco el empleo.'),
+    miliRecentAdvice('pitity-mili-claim', 'mili_laughed_at_drink_claim', 'Cuatro segundos y ya robaste.'),
+    miliRecentAdvice('pitity-mili-party-good', 'mili_agreed_on_pool_accident', 'Coincidieron.'),
+    miliRecentAdvice('pitity-mili-party-friendly', 'mili_enjoyed_party_agreement', 'Charla de fiesta.'),
+    miliRecentAdvice('pitity-mili-party-bad', 'mili_declined_to_hold_tambu', 'La bajaste.'),
+    miliRecentAdvice('pitity-mili-chaos', 'mili_played_along_with_chaos', 'Parte del problema.'),
+    miliRecentAdvice('pitity-mili-warning', 'mili_warned_tambu_to_slow_down', 'Bajá medio cambio.'),
+    miliRecentAdvice('pitity-mili-dance-bad', 'mili_called_dancing_boring', 'Te dijo qué embole.'),
+    miliRecentAdvice('pitity-mili-dance-friendly', 'mili_framed_party_companions', 'Compañeros de joda.'),
+    miliRecentAdvice('pitity-mili-challenge', 'mili_returned_challenge', 'Te desafió de vuelta.'),
+    miliRecentAdvice('pitity-mili-dance-tease', 'mili_played_along_with_dance_tease', 'Te la devolvió.'),
+  ],
+  eze: [
+    {
+      id: 'eze-mili-strong-flirt',
+      priority: 210,
+      when: {
+        latestSignals: ['mili_returned_challenge'],
+        allSituations: ['strong_attraction', 'returned_flirt', 'good_balanced_progress'],
+        allSignals: ['npc_returned_flirt', 'tambu_showed_romantic_intent'],
+        historyLength: { eq: 3 },
+      },
+      lines: [
+        { id: 'eze-mili-strong-1', text: 'Na bueno... esta quiere keke.' },
+        { id: 'eze-mili-strong-2', text: 'Está pidiendo keke.' },
+      ],
+    },
+    miliRecentAdvice('eze-mili-drink-trust', 'mili_trusted_drink_to_tambu', 'Te dejó un vaso de la nada y se quedó hablando. Por ahora buena onda, no inventes.'),
+    miliRecentAdvice('eze-mili-friendly', 'mili_called_tambu_educated', 'Todo bien, pero fuiste literalmente un perchero con manos.'),
+    miliRecentAdvice('eze-mili-rude', 'mili_called_tambu_tempered', '“No soy tu mozo mami”. Arrancaste como un pelotudo.'),
+    miliRecentAdvice('eze-mili-claim', 'mili_laughed_at_drink_claim', 'Lo del vaso te lo compró. No empieces a abusar ahora.'),
+    miliRecentAdvice('eze-mili-party-friendly', 'mili_enjoyed_party_agreement', 'Se están cagando de risa de la fiesta. Puede ser solo buena onda.'),
+    miliRecentAdvice('eze-mili-party-bad', 'mili_declined_to_hold_tambu', 'Le dijiste que te querés ir y te dijo que no te retiene. No sé qué querés que te diga.'),
+    miliRecentAdvice('eze-mili-party-good', 'mili_agreed_on_pool_accident', 'Coincidieron hasta en quién se cae a la pileta. Ahí hubo algo, pero calmate.'),
+    miliRecentAdvice('eze-mili-chaos', 'mili_played_along_with_chaos', 'Te siguió lo de ser parte del problema. Ojo.'),
+    miliRecentAdvice('eze-mili-warning', 'mili_warned_tambu_to_slow_down', 'Ya te dijo que bajes medio cambio. Hacelo.'),
+    miliRecentAdvice('eze-mili-dance-bad', 'mili_called_dancing_boring', 'Te dijo “qué embole” en la cara. No necesito analizar mucho.'),
+    miliRecentAdvice('eze-mili-dance-friendly', 'mili_framed_party_companions', 'Se están llevando bien, pero sigue medio compañeros de joda.'),
+    miliRecentAdvice('eze-mili-challenge', 'mili_returned_challenge', 'Esa te la dejó picando.'),
+    miliRecentAdvice('eze-mili-dance-tease', 'mili_played_along_with_dance_tease', 'Te dijo que después te lo hace comprobar. Ojo que ahí hubo algo.'),
+    miliRecentAdvice('eze-mili-overplay', 'mili_disliked_overplay', 'Ya te está diciendo que solo sabés bardear. Aflojá.'),
+  ],
+  tobi: [
+    miliRecentAdvice('tobi-mili-drink-trust', 'mili_trusted_drink_to_tambu', 'Te pidió un favor, se lo hiciste y habló. Seguí.'),
+    miliRecentAdvice('tobi-mili-friendly', 'mili_called_tambu_educated', '¿Viniste a preguntarme porque sostuviste un vaso? Volvé allá.'),
+    miliRecentAdvice('tobi-mili-rude', 'mili_called_tambu_tempered', '“No soy tu mozo mami”. ¿Sos pelotudo?'),
+    miliRecentAdvice('tobi-mili-claim', 'mili_laughed_at_drink_claim', 'Le robaste el vaso cuatro segundos. ¿Y?'),
+    miliRecentAdvice('tobi-mili-party-friendly', 'mili_enjoyed_party_agreement', 'Están hablando de una fiesta. Hacé algo.'),
+    miliRecentAdvice('tobi-mili-party-bad', 'mili_declined_to_hold_tambu', 'Si te querés ir, andate. ¿Entonces para qué le hablás?'),
+    miliRecentAdvice('tobi-mili-party-good', 'mili_agreed_on_pool_accident', 'Se cagó de risa. ¿Qué querés, un certificado?'),
+    miliRecentAdvice('tobi-mili-chaos', 'mili_played_along_with_chaos', 'Bueno, te siguió. No la cagues.'),
+    miliRecentAdvice('tobi-mili-warning', 'mili_warned_tambu_to_slow_down', 'Te dijo bajá medio cambio. Bajalo.'),
+    miliRecentAdvice('tobi-mili-dance-bad', 'mili_called_dancing_boring', 'No bailás ni en pedo y ella te dijo qué embole. Listo.'),
+    miliRecentAdvice('tobi-mili-dance-friendly', 'mili_framed_party_companions', 'Mucho banco, mucha dignidad. ¿Vas a hacer algo?'),
+    miliRecentAdvice('tobi-mili-challenge', 'mili_returned_challenge', '¿Sos pelotudo? Te desafió de vuelta. Hacé algo.'),
+    miliRecentAdvice('tobi-mili-dance-tease', 'mili_played_along_with_dance_tease', 'Te dijo que te lo hace comprobar. Andá.'),
+    miliRecentAdvice('tobi-mili-overplay', 'mili_disliked_overplay', 'Nao, nao... ya estás bardeando de más.'),
+  ],
+};
+
+export const MILI_COUNCIL_CONFIG = {
+  ...COUNCIL_CONFIG,
+  members: COUNCIL_CONFIG.members.map((member) => ({
+    ...member,
+    rules: [...(MILI_COUNCIL_RULES[member.id] ?? []), ...member.rules],
+  })),
 };
