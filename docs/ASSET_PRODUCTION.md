@@ -13,7 +13,7 @@ Al terminar este pack deben estar resueltos:
 - casa/fondo con ventanas y puerta de BAÑO;
 - barra y zona DJ con identidad;
 - props suficientes para que la fiesta se sienta vivida;
-- Tambu con sprite real básico;
+- Tambu integrado como referencia humana de producción;
 - NPC random con variantes modulares;
 - Sofi, Mili y Cami distinguibles;
 - HUD todavía funcional, aunque no definitivo.
@@ -21,12 +21,17 @@ Al terminar este pack deben estar resueltos:
 ## Estándar visual
 
 - Tile base: `16x16 px`.
-- Personaje base: `24x32 px`.
+- Tambu es la unidad humana oficial del juego.
+- Frame fuente de Tambu: `32x48 px`.
+- Escala runtime de Tambu: `1.24`.
+- Envolvente nominal runtime: `39.68x59.52 world px` con cámara `zoom = 1`.
+- El resto de personajes, objetos y arquitectura deben calibrarse contra Tambu; no se debe reescalar a Tambu para hacer encajar assets nuevos.
 - Pixel art limpio, de lectura rápida y detalle medio.
 - Máximo 2–3 tonos principales por material/objeto.
 - `image-rendering: pixelated` siempre activo.
-- Evitar blur, antialias y sombras suaves dentro del arte.
+- Evitar blur y antialias dentro del arte.
 - Las luces y glows se agregan desde Phaser/CSS, no pintados de forma exagerada dentro de los sprites.
+- Consultar `docs/HUMAN_SCALE.md` para cualquier decisión de escala.
 
 ## Qué sigue provisional
 
@@ -105,7 +110,8 @@ Dos frames de agua alternando lentamente.
 - protagonista visual del centro del patio;
 - cian/azul más luminoso que el entorno;
 - reflejos limitados;
-- borde de piedra/baldosa claro.
+- borde de piedra/baldosa claro;
+- escalera, borde y props deben verificarse junto a Tambu a escala runtime real.
 
 ### Reemplaza
 Rectángulos actuales de agua y borde.
@@ -129,7 +135,8 @@ La señal visible debe decir `BAÑO` o usar iconografía reconocible. Nunca `WC`
 ### Reglas
 - pared crema/apagada;
 - ventanas con luz cálida;
-- profundidad simple mediante zócalo y sombra inferior.
+- profundidad simple mediante zócalo y sombra inferior;
+- puertas y elementos arquitectónicos se validan colocando a Tambu delante antes de aprobación.
 
 ---
 
@@ -149,7 +156,8 @@ La señal visible debe decir `BAÑO` o usar iconografía reconocible. Nunca `WC`
 ### Reglas
 - debe leerse como punto de encuentro;
 - botellas de colores variados pero controlados;
-- mantener espacio libre delante para futura interacción.
+- mantener espacio libre delante para futura interacción;
+- altura y profundidad visual del mostrador deben resultar creíbles junto a Tambu.
 
 ---
 
@@ -161,6 +169,10 @@ La señal visible debe decir `BAÑO` o usar iconografía reconocible. Nunca `WC`
 - `speaker_01.png`
 - `speaker_02.png`
 - `party_light_fixture.png`
+
+### Reglas de escala
+- la cabina debe alojar un humano de la escala de Tambu de forma creíble;
+- controladores, parlantes y superficie de trabajo deben mantener lectura humana al tamaño real del juego.
 
 ### Lo que sigue por código
 - haces de luz;
@@ -198,36 +210,51 @@ La señal visible debe decir `BAÑO` o usar iconografía reconocible. Nunca `WC`
 ## Regla de densidad
 No llenar cada tile. Los props se concentran donde naturalmente habría actividad: barra, mesas, piscina y grupos.
 
+## Regla de escala
+Todo prop Tier A o Tier B debe probarse al lado de Tambu antes de aprobarse. Para clutter muy pequeño se conserva primero la legibilidad y luego el realismo literal.
+
 ---
 
 # FASE 3 — Personajes
 
-## 1. Tambu — primero
+## 1. Tambu — referencia cerrada
 
-### Sheet inicial
-`24x32 px` por frame.
+Tambu ya cuenta con sprite de producción y **no debe rehacerse ni reescalarse como parte de este pack**.
 
-### Animaciones mínimas
+### Especificación actual
+
+- frame: `32x48 px`;
+- spritesheet: `96x192 px`;
+- escala runtime: `1.24`;
+- envolvente nominal runtime: `39.68x59.52 world px`;
+- 12 frames / 4 direcciones;
+- fuente de verdad: `src/data/tambuSprite.js`.
+
+### Animaciones actuales
 - idle_down
 - idle_up
 - idle_left
 - idle_right
-- walk_down_1 / walk_down_2
-- walk_up_1 / walk_up_2
-- walk_left_1 / walk_left_2
-- walk_right_1 / walk_right_2
+- walk_down
+- walk_up
+- walk_left
+- walk_right
 
 ### Objetivo
-Que Tambu deje de parecer un placeholder y defina el estándar de proporciones para el resto.
+Usar a Tambu para definir el estándar de proporciones del resto de humanos y del entorno.
 
-### Todavía no
-No buscar parecido facial exacto hasta tener las fotos de referencia.
+### Regla
+Los assets nuevos se adaptan a Tambu. No ajustar su `scale: 1.24` para solucionar problemas de proporción ajenos.
 
 ---
 
 ## 2. NPC random — sistema modular
 
 No diseñar 30 personas a mano.
+
+### Base proporcional
+
+Los NPCs parten de la familia visual y escala humana definida por Tambu. Pueden variar silueta, altura aparente y ancho dentro de márgenes controlados, pero no deben sentirse de otro sistema de escala.
 
 ### Componentes
 
@@ -283,6 +310,9 @@ Más segura/filosa. Diferenciar por pelo, outfit y postura.
 ### Alcance v0.1
 Un idle claro por personaje. Las animaciones de charla vienen después.
 
+### Regla proporcional
+Deben compartir el mismo sistema humano de Tambu; diferenciarlas por diseño, no mediante escalas arbitrarias.
+
 ---
 
 ## 4. Amigos reales
@@ -298,7 +328,7 @@ Orden futuro recomendado cuando lleguen las fotos:
 5. Santy
 6. Eze
 
-Tambu va primero por ser el jugador.
+Tambu permanece como referencia humana para todos.
 
 ---
 
@@ -383,7 +413,7 @@ public/assets/
 5. Barra.
 6. DJ + parlantes.
 7. Props principales.
-8. Tambu real básico.
+8. Validación de escala de todos los assets contra Tambu.
 9. NPC modular v1.
 10. Sofi/Mili/Cami.
 11. Ajuste de iluminación y ambient light.
@@ -399,6 +429,7 @@ El pack se considera exitoso cuando:
 
 - el jugador reconoce instantáneamente una fiesta en patio sin necesitar labels;
 - piscina, barra, DJ y baño tienen identidad propia;
+- todos los objetos importantes se sienten proporcionados para Tambu;
 - Tambu destaca entre NPCs sin romper la estética;
 - los NPC de relleno parecen variados aunque provengan de un sistema modular;
 - los objetos ya no parecen simples rectángulos de prototipo;
