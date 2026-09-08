@@ -61,6 +61,8 @@ export function createDialogueSystem(scene, {
   let session = null;
   let currentOutcome = null;
   let currentCouncilMember = null;
+  let currentCouncilAdvice = null;
+  let councilPhase = 'selection';
   let pendingNextBeat = null;
   let uiElements = null;
   let presentation = null;
@@ -183,6 +185,8 @@ export function createDialogueSystem(scene, {
   function openCouncil() {
     if (!councilIsAvailable()) return;
     currentCouncilMember = null;
+    currentCouncilAdvice = null;
+    councilPhase = 'selection';
     mode = DIALOGUE_MODE.COUNCIL;
     replaceUi(createCouncilSelectionUi(scene, conversation.council.members));
   }
@@ -191,13 +195,23 @@ export function createDialogueSystem(scene, {
     const member = conversation.council.members[index];
     if (!member) return;
     currentCouncilMember = member;
-    const advice = resolveCouncilAdvice(session, member);
-    session = markCouncilUsed(session, advice);
-    replaceUi(createCouncilAdviceUi(scene, member, advice.text));
+    currentCouncilAdvice = resolveCouncilAdvice(session, member);
+    session = markCouncilUsed(session, currentCouncilAdvice);
+    councilPhase = 'advice';
+    replaceUi(createCouncilAdviceUi(scene, member));
+    presentation = createDialoguePresentation([
+      { speaker: member.name, text: currentCouncilAdvice.text },
+      ...(currentCouncilAdvice.tambuReaction
+        ? [{ speaker: 'TAMBU', text: currentCouncilAdvice.tambuReaction }]
+        : []),
+    ]);
+    uiElements.update(presentation.current());
   }
 
   function returnFromCouncil() {
     currentCouncilMember = null;
+    currentCouncilAdvice = null;
+    councilPhase = 'selection';
     pendingNextBeat = null;
     mode = DIALOGUE_MODE.QUESTION;
     renderQuestion(true);
@@ -213,6 +227,8 @@ export function createDialogueSystem(scene, {
     session = null;
     currentOutcome = null;
     currentCouncilMember = null;
+    currentCouncilAdvice = null;
+    councilPhase = 'selection';
     pendingNextBeat = null;
     mode = DIALOGUE_MODE.IDLE;
   }
@@ -257,7 +273,7 @@ export function createDialogueSystem(scene, {
   }
 
   function updateCouncil(input) {
-    if (!currentCouncilMember) {
+    if (councilPhase === 'selection') {
       if (input.escape) {
         returnFromCouncil();
         return;
@@ -269,7 +285,14 @@ export function createDialogueSystem(scene, {
       return;
     }
 
-    if (input.advance) returnFromCouncil();
+    if (!input.advance) return;
+
+    const result = presentation.advance();
+    if (result === 'next') {
+      councilPhase = 'tambu-reaction';
+    } else if (result === 'finished') {
+      returnFromCouncil();
+    }
   }
 
   function updateOutcome(input) {
@@ -310,5 +333,6 @@ export function createDialogueSystem(scene, {
     close: resetDialogue,
     isOpen: () => mode !== DIALOGUE_MODE.IDLE,
     getMode: () => mode,
+    getCouncilPhase: () => (mode === DIALOGUE_MODE.COUNCIL ? councilPhase : null),
   };
 }

@@ -137,24 +137,36 @@ export function createCouncilSelectionUi(scene, members) {
   return [panel, title, subtitle, ...options, help];
 }
 
-export function createCouncilAdviceUi(scene, member, advice) {
+export function createCouncilAdviceUi(scene, member) {
   const panel = createPanel(scene, 640, 590, 900, 200);
   const title = createText(scene, 220, 520, `EL CONSEJO · ${member.name}`, {
     fontSize: '18px',
     color: '#8fd7ff',
     fontStyle: 'bold',
   });
-  const line = createText(scene, 220, 568, `“${advice}”`, {
+  const line = createText(scene, 220, 568, '', {
     fontSize: '18px',
     color: '#f4f4ef',
     wordWrap: { width: 820 },
   });
-  const help = createText(scene, 1060, 660, 'ENTER / SPACE · VOLVER', {
+  const help = createText(scene, 1060, 660, 'ENTER / SPACE · CONTINUAR', {
     fontSize: '12px',
     color: '#8e95a2',
   }).setOrigin(1, 0.5);
 
-  return [panel, title, line, help];
+  return {
+    elements: [panel, title, line, help],
+    update({ entry, text, complete }) {
+      const isTambu = entry?.speaker === 'TAMBU';
+      title.setText(`EL CONSEJO · ${isTambu ? 'TAMBU' : member.name}`);
+      line.setText(`“${text}”`);
+      help.setText(
+        complete && isTambu
+          ? 'ENTER / SPACE · VOLVER'
+          : 'ENTER / SPACE · CONTINUAR',
+      );
+    },
+  };
 }
 
 export function createOutcomeUi(scene, outcome) {

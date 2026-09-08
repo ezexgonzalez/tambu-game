@@ -118,6 +118,39 @@ test('todas las consultas posibles tienen contenido, no mutan sesión y se consu
   }
 });
 
+test('cada línea actual del Consejo tiene una reacción específica de Tambu', () => {
+  for (const currentConversation of [conversation, MILI_CONVERSATION]) {
+    for (const member of currentConversation.council.members) {
+      const lines = [...member.rules.flatMap((rule) => rule.lines), ...member.fallbackLines];
+      for (const line of lines) {
+        assert.equal(typeof line.tambuReaction, 'string', `${member.id}:${line.id}`);
+        assert.ok(line.tambuReaction.length > 0, `${member.id}:${line.id}`);
+      }
+    }
+  }
+});
+
+test('las líneas especiales y las voces de Consejo conservan reacciones coherentes', () => {
+  const optimus = resolveCouncilAdvice(play([1, 2, 1]), pitity);
+  assert.equal(optimus.text, 'Optimus.');
+  assert.equal(optimus.tambuReaction, 'Ah bueno. Listo.');
+  assert.doesNotMatch(optimus.tambuReaction, /entiendo menos|qué significa/i);
+
+  const reportSession = play([3, 3]);
+  reportSession.councilLineHistory = ['pitity-report-2'];
+  const hardy = resolveCouncilAdvice(reportSession, pitity);
+  assert.equal(hardy.text, 'Hardy Kane.');
+  assert.equal(hardy.tambuReaction, '¿Qué mierda significa Hardy Kane, hijo de puta?');
+
+  const ezeAdvice = resolveCouncilAdvice(play([3]), eze);
+  assert.equal(ezeAdvice.text, 'Lo de papi funcionó de pedo. No abuses.');
+  assert.equal(ezeAdvice.tambuReaction, 'No me lo recuerdes.');
+
+  const tobiAdvice = resolveCouncilAdvice(play([3]), tobi);
+  assert.match(tobiAdvice.text, /papi/);
+  assert.equal(typeof tobiAdvice.tambuReaction, 'string');
+});
+
 test('auditoría de todos los pools: sin stats, instrucciones, fallbacks vacíos ni hermano de Eze', () => {
   for (const member of conversation.council.members) {
     const lines = [...member.rules.flatMap((rule) => rule.lines), ...member.fallbackLines];

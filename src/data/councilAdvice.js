@@ -1,3 +1,166 @@
+// Each answer belongs to the exact Council line it follows. Keeping this data next to
+// the advice catalog prevents a generic Tambu response from mismatching an advisor.
+const TAMBU_REACTIONS = {
+  pitity: {
+    'Optimus.': 'Ah bueno. Listo.',
+    'Y la verdad que está bastante hard.': 'Eso sí lo entendí.',
+    'Parece bastante EZ.': 'Bueno, algo entendí.',
+    'Rarillo.': '¿Rarillo qué, boludo?',
+    'Vale...': '¿Vale qué?',
+    'Marketingillo.': 'No empieces vos también.',
+    'Pro.': 'Bueno, te tomo el pro.',
+    'Vale.': '¿Eso era?',
+    'Bastante pro.': 'Bueno, algo bien hice.',
+    'God.': 'Bueno, eso supongo que es bueno.',
+    'Papiillo.': 'No me sigas el juego con eso.',
+    'Está pro.': 'Bueno, me sirve.',
+    'Amiguillos.': 'No me digas amiguillos, la concha de tu madre.',
+    'Hardy Kane.': '¿Qué mierda significa Hardy Kane, hijo de puta?',
+    'Harly Queen.': 'Cada vez entiendo menos.',
+    'Pensadillo.': 'Bueno, ya sé.',
+    'Estás intensillo.': 'Bueno, se entendió.',
+    'Complicadillo.': 'Sí, gracias por el aporte.',
+    'Psicopedagogillo.': 'No existe esa palabra.',
+    '¿Y yo qué sé?': 'Para eso te vine a preguntar.',
+    'Preguntale a ella.': 'Mirá qué consejo revolucionario.',
+    'Me sacaste para esto.': 'Sí, mala decisión mía.',
+    'Y...': 'Gracias por tanto.',
+    'Goood.': 'Listo, te tomo el good.',
+    'Confianzilla.': 'Eso tampoco existe, pero te entiendo.',
+    'Educadillo.': 'Bueno, no exageres.',
+    'Bastante hard.': 'Bueno, tampoco era para tanto.',
+    'Ladroncillo.': 'No me digas ladroncillo.',
+    'Misma neuroncilla.': 'Eso fue lo más lindo que me dijiste.',
+    'Vale, chavales.': 'No somos un stream, boludo.',
+    'Modo chavales.': 'No sé qué significa eso.',
+    'Se puso god.': 'Bueno, entonces voy bien.',
+    'Combete.': 'No sé para qué mierda te pregunto.',
+    'Fulete.': '¿Qué carajo es fulete?',
+    'Hard.': 'Bueno, capaz no bailo.',
+  },
+  eze: {
+    'Ya está boludo, no hagas más.': 'Bueno, tampoco me retires del mercado.',
+    'Venía bien, no la cagues ahora.': 'Bueno, calmate vos también.',
+    'Na bueno... esta quiere keke.': '¿Podés hablar como una persona normal cinco segundos?',
+    'Está pidiendo keke.': 'Bueno, calmate vos también.',
+    'Te preguntó si pasó la selección y sigue con el juego. Ojo, boludo.': 'Eso pensé yo.',
+    'Lo de papi funcionó de pedo. No abuses.': 'No me lo recuerdes.',
+    'Boludo, ahora yo también quiero saber qué versión le llegó.': 'Bueno, entonces no soy el único.',
+    'Te preguntó si hay más de una versión. No le mandes el prontuario entero.': 'Sí, tampoco le voy a entregar un legajo.',
+    'Marketing orgánico, tiraste. Menos mal que no le pasaste un presupuesto.': 'Todavía no me da para facturarle.',
+    'Tu nombre circula, sí. Falta saber qué están contando estos boludos.': 'No me ayudes tanto.',
+    'Te dijo que todavía tenés tiempo. Te está descansando un poco, boludo.': 'Bueno, por ahora no la decepcioné.',
+    'Todavía ni arrancaron y ya pediste no decepcionarla. No te pongas en examen.': 'Bueno, es que vos me hacés dudar.',
+    'Te compró lo de observar. No hace falta demostrarle toda la carrera ahora.': 'No iba a sacar el diploma, boludo.',
+    'Se enganchó con cómo sos con los chicos. Por ahora es eso, no armes una película.': 'Bueno, por eso vine.',
+    'Ojo, te preguntó si ella ya dejó de ser una desconocida. Esa pregunta fue por ella.': 'Eso pensé yo.',
+    'No sé boludo, lo de si ya la conocés sonó bastante personal.': 'Bueno, por eso te vine a preguntar.',
+    'El informe te lo rechazó al toque. No le mandes un PDF después, boludo.': 'No le iba a mandar un PDF, enfermo.',
+    'Le ofreciste diagnosticarla y te siguió hablando. No lo tomes como permiso para atenderla.': 'Estamos hablando de mí, boludo.',
+    'Te dijo agotador. No conviertas la charla en una evaluación, boludo.': 'Bueno, tampoco fue tan grave.',
+    'Lo de que agotás a los demás me consta, boludo. Dejala hablar a ella también.': 'Gracias por levantarme el autoestima.',
+    'Ese “qué conveniente” te lo devolvió. No sé si ya está, pero entendió la indirecta.': 'Bueno, algo entendió entonces.',
+    'Ahora sí se enteró. El “ah...” puede ser varias cosas, no festejes antes de tiempo.': 'Bueno, por lo menos no se hizo la boluda.',
+    'Estás charlando re lindo, pero no sé si se enteró que te la querés levantar.': 'Sí, ya sé. No me des manija tampoco.',
+    'Le dijiste que flasheás cosas y viniste a preguntarme qué flashear. Sos tremendo, boludo.': 'Para esto vine hasta acá.',
+    'Antes te devolvió el juego. Ahora te estás haciendo la cabeza vos, boludo.': 'Bueno, capaz un poco.',
+    'Le hablaste de selección y ahora de flashear cosas. No te armes un juicio solo.': 'Bueno, no me hagas un expediente vos tampoco.',
+    'Te pidió el diagnóstico y le tiraste secreto profesional. Le estás haciendo un trámite, boludo.': 'Bueno, fue un chiste.',
+    'Te siguió el chiste del diagnóstico. No sé si quiere salir con vos o sacarte la matrícula.': 'Vos siempre ayudando una banda.',
+    'Esa te la dejó picando.': 'Eso pensé yo.',
+    'Ojo que ahí hubo algo.': 'Bueno, por eso vine.',
+    'Te preguntó si pasó la selección, boludo. Te siguió el juego.': 'Sí, no me hagas repetirlo.',
+    'Mmm... estás medio modo amigo igual.': 'Bueno, tampoco me tires abajo ahora.',
+    'Se ríe y charla, sí. Con nosotros también hace eso, boludo.': 'Gracias, me re sirvió.',
+    'Por ahora se están llevando bien. Tampoco inventes una película.': 'No inventé nada todavía.',
+    'No sé boludo, hay ida y vuelta. No me hagas firmarte nada.': 'Bueno, tampoco te pedí un contrato.',
+    'No sé boludo, puede ser. Me pedís que adivine y yo también estoy acá mirando.': 'Para eso vine hasta acá.',
+    'Te diría que sí, pero después sale mal y la culpa la tengo yo.': 'Sí, obviamente la culpa va a ser tuya.',
+    'Te dejó un vaso de la nada y se quedó hablando. Por ahora buena onda, no inventes.': 'No inventé nada, vine a chequear.',
+    'Todo bien, pero fuiste literalmente un perchero con manos.': 'Gracias por la descripción.',
+    '“No soy tu mozo mami”. Arrancaste como un pelotudo.': 'Bueno, tampoco era para tanto.',
+    'Lo del vaso te lo compró. No empieces a abusar ahora.': 'No estoy abusando de nada.',
+    'Se están cagando de risa de la fiesta. Puede ser solo buena onda.': 'Sí, ya sé. No me arruines el momento.',
+    'Le dijiste que te querés ir y te dijo que no te retiene. No sé qué querés que te diga.': 'Bueno, capaz no me quería retener.',
+    'Coincidieron hasta en quién se cae a la pileta. Ahí hubo algo, pero calmate.': 'Bueno, calmate vos también.',
+    'Te siguió lo de ser parte del problema. Ojo.': 'Eso pensé yo.',
+    'Ya te dijo que bajes medio cambio. Hacelo.': 'Bueno, se entendió.',
+    'Te dijo “qué embole” en la cara. No necesito analizar mucho.': 'Bueno, tampoco voy a bailar por obligación.',
+    'Se están llevando bien, pero sigue medio compañeros de joda.': 'Bueno, eso ya lo vi.',
+    'Te dijo que después te lo hace comprobar. Ojo que ahí hubo algo.': 'Bueno, por eso vine.',
+    'Ya te está diciendo que solo sabés bardear. Aflojá.': 'Bueno, ya aflojé.',
+  },
+  tobi: {
+    'Nao, nao... ya está. No digas más nada.': 'Bueno, la puta que te parió.',
+    'Ya está. Callate la boca un poco.': 'Bueno, tampoco me retires del mercado.',
+    'Arrancaste diciéndote papi. Ahora bancátela.': 'Bueno, fue una sola vez.',
+    'Para decirle papi no me preguntaste, cagón.': 'Porque sabía que me ibas a romper las pelotas.',
+    'Te hacés el misterioso y venís a preguntarme a mí. Andá.': 'Bueno, ya voy, enfermo.',
+    '¿Ya me viniste a romper las pelotas? Recién arrancaste con el misterio.': 'Era una pregunta nomás, hijo de puta.',
+    '¿Me llamaste para contarme que tenés prensa? Sos pelotudo.': 'Bueno, te pregunté nomás.',
+    'Menos marketing, cagón. Volvé allá.': 'Bueno, ya voy.',
+    'Recién arrancaste, cagón. Todavía no decepcionaste a nadie.': 'Bueno, eso es algo.',
+    'Si seguís viniendo acá a preguntar, la vas a decepcionar por abandono.': 'Bueno, la concha de tu madre, ya voy.',
+    'Nos dejás cansarnos solos, pero a mí me venís a cansar.': 'No sé para qué te pregunto a vos tampoco.',
+    'Listo, sobreviviste. Ahora hablá con ella, cagón.': 'Bueno, ya voy, enfermo.',
+    'Te preguntó si ya la conocés. ¿Entonces para qué me preguntás a mí?': 'Porque vos estabas ahí parado.',
+    'No te pidió un documento, cagón. Seguí conociéndola.': 'Bueno, ya entendí.',
+    '¿Sos pelotudo? Te la acaba de dejar ahí.': 'Era una pregunta nomás, hijo de puta.',
+    'Te preguntó si pasó la selección. ¿Qué estás esperando?': 'Bueno, ya voy.',
+    'Te dijo que no al informe. Guardalo y callate la boca con eso.': 'Bueno, no le voy a hacer un informe.',
+    'Nao, nao... no le hagas una consulta médica en la fiesta.': 'No era una consulta médica, boludo.',
+    'Agotador. Te lo dijo ella, no yo.': 'Bueno, gracias por remarcarlo.',
+    'Lo automático apagalo un rato. Hablale sin hacerle un estudio.': 'Bueno, no soy un robot tampoco.',
+    'Listo, ya se lo dijiste. ¿Entonces para qué preguntás?': 'Bueno, quería saber si quedó raro.',
+    'Ahora bancá lo que dijiste, cagón.': 'Bueno, eso sí.',
+    'Nao, nao... ya estás inventando cualquier cosa. Seguí hablando normal.': 'La puta que te parió.',
+    'Le dijiste que pensás demasiado y viniste a pensar conmigo. Volvé allá.': 'Bueno, no me expongas tanto.',
+    'El diagnóstico guardátelo, cagón. Hablale de vos.': 'Bueno, ya voy.',
+    'Secreto profesional, tiraste. ¿La estás levantando o le estás cobrando?': 'Sos un hijo de puta.',
+    '¿Entonces para qué viniste a hablarle? ¿Para hacer otro amigo?': 'Bueno, tampoco me tires abajo.',
+    'Mucho hablar, cagón. Ni vos te acordás de que te gusta.': 'Sí me acuerdo, boludo.',
+    '¿Qué estás esperando? Hacelo.': 'Bueno, ya voy.',
+    'Te sigue hablando y vos acá. Andá, cagón.': 'Bueno, ya voy, enfermo.',
+    '¿Me llamaste por esto? Andá y hacelo.': 'Bueno, te pregunté nomás.',
+    'Si te quedás acá conmigo, seguro que no pasa nada.': 'Qué tipo servicial.',
+    'Te pidió un favor, se lo hiciste y habló. Seguí.': 'Bueno, ya voy.',
+    '¿Viniste a preguntarme porque sostuviste un vaso? Volvé allá.': 'Bueno, te pregunté nomás.',
+    '“No soy tu mozo mami”. ¿Sos pelotudo?': 'Bueno, tampoco fue tan grave.',
+    'Le robaste el vaso cuatro segundos. ¿Y?': 'Bueno, se rió.',
+    'Están hablando de una fiesta. Hacé algo.': '¿Qué querés que haga, que la case?',
+    'Si te querés ir, andate. ¿Entonces para qué le hablás?': 'Bueno, no me quiero ir tanto.',
+    'Se cagó de risa. ¿Qué querés, un certificado?': 'No, una opinión te pedí.',
+    'Bueno, te siguió. No la cagues.': 'Sí, bueno, no la voy a cagar.',
+    'Te dijo bajá medio cambio. Bajalo.': 'Bueno, se entendió.',
+    'No bailás ni en pedo y ella te dijo qué embole. Listo.': 'Bueno, no era una invitación formal.',
+    'Mucho banco, mucha dignidad. ¿Vas a hacer algo?': 'Bueno, dejame pensar dos segundos.',
+    '¿Sos pelotudo? Te desafió de vuelta. Hacé algo.': 'Bueno, ya voy, enfermo.',
+    'Te dijo que te lo hace comprobar. Andá.': 'Bueno, la concha de tu madre, ya voy.',
+    'Nao, nao... ya estás bardeando de más.': 'Bueno, ya entendí.',
+  },
+};
+
+function addTambuReactions(config) {
+  return {
+    ...config,
+    members: config.members.map((member) => {
+      const withReaction = (line) => ({
+        ...line,
+        tambuReaction: TAMBU_REACTIONS[member.id]?.[line.text],
+      });
+
+      return {
+        ...member,
+        rules: member.rules.map((rule) => ({
+          ...rule,
+          lines: rule.lines.map(withReaction),
+        })),
+        fallbackLines: member.fallbackLines.map(withReaction),
+      };
+    }),
+  };
+}
+
 // Callbacks use only the last choice's emitted signals, never accumulated signals.
 function recentAdvice(id, signal, texts, priority = 110, conditions = {}) {
   return {
@@ -8,7 +171,7 @@ function recentAdvice(id, signal, texts, priority = 110, conditions = {}) {
   };
 }
 
-export const COUNCIL_CONFIG = {
+const BASE_COUNCIL_CONFIG = {
   availableFromBeatIndex: 1,
   members: [
     {
@@ -348,10 +511,12 @@ const MILI_COUNCIL_RULES = {
   ],
 };
 
-export const MILI_COUNCIL_CONFIG = {
-  ...COUNCIL_CONFIG,
-  members: COUNCIL_CONFIG.members.map((member) => ({
+export const COUNCIL_CONFIG = addTambuReactions(BASE_COUNCIL_CONFIG);
+
+export const MILI_COUNCIL_CONFIG = addTambuReactions({
+  ...BASE_COUNCIL_CONFIG,
+  members: BASE_COUNCIL_CONFIG.members.map((member) => ({
     ...member,
     rules: [...(MILI_COUNCIL_RULES[member.id] ?? []), ...member.rules],
   })),
-};
+});

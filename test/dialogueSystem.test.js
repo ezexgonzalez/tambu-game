@@ -107,6 +107,23 @@ function playDialogueRoute(h, route) {
   });
 }
 
+function completeCouncilExchange(h) {
+  assert.equal(h.system.getCouncilPhase(), 'advice');
+  assert.equal(h.textAt(568), '“”');
+  h.press('ENTER');
+  assert.equal(h.system.getCouncilPhase(), 'advice');
+  assert.ok(h.textAt(568).length > 2);
+  h.press('SPACE');
+  assert.equal(h.system.getCouncilPhase(), 'tambu-reaction');
+  assert.equal(h.textAt(520), 'EL CONSEJO · TAMBU');
+  assert.equal(h.textAt(568), '“”');
+  h.press('ENTER');
+  assert.equal(h.system.getCouncilPhase(), 'tambu-reaction');
+  assert.ok(h.textAt(568).length > 2);
+  h.press('SPACE');
+  assert.equal(h.system.getMode(), 'question');
+}
+
 test('prompt bloquea opciones/C y descarta teclas anticipadas, incluso al completarse', () => {
   const h = harness();
   h.open();
@@ -173,8 +190,7 @@ test('reaction + bridge completo, Consejo, outcome/HUD y bloqueo siguen funciona
       assert.equal(h.system.getMode(), 'council');
       h.press('ONE');
       assert.deepEqual(h.state.relationships, {});
-      h.press('ENTER');
-      assert.equal(h.system.getMode(), 'question');
+      completeCouncilExchange(h);
       assert.ok(h.textAt(568));
       h.press('C');
       assert.equal(h.system.getMode(), 'question');
@@ -197,6 +213,66 @@ test('reaction + bridge completo, Consejo, outcome/HUD y bloqueo siguen funciona
   h.open();
   assert.equal(h.system.isOpen(), false);
   assert.deepEqual(h.state, result);
+});
+
+test('Consejo muestra advisor, reacción de Tambu y vuelve a la misma pregunta sin reabrirse', () => {
+  const h = harness();
+  h.open();
+  h.press('ENTER');
+  h.press('ONE');
+  completeSequence(h, normalizeDialogueSequence(
+    patioWomen[0].conversation.beats[0].choices[0],
+    'Sofi',
+  ));
+  h.press('ENTER');
+  const promptBeforeCouncil = h.textAt(510);
+  const stateBeforeCouncil = structuredClone(h.state);
+
+  h.press('C');
+  assert.equal(h.system.getCouncilPhase(), 'selection');
+  h.press('ESC');
+  assert.equal(h.system.getMode(), 'question');
+  assert.equal(h.textAt(510), promptBeforeCouncil);
+  h.press('C');
+  assert.equal(h.system.getCouncilPhase(), 'selection');
+  h.press('ONE');
+  h.press('ENTER');
+  assert.equal(h.textAt(568), '“Rarillo.”');
+  h.press('SPACE');
+  assert.equal(h.textAt(520), 'EL CONSEJO · TAMBU');
+  h.press('ESC');
+  assert.equal(h.system.getMode(), 'council');
+  assert.equal(h.system.getCouncilPhase(), 'tambu-reaction');
+  h.press('ENTER');
+  assert.equal(h.textAt(568), '“¿Rarillo qué, boludo?”');
+  h.press('SPACE');
+
+  assert.equal(h.system.getMode(), 'question');
+  assert.equal(h.textAt(510), promptBeforeCouncil);
+  assert.deepEqual(h.state, stateBeforeCouncil);
+  h.press('C');
+  assert.equal(h.system.getMode(), 'question');
+});
+
+test('Consejo con Mili también inserta la reacción de Tambu sin alterar el diálogo', () => {
+  const h = harness(patioWomen[1]);
+  h.open();
+  h.press('ENTER');
+  h.press('ONE');
+  completeSequence(h, normalizeDialogueSequence(
+    patioWomen[1].conversation.beats[0].choices[0],
+    'Mili',
+  ));
+  h.press('ENTER');
+  const promptBeforeCouncil = h.textAt(510);
+
+  h.press('C');
+  h.press('THREE');
+  completeCouncilExchange(h);
+
+  assert.equal(h.textAt(510), promptBeforeCouncil);
+  h.press('C');
+  assert.equal(h.system.getMode(), 'question');
 });
 
 test('bathroom agrega cierre secuencial y recién después dispara el evento', () => {
