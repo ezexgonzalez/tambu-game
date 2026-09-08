@@ -56,19 +56,19 @@ export const COUNCIL_CONFIG = {
           'Amiguillos.', 'Vale.',
         ], 50),
         recentAdvice('pitity-report', 'sofi_amused_by_psychopedagogy', [
-          'Hardy Kane.', 'Mucho, illo.',
+          'Hardy Kane.', 'Harly Queen.',
         ], 50),
         recentAdvice('pitity-automatic', 'beat3_genuine', [
-          'Pensadillo.', 'Mucho, illo.',
+          'Pensadillo.', 'Estás intensillo.',
         ], 50),
         recentAdvice('pitity-interest', 'beat3_direct_interest', [
           'God.', 'Bastante pro.',
         ], 50),
         recentAdvice('pitity-vulnerable', 'beat3_vulnerable', [
-          'Hardillo.', 'Pensadillo.',
+          'Complicadillo.', 'Pensadillo.',
         ], 50),
         recentAdvice('pitity-diagnosis', 'beat3_diagnosis', [
-          'Diagnostiquillo.', 'Vale...',
+          'Psicopedagogillo.', 'Vale...',
         ], 50),
       ],
       fallbackLines: [
@@ -287,18 +287,18 @@ const MILI_COUNCIL_RULES = {
   pitity: [
     miliRecentAdvice('pitity-mili-drink-trust', 'mili_trusted_drink_to_tambu', ['Goood.', 'Bastante pro.', 'Confianzilla.']),
     miliRecentAdvice('pitity-mili-friendly', 'mili_called_tambu_educated', ['Vale.', 'Educadillo.']),
-    miliRecentAdvice('pitity-mili-rude', 'mili_called_tambu_tempered', ['Hardy Kane.', 'Arranque hardillo.', 'Vale...']),
+    miliRecentAdvice('pitity-mili-rude', 'mili_called_tambu_tempered', ['Hardy Kane.', 'Harly Queen.', 'Bastante hard.', 'Vale...']),
     miliRecentAdvice('pitity-mili-claim', 'mili_laughed_at_drink_claim', ['God.', 'Bastante pro.', 'Ladroncillo.']),
     miliRecentAdvice('pitity-mili-party-good', 'mili_agreed_on_pool_accident', ['Goood.', 'Pro.', 'Misma neuroncilla.']),
     miliRecentAdvice('pitity-mili-party-friendly', 'mili_enjoyed_party_agreement', ['Amiguillos.', 'Vale, chavales.', 'Modo chavales.']),
-    miliRecentAdvice('pitity-mili-party-bad', 'mili_declined_to_hold_tambu', ['Hardy Kane.', 'Entonces andate, illo.', 'Situación hardilla.']),
+    miliRecentAdvice('pitity-mili-party-bad', 'mili_declined_to_hold_tambu', ['Hardy Kane.', 'Harly Queen.', 'Bastante hard.']),
     miliRecentAdvice('pitity-mili-chaos', 'mili_played_along_with_chaos', ['Goood.', 'Está pro.', 'Se puso god.', 'Combete.']),
-    miliRecentAdvice('pitity-mili-warning', 'mili_warned_tambu_to_slow_down', ['Hardy Kane.', 'Estás intensillo.', 'Mucho, illo.']),
-    miliRecentAdvice('pitity-mili-dance-bad', 'mili_called_dancing_boring', ['Hard.', 'Hardy Kane.', 'Qué hardillo.']),
+    miliRecentAdvice('pitity-mili-warning', 'mili_warned_tambu_to_slow_down', ['Hardy Kane.', 'Harly Queen.', 'Estás intensillo.', 'Fulete.']),
+    miliRecentAdvice('pitity-mili-dance-bad', 'mili_called_dancing_boring', ['Hard.', 'Hardy Kane.', 'Harly Queen.']),
     miliRecentAdvice('pitity-mili-dance-friendly', 'mili_framed_party_companions', ['Amiguillos.', 'Modo chavales.']),
     miliRecentAdvice('pitity-mili-challenge', 'mili_returned_challenge', ['God.', 'Bastante pro.']),
     miliRecentAdvice('pitity-mili-dance-tease', 'mili_played_along_with_dance_tease', ['Goood.', 'Pro.', 'Bastante pro.']),
-    miliRecentAdvice('pitity-mili-overplay', 'mili_disliked_overplay', ['Hardy Kane.', 'Mucho, illo.', 'Estás intensillo.', 'Fulete.']),
+    miliRecentAdvice('pitity-mili-overplay', 'mili_disliked_overplay', ['Hardy Kane.', 'Harly Queen.', 'Estás intensillo.', 'Fulete.', 'Bastante hard.']),
   ],
   eze: [
     {

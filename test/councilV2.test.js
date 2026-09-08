@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { SOFI_CONVERSATION as conversation } from '../src/data/conversations/sofiConversation.js';
+import { MILI_CONVERSATION } from '../src/data/conversations/miliConversation.js';
 import { createConversationSession, resolveOutcome } from '../src/systems/socialSystem.js';
 import { getConversationBeat, applyConversationChoice, advanceConversationSession } from '../src/systems/conversationFlow.js';
 import { resolveCouncilAdvice, canUseCouncil, markCouncilUsed } from '../src/systems/councilSystem.js';
@@ -126,6 +127,23 @@ test('auditoría de todos los pools: sin stats, instrucciones, fallbacks vacíos
       if (member.id === 'eze') assert.doesNotMatch(text, /hermano/i);
     }
   }
+});
+
+test('Pitity evita las formas de voz descartadas y conserva veredictos canónicos', () => {
+  const pitityPools = [conversation, MILI_CONVERSATION]
+    .flatMap(({ council }) => {
+      const pitity = council.members.find(({ id }) => id === 'pitity');
+      return [...pitity.rules.flatMap((rule) => rule.lines), ...pitity.fallbackLines];
+    })
+    .map(({ text }) => text);
+
+  pitityPools.forEach((text) => {
+    assert.doesNotMatch(text, /hardill[oa]/i);
+    assert.doesNotMatch(text, /(?:^|[\s,])illo(?:[.!?]|$)/i);
+  });
+  assert.ok(pitityPools.includes('Optimus.'));
+  assert.ok(pitityPools.includes('Parece bastante EZ.'));
+  assert.ok(pitityPools.includes('Y la verdad que está bastante hard.'));
 });
 
 test('consultar a cualquier amigo en cualquier beat conserva las 256 rutas sociales', () => {
