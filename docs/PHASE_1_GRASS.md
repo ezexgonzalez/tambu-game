@@ -1,10 +1,10 @@
 # Tambu Game — Fase 1 / Paso 1: Césped
 
-**Versión:** 1.0  
-**Estado:** candidato visual V1 listo para calibración  
+**Versión:** 1.1  
+**Estado:** candidato visual V3 listo para prueba en contexto  
 **Depende de:** `ART_DIRECTION.md`, `HUMAN_SCALE.md`, `PHASE_1_CALIBRATION.md`
 
-Este documento congela el primer candidato de césped para la muestra de calibración. No se busca un pasto hiper detallado: se busca una masa nocturna tranquila que sostenga a Tambu, piscina, deck, luces y NPCs sin generar ruido visual.
+Este documento define el candidato actual de césped para la muestra de calibración. No se busca un pasto hiper detallado: se busca una masa nocturna tranquila que sostenga a Tambu, piscina, deck, luces y NPCs sin generar ruido visual.
 
 ---
 
@@ -52,18 +52,17 @@ No añadir verdes nuevos durante esta prueba salvo que la revisión en contexto 
 
 ---
 
-# 4. Set V1
+# 4. Set V3
 
 ## `grass_01.png`
 
 Tile dominante.
 
-- base muy calma;
-- pocos clusters de 2–3 px;
-- contraste mínimo;
+- base deliberadamente calma y casi plana;
+- no lleva textura repetitiva interna;
 - diseñado para ocupar aproximadamente `65–75%` del campo.
 
-No debe verse como un tile decorado cuando se repite.
+La prueba V1 mostró que incluso clusters muy pequeños repetidos dentro del tile base forman diagonales visibles al llenar superficies grandes. Por eso el tile dominante queda neutro y la riqueza se construye con variantes agrupadas y composición macro.
 
 ## `grass_02.png`
 
@@ -71,7 +70,7 @@ Variación oscura agrupada.
 
 - pequeños grupos de briznas y masa oscura;
 - nunca dispersarlo en patrón uniforme;
-- usar en clusters de `2–4 tiles`.
+- usar en clusters pequeños o como acento aislado.
 
 Objetivo aproximado: `10–15%`.
 
@@ -86,13 +85,20 @@ Variación algo más luminosa/foliada.
 Objetivo aproximado: `5–10%`.
 
 ## `grass_worn_01.png`
+## `grass_worn_02.png`
+## `grass_worn_03.png`
 
-Pasto desgastado por circulación.
+Tres variantes de pasto desgastado por circulación.
 
-- parche irregular verde-seco;
-- bordes orgánicos pixelados;
-- conserva pequeños rastros de césped;
-- nunca distribuir como ruido aleatorio.
+La prueba inicial con un único `grass_worn_01` repetido produjo manchas reconocibles como copia del mismo sprite. Se amplía el set a tres direcciones/formas para romper esa repetición.
+
+Reglas:
+
+- líneas y manchas verde-seco estrechas, no círculos centrales;
+- bordes pixelados irregulares;
+- conservar césped alrededor;
+- alternar variantes cuando formen una zona transitada;
+- no construir caminos rectos perfectos.
 
 Usar solo cerca de:
 
@@ -112,7 +118,7 @@ La distribución debe ser dirigida por composición:
 - `grass_01`: gran masa continua;
 - `grass_02`: clusters oscuros separados;
 - `grass_03`: pequeños acentos agrupados;
-- `grass_worn_01`: manchas conectadas a circulación.
+- `grass_worn_*`: secuencias cortas ligadas a circulación.
 
 Evitar:
 
@@ -120,24 +126,25 @@ Evitar:
 - alternancia A/B/A/B;
 - colocar una variante cada N tiles;
 - una brizna brillante en todos los módulos;
-- porcentajes exactos que produzcan patrones mecánicos.
+- porcentajes exactos que produzcan patrones mecánicos;
+- repetir la misma variante worn varias veces seguidas.
 
-Los porcentajes son una guía visual, no una regla matemática.
+Los porcentajes son guía visual, no regla matemática.
 
 ---
 
 # 6. Cambio respecto al prototipo actual
 
-El código actual mezcla tiles con una textura procedural dibujada por `Phaser.Graphics`, con tallos y colores colocados regularmente en todo el terreno. Esa capa ayuda al prototipo pero genera ruido y dificulta controlar la dirección visual final.
+El patio actual ya usa tiles reales, pero luego agrega encima `drawGrassTexture()` con `Phaser.Graphics`: parches, tallos y flores distribuidos por bucles. Esa capa fue útil para salir del prototipo plano, pero para esta calibración necesitamos comprobar cuánto material puede resolver el arte por sí mismo.
 
-Para la muestra de calibración:
+Para la muestra:
 
-1. probar primero los cuatro tiles sin `drawGrassTexture()`;
-2. desactivar temporalmente flores y microbriznas procedurales en la zona de muestra;
-3. evaluar si los assets por sí solos producen suficiente material;
-4. reintroducir después solo decoración dirigida que aporte composición.
+1. probar primero el set V3 sin `drawGrassTexture()`;
+2. desactivar temporalmente flores y microbriznas procedurales en la muestra;
+3. revisar el césped junto a Tambu, deck y piscina;
+4. solo después decidir qué macrovariación o decoración dirigida vuelve como capa separada.
 
-No eliminar todavía el sistema del patio completo hasta aprobar la calibración.
+No eliminar todavía `drawGrassTexture()` del patio completo hasta aprobar la calibración.
 
 ---
 
@@ -147,36 +154,42 @@ A `zoom = 1`:
 
 - [ ] Tambu destaca inmediatamente sobre el césped;
 - [ ] no se percibe una grilla de `16x16`;
-- [ ] `grass_01` no parece repetirse de forma obvia;
+- [ ] `grass_01` no delata repetición;
 - [ ] los clusters secundarios se leen como variación natural;
-- [ ] la zona gastada parece uso del espacio y no tierra aleatoria;
+- [ ] la zona gastada parece uso del espacio y no un patrón copiado;
 - [ ] el fondo no vibra ni roba atención;
 - [ ] los colores conservan suficiente rango para recibir ambient nocturno;
 - [ ] el set puede extenderse por todo el patio sin requerir decenas de tiles únicos.
+
+Importante: el césped NO se aprueba por verse espectacular aislado. Se aprueba por funcionar dentro de la muestra completa. Si al sumar deck/piscina/luces queda excesivamente plano, se agrega una capa macro de variación; no se vuelve a llenar cada tile de ruido.
 
 ---
 
 # 8. Producción reproducible
 
-El repo incluye `tools/generate_grass_v1.py`, que genera de forma determinista este candidato:
+El repo incluye `tools/generate_grass_v1.py`, que genera de forma determinista el candidato actual:
 
 - `grass_01.png`;
 - `grass_02.png`;
 - `grass_03.png`;
 - `grass_worn_01.png`;
-- un campo de prueba `384x256`.
+- `grass_worn_02.png`;
+- `grass_worn_03.png`;
+- campo de prueba `384x256`.
 
-El script es una herramienta de calibración. Si el candidato se aprueba, los PNG generados pueden convertirse en assets de producción y el patrón puede ajustarse manualmente sin obligación de mantener generación procedural.
+El script es una herramienta de calibración. Si el candidato se aprueba, los PNG generados pueden convertirse en assets de producción y luego ajustarse manualmente sin obligación de mantener generación procedural.
 
 ---
 
 # 9. Próximo gate
 
-Antes de pasar al deck, este candidato debe verse:
+El tratamiento base ya está suficientemente definido para incorporarlo a la muestra, pero todavía NO queda congelado como arte final.
 
-1. aislado a resolución nativa;
-2. repetido en un campo `384x256`;
-3. con Tambu real encima;
-4. sin textura procedural adicional.
+Siguiente paso:
 
-Si funciona, se congela el tratamiento del césped y se pasa a **Deck + edge**.
+1. colocar Tambu real sobre el campo;
+2. sumar **Deck + edge**;
+3. revisar juntos el balance de detalle;
+4. si sigue funcionando, avanzar a borde/agua de piscina.
+
+La evaluación del césped se mantiene abierta hasta verlo acompañado por esos materiales.
