@@ -1,10 +1,12 @@
 # Tambu Game — Dirección de Arte
 
-**Versión:** 1.0  
+**Versión:** 1.1  
 **Estado:** FASE 0 — baseline visual definida  
 **Scope actual:** V1 · La fiesta / Patio  
 
 Este documento fija la dirección visual que debe guiar la producción de arte del patio. No define el layout jugable ni reemplaza `ASSET_PRODUCTION.md`: este archivo define **cómo debe verse y sentirse el juego**; `ASSET_PRODUCTION.md` define **qué assets producir y en qué orden**.
+
+La escala humana tiene una fuente específica: `docs/HUMAN_SCALE.md`. Si otra nota antigua contradice las medidas de Tambu, prevalecen `src/data/tambuSprite.js` y `HUMAN_SCALE.md`.
 
 Si una decisión de arte futura hace que un objeto se vea más detallado pero rompe esta dirección, la dirección visual tiene prioridad.
 
@@ -44,7 +46,7 @@ Se conserva:
 - barra en el sector derecho;
 - casa/deck en la franja superior;
 - circulación principal alrededor de la piscina;
-- escala general de Tambu;
+- escala actual de Tambu;
 - zonas de interacción existentes;
 - colisiones y lectura jugable del espacio.
 
@@ -71,11 +73,31 @@ Se pueden mejorar formas, materiales, bordes, decoración, iluminación, props y
 
 ## Base técnica
 
-- Tile base: `16x16 px`.
-- Personaje base: `24x32 px` por frame.
-- Arte producido a resolución nativa y escalado con nearest-neighbor / integer scale.
-- `image-rendering: pixelated` siempre activo.
-- Evitar escalas fraccionarias en sprites importantes.
+- Tile base del entorno: `16x16 px`.
+- Tambu es la **unidad humana oficial**.
+- Frame fuente de Tambu: `32x48 px`.
+- Escala actual de Tambu en runtime: `1.24`.
+- Envolvente nominal de su frame en runtime: `39.68x59.52 world px`.
+- Cámara principal actual: `zoom = 1`.
+- Relación nominal con tile: `2.48 tiles` de ancho por `3.72 tiles` de alto.
+- Sprites y tiles se producen sin antialias y se renderizan con `image-rendering: pixelated`.
+- La escala `1.24` de Tambu es una decisión ya estabilizada: **no se modifica para acomodar assets nuevos**.
+- Para nuevos assets conviene autorar lo más cerca posible del tamaño final, pero la prioridad es que se vean proporcionados junto a Tambu.
+
+## Escala humana oficial
+
+Para producción se define:
+
+- `1H = 59.52 world px` → alto nominal del frame de Tambu en runtime.
+- `1W = 39.68 world px` → ancho nominal del frame de Tambu en runtime.
+
+`H` es una unidad de comparación visual, no una conversión literal a metros.
+
+Todo Tier A o Tier B que represente un objeto de escala humana debe probarse junto a Tambu antes de aprobarse: puertas, mesas, barra, DJ booth, parlantes, sillas, cooler, escalera y borde de piscina, etc.
+
+La prueba debe hacerse **con Tambu a su escala real de runtime**, nunca reescalando una copia para hacer coincidir el objeto.
+
+Ver especificación completa en `docs/HUMAN_SCALE.md`.
 
 ## Complejidad tonal
 
@@ -104,7 +126,7 @@ Los assets importantes reciben más contraste, volumen, animación o luz. Los se
 
 # 5. Paleta base
 
-Estos colores son una **familia objetivo**, no una obligación de usar un único valor exacto en cada sprite. Las variantes deben mantenerse cerca de este lenguaje.
+Estos colores son una **familia objetivo**, no una obligación de usar un único valor exacto en cada sprite.
 
 ## Noche / sombras
 
@@ -135,7 +157,6 @@ El césped debe verse orgánico, pero no moteado. La variación principal debe a
 - Piedra sombra: `#8E8A84`
 - Piedra base: `#B8B2A9`
 - Piedra luz: `#D7D0C4`
-
 - Pared crema apagada: `#C9C1B5`
 - Pared sombra: `#9E978F`
 
@@ -173,42 +194,40 @@ La iluminación es parte central de la identidad del juego.
 
 El patio debe tener una base nocturna fría y fuentes locales cálidas o de color. La escena no debe ser simplemente “oscura”; debe tener contraste entre zonas tranquilas y zonas activas.
 
-## Fuentes principales
+## Piscina
 
-### Piscina
+- luz fría/cian;
+- puntos de luz subacuática o reflejos localizados;
+- leve contaminación azul sobre el borde cercano;
+- movimiento visual incluso cuando Tambu está quieto.
 
-- Luz fría/cian.
-- Puntos de luz subacuática o reflejos localizados.
-- Borde cercano puede recibir una leve contaminación azul.
-- El agua debe tener movimiento visual incluso cuando el jugador está quieto.
+## Casa / deck
 
-### Casa / deck
+- apliques y ventanas cálidas;
+- luz contenida, doméstica, no teatral;
+- separación clara de la arquitectura respecto del fondo nocturno.
 
-- Apliques y ventanas cálidas.
-- Luz contenida, doméstica, no teatral.
-- Ayuda a separar la arquitectura del fondo nocturno.
+## Barra
 
-### Barra
+- identidad cálida con acento magenta/violeta controlado;
+- botellas y estantes pueden recibir backlight;
+- debe verse como punto social sin competir con la piscina.
 
-- Identidad cálida con acento magenta/violeta controlado.
-- Botellas y estantes pueden recibir backlight.
-- Debe verse como punto social sin competir con la piscina.
+## DJ
 
-### DJ
+- violeta/azul;
+- mayor energía visual que el resto del mapa;
+- pulsos, focos o haces sutiles por código;
+- no inundar todo el césped con color.
 
-- Violeta/azul.
-- Mayor energía visual que el resto del mapa.
-- Pulsos, focos o haces sutiles pueden resolverse por código.
-- No inundar todo el césped con color.
+## Guirnaldas y mesas
 
-### Guirnaldas y mesas
-
-- Halos pequeños y localizados.
-- Las bombitas de colores deben sentirse como puntos de luz, no como píxeles decorativos pegados a un cable.
+- halos pequeños y localizados;
+- las bombitas deben sentirse como fuentes de luz y no como píxeles pegados a un cable.
 
 ## Implementación
 
-Dentro de los sprites:
+Dentro de sprites:
 
 - sombras de contacto;
 - highlights duros y pixelados;
@@ -219,9 +238,9 @@ Por Phaser/CSS:
 - ambient tint;
 - glows suaves;
 - additive blend puntual;
-- pulsos de luces;
+- pulsos;
 - haces;
-- cambios sutiles de intensidad;
+- variaciones sutiles de intensidad;
 - partículas.
 
 **No hornear grandes halos borrosos dentro del PNG.**
@@ -294,14 +313,7 @@ Cada superficie debe poder identificarse incluso sin iluminación especial.
 - Tambu;
 - NPCs principales.
 
-Pueden tener:
-
-- más detalle;
-- 3–4 niveles tonales;
-- animación;
-- luz propia;
-- props integrados;
-- silueta única.
+Pueden tener más detalle, 3–4 niveles tonales, animación, luz propia, props integrados y silueta única.
 
 ## Tier B — Soporte visual
 
@@ -332,7 +344,7 @@ Su función es contar historia y romper repetición. Nunca deben convertirse en 
 
 Más vida no significa llenar cada espacio vacío.
 
-## Zonas de alta densidad
+## Alta densidad
 
 - barra;
 - DJ;
@@ -340,13 +352,13 @@ Más vida no significa llenar cada espacio vacío.
 - mesas;
 - esquinas decorativas.
 
-## Zonas de densidad media
+## Densidad media
 
 - laterales de piscina;
 - grupos de NPCs;
 - transición deck/césped.
 
-## Zonas que necesitan aire
+## Necesitan aire
 
 - circulación inmediata de Tambu;
 - frente de NPCs interactuables;
@@ -354,7 +366,7 @@ Más vida no significa llenar cada espacio vacío.
 - bordes jugables de piscina;
 - recorridos entre puntos de interés.
 
-El espacio negativo es parte del diseño. Sirve para mover al jugador y también para hacer que los grupos sociales sean legibles.
+El espacio negativo es parte del diseño. Sirve para mover al jugador y para hacer que los grupos sociales sean legibles.
 
 ---
 
@@ -362,12 +374,13 @@ El espacio negativo es parte del diseño. Sirve para mover al jugador y también
 
 Los personajes deben pertenecer al mismo mundo visual que los props.
 
-- Mantener `24x32 px` como estándar actual.
-- No aumentar detalle facial por encima de lo que soporta esa escala.
+- Tambu mantiene su frame fuente `32x48 px` y `scale: 1.24`.
+- No aumentar detalle facial por encima de lo que soporta esta escala.
 - Priorizar peinado, outfit, silueta y postura para distinguir personas.
 - Tambu debe destacar sin parecer de otro juego.
 - NPCs random pueden ser más simples que personajes interactuables.
 - Los personajes importantes pueden recibir 1–2 detalles identificatorios adicionales.
+- No usar cambios arbitrarios de escala para comunicar edad, personalidad o importancia narrativa.
 
 Todos los personajes deben tener sombra de contacto consistente.
 
@@ -411,6 +424,8 @@ La UI final no queda congelada en esta fase; solo queda fijada su relación est�
 - aumentar detalle solo por aumentar detalle;
 - sprites con perspectivas distintas;
 - escalas inconsistentes;
+- reescalar a Tambu para adaptar otro asset;
+- aprobar mobiliario o arquitectura sin compararlo con Tambu;
 - antialias en assets;
 - objetos con bordes excesivamente negros;
 - césped con checker o ruido repetitivo;
@@ -431,16 +446,18 @@ No producir un asset final solo a partir de un prompt.
 
 Para Tier A y Tier B:
 
-1. **Definir función** — qué hace y por qué existe en la escena.
-2. **Definir footprint** — tamaño, colisión y espacio jugable.
-3. **Referencia / exploración** — IA, boceto o referencias visuales pueden proponer dirección.
-4. **Diseño aislado** — trabajar el objeto fuera del mapa.
-5. **Normalización** — perspectiva, escala, paleta, bordes y nivel de detalle.
-6. **Integración** — colocarlo en el patio real.
-7. **Iluminación / sombra** — resolver contacto y fuente local.
-8. **Revisión en contexto** — comprobar jerarquía y lectura jugable.
-9. **Variantes** — solo cuando la repetición lo justifique.
-10. **Aprobación** — recién entonces se considera asset reutilizable.
+1. **Definir función** — qué hace y por qué existe.
+2. **Definir footprint** — tamaño, colisión y espacio jugable actual.
+3. **Calibrar con Tambu** — colocar la silueta/frame real de Tambu al lado y determinar proporción objetivo.
+4. **Referencia / exploración** — IA, boceto o referencias visuales pueden proponer dirección.
+5. **Diseño aislado** — trabajar el objeto fuera del mapa.
+6. **Normalización** — perspectiva, escala, paleta, bordes y detalle.
+7. **Prueba con Tambu** — asset + Tambu a escala runtime real.
+8. **Integración** — colocarlo en el patio real.
+9. **Iluminación / sombra** — resolver contacto y fuente local.
+10. **Revisión en contexto** — comprobar jerarquía, escala y lectura jugable.
+11. **Variantes** — solo cuando la repetición lo justifique.
+12. **Aprobación** — recién entonces se considera reutilizable.
 
 La IA es una herramienta de exploración y producción asistida. La dirección de arte y la integración siguen siendo decisiones del juego.
 
@@ -448,7 +465,7 @@ La IA es una herramienta de exploración y producción asistida. La dirección d
 
 # 15. Gate visual antes de producir todo el patio
 
-Antes de rehacer decenas de assets, se debe construir y aprobar una **muestra de calibración** con:
+Antes de rehacer decenas de assets se debe construir y aprobar una **muestra de calibración** con:
 
 - césped final candidate;
 - un tramo de deck;
@@ -456,28 +473,30 @@ Antes de rehacer decenas de assets, se debe construir y aprobar una **muestra de
 - una luz cálida;
 - una fuente fría/cian;
 - una planta o prop Tier B;
-- Tambu colocado encima para comprobar escala.
+- **Tambu real colocado a `scale: 1.24`, sin ninguna modificación de escala**.
 
-Esta pequeña muestra debe validar simultáneamente:
+La muestra debe validar simultáneamente:
 
 - paleta;
 - perspectiva;
 - materiales;
 - contraste;
-- escala;
+- escala humana;
 - sombra;
 - comportamiento de iluminación.
 
-Si esta muestra no funciona, se corrige antes de producir la barra, DJ y resto del set.
+Si esta muestra no funciona, se corrige antes de producir barra, DJ y resto del set.
 
 ---
 
 # 16. Criterios de aprobación de la dirección
 
-La Fase 0 se considera correctamente aplicada cuando una producción futura puede responder con claridad estas preguntas:
+La Fase 0 se considera correctamente aplicada cuando una producción futura puede responder con claridad:
 
 - ¿qué nivel de detalle corresponde a este objeto?;
-- ¿qué perspectiva y escala debe usar?;
+- ¿qué perspectiva debe usar?;
+- ¿qué tamaño tiene al lado de Tambu?;
+- ¿su footprint actual sigue siendo razonable?;
 - ¿qué paleta le pertenece?;
 - ¿cómo recibe o emite luz?;
 - ¿qué importancia tiene dentro del mapa?;
@@ -496,7 +515,8 @@ Al completar las fases posteriores usando esta dirección, el patio debe:
 - sentirse más vivo mediante composición, props, NPCs y animación ambiental;
 - mantener caminos y colisiones legibles;
 - verse coherente incluso sin UI;
-- conservar la identidad y el layout jugable actual.
+- conservar la identidad y el layout jugable actual;
+- mantener proporciones creíbles respecto de Tambu en todos los objetos humanos.
 
 ---
 
@@ -508,6 +528,7 @@ Con esta baseline definida, el siguiente trabajo visual es construir la **muestr
 2. borde de piscina;
 3. agua;
 4. deck;
-5. iluminación cálida/fría de prueba.
+5. iluminación cálida/fría de prueba;
+6. Tambu real como referencia de escala.
 
 No comenzar todavía una reconstrucción completa de barra, DJ o NPCs hasta validar esa muestra.
