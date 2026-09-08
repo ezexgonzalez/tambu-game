@@ -6,6 +6,7 @@ import {
   advanceConversationSession,
   applyConversationChoice,
   getConversationBeat,
+  resolveBeatPrompt,
 } from '../src/systems/conversationFlow.js';
 import { resolveCouncilAdvice } from '../src/systems/councilSystem.js';
 import { createConversationSession, resolveOutcome } from '../src/systems/socialSystem.js';
@@ -67,6 +68,26 @@ test('dos opciones Tambu seguidas activan la advertencia contextual de Mili', ()
   assert.equal(result.presentation.variantId, 'already-accelerated');
   assert.ok(result.session.signals.includes('mili_warned_tambu_to_slow_down'));
   assert.deepEqual(result.session.stats, { attraction: 10, trust: 3, intensity: 12 });
+});
+
+test('los prompts de Mili reconocen las elecciones inmediatamente anteriores', () => {
+  const beat2 = getConversationBeat(MILI_CONVERSATION, 'beat-2');
+  const beat3 = getConversationBeat(MILI_CONVERSATION, 'beat-3');
+  const beat4 = getConversationBeat(MILI_CONVERSATION, 'beat-4');
+
+  assert.match(resolveBeatPrompt(beat2, playMili([2]).session), /no soy tu mozo/);
+  assert.match(resolveBeatPrompt(beat3, playMili([0, 1]).session), /mientras decidís si te escapás/);
+  assert.match(resolveBeatPrompt(beat4, playMili([0, 0, 0]).session), /bailar claramente no es lo tuyo/);
+});
+
+test('los prompts distinguen el caos y la burla de Mili según su variante contextual', () => {
+  const beat3 = getConversationBeat(MILI_CONVERSATION, 'beat-3');
+  const beat4 = getConversationBeat(MILI_CONVERSATION, 'beat-4');
+
+  assert.match(resolveBeatPrompt(beat3, playMili([0, 3]).session), /señor caos/);
+  assert.match(resolveBeatPrompt(beat3, playMili([3, 3]).session), /Antes de que aceleres otra cosa/);
+  assert.match(resolveBeatPrompt(beat4, playMili([0, 0, 3]).session), /Bastante confianza agarraste/);
+  assert.match(resolveBeatPrompt(beat4, playMili([3, 3, 3]).session), /cuando no estás bardeando/);
 });
 
 test('la burla del Beat 3 responde al contexto intenso o a una advertencia previa', () => {

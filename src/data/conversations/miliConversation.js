@@ -64,6 +64,24 @@ export const MILI_CONVERSATION = {
     {
       id: 'beat-2',
       prompt: 'Esta fiesta está rara. No sé si está buenísima o si dentro de veinte minutos se cagan todos a piñas.',
+      promptVariants: [
+        {
+          when: { allChoices: ['beat-1:drink-trust'] },
+          prompt: 'Bueno, por ahora aprobaste el sistema de seguridad.\n\nIgual esta fiesta está rara. No sé si está buenísima o si dentro de veinte minutos se cagan todos a piñas.',
+        },
+        {
+          when: { allChoices: ['beat-1:help-friendly'] },
+          prompt: 'Gracias igual.\n\nEsta fiesta está rara. No sé si está buenísima o si dentro de veinte minutos se cagan todos a piñas.',
+        },
+        {
+          when: { allChoices: ['beat-1:not-your-waiter'] },
+          prompt: 'Bueno, señor “no soy tu mozo”...\n\nEsta fiesta está rara. No sé si está buenísima o si dentro de veinte minutos se cagan todos a piñas.',
+        },
+        {
+          when: { allChoices: ['beat-1:claim-drink'] },
+          prompt: 'Bueno, ladrón de vasos...\n\nEsta fiesta está rara. No sé si está buenísima o si dentro de veinte minutos se cagan todos a piñas.',
+        },
+      ],
       nextBeat: 'beat-3',
       choices: [
         {
@@ -132,6 +150,31 @@ export const MILI_CONVERSATION = {
     {
       id: 'beat-3',
       prompt: 'Mirá esos dos. Están bailando horrible pero con una confianza espectacular.\n\nEso es mucho más importante que bailar bien.',
+      promptVariants: [
+        {
+          when: {
+            allChoices: ['beat-2:accelerate-chaos'],
+            allSignals: ['mili_warned_tambu_to_slow_down'],
+          },
+          prompt: 'Antes de que aceleres otra cosa, mirá esos dos. Están bailando horrible pero con una confianza espectacular.\n\nEso es mucho más importante que bailar bien.',
+        },
+        {
+          when: { allChoices: ['beat-2:both-can-happen'] },
+          prompt: 'Igual mirá esos dos. Están bailando horrible pero con una confianza espectacular.\n\nEso es mucho más importante que bailar bien.',
+        },
+        {
+          when: { allChoices: ['beat-2:thinking-of-leaving'] },
+          prompt: 'Bueno... mientras decidís si te escapás, mirá esos dos. Están bailando horrible pero con una confianza espectacular.\n\nEso es mucho más importante que bailar bien.',
+        },
+        {
+          when: { allChoices: ['beat-2:pool-accident'] },
+          prompt: 'JAJA. Igual pará, mirá esos dos. Están bailando horrible pero con una confianza espectacular.\n\nEso es mucho más importante que bailar bien.',
+        },
+        {
+          when: { allChoices: ['beat-2:accelerate-chaos'] },
+          prompt: 'Bueno, señor caos, mirá esos dos. Están bailando horrible pero con una confianza espectacular.\n\nEso es mucho más importante que bailar bien.',
+        },
+      ],
       nextBeat: 'beat-4',
       choices: [
         {
@@ -225,6 +268,27 @@ export const MILI_CONVERSATION = {
     {
       id: 'beat-4',
       prompt: 'Igual para ser un tipo al que le encajé un vaso porque sí, resultaste bastante entretenido.',
+      promptVariants: [
+        {
+          when: {
+            allChoices: ['beat-3:you-cant-dance'],
+            allSignals: ['mili_disliked_overplay'],
+          },
+          prompt: 'Igual... cuando no estás bardeando, sos bastante entretenido.',
+        },
+        {
+          when: { allChoices: ['beat-3:never-dance'] },
+          prompt: 'Bueno... bailar claramente no es lo tuyo.\n\nIgual, para ser un tipo al que le encajé un vaso porque sí, resultaste bastante entretenido.',
+        },
+        {
+          when: { allChoices: ['beat-3:prove-it'] },
+          prompt: 'Mirá vos... arrancaste sosteniéndome un vaso y ahora me estás desafiando.\n\nTe fuiste soltando bastante.',
+        },
+        {
+          when: { allChoices: ['beat-3:you-cant-dance'] },
+          prompt: 'Primero me robás el vaso y ahora me bardeás cómo bailo.\n\nBastante confianza agarraste.',
+        },
+      ],
       choices: [
         {
           id: 'not-bad-either',
