@@ -1,0 +1,513 @@
+# Tambu Game — Dirección de Arte
+
+**Versión:** 1.0  
+**Estado:** FASE 0 — baseline visual definida  
+**Scope actual:** V1 · La fiesta / Patio  
+
+Este documento fija la dirección visual que debe guiar la producción de arte del patio. No define el layout jugable ni reemplaza `ASSET_PRODUCTION.md`: este archivo define **cómo debe verse y sentirse el juego**; `ASSET_PRODUCTION.md` define **qué assets producir y en qué orden**.
+
+Si una decisión de arte futura hace que un objeto se vea más detallado pero rompe esta dirección, la dirección visual tiene prioridad.
+
+---
+
+# 1. Objetivo visual
+
+Tambu Game debe pasar de un prototipo funcional a un **pixel-art 2D moderno, nocturno, social y atmosférico**, con suficiente detalle para que el patio se sienta como un lugar real preparado para una fiesta.
+
+La referencia de calidad no debe copiarse 1:1. Se toma como objetivo por:
+
+- mejor iluminación nocturna;
+- objetos con volumen y materiales legibles;
+- mayor riqueza ambiental;
+- mejor jerarquía visual;
+- sensación de mundo vivo;
+- coherencia entre escenario, personajes y props.
+
+La escena final debe sentirse como un videojuego indie cuidado, no como formas geométricas con decoración encima y tampoco como una ilustración difícil de convertir en gameplay.
+
+## Fantasía visual
+
+> Una noche agradable de verano en el patio de una casa, con una fiesta suficientemente linda como para querer recorrerla, pero suficientemente íntima como para que cada grupo, conversación y rincón tenga personalidad.
+
+La fiesta no es una rave ni un boliche. La energía viene de la gente, la música, el agua, las luces y pequeños focos sociales.
+
+---
+
+# 2. Restricciones que NO se rompen
+
+La mejora visual no puede rediseñar el mapa jugable.
+
+Se conserva:
+
+- piscina como centro físico y visual;
+- DJ en el sector izquierdo;
+- barra en el sector derecho;
+- casa/deck en la franja superior;
+- circulación principal alrededor de la piscina;
+- escala general de Tambu;
+- zonas de interacción existentes;
+- colisiones y lectura jugable del espacio.
+
+Se pueden mejorar formas, materiales, bordes, decoración, iluminación, props y microcomposición sin cambiar el macro-layout.
+
+**Regla:** el arte se adapta al juego. El juego no debe romperse para acomodar una imagen bonita.
+
+---
+
+# 3. Lenguaje visual
+
+## Estilo
+
+- Pixel art moderno.
+- Vista top-down / 3/4 superior coherente en todo el escenario.
+- Lectura rápida de silueta.
+- Detalle medio-alto en assets protagonistas.
+- Detalle medio en props secundarios.
+- Detalle bajo y controlado en clutter.
+- Bordes y sombras definidos; evitar aspecto vectorial.
+- Nada de antialias dentro de los sprites.
+- Nada de texturas fotográficas.
+- Nada de ruido de un píxel distribuido al azar para simular detalle.
+
+## Base técnica
+
+- Tile base: `16x16 px`.
+- Personaje base: `24x32 px` por frame.
+- Arte producido a resolución nativa y escalado con nearest-neighbor / integer scale.
+- `image-rendering: pixelated` siempre activo.
+- Evitar escalas fraccionarias en sprites importantes.
+
+## Complejidad tonal
+
+- Props normales: 2–3 tonos principales por material.
+- Assets protagonistas: pueden sumar 1 tono de highlight/acento cuando ayude a volumen o iluminación.
+- Las variaciones de color deben describir forma o material, no decorar por decorar.
+
+---
+
+# 4. Jerarquía visual del patio
+
+El jugador debe entender el escenario en este orden aproximado:
+
+1. **Piscina** — protagonista visual y centro de composición.
+2. **Tambu y NPCs interactuables** — lectura inmediata sobre el entorno.
+3. **Barra y DJ** — dos focos laterales con identidades distintas.
+4. **Grupos sociales / amigos / chicas**.
+5. **Casa y deck superior** — marco arquitectónico de la escena.
+6. **Props y clutter** — enriquecen sin competir.
+
+No todos los elementos pueden tener el mismo contraste.
+
+Los assets importantes reciben más contraste, volumen, animación o luz. Los secundarios sostienen la escena. El clutter debe desaparecer visualmente cuando se mira el mapa de lejos.
+
+---
+
+# 5. Paleta base
+
+Estos colores son una **familia objetivo**, no una obligación de usar un único valor exacto en cada sprite. Las variantes deben mantenerse cerca de este lenguaje.
+
+## Noche / sombras
+
+- Sombra profunda: `#111827`
+- Sombra azul: `#18243A`
+- Azul ambiente: `#22304A`
+
+Evitar usar negro puro como sombra general del mundo. El negro puede reservarse para oclusión fuerte, UI y pequeños huecos.
+
+## Césped
+
+- Verde oscuro: `#21432D`
+- Verde medio: `#2F5A38`
+- Verde luz: `#487348`
+- Detalle seco opcional: `#697047`
+
+El césped debe verse orgánico, pero no moteado. La variación principal debe aparecer en parches y tiles alternativos, no como checker repetitivo.
+
+## Madera / deck
+
+- Marrón sombra: `#4A3027`
+- Marrón base: `#6A4531`
+- Marrón luz: `#8A5B3A`
+- Highlight cálido excepcional: `#B07A4C`
+
+## Casa / piedra / borde de piscina
+
+- Piedra sombra: `#8E8A84`
+- Piedra base: `#B8B2A9`
+- Piedra luz: `#D7D0C4`
+
+- Pared crema apagada: `#C9C1B5`
+- Pared sombra: `#9E978F`
+
+## Agua
+
+- Profundo: `#12627A`
+- Base: `#1688A5`
+- Luz: `#39B8D2`
+- Brillo: `#8BE7EF`
+
+El agua puede ser el material más luminoso del escenario sin volverse fluorescente en toda su superficie.
+
+## Iluminación cálida
+
+- Núcleo: `#FFF0B0`
+- Luz cálida: `#FFD36A`
+- Ámbar: `#E89A45`
+
+## Acentos de fiesta
+
+- Violeta DJ: `#A25BFF`
+- Magenta: `#F05AA6`
+- Cian: `#53D8F2`
+- Azul: `#5890FF`
+
+Los acentos deben concentrarse en fuentes de luz, señalética y pequeños detalles. No teñir todo el mapa con neón.
+
+---
+
+# 6. Iluminación
+
+La iluminación es parte central de la identidad del juego.
+
+## Regla general
+
+El patio debe tener una base nocturna fría y fuentes locales cálidas o de color. La escena no debe ser simplemente “oscura”; debe tener contraste entre zonas tranquilas y zonas activas.
+
+## Fuentes principales
+
+### Piscina
+
+- Luz fría/cian.
+- Puntos de luz subacuática o reflejos localizados.
+- Borde cercano puede recibir una leve contaminación azul.
+- El agua debe tener movimiento visual incluso cuando el jugador está quieto.
+
+### Casa / deck
+
+- Apliques y ventanas cálidas.
+- Luz contenida, doméstica, no teatral.
+- Ayuda a separar la arquitectura del fondo nocturno.
+
+### Barra
+
+- Identidad cálida con acento magenta/violeta controlado.
+- Botellas y estantes pueden recibir backlight.
+- Debe verse como punto social sin competir con la piscina.
+
+### DJ
+
+- Violeta/azul.
+- Mayor energía visual que el resto del mapa.
+- Pulsos, focos o haces sutiles pueden resolverse por código.
+- No inundar todo el césped con color.
+
+### Guirnaldas y mesas
+
+- Halos pequeños y localizados.
+- Las bombitas de colores deben sentirse como puntos de luz, no como píxeles decorativos pegados a un cable.
+
+## Implementación
+
+Dentro de los sprites:
+
+- sombras de contacto;
+- highlights duros y pixelados;
+- pequeñas zonas pintadas de luz cuando formen parte material del objeto.
+
+Por Phaser/CSS:
+
+- ambient tint;
+- glows suaves;
+- additive blend puntual;
+- pulsos de luces;
+- haces;
+- cambios sutiles de intensidad;
+- partículas.
+
+**No hornear grandes halos borrosos dentro del PNG.**
+
+## Sombras
+
+Todo objeto con masa debe tener contacto con el suelo.
+
+- NPCs: sombra corta y simple.
+- Mesas / macetas / postes: sombra legible pero discreta.
+- Barra / DJ / arquitectura: sombra estructural más marcada.
+
+La sombra debe reforzar volumen, no dibujar un segundo objeto negro debajo.
+
+---
+
+# 7. Reglas de materiales
+
+Cada superficie debe poder identificarse incluso sin iluminación especial.
+
+## Césped
+
+- textura corta y sutil;
+- variación por parches;
+- flores y pequeñas plantas solo en lugares elegidos;
+- zonas de paso pueden tener tiles algo gastados.
+
+## Madera
+
+- dirección de tablas consistente;
+- uniones y bordes claros;
+- evitar una línea oscura en cada tabla si genera demasiado ruido.
+
+## Piedra / baldosas
+
+- masa sólida;
+- bordes claros;
+- pequeñas juntas;
+- suficientes diferencias con césped y agua para que las colisiones se entiendan.
+
+## Agua
+
+- patrón amplio y coherente;
+- 2–4 frames lentos antes que ruido constante;
+- reflejos agrupados;
+- ondas alrededor de props cuando corresponda.
+
+## Vidrio / botellas
+
+- silueta primero;
+- base oscura + cuerpo de color + highlight pequeño;
+- no intentar representar detalle realista a escala minúscula.
+
+## Plantas
+
+- grupos de hojas, no píxeles aleatorios;
+- 2–3 verdes;
+- maceta claramente separada de la planta.
+
+---
+
+# 8. Diseño de assets por importancia
+
+## Tier A — Assets protagonistas
+
+- piscina;
+- barra;
+- DJ booth;
+- casa/deck;
+- Tambu;
+- NPCs principales.
+
+Pueden tener:
+
+- más detalle;
+- 3–4 niveles tonales;
+- animación;
+- luz propia;
+- props integrados;
+- silueta única.
+
+## Tier B — Soporte visual
+
+- mesas;
+- parlantes;
+- postes;
+- jardineras;
+- cooler;
+- sillas;
+- muebles secundarios.
+
+Deben verse terminados, pero subordinados a Tier A.
+
+## Tier C — Clutter
+
+- vasos;
+- latas;
+- botellas sueltas;
+- flores;
+- ceniceros;
+- pequeños objetos de fiesta.
+
+Su función es contar historia y romper repetición. Nunca deben convertirse en ruido dominante.
+
+---
+
+# 9. Densidad y composición
+
+Más vida no significa llenar cada espacio vacío.
+
+## Zonas de alta densidad
+
+- barra;
+- DJ;
+- bordes sociales del patio;
+- mesas;
+- esquinas decorativas.
+
+## Zonas de densidad media
+
+- laterales de piscina;
+- grupos de NPCs;
+- transición deck/césped.
+
+## Zonas que necesitan aire
+
+- circulación inmediata de Tambu;
+- frente de NPCs interactuables;
+- accesos a barra y DJ;
+- bordes jugables de piscina;
+- recorridos entre puntos de interés.
+
+El espacio negativo es parte del diseño. Sirve para mover al jugador y también para hacer que los grupos sociales sean legibles.
+
+---
+
+# 10. Personajes y relación con el entorno
+
+Los personajes deben pertenecer al mismo mundo visual que los props.
+
+- Mantener `24x32 px` como estándar actual.
+- No aumentar detalle facial por encima de lo que soporta esa escala.
+- Priorizar peinado, outfit, silueta y postura para distinguir personas.
+- Tambu debe destacar sin parecer de otro juego.
+- NPCs random pueden ser más simples que personajes interactuables.
+- Los personajes importantes pueden recibir 1–2 detalles identificatorios adicionales.
+
+Todos los personajes deben tener sombra de contacto consistente.
+
+Los NPCs no deben distribuirse como piezas de tablero. Deben formar pequeños grupos, mirar hacia alguien/algo y ocupar el espacio según una intención social.
+
+---
+
+# 11. Movimiento ambiental
+
+La vida del mapa debe continuar aunque Tambu no se mueva.
+
+Prioridad:
+
+1. agua animada;
+2. guirnaldas y luces con variación muy leve;
+3. DJ con pulso o cambio de iluminación;
+4. NPCs con idles/giros simples;
+5. pequeños props animados solo cuando aporten.
+
+Evitar que todo se anime al mismo tiempo. El movimiento también necesita jerarquía.
+
+---
+
+# 12. UI vs mundo
+
+La UI puede ser más limpia y contrastada que el escenario, pero debe compartir lenguaje pixel-art.
+
+- HUD legible por encima de la escena.
+- Marcos oscuros.
+- Iconografía simple.
+- Acentos cálidos para puntos/recursos y rojos para vidas.
+- Evitar glows grandes detrás de paneles.
+- La UI nunca debe competir con NPCs o fuentes de interacción.
+
+La UI final no queda congelada en esta fase; solo queda fijada su relación estética con el mundo.
+
+---
+
+# 13. Qué evitar
+
+- aumentar detalle solo por aumentar detalle;
+- sprites con perspectivas distintas;
+- escalas inconsistentes;
+- antialias en assets;
+- objetos con bordes excesivamente negros;
+- césped con checker o ruido repetitivo;
+- neón aplicado a todo;
+- halos pintados dentro de cada sprite;
+- props distribuidos uniformemente;
+- NPCs alineados como grilla;
+- sombras blandas realistas mezcladas con sprites sin volumen;
+- copiar literalmente una referencia generada;
+- cambiar el macro-layout para hacer que una ilustración encaje;
+- diseñar assets aislados sin probarlos dentro del mapa.
+
+---
+
+# 14. Pipeline obligatorio para cada asset importante
+
+No producir un asset final solo a partir de un prompt.
+
+Para Tier A y Tier B:
+
+1. **Definir función** — qué hace y por qué existe en la escena.
+2. **Definir footprint** — tamaño, colisión y espacio jugable.
+3. **Referencia / exploración** — IA, boceto o referencias visuales pueden proponer dirección.
+4. **Diseño aislado** — trabajar el objeto fuera del mapa.
+5. **Normalización** — perspectiva, escala, paleta, bordes y nivel de detalle.
+6. **Integración** — colocarlo en el patio real.
+7. **Iluminación / sombra** — resolver contacto y fuente local.
+8. **Revisión en contexto** — comprobar jerarquía y lectura jugable.
+9. **Variantes** — solo cuando la repetición lo justifique.
+10. **Aprobación** — recién entonces se considera asset reutilizable.
+
+La IA es una herramienta de exploración y producción asistida. La dirección de arte y la integración siguen siendo decisiones del juego.
+
+---
+
+# 15. Gate visual antes de producir todo el patio
+
+Antes de rehacer decenas de assets, se debe construir y aprobar una **muestra de calibración** con:
+
+- césped final candidate;
+- un tramo de deck;
+- una esquina de piscina con agua y borde;
+- una luz cálida;
+- una fuente fría/cian;
+- una planta o prop Tier B;
+- Tambu colocado encima para comprobar escala.
+
+Esta pequeña muestra debe validar simultáneamente:
+
+- paleta;
+- perspectiva;
+- materiales;
+- contraste;
+- escala;
+- sombra;
+- comportamiento de iluminación.
+
+Si esta muestra no funciona, se corrige antes de producir la barra, DJ y resto del set.
+
+---
+
+# 16. Criterios de aprobación de la dirección
+
+La Fase 0 se considera correctamente aplicada cuando una producción futura puede responder con claridad estas preguntas:
+
+- ¿qué nivel de detalle corresponde a este objeto?;
+- ¿qué perspectiva y escala debe usar?;
+- ¿qué paleta le pertenece?;
+- ¿cómo recibe o emite luz?;
+- ¿qué importancia tiene dentro del mapa?;
+- ¿cuánto clutter puede rodearlo?;
+- ¿debe ser sprite, tile, overlay o efecto por código?;
+- ¿sigue pareciendo parte de Tambu Game al lado de los otros assets?
+
+## Resultado visual esperado
+
+Al completar las fases posteriores usando esta dirección, el patio debe:
+
+- sentirse nocturno sin perder legibilidad;
+- tener una piscina visualmente atractiva como centro;
+- mostrar materiales claros y objetos con volumen;
+- usar barra y DJ como focos secundarios;
+- sentirse más vivo mediante composición, props, NPCs y animación ambiental;
+- mantener caminos y colisiones legibles;
+- verse coherente incluso sin UI;
+- conservar la identidad y el layout jugable actual.
+
+---
+
+# 17. Próximo paso
+
+Con esta baseline definida, el siguiente trabajo visual es construir la **muestra de calibración de Fase 1**, comenzando por:
+
+1. césped;
+2. borde de piscina;
+3. agua;
+4. deck;
+5. iluminación cálida/fría de prueba.
+
+No comenzar todavía una reconstrucción completa de barra, DJ o NPCs hasta validar esa muestra.
