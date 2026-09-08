@@ -1,100 +1,58 @@
-# Tambu Game — Fase 1 / Paso 1: Grass System V2
+# Tambu Game — Night Grass Pack V3
 
-**Versión:** 2.0
-**Estado:** Production Grass Pack V1 integrado en calibración y patio
-**Scope:** solo césped; no autoriza deck, piscina, barra, DJ, NPCs ni iluminación final.
+**Estado:** integrado en GrassCalibrationScene y PatioScene.
+**Scope:** solo césped; no autoriza cambios de deck, piscina, barra, DJ, NPCs ni iluminación final.
 
-## Objetivo
+## Fuente de verdad
 
-Grass System V2 sustituye la idea de “un tile con ruido” por una composición de pixel art en capas. A cámara `zoom = 1` debe leerse primero una masa nocturna calma; la riqueza aparece al mirar el terreno completo mediante zonas macro, grupos de vegetación y desgaste de circulación.
-
-Tambu permanece como referencia de escala: frame fuente `32x48`, `scale: 1.24`, `1H = 59.52 world px`. El césped no se reescala ni invade su silueta.
-
-## Assets aprobados
+Los PNG de `tambu_night_grass_pack_v3.zip` son arte autorado y se integran sin redibujarse, regenerarse ni transformarse. La hoja `reference/night_grass_pack_v3_reference.png` sirve únicamente como referencia y no se carga en el juego.
 
 ```
 public/assets/tiles/grass/
-├── base/
-│   ├── grass_base_01.png       16x16
-│   ├── grass_base_02.png       16x16
-│   └── grass_base_03.png       16x16
-├── clusters/
-│   ├── grass_dense_01.png      32x32
-│   ├── grass_dense_02.png      32x32
-│   └── grass_lively_01.png     32x32
-├── macro/
-│   ├── grass_macro_dark_01.png 64x64
-│   ├── grass_macro_dark_02.png 64x64
-│   └── grass_macro_soft_01.png 64x64
-├── worn/
-│   ├── grass_worn_01.png       32x32
-│   ├── grass_worn_02.png       48x32
-│   └── grass_worn_03.png       48x48
-└── accents/
-    ├── flower_white_01.png     16x16
-    ├── flower_pink_01.png      16x16
-    └── leaf_01.png             16x16
+├── base/       grass_base_01…04.png       16x16
+├── micro/      grass_micro_01…04.png      16x16
+├── macro/      grass_macro_soft_01…02.png,
+│               grass_macro_dark_01.png    64x64
+├── clusters/   grass_cluster_01…08.png    48x48
+├── accents/    flores, hojas y plantas    16x16 / 32x32
+└── extra/      bush_edge_01…02.png        64x32
 ```
 
-Todos son PNG raster nativos aprobados, con transparencia donde hace falta, píxel duro y sin blur ni antialias. Se reemplazan byte a byte desde `tambu_grass_production_pack_v1.zip`; no se redibujan, generan ni transforman por código.
+No existe una capa ni assets `worn`: no se usa tierra marrón, caminos desgastados ni textura procedimental adicional.
 
-## Paleta
+## Capas y escala
 
-- oscuro: `#21432D`
-- base: `#2F5A38`
-- luz: `#487348`
-- intermedios: `#294F34`, `#3B673F`
-- desgaste apagado: `#4F5638`, `#697047`, `#7B7E4B`, con tierra `#5D5138`
-
-La familia mantiene margen para que piscina e iluminación nocturna tengan más presencia que el terreno.
-
-## Arquitectura
+`createGrass()` renderiza en este orden estable:
 
 ```
-src/world/grass/
-├── preloadGrass.js  → claves Phaser y rutas de los quince PNG
-├── grassLayout.js   → composición dirigida y hash estable de la base
-└── createGrass.js   → render por capas: base → macro → clusters → worn → accents
+base → micro → macro → clusters → accents
 ```
 
-`createGrass()` no usa `Math.random()`. Los overlays relevantes viven en `GRASS_CALIBRATION_LAYOUT` y `createPatioGrassLayout()`, por lo que la composición conserva exactamente las mismas posiciones entre cargas. El hash de base también es estable y evita secuencias/checkers regulares.
+La base usa cuatro variantes con hash determinista para evitar checker o secuencias repetidas. Los micro tiles aparecen en grupos pequeños; los macro patches se mantienen dentro de alpha `0.75–1.0`; los clusters, plantas y bush edges se reservan para bordes y rincones. El centro jugable queda intencionalmente limpio.
 
-El generador provisional `tools/generate_grass_v2.mjs` fue retirado para que no pueda sobrescribir el Production Grass Pack V1. Phaser carga solamente los PNG autorados.
+Tambu se conserva como referencia humana: frame fuente `32x48`, `scale: 1.24`, cámara `zoom = 1`.
 
-## Distribución de la muestra
+## Integración
 
-- base 01 dominante; base 02 oscura; base 03 algo más viva;
-- objetivo perceptual: aproximadamente `40% / 30% / 20%`, dejando el resto de la riqueza a capas superiores;
-- como la base debe cubrir el 100% del piso, la selección de underlay es `44% / 33% / 23%`; macro, clusters, worn y accents completan la lectura perceptual sin crear huecos;
-- tres macrovariaciones de 64 px usan alpha `0.86–0.90`, porque el asset nuevo ya contiene su propia transición;
-- siete clusters se concentran en bordes y rincones, y dejan aire alrededor de `tambuSpots.quiet`;
-- tres parches worn compactos se leen como pasto pisado/tierra irregular, no como líneas ni caminos;
-- seis accents son puntuales: dos flores blancas, dos rosas y dos hojas.
+- `preloadGrass.js` declara las rutas y keys de Night Grass Pack V3.
+- `grassLayout.js` concentra la composición estable de calibración y patio.
+- `createPatioWorld.js` sigue llamando `createGrass(scene, createPatioGrassLayout(PATIO_LAYOUT))`.
+- No se modifican colisiones, macro-layout, personajes ni interacciones.
+- `tools/generate_grass_v2.mjs` continúa eliminado para que no pueda sobrescribir el pack.
 
-## Muestra de calibración
+## Calibración
 
-`src/scenes/GrassCalibrationScene.js` construye el campo de `384x256 world px` (`24x16` tiles) con Tambu real a escala runtime. Solo está disponible durante desarrollo:
+Durante desarrollo:
 
 ```
 /?scene=grass-calibration&grassSpot=quiet
 /?scene=grass-calibration&grassSpot=dense
 ```
 
-La cámara mantiene `zoom = 1`. `grassSpot=quiet` prueba espacio negativo y lectura del personaje; `grassSpot=dense` prueba proximidad a un cluster sin ocultar sus pies.
-
-## Relación con el patio
-
-El patio productivo ya invoca `createGrass(scene, createPatioGrassLayout(PATIO_LAYOUT))`. Conserva su macro-layout, colisiones, personajes, piscina, deck, DJ y barra sin cambios. La textura histórica `drawGrassTexture()` y sus datos asociados fueron retirados: no quedan flores, tallos ni líneas procedurales compitiendo con el pack.
-
-La composición del patio usa cinco macro patches a alpha `0.80–0.84`, clusters principalmente en bordes y nueve patches worn alrededor de la circulación de piscina, barra, mesas, cooler y entrada. Los accents quedan deliberadamente escasos.
+`quiet` mantiene aire alrededor de Tambu; `dense` lo acerca a un cluster sin cubrir su silueta.
 
 ## Validación automática
 
-`test/grassSystem.test.js` verifica:
+`test/grassSystem.test.js` comprueba los 29 assets y sus tamaños nativos, las cuatro bases deterministas, el orden de capas, la ausencia de `worn`, la integración del patio y la ausencia del generador antiguo.
 
-- los quince assets y sus dimensiones;
-- selección base estable con las tres variantes;
-- canvas y capas de la muestra (`384x256`, macro, clusters, worn, accents y dos posiciones de Tambu);
-- layout dirigido del patio, incluyendo alpha de macros dentro de `0.75–1`.
-
-No avanzar a deck hasta aprobar visualmente esta integración.
+No avanzar a Deck hasta aprobar visualmente el césped en el patio real.
