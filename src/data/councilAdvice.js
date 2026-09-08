@@ -146,7 +146,7 @@ function addTambuReactions(config) {
     members: config.members.map((member) => {
       const withReaction = (line) => ({
         ...line,
-        tambuReaction: TAMBU_REACTIONS[member.id]?.[line.text],
+        tambuReaction: line.tambuReaction ?? TAMBU_REACTIONS[member.id]?.[line.text],
       });
 
       return {
@@ -518,5 +518,156 @@ export const MILI_COUNCIL_CONFIG = addTambuReactions({
   members: BASE_COUNCIL_CONFIG.members.map((member) => ({
     ...member,
     rules: [...(MILI_COUNCIL_RULES[member.id] ?? []), ...member.rules],
+  })),
+});
+
+const CAMI_COUNCIL_RULES = {
+  pitity: [
+    {
+      id: 'pitity-cami-literal', priority: 220,
+      when: { latestSignals: ['cami_had_to_explain_joke'] },
+      lines: [
+        { id: 'pitity-cami-literal-1', text: 'Hardy Kane.', tambuReaction: '¿Qué mierda significa Hardy Kane, hijo de puta?' },
+        { id: 'pitity-cami-literal-2', text: 'Harly Queen.', tambuReaction: 'Cada vez entiendo menos.' },
+      ],
+    },
+    {
+      id: 'pitity-cami-overplay', priority: 210,
+      when: { anySignals: ['cami_warned_about_overplay', 'cami_noticed_tambu_character', 'cami_disliked_overplay'] },
+      lines: [
+        { id: 'pitity-cami-overplay-1', text: 'Estás intensillo.', tambuReaction: 'Bueno, se entendió.' },
+        { id: 'pitity-cami-overplay-2', text: 'Fulete.', tambuReaction: '¿Qué carajo es fulete?' },
+      ],
+    },
+    {
+      id: 'pitity-cami-optimus', priority: 200,
+      when: {
+        latestSignals: ['cami_showed_strong_interest'],
+        allSituations: ['strong_attraction', 'returned_flirt'],
+        allSignals: ['npc_returned_flirt', 'tambu_showed_romantic_intent'],
+        historyLength: { gte: 3 },
+      },
+      lines: [{ id: 'pitity-cami-optimus-1', text: 'Optimus.', tambuReaction: 'Ah bueno. Listo.' }],
+    },
+    {
+      id: 'pitity-cami-interest', priority: 180,
+      when: { latestSignals: ['cami_showed_interest'] },
+      lines: [
+        { id: 'pitity-cami-interest-1', text: 'God.', tambuReaction: 'Bueno, eso supongo que es bueno.' },
+        { id: 'pitity-cami-interest-2', text: 'Bastante pro.', tambuReaction: 'Bueno, algo bien hice.' },
+      ],
+    },
+    {
+      id: 'pitity-cami-banter', priority: 160,
+      when: { latestSignals: ['cami_enjoyed_banter'] },
+      lines: [
+        { id: 'pitity-cami-banter-1', text: 'Goood.', tambuReaction: 'Listo, te tomo el good.' },
+        { id: 'pitity-cami-banter-2', text: 'Pro.', tambuReaction: 'Bueno, te tomo el pro.' },
+      ],
+    },
+    {
+      id: 'pitity-cami-friendly', priority: 150,
+      when: { latestSignals: ['cami_friendzone_energy', 'cami_sees_tambu_as_friendly'] },
+      lines: [{ id: 'pitity-cami-friendly-1', text: 'Amiguillos.', tambuReaction: 'No me digas amiguillos, la concha de tu madre.' }],
+    },
+  ],
+  eze: [
+    {
+      id: 'eze-cami-literal', priority: 220,
+      when: { latestSignals: ['cami_had_to_explain_joke'] },
+      lines: [{
+        id: 'eze-cami-literal-1',
+        text: 'Boludo, te tuvo que explicar que era un chiste. Venís flojísimo.',
+        tambuReaction: 'Bueno, ya entendí.',
+      }],
+    },
+    {
+      id: 'eze-cami-overplay', priority: 210,
+      when: { anySignals: ['cami_warned_about_overplay', 'cami_noticed_tambu_character', 'cami_disliked_overplay'] },
+      lines: [{
+        id: 'eze-cami-overplay-1',
+        text: 'Ya te fichó el personaje, boludo. Aflojá un poco.',
+        tambuReaction: 'Bueno, tampoco estoy actuando.',
+      }],
+    },
+    {
+      id: 'eze-cami-interest', priority: 190,
+      when: { latestSignals: ['cami_showed_interest', 'cami_showed_strong_interest'] },
+      lines: [{
+        id: 'eze-cami-interest-1',
+        text: 'Ese “seguí” no fue porque sí. Ojo.',
+        tambuReaction: 'Bueno, por eso vine.',
+      }],
+    },
+    {
+      id: 'eze-cami-banter', priority: 170,
+      when: { latestSignals: ['cami_enjoyed_banter', 'cami_returned_banter'] },
+      lines: [{
+        id: 'eze-cami-banter-1',
+        text: 'Ahí sí, te la devolvió y vos también. Ojo.',
+        tambuReaction: 'Eso pensé yo.',
+      }],
+    },
+    {
+      id: 'eze-cami-friendly', priority: 150,
+      when: { latestSignals: ['cami_friendzone_energy', 'cami_sees_tambu_as_friendly'] },
+      lines: [{
+        id: 'eze-cami-friendly-1',
+        text: 'Se cagan de risa, sí. También puede ser porque le caés bien y listo.',
+        tambuReaction: 'No me tires abajo ahora.',
+      }],
+    },
+  ],
+  tobi: [
+    {
+      id: 'tobi-cami-literal', priority: 220,
+      when: { latestSignals: ['cami_had_to_explain_joke'] },
+      lines: [{
+        id: 'tobi-cami-literal-1',
+        text: '¿Te tuvo que explicar el chiste? ¿Sos pelotudo?',
+        tambuReaction: 'Bueno, ya entendí, hijo de puta.',
+      }],
+    },
+    {
+      id: 'tobi-cami-overplay', priority: 210,
+      when: { anySignals: ['cami_warned_about_overplay', 'cami_noticed_tambu_character', 'cami_disliked_overplay'] },
+      lines: [{
+        id: 'tobi-cami-overplay-1',
+        text: 'Ya entendió que te estás haciendo el vivo. Callate un poco.',
+        tambuReaction: 'Bueno, tampoco tanto.',
+      }],
+    },
+    {
+      id: 'tobi-cami-interest', priority: 190,
+      when: { latestSignals: ['cami_showed_interest', 'cami_showed_strong_interest'] },
+      lines: [{
+        id: 'tobi-cami-interest-1', text: 'Te dijo seguí. ¿Qué hacés acá?',
+        tambuReaction: 'Bueno, la concha de tu madre, ya voy.',
+      }],
+    },
+    {
+      id: 'tobi-cami-banter', priority: 170,
+      when: { latestSignals: ['cami_enjoyed_banter', 'cami_returned_banter'] },
+      lines: [{
+        id: 'tobi-cami-banter-1', text: 'Bueno, se rió. Volvé.',
+        tambuReaction: 'Bueno, ya voy.',
+      }],
+    },
+    {
+      id: 'tobi-cami-friendly', priority: 150,
+      when: { latestSignals: ['cami_friendzone_energy', 'cami_sees_tambu_as_friendly'] },
+      lines: [{
+        id: 'tobi-cami-friendly-1', text: 'Buenísimo, otro amigo.',
+        tambuReaction: 'Bueno, tampoco me tires abajo.',
+      }],
+    },
+  ],
+};
+
+export const CAMI_COUNCIL_CONFIG = addTambuReactions({
+  ...BASE_COUNCIL_CONFIG,
+  members: BASE_COUNCIL_CONFIG.members.map((member) => ({
+    ...member,
+    rules: [...(CAMI_COUNCIL_RULES[member.id] ?? []), ...member.rules],
   })),
 });

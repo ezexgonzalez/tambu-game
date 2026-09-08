@@ -1,5 +1,6 @@
 import { SOFI_CONVERSATION } from './conversations/sofiConversation.js';
 import { MILI_CONVERSATION } from './conversations/miliConversation.js';
+import { CAMI_CONVERSATION } from './conversations/camiConversation.js';
 
 export const patioWomen = [
   {
@@ -24,19 +25,7 @@ export const patioWomen = [
     x: 1235,
     y: 635,
     palette: 9,
-    conversation: {
-      initialBeat: 'prototype',
-      beats: [{
-        id: 'prototype',
-        prompt: '¿Necesitás algo o estabas dando vueltas nomás?',
-        choices: [
-          { id: 'one', text: 'Estoy explorando.', reaction: '¿Explorando? Qué misterioso.' },
-          { id: 'two', text: 'Buscaba una conversación decente.', reaction: 'Qué presión. Espero estar a la altura.' },
-          { id: 'three', text: 'Me descubriste.', reaction: 'Por lo menos lo admitís.' },
-          { id: 'four', text: 'Todavía no decidí.', reaction: 'Bueno, avisame cuando decidas.' },
-        ],
-      }],
-    },
+    conversation: CAMI_CONVERSATION,
   },
 ];
 
