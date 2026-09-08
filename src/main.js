@@ -1,6 +1,10 @@
 import Phaser from 'phaser';
 import './styles.css';
+import { GrassCalibrationScene } from './scenes/GrassCalibrationScene.js';
 import { PatioScene } from './scenes/PatioScene.js';
+
+const isGrassCalibration = import.meta.env.DEV
+  && new URLSearchParams(window.location.search).get('scene') === 'grass-calibration';
 
 const config = {
   type: Phaser.AUTO,
@@ -22,7 +26,7 @@ const config = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [PatioScene],
+  scene: [isGrassCalibration ? GrassCalibrationScene : PatioScene],
 };
 
 new Phaser.Game(config);
