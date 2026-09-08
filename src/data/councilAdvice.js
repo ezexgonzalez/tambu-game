@@ -38,42 +38,45 @@ export const COUNCIL_CONFIG = {
           lines: [{ id: 'pitity-ez-line', text: 'Parece bastante EZ.' }],
         },
         recentAdvice('pitity-mystery', 'sofi_engaged_with_mystery', [
-          'Mucho misterio.', 'Ni vos sabés qué versión.',
+          'Rarillo.', 'Vale...',
         ], 50),
         recentAdvice('pitity-marketing', 'sofi_enjoyed_group_humor', [
-          'Ya tenés representante.', 'Salió gratis la publicidad.',
+          'Marketingillo.', 'Pro.',
         ], 50),
         recentAdvice('pitity-genuine', 'sofi_comfortable_with_genuine_intro', [
-          'Todavía no la decepcionaste.', 'Te dio plazo.',
+          'Vale.', 'Bastante pro.',
         ], 50),
         recentAdvice('pitity-papi', 'sofi_played_along_with_papi', [
-          'Se rió. Milagro.', 'Arrancaste fuerte, papi.',
+          'God.', 'Papiillo.',
         ], 50),
         recentAdvice('pitity-observer', 'sofi_values_tambu_observation', [
-          'Te fichó.', 'Sobreviviente profesional.',
+          'Rarillo.', 'Está pro.',
         ], 50),
         recentAdvice('pitity-personal', 'sofi_invited_personal_connection', [
-          'Ya no sos tan desconocido.', 'Te preguntó por ella.',
+          'Amiguillos.', 'Vale.',
         ], 50),
         recentAdvice('pitity-report', 'sofi_amused_by_psychopedagogy', [
-          'El informe no lo quiere.', 'No le factures.',
+          'Hardy Kane.', 'Mucho, illo.',
         ], 50),
         recentAdvice('pitity-automatic', 'beat3_genuine', [
-          'Agotador, dijo.', 'Aflojá el análisis.',
+          'Pensadillo.', 'Mucho, illo.',
         ], 50),
         recentAdvice('pitity-interest', 'beat3_direct_interest', [
-          'Se dio por aludida.', 'Entendió.',
+          'God.', 'Bastante pro.',
         ], 50),
         recentAdvice('pitity-vulnerable', 'beat3_vulnerable', [
-          'Te analizaste solo.', 'Mucho pensamiento.',
+          'Hardillo.', 'Pensadillo.',
         ], 50),
         recentAdvice('pitity-diagnosis', 'beat3_diagnosis', [
-          'Guardá la matrícula.', 'Diagnóstico reservado.',
+          'Diagnostiquillo.', 'Vale...',
         ], 50),
       ],
       fallbackLines: [
-        { id: 'pitity-neutral-1', text: '¿Yo tengo que saber?' },
-        { id: 'pitity-neutral-2', text: 'Me elegiste a mí. Mirá vos.' },
+        { id: 'pitity-neutral-1', text: '¿Y yo qué sé?' },
+        { id: 'pitity-neutral-2', text: 'Preguntale a ella.' },
+        { id: 'pitity-neutral-3', text: 'Me sacaste para esto.' },
+        { id: 'pitity-neutral-4', text: 'Vale.' },
+        { id: 'pitity-neutral-5', text: 'Y...' },
       ],
     },
     {
@@ -276,25 +279,26 @@ export const COUNCIL_CONFIG = {
   ],
 };
 
-function miliRecentAdvice(id, signal, text, priority = 160) {
-  return recentAdvice(id, signal, [text], priority);
+function miliRecentAdvice(id, signal, texts, priority = 160) {
+  return recentAdvice(id, signal, Array.isArray(texts) ? texts : [texts], priority);
 }
 
 const MILI_COUNCIL_RULES = {
   pitity: [
-    miliRecentAdvice('pitity-mili-drink-trust', 'mili_trusted_drink_to_tambu', 'Te dejó el vaso. Confianza inmediata.'),
-    miliRecentAdvice('pitity-mili-friendly', 'mili_called_tambu_educated', 'Cumpliste de mozo.'),
-    miliRecentAdvice('pitity-mili-rude', 'mili_called_tambu_tempered', 'Duró poco el empleo.'),
-    miliRecentAdvice('pitity-mili-claim', 'mili_laughed_at_drink_claim', 'Cuatro segundos y ya robaste.'),
-    miliRecentAdvice('pitity-mili-party-good', 'mili_agreed_on_pool_accident', 'Coincidieron.'),
-    miliRecentAdvice('pitity-mili-party-friendly', 'mili_enjoyed_party_agreement', 'Charla de fiesta.'),
-    miliRecentAdvice('pitity-mili-party-bad', 'mili_declined_to_hold_tambu', 'La bajaste.'),
-    miliRecentAdvice('pitity-mili-chaos', 'mili_played_along_with_chaos', 'Parte del problema.'),
-    miliRecentAdvice('pitity-mili-warning', 'mili_warned_tambu_to_slow_down', 'Bajá medio cambio.'),
-    miliRecentAdvice('pitity-mili-dance-bad', 'mili_called_dancing_boring', 'Te dijo qué embole.'),
-    miliRecentAdvice('pitity-mili-dance-friendly', 'mili_framed_party_companions', 'Compañeros de joda.'),
-    miliRecentAdvice('pitity-mili-challenge', 'mili_returned_challenge', 'Te desafió de vuelta.'),
-    miliRecentAdvice('pitity-mili-dance-tease', 'mili_played_along_with_dance_tease', 'Te la devolvió.'),
+    miliRecentAdvice('pitity-mili-drink-trust', 'mili_trusted_drink_to_tambu', ['Goood.', 'Bastante pro.', 'Confianzilla.']),
+    miliRecentAdvice('pitity-mili-friendly', 'mili_called_tambu_educated', ['Vale.', 'Educadillo.']),
+    miliRecentAdvice('pitity-mili-rude', 'mili_called_tambu_tempered', ['Hardy Kane.', 'Arranque hardillo.', 'Vale...']),
+    miliRecentAdvice('pitity-mili-claim', 'mili_laughed_at_drink_claim', ['God.', 'Bastante pro.', 'Ladroncillo.']),
+    miliRecentAdvice('pitity-mili-party-good', 'mili_agreed_on_pool_accident', ['Goood.', 'Pro.', 'Misma neuroncilla.']),
+    miliRecentAdvice('pitity-mili-party-friendly', 'mili_enjoyed_party_agreement', ['Amiguillos.', 'Vale, chavales.', 'Modo chavales.']),
+    miliRecentAdvice('pitity-mili-party-bad', 'mili_declined_to_hold_tambu', ['Hardy Kane.', 'Entonces andate, illo.', 'Situación hardilla.']),
+    miliRecentAdvice('pitity-mili-chaos', 'mili_played_along_with_chaos', ['Goood.', 'Está pro.', 'Se puso god.', 'Combete.']),
+    miliRecentAdvice('pitity-mili-warning', 'mili_warned_tambu_to_slow_down', ['Hardy Kane.', 'Estás intensillo.', 'Mucho, illo.']),
+    miliRecentAdvice('pitity-mili-dance-bad', 'mili_called_dancing_boring', ['Hard.', 'Hardy Kane.', 'Qué hardillo.']),
+    miliRecentAdvice('pitity-mili-dance-friendly', 'mili_framed_party_companions', ['Amiguillos.', 'Modo chavales.']),
+    miliRecentAdvice('pitity-mili-challenge', 'mili_returned_challenge', ['God.', 'Bastante pro.']),
+    miliRecentAdvice('pitity-mili-dance-tease', 'mili_played_along_with_dance_tease', ['Goood.', 'Pro.', 'Bastante pro.']),
+    miliRecentAdvice('pitity-mili-overplay', 'mili_disliked_overplay', ['Hardy Kane.', 'Mucho, illo.', 'Estás intensillo.', 'Fulete.']),
   ],
   eze: [
     {
