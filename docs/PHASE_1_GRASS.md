@@ -1,7 +1,7 @@
 # Tambu Game — Fase 1 / Paso 1: Grass System V2
 
 **Versión:** 2.0
-**Estado:** muestra de calibración integrada para revisión
+**Estado:** Production Grass Pack V1 integrado en calibración y patio
 **Scope:** solo césped; no autoriza deck, piscina, barra, DJ, NPCs ni iluminación final.
 
 ## Objetivo
@@ -10,7 +10,7 @@ Grass System V2 sustituye la idea de “un tile con ruido” por una composició
 
 Tambu permanece como referencia de escala: frame fuente `32x48`, `scale: 1.24`, `1H = 59.52 world px`. El césped no se reescala ni invade su silueta.
 
-## Assets producidos
+## Assets aprobados
 
 ```
 public/assets/tiles/grass/
@@ -36,7 +36,7 @@ public/assets/tiles/grass/
     └── leaf_01.png             16x16
 ```
 
-Todos son PNG raster nativos, con transparencia donde hace falta, píxel duro y sin blur ni antialias. No se usa una imagen de concepto como textura, atlas ni fondo.
+Todos son PNG raster nativos aprobados, con transparencia donde hace falta, píxel duro y sin blur ni antialias. Se reemplazan byte a byte desde `tambu_grass_production_pack_v1.zip`; no se redibujan, generan ni transforman por código.
 
 ## Paleta
 
@@ -57,17 +57,17 @@ src/world/grass/
 └── createGrass.js   → render por capas: base → macro → clusters → worn → accents
 ```
 
-`createGrass()` no usa `Math.random()`. Los overlays relevantes viven en `GRASS_CALIBRATION_LAYOUT`, por lo que la muestra conserva exactamente la misma composición entre cargas. El hash de base también es estable y evita secuencias/checkers regulares.
+`createGrass()` no usa `Math.random()`. Los overlays relevantes viven en `GRASS_CALIBRATION_LAYOUT` y `createPatioGrassLayout()`, por lo que la composición conserva exactamente las mismas posiciones entre cargas. El hash de base también es estable y evita secuencias/checkers regulares.
 
-La herramienta `tools/generate_grass_v2.mjs` genera de forma reproducible los PNG de producción; se ejecuta fuera del runtime. Phaser solo carga archivos raster terminados.
+El generador provisional `tools/generate_grass_v2.mjs` fue retirado para que no pueda sobrescribir el Production Grass Pack V1. Phaser carga solamente los PNG autorados.
 
 ## Distribución de la muestra
 
 - base 01 dominante; base 02 oscura; base 03 algo más viva;
 - objetivo perceptual: aproximadamente `40% / 30% / 20%`, dejando el resto de la riqueza a capas superiores;
 - como la base debe cubrir el 100% del piso, la selección de underlay es `44% / 33% / 23%`; macro, clusters, worn y accents completan la lectura perceptual sin crear huecos;
-- seis macrovariaciones de 64 px rompen masas amplias sin mostrar cuadrados;
-- dieciséis clusters se concentran en bordes y rincones, y dejan aire alrededor de `tambuSpots.quiet`;
+- tres macrovariaciones de 64 px usan alpha `0.86–0.90`, porque el asset nuevo ya contiene su propia transición;
+- siete clusters se concentran en bordes y rincones, y dejan aire alrededor de `tambuSpots.quiet`;
 - tres parches worn compactos se leen como pasto pisado/tierra irregular, no como líneas ni caminos;
 - seis accents son puntuales: dos flores blancas, dos rosas y dos hojas.
 
@@ -82,9 +82,11 @@ La herramienta `tools/generate_grass_v2.mjs` genera de forma reproducible los PN
 
 La cámara mantiene `zoom = 1`. `grassSpot=quiet` prueba espacio negativo y lectura del personaje; `grassSpot=dense` prueba proximidad a un cluster sin ocultar sus pies.
 
-## Relación con el patio actual
+## Relación con el patio
 
-Esta entrega es deliberadamente un gate de calibración. El patio productivo todavía conserva su `drawGrassTexture()` histórico: no se ejecuta en la muestra V2 y no compite con sus assets. Se retirará al migrar el patio completo, después de aprobar esta muestra; hacerlo ahora contradiría el alcance de “solo muestra” y modificaría el mapa antes del visto bueno.
+El patio productivo ya invoca `createGrass(scene, createPatioGrassLayout(PATIO_LAYOUT))`. Conserva su macro-layout, colisiones, personajes, piscina, deck, DJ y barra sin cambios. La textura histórica `drawGrassTexture()` y sus datos asociados fueron retirados: no quedan flores, tallos ni líneas procedurales compitiendo con el pack.
+
+La composición del patio usa cinco macro patches a alpha `0.80–0.84`, clusters principalmente en bordes y nueve patches worn alrededor de la circulación de piscina, barra, mesas, cooler y entrada. Los accents quedan deliberadamente escasos.
 
 ## Validación automática
 
@@ -92,6 +94,7 @@ Esta entrega es deliberadamente un gate de calibración. El patio productivo tod
 
 - los quince assets y sus dimensiones;
 - selección base estable con las tres variantes;
-- canvas y capas de la muestra (`384x256`, macro, clusters, worn, accents y dos posiciones de Tambu).
+- canvas y capas de la muestra (`384x256`, macro, clusters, worn, accents y dos posiciones de Tambu);
+- layout dirigido del patio, incluyendo alpha de macros dentro de `0.75–1`.
 
-La migración de todo el patio queda explícitamente fuera de este paso. No avanzar a deck hasta aprobar visualmente la muestra.
+No avanzar a deck hasta aprobar visualmente esta integración.

@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import test from 'node:test';
-import { getGrassBaseKey, GRASS_BASE_KEYS, GRASS_CALIBRATION_LAYOUT } from '../src/world/grass/grassLayout.js';
+import {
+  createPatioGrassLayout,
+  getGrassBaseKey,
+  GRASS_BASE_KEYS,
+  GRASS_CALIBRATION_LAYOUT,
+} from '../src/world/grass/grassLayout.js';
+import { PATIO_LAYOUT } from '../src/world/patioLayout.js';
 import { GRASS_ASSETS } from '../src/world/grass/preloadGrass.js';
 
 function readPngSize(path) {
@@ -44,12 +50,29 @@ test('la base usa una composición determinista sin checker regular', () => {
 
 test('la calibración conserva las capas dirigidas y zonas de lectura de Tambu', () => {
   assert.deepEqual(GRASS_CALIBRATION_LAYOUT.bounds, { x: 0, y: 0, width: 384, height: 256 });
-  assert.equal(GRASS_CALIBRATION_LAYOUT.macro.length, 6);
-  assert.equal(GRASS_CALIBRATION_LAYOUT.clusters.length, 16);
+  assert.equal(GRASS_CALIBRATION_LAYOUT.macro.length, 3);
+  assert.equal(GRASS_CALIBRATION_LAYOUT.clusters.length, 7);
   assert.equal(GRASS_CALIBRATION_LAYOUT.worn.length, 3);
   assert.equal(GRASS_CALIBRATION_LAYOUT.accents.length, 6);
   assert.notDeepEqual(
     GRASS_CALIBRATION_LAYOUT.tambuSpots.quiet,
     GRASS_CALIBRATION_LAYOUT.tambuSpots.dense,
   );
+});
+
+test('el patio usa el mismo sistema de césped con overlays dirigidos', () => {
+  const layout = createPatioGrassLayout(PATIO_LAYOUT);
+  assert.deepEqual(layout.bounds, PATIO_LAYOUT.terrain.grass);
+  assert.ok(layout.macro.every(({ alpha }) => alpha >= 0.75 && alpha <= 1));
+  assert.ok(layout.clusters.length > 0);
+  assert.ok(layout.worn.length > 0);
+  assert.ok(layout.accents.length > 0);
+});
+
+test('el patio no reactiva el render procedural ni el generador provisional', () => {
+  const patioWorld = readFileSync(new URL('../src/world/createPatioWorld.js', import.meta.url), 'utf8');
+
+  assert.match(patioWorld, /createGrass\(scene, createPatioGrassLayout\(PATIO_LAYOUT\)/);
+  assert.doesNotMatch(patioWorld, /drawGrassTexture/);
+  assert.equal(existsSync(new URL('../tools/generate_grass_v2.mjs', import.meta.url)), false);
 });
