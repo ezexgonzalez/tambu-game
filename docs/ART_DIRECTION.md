@@ -1,14 +1,19 @@
 # Tambu Game — Dirección de Arte
 
-**Versión:** 1.1  
+**Versión:** 1.2  
 **Estado:** FASE 0 — baseline visual definida  
-**Scope actual:** V1 · La fiesta / Patio  
+**Scope actual:** V1 · La fiesta / Patio
 
-Este documento fija la dirección visual que debe guiar la producción de arte del patio. No define el layout jugable ni reemplaza `ASSET_PRODUCTION.md`: este archivo define **cómo debe verse y sentirse el juego**; `ASSET_PRODUCTION.md` define **qué assets producir y en qué orden**.
+Este documento fija **cómo debe verse y sentirse el juego**.
 
-La escala humana tiene una fuente específica: `docs/HUMAN_SCALE.md`. Si otra nota antigua contradice las medidas de Tambu, prevalecen `src/data/tambuSprite.js` y `HUMAN_SCALE.md`.
+Documentos complementarios y precedencia:
 
-Si una decisión de arte futura hace que un objeto se vea más detallado pero rompe esta dirección, la dirección visual tiene prioridad.
+- `docs/HUMAN_SCALE.md` → escala humana y proporciones.
+- `docs/PIXEL_ART_STYLE_GUIDE.md` → reglas técnicas estrictas de producción, paletas, pixel density, IA y validación.
+- `docs/ASSET_PRODUCTION.md` → qué assets producir y en qué orden.
+- `docs/PHASE_1_*.md` → decisiones específicas de fase.
+
+Si una decisión futura hace que un objeto se vea más detallado pero rompe esta dirección, la dirección visual tiene prioridad. Si una generación contradice una regla técnica o paleta de producción, prevalece `PIXEL_ART_STYLE_GUIDE.md`.
 
 ---
 
@@ -71,9 +76,18 @@ Se pueden mejorar formas, materiales, bordes, decoración, iluminación, props y
 - Nada de texturas fotográficas.
 - Nada de ruido de un píxel distribuido al azar para simular detalle.
 
+## Regla nocturna
+
+Todo asset nuevo se diseña **ya adaptado a noche**.
+
+No producir assets diurnos para después oscurecerlos con un overlay.
+
+> Los sprites nacen nocturnos. Phaser después los ilumina.
+
 ## Base técnica
 
-- Tile base del entorno: `16x16 px`.
+- Tile/grid lógico del entorno: `16x16 px`.
+- La resolución visual de un asset puede superar 16x16 y ocupar múltiples tiles cuando sea necesario.
 - Tambu es la **unidad humana oficial**.
 - Frame fuente de Tambu: `32x48 px`.
 - Escala actual de Tambu en runtime: `1.24`.
@@ -81,29 +95,30 @@ Se pueden mejorar formas, materiales, bordes, decoración, iluminación, props y
 - Cámara principal actual: `zoom = 1`.
 - Relación nominal con tile: `2.48 tiles` de ancho por `3.72 tiles` de alto.
 - Sprites y tiles se producen sin antialias y se renderizan con `image-rendering: pixelated`.
-- La escala `1.24` de Tambu es una decisión ya estabilizada: **no se modifica para acomodar assets nuevos**.
-- Para nuevos assets conviene autorar lo más cerca posible del tamaño final, pero la prioridad es que se vean proporcionados junto a Tambu.
+- La escala `1.24` de Tambu es una decisión estabilizada: **no se modifica para acomodar assets nuevos**.
+- Para nuevos assets conviene autorar cerca del tamaño final; la prioridad es que se vean proporcionados junto a Tambu.
 
 ## Escala humana oficial
 
-Para producción se define:
+Para producción:
 
 - `1H = 59.52 world px` → alto nominal del frame de Tambu en runtime.
 - `1W = 39.68 world px` → ancho nominal del frame de Tambu en runtime.
 
 `H` es una unidad de comparación visual, no una conversión literal a metros.
 
-Todo Tier A o Tier B que represente un objeto de escala humana debe probarse junto a Tambu antes de aprobarse: puertas, mesas, barra, DJ booth, parlantes, sillas, cooler, escalera y borde de piscina, etc.
+Todo Tier A o Tier B de escala humana debe probarse junto a Tambu antes de aprobarse: puertas, mesas, barra, DJ booth, parlantes, sillas, cooler, escalera, borde de piscina, etc.
 
-La prueba debe hacerse **con Tambu a su escala real de runtime**, nunca reescalando una copia para hacer coincidir el objeto.
+La prueba se hace con Tambu a su escala real de runtime, nunca reescalándolo para hacer coincidir otro asset.
 
-Ver especificación completa en `docs/HUMAN_SCALE.md`.
+Ver `docs/HUMAN_SCALE.md`.
 
 ## Complejidad tonal
 
 - Props normales: 2–3 tonos principales por material.
 - Assets protagonistas: pueden sumar 1 tono de highlight/acento cuando ayude a volumen o iluminación.
 - Las variaciones de color deben describir forma o material, no decorar por decorar.
+- Las paletas estrictas y reglas de normalización están en `PIXEL_ART_STYLE_GUIDE.md`.
 
 ---
 
@@ -126,7 +141,7 @@ Los assets importantes reciben más contraste, volumen, animación o luz. Los se
 
 # 5. Paleta base
 
-Estos colores son una **familia objetivo**, no una obligación de usar un único valor exacto en cada sprite.
+Los valores de esta sección definen la dirección de materiales. Para producción estricta, normalización de paleta y Night Grass prevalece `docs/PIXEL_ART_STYLE_GUIDE.md`.
 
 ## Noche / sombras
 
@@ -134,16 +149,27 @@ Estos colores son una **familia objetivo**, no una obligación de usar un único
 - Sombra azul: `#18243A`
 - Azul ambiente: `#22304A`
 
-Evitar usar negro puro como sombra general del mundo. El negro puede reservarse para oclusión fuerte, UI y pequeños huecos.
+Evitar negro puro como sombra general del mundo. El negro puede reservarse para oclusión fuerte, UI y pequeños huecos.
 
-## Césped
+## Césped — familia oficial nocturna
 
-- Verde oscuro: `#21432D`
-- Verde medio: `#2F5A38`
-- Verde luz: `#487348`
-- Detalle seco opcional: `#697047`
+- Deep shadow: `#112A2F`
+- Shadow: `#112F31`
+- Dark base: `#123232`
+- Base: `#153B35`
+- Mid grass: `#194137`
+- Soft light: `#1C4839`
+- Highlight: `#25553D`
 
-El césped debe verse orgánico, pero no moteado. La variación principal debe aparecer en parches y tiles alternativos, no como checker repetitivo.
+El césped debe sentirse como una superficie nocturna fría, uniforme y suave. Las variantes cambian patrón/densidad, no identidad cromática.
+
+No usar:
+
+- tierra marrón;
+- zonas `worn`;
+- verdes amarillos de día;
+- checker repetitivo;
+- flores integradas de forma masiva al ground.
 
 ## Madera / deck
 
@@ -182,7 +208,7 @@ El agua puede ser el material más luminoso del escenario sin volverse fluoresce
 - Cian: `#53D8F2`
 - Azul: `#5890FF`
 
-Los acentos deben concentrarse en fuentes de luz, señalética y pequeños detalles. No teñir todo el mapa con neón.
+Los acentos se concentran en fuentes de luz, señalética y pequeños detalles. No teñir todo el mapa con neón.
 
 ---
 
@@ -192,7 +218,9 @@ La iluminación es parte central de la identidad del juego.
 
 ## Regla general
 
-El patio debe tener una base nocturna fría y fuentes locales cálidas o de color. La escena no debe ser simplemente “oscura”; debe tener contraste entre zonas tranquilas y zonas activas.
+El patio tiene una base nocturna fría y fuentes locales cálidas o de color. La escena no debe ser simplemente “oscura”; debe tener contraste entre zonas tranquilas y zonas activas.
+
+Los materiales deben ser legibles sin iluminación final, pero deliberadamente contenidos para dejar espacio a las luces runtime.
 
 ## Piscina
 
@@ -205,7 +233,7 @@ El patio debe tener una base nocturna fría y fuentes locales cálidas o de colo
 
 - apliques y ventanas cálidas;
 - luz contenida, doméstica, no teatral;
-- separación clara de la arquitectura respecto del fondo nocturno.
+- separación clara de arquitectura respecto del fondo nocturno.
 
 ## Barra
 
@@ -264,9 +292,13 @@ Cada superficie debe poder identificarse incluso sin iluminación especial.
 ## Césped
 
 - textura corta y sutil;
-- variación por parches;
+- superficie continua y relativamente uniforme;
+- variación por patrón, densidad y patches verdes;
 - flores y pequeñas plantas solo en lugares elegidos;
-- zonas de paso pueden tener tiles algo gastados.
+- sin tierra marrón;
+- sin `worn`;
+- mayor riqueza vegetal hacia bordes y rincones;
+- centro jugable más tranquilo.
 
 ## Madera
 
@@ -297,7 +329,7 @@ Cada superficie debe poder identificarse incluso sin iluminación especial.
 ## Plantas
 
 - grupos de hojas, no píxeles aleatorios;
-- 2–3 verdes;
+- 2–3 verdes derivados de la atmósfera nocturna;
 - maceta claramente separada de la planta.
 
 ---
@@ -429,12 +461,16 @@ La UI final no queda congelada en esta fase; solo queda fijada su relación est�
 - antialias en assets;
 - objetos con bordes excesivamente negros;
 - césped con checker o ruido repetitivo;
+- césped con hue distinto entre variantes;
+- verdes amarillos/diurnos en materiales base;
+- tierra o `worn` en el césped actual;
 - neón aplicado a todo;
 - halos pintados dentro de cada sprite;
 - props distribuidos uniformemente;
 - NPCs alineados como grilla;
 - sombras blandas realistas mezcladas con sprites sin volumen;
 - copiar literalmente una referencia generada;
+- usar una sheet conceptual como fuente de recortes finales;
 - cambiar el macro-layout para hacer que una ilustración encaje;
 - diseñar assets aislados sin probarlos dentro del mapa.
 
@@ -448,10 +484,10 @@ Para Tier A y Tier B:
 
 1. **Definir función** — qué hace y por qué existe.
 2. **Definir footprint** — tamaño, colisión y espacio jugable actual.
-3. **Calibrar con Tambu** — colocar la silueta/frame real de Tambu al lado y determinar proporción objetivo.
+3. **Calibrar con Tambu** — colocar frame real de Tambu y determinar proporción objetivo.
 4. **Referencia / exploración** — IA, boceto o referencias visuales pueden proponer dirección.
-5. **Diseño aislado** — trabajar el objeto fuera del mapa.
-6. **Normalización** — perspectiva, escala, paleta, bordes y detalle.
+5. **Diseño individual** — una imagen = un asset final candidate.
+6. **Normalización** — perspectiva, escala, paleta, pixel density, bordes y detalle.
 7. **Prueba con Tambu** — asset + Tambu a escala runtime real.
 8. **Integración** — colocarlo en el patio real.
 9. **Iluminación / sombra** — resolver contacto y fuente local.
@@ -459,7 +495,17 @@ Para Tier A y Tier B:
 11. **Variantes** — solo cuando la repetición lo justifique.
 12. **Aprobación** — recién entonces se considera reutilizable.
 
-La IA es una herramienta de exploración y producción asistida. La dirección de arte y la integración siguen siendo decisiones del juego.
+## Regla específica de generación IA
+
+- una imagen = un asset;
+- no sheets como entrega de producción;
+- no collages;
+- no pack presentations para recortar;
+- no atlas conceptuales como fuente de PNG finales;
+- transparencia real cuando corresponda;
+- cualquier sheet puede usarse únicamente como referencia visual.
+
+Ver reglas completas en `docs/PIXEL_ART_STYLE_GUIDE.md`.
 
 ---
 
@@ -517,18 +563,3 @@ Al completar las fases posteriores usando esta dirección, el patio debe:
 - verse coherente incluso sin UI;
 - conservar la identidad y el layout jugable actual;
 - mantener proporciones creíbles respecto de Tambu en todos los objetos humanos.
-
----
-
-# 17. Próximo paso
-
-Con esta baseline definida, el siguiente trabajo visual es construir la **muestra de calibración de Fase 1**, comenzando por:
-
-1. césped;
-2. borde de piscina;
-3. agua;
-4. deck;
-5. iluminación cálida/fría de prueba;
-6. Tambu real como referencia de escala.
-
-No comenzar todavía una reconstrucción completa de barra, DJ o NPCs hasta validar esa muestra.
