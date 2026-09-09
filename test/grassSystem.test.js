@@ -3,7 +3,6 @@ import { existsSync, readFileSync } from 'node:fs';
 import test from 'node:test';
 import {
   createPatioGrassLayout,
-  getGrassBaseKey,
   GRASS_BASE_KEYS,
   GRASS_CALIBRATION_LAYOUT,
 } from '../src/world/grass/grassLayout.js';
@@ -19,45 +18,33 @@ function readPngSize(path) {
   };
 }
 
-test('Night Grass Pack V3 declara el set modular completo con tamaños nativos', () => {
+test('el primer rediseño declara únicamente las cinco texturas aprobadas', () => {
   const expected = {
-    base01: [16, 16], base02: [16, 16], base03: [16, 16], base04: [16, 16],
-    micro01: [16, 16], micro02: [16, 16], micro03: [16, 16], micro04: [16, 16],
-    macroSoft01: [64, 64], macroSoft02: [64, 64], macroDark01: [64, 64],
-    cluster01: [48, 48], cluster02: [48, 48], cluster03: [48, 48], cluster04: [48, 48],
-    cluster05: [48, 48], cluster06: [48, 48], cluster07: [48, 48], cluster08: [48, 48],
-    flowerWhite01: [16, 16], flowerPink01: [16, 16], flowerPink02: [16, 16],
-    leaf01: [16, 16], leaf02: [16, 16], leaf03: [16, 16],
-    smallPlant01: [32, 32], smallPlant02: [32, 32],
-    bushEdge01: [64, 32], bushEdge02: [64, 32],
+    ground01: [1254, 1254], ground02: [1254, 1254], ground03: [1254, 1254],
+    macroSoft01: [1254, 1254], macroSoft02: [1254, 1254],
   };
 
+  assert.deepEqual(Object.keys(GRASS_ASSETS).sort(), Object.keys(expected).sort());
   Object.entries(expected).forEach(([name, [width, height]]) => {
     assert.deepEqual(readPngSize(GRASS_ASSETS[name].path), { width, height });
   });
 });
 
-test('la base usa cuatro variantes deterministas sin checker regular', () => {
-  const first = [];
-  const second = [];
-  for (let y = 0; y < 16; y += 1) {
-    for (let x = 0; x < 24; x += 1) {
-      first.push(getGrassBaseKey(x, y));
-      second.push(getGrassBaseKey(x, y));
-    }
-  }
+test('la superficie usa tres grounds en regiones orgánicas, no una grilla de tiles', () => {
+  const layout = createPatioGrassLayout(PATIO_LAYOUT);
+  const assets = layout.base.map(({ asset }) => asset);
 
-  assert.deepEqual(first, second);
-  assert.equal(new Set(first).size, GRASS_BASE_KEYS.length);
-  assert.notEqual(first.join(','), GRASS_BASE_KEYS.flatMap((key) => [key]).join(','));
+  assert.equal(GRASS_BASE_KEYS.length, 3);
+  assert.equal(assets.filter((asset) => asset === GRASS_ASSETS.ground01.key).length, 1);
+  assert.equal(assets.filter((asset) => asset === GRASS_ASSETS.ground02.key).length, 2);
+  assert.equal(assets.filter((asset) => asset === GRASS_ASSETS.ground03.key).length, 3);
+  assert.ok(layout.base.every(({ points }) => points.length >= 4));
 });
 
-test('la calibración conserva capas Night Grass y zonas de lectura de Tambu', () => {
+test('la calibración conserva base, macros suaves y zonas de lectura de Tambu', () => {
   assert.deepEqual(GRASS_CALIBRATION_LAYOUT.bounds, { x: 0, y: 0, width: 384, height: 256 });
-  assert.equal(GRASS_CALIBRATION_LAYOUT.micro.length, 8);
-  assert.equal(GRASS_CALIBRATION_LAYOUT.macro.length, 3);
-  assert.equal(GRASS_CALIBRATION_LAYOUT.clusters.length, 5);
-  assert.equal(GRASS_CALIBRATION_LAYOUT.accents.length, 5);
+  assert.equal(GRASS_CALIBRATION_LAYOUT.base.length, 3);
+  assert.equal(GRASS_CALIBRATION_LAYOUT.macro.length, 2);
   assert.equal('worn' in GRASS_CALIBRATION_LAYOUT, false);
   assert.notDeepEqual(
     GRASS_CALIBRATION_LAYOUT.tambuSpots.quiet,
@@ -65,28 +52,26 @@ test('la calibración conserva capas Night Grass y zonas de lectura de Tambu', (
   );
 });
 
-test('el patio usa capas verdes dirigidas, sin worn ni tierra', () => {
+test('el patio mantiene el centro limpio y concentra la variación en laterales y bordes', () => {
   const layout = createPatioGrassLayout(PATIO_LAYOUT);
-  const allOverlays = [...layout.micro, ...layout.macro, ...layout.clusters, ...layout.accents];
 
   assert.deepEqual(layout.bounds, PATIO_LAYOUT.terrain.grass);
-  assert.ok(layout.macro.every(({ alpha }) => alpha >= 0.75 && alpha <= 1));
-  assert.ok(layout.micro.length > 0);
-  assert.ok(layout.clusters.length > 0);
-  assert.ok(layout.accents.length > 0);
+  assert.equal(layout.macro.length, 2);
+  assert.ok(layout.macro.every(({ scale }) => scale === 0.35));
+  assert.ok(layout.macro.every(({ x, y }) => x < PATIO_LAYOUT.pool.x - 20 || x > PATIO_LAYOUT.pool.x + PATIO_LAYOUT.pool.width));
   assert.equal('worn' in layout, false);
-  assert.equal(allOverlays.some(({ asset }) => asset.includes('worn')), false);
+  assert.equal('clusters' in layout, false);
+  assert.equal('accents' in layout, false);
 });
 
-test('el renderer usa el orden base, micro, macro, clusters y accents', () => {
+test('el renderer compone base orgánica antes de los macros, sin capas no aprobadas', () => {
   const renderer = readFileSync(new URL('../src/world/grass/createGrass.js', import.meta.url), 'utf8');
-  const microIndex = renderer.indexOf('micro: addLayer');
   const macroIndex = renderer.indexOf('macro: addLayer');
-  const clustersIndex = renderer.indexOf('clusters: addLayer');
-  const accentsIndex = renderer.indexOf('accents: addLayer');
 
-  assert.ok(microIndex > 0);
-  assert.ok(microIndex < macroIndex && macroIndex < clustersIndex && clustersIndex < accentsIndex);
+  assert.ok(macroIndex > 0);
+  assert.ok(renderer.indexOf('base: baseLayers') < macroIndex);
+  assert.match(renderer, /tileSprite/);
+  assert.doesNotMatch(renderer, /clusters|accents|micro/);
   assert.doesNotMatch(renderer, /worn/);
 });
 

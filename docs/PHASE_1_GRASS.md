@@ -1,7 +1,7 @@
 # Tambu Game — Fase 1 · Night Grass
 
-**Estado runtime actual:** Night Grass Pack V3 integrado.  
-**Estado de arte:** V3 NO está congelado como arte final; se está produciendo una nueva familia de césped nocturno bajo `PIXEL_ART_STYLE_GUIDE.md`.  
+**Estado runtime actual:** primer rediseño de Ground + Macro integrado.
+**Estado de arte:** esta pasada usa únicamente tres grounds aprobados y dos macros suaves aprobados.
 **Scope:** solo césped; no autoriza cambios de deck, piscina, barra, DJ, NPCs ni iluminación final.
 
 ---
@@ -14,7 +14,7 @@ Para cualquier asset nuevo de césped prevalece:
 2. `docs/ART_DIRECTION.md` — objetivo visual y jerarquía.
 3. este archivo — decisiones específicas de la Fase 1.
 
-Los PNG actualmente integrados del Pack V3 continúan funcionando únicamente como implementación runtime mientras se aprueba su reemplazo.
+El runtime no carga los assets V3 de micro, clusters, acentos, setos ni macro oscuro durante esta pasada.
 
 La hoja/reference de cualquier pack conceptual es **solo referencia**. Nunca se recorta para fabricar assets finales.
 
@@ -32,7 +32,7 @@ La hoja/reference de cualquier pack conceptual es **solo referencia**. Nunca se 
 - Variaciones por patrón, densidad y valor; no por cambio evidente de hue.
 - Mayor riqueza vegetal hacia bordes y rincones.
 - Centro jugable más tranquilo.
-- Flores/hojas son acentos escasos.
+- Flores/hojas quedan para una pasada posterior.
 - El césped nunca compite con piscina, Tambu, NPCs, barra o DJ.
 
 ---
@@ -126,13 +126,15 @@ Una textura no está aprobada solo porque se vea bien como imagen individual.
 
 # Arquitectura runtime actual
 
-El sistema V3 existente continúa renderizando conceptualmente:
+La primera composición integrada renderiza:
 
 ```text
-base → micro → macro → clusters → accents
+ground base → regiones laterales/rincones → macro suave
 ```
 
-La arquitectura puede reutilizarse si sirve al nuevo arte, pero **no obliga a mantener nombres, tamaños o PNGs del pack anterior**.
+La distribución apunta aproximadamente a 70% `ground_01`, 20% `ground_02` y 10% `ground_03`: el centro alrededor de la piscina permanece más uniforme y la variación queda en laterales/bordes. Solo se usan `grass_macro_soft_01` y `grass_macro_soft_02`, con una cobertura visual moderada fuera del centro jugable.
+
+Clusters, flores, hojas, setos, worn, tierra y `grass_macro_dark_01` no forman parte de esta integración.
 
 No se reintroduce `worn`.
 
@@ -156,21 +158,10 @@ Durante desarrollo se mantienen disponibles:
 ```
 
 `quiet` debe mostrar Tambu sobre ground tranquilo.  
-`dense` debe probar vegetación de borde/cluster sin cubrir su silueta.
+`dense` debe probar la lectura junto a una variación macro suave sin cubrir su silueta.
 
 ---
 
-# Criterio para reemplazar V3
+# Próxima validación
 
-No reemplazar el pack runtime actual hasta tener como mínimo:
-
-- 3 ground candidates coherentes entre sí;
-- repeat test aprobado;
-- 1 macro soft aprobado;
-- 1 cluster soft aprobado;
-- comparación con Tambu a zoom 1;
-- revisión de color conjunta en una misma escena.
-
-Cuando esos elementos estén aprobados, recién entonces se prepara el pack de integración para Work.
-
-No avanzar a Deck como producción final hasta cerrar esta calibración del césped.
+Antes de extender el sistema con clusters o acentos, verificar la composición actual junto a Tambu a zoom 1 y confirmar que los macros no dominan el mapa. No avanzar a Deck como producción final hasta cerrar esta calibración del césped.

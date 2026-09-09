@@ -1,33 +1,40 @@
-import { getGrassBaseKey } from './grassLayout.js';
-
 function addLayer(scene, items, depth) {
-  return items.map(({ asset, x, y, alpha = 1 }) => scene.add.image(x, y, asset)
+  return items.map(({ asset, x, y, alpha = 1, scale = 1 }) => scene.add.image(x, y, asset)
     .setOrigin(0)
     .setDepth(depth)
-    .setAlpha(alpha));
+    .setAlpha(alpha)
+    .setScale(scale));
+}
+
+function addGroundRegion(scene, bounds, { asset, points }, depth) {
+  const texture = scene.add.tileSprite(
+    bounds.x,
+    bounds.y,
+    bounds.width,
+    bounds.height,
+    asset,
+  ).setOrigin(0).setDepth(depth);
+
+  const maskShape = scene.make.graphics({ add: false });
+  maskShape.fillStyle(0xffffff, 1);
+  maskShape.beginPath();
+  points.forEach(({ x, y }, index) => {
+    if (index === 0) maskShape.moveTo(x, y);
+    else maskShape.lineTo(x, y);
+  });
+  maskShape.closePath();
+  maskShape.fillPath();
+  texture.setMask(maskShape.createGeometryMask());
+
+  return { texture, maskShape };
 }
 
 export function createGrass(scene, layout, { depth = -40 } = {}) {
-  const { bounds, tileSize, seed, micro, macro, clusters, accents } = layout;
-  const base = [];
-  const columns = Math.ceil(bounds.width / tileSize);
-  const rows = Math.ceil(bounds.height / tileSize);
-
-  for (let row = 0; row < rows; row += 1) {
-    for (let column = 0; column < columns; column += 1) {
-      base.push(scene.add.image(
-        bounds.x + column * tileSize,
-        bounds.y + row * tileSize,
-        getGrassBaseKey(column, row, seed),
-      ).setOrigin(0).setDepth(depth));
-    }
-  }
+  const { bounds, base, macro } = layout;
+  const baseLayers = base.map((region) => addGroundRegion(scene, bounds, region, depth));
 
   return {
-    base,
-    micro: addLayer(scene, micro, depth + 1),
-    macro: addLayer(scene, macro, depth + 2),
-    clusters: addLayer(scene, clusters, depth + 3),
-    accents: addLayer(scene, accents, depth + 4),
+    base: baseLayers,
+    macro: addLayer(scene, macro, depth + 1),
   };
 }
