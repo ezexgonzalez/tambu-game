@@ -6,6 +6,7 @@ import {
   getGrassGroundKey,
   GRASS_BASE_KEYS,
   GRASS_CALIBRATION_LAYOUT,
+  GRASS_DECAL_KEYS,
 } from '../src/world/grass/grassLayout.js';
 import { PATIO_LAYOUT } from '../src/world/patioLayout.js';
 import { GRASS_ASSETS } from '../src/world/grass/preloadGrass.js';
@@ -54,10 +55,12 @@ function getTileShareInBounds(layout, area, key) {
   return matching / count;
 }
 
-test('el Grass Pass declara tres grounds runtime y dos macros sin assets extra', () => {
+test('el Grass Pass declara los grounds, macros y decals aprobados', () => {
   const expected = {
     ground01: [64, 64], ground02: [64, 64], ground03: [64, 64],
-    macroSoft01: [256, 256], macroSoft02: [256, 256],
+    macroSoft01: [192, 192], macroSoft02: [192, 192], macroDense01: [192, 192],
+    tuftSmall01: [16, 16], tuftSmall02: [16, 16], tuftSmall03: [16, 16],
+    tuftPair01: [24, 24],
   };
 
   assert.deepEqual(Object.keys(GRASS_ASSETS).sort(), Object.keys(expected).sort());
@@ -117,9 +120,10 @@ test('el centro cercano a la piscina contiene más ground01 que los bordes', () 
   assert.ok(centerShare > edgeShare);
 });
 
-test('la calibración usa la misma grilla dirigida, macros y spots de Tambu', () => {
+test('la calibración usa la misma grilla dirigida, overlays y spots de Tambu', () => {
   assert.deepEqual(GRASS_CALIBRATION_LAYOUT.bounds, { x: 0, y: 0, width: 384, height: 256 });
-  assert.equal(GRASS_CALIBRATION_LAYOUT.macro.length, 2);
+  assert.equal(GRASS_CALIBRATION_LAYOUT.macro.length, 3);
+  assert.ok(GRASS_CALIBRATION_LAYOUT.decals.length > 0);
   assert.equal('worn' in GRASS_CALIBRATION_LAYOUT, false);
   assert.notDeepEqual(
     GRASS_CALIBRATION_LAYOUT.tambuSpots.quiet,
@@ -127,26 +131,63 @@ test('la calibración usa la misma grilla dirigida, macros y spots de Tambu', ()
   );
 });
 
-test('el patio conserva macros, sin worn, clusters ni accents', () => {
+test('el patio suma macros y decals deterministas sin capas ajenas', () => {
   const layout = createPatioGrassLayout(PATIO_LAYOUT);
+  const repeatedLayout = createPatioGrassLayout(PATIO_LAYOUT);
 
   assert.deepEqual(layout.bounds, PATIO_LAYOUT.terrain.grass);
-  assert.equal(layout.macro.length, 2);
-  assert.ok(layout.macro.every(({ alpha, scale }) => alpha === 0.72 && scale === 1));
+  assert.equal(layout.macro.length, 3);
+  assert.deepEqual(layout.decals, repeatedLayout.decals);
+  assert.ok(layout.decals.length > 0);
+  assert.ok(layout.decals.every(({ asset }) => GRASS_DECAL_KEYS.includes(asset)));
+  assert.ok(layout.macro.every(({ alpha, scale }) => alpha <= 0.62 && scale === 1));
   assert.equal('worn' in layout, false);
   assert.equal('clusters' in layout, false);
   assert.equal('accents' in layout, false);
 });
 
-test('el renderer compone tiles base completos antes de los macros sin masks', () => {
+test('los decals dejan respirar el centro y concentran vida en los bordes', () => {
+  const layout = createPatioGrassLayout(PATIO_LAYOUT);
+  const { bounds, distribution, decals } = layout;
+  const inset = distribution.edgeSize;
+  const center = {
+    x: Math.max(distribution.center.x, bounds.x + inset),
+    y: Math.max(distribution.center.y, bounds.y + inset),
+    right: Math.min(distribution.center.x + distribution.center.width, bounds.x + bounds.width - inset),
+    bottom: Math.min(distribution.center.y + distribution.center.height, bounds.y + bounds.height - inset),
+  };
+  const centerCount = decals.filter(({ x, y }) => (
+    x >= center.x && x < center.right && y >= center.y && y < center.bottom
+  )).length;
+  const edgeCount = decals.filter(({ x, y }) => (
+    x < bounds.x + inset
+    || x >= bounds.x + bounds.width - inset
+    || y < bounds.y + inset
+    || y >= bounds.y + bounds.height - inset
+  )).length;
+  const centerDensity = centerCount / ((center.right - center.x) * (center.bottom - center.y));
+  const edgeArea = bounds.width * bounds.height
+    - (bounds.width - inset * 2) * (bounds.height - inset * 2);
+
+  assert.ok(edgeCount / edgeArea > centerDensity);
+  assert.ok(decals.length < 100);
+  assert.ok(decals.some(({ flipX, flipY }) => flipX || flipY));
+});
+
+test('el renderer compone base, macros y decals en orden sin masks ni random', () => {
   const renderer = readFileSync(new URL('../src/world/grass/createGrass.js', import.meta.url), 'utf8');
   const macroIndex = renderer.indexOf('macro: addLayer');
+  const decalsIndex = renderer.indexOf('decals: addLayer');
+  const layoutSource = readFileSync(new URL('../src/world/grass/grassLayout.js', import.meta.url), 'utf8');
 
   assert.ok(macroIndex > 0);
   assert.ok(renderer.indexOf('base,') < macroIndex);
+  assert.ok(decalsIndex > macroIndex);
   assert.match(renderer, /scene\.add\.image/);
+  assert.match(renderer, /setFlipX|setFlipY/);
   assert.doesNotMatch(renderer, /enableFilters|addMask|createGeometryMask|\.setMask\s*\(/);
   assert.doesNotMatch(renderer, /clusters|accents|micro|worn/);
+  assert.doesNotMatch(layoutSource, /Math\.random/);
 });
 
 test('el patio no reactiva render procedural, worn ni el generador provisional', () => {

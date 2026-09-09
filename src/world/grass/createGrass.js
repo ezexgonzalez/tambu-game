@@ -1,15 +1,25 @@
 import { getGrassGroundKey } from './grassLayout.js';
 
 function addLayer(scene, items, depth) {
-  return items.map(({ asset, x, y, alpha = 1, scale = 1 }) => scene.add.image(x, y, asset)
+  return items.map(({
+    asset,
+    x,
+    y,
+    alpha = 1,
+    scale = 1,
+    flipX = false,
+    flipY = false,
+  }) => scene.add.image(x, y, asset)
     .setOrigin(0)
     .setDepth(depth)
     .setAlpha(alpha)
-    .setScale(scale));
+    .setScale(scale)
+    .setFlipX(flipX)
+    .setFlipY(flipY));
 }
 
 export function createGrass(scene, layout, { depth = -40 } = {}) {
-  const { bounds, tileSize, macro } = layout;
+  const { bounds, tileSize, macro, decals = [] } = layout;
   const base = [];
   const columns = Math.ceil(bounds.width / tileSize);
   const rows = Math.ceil(bounds.height / tileSize);
@@ -27,5 +37,6 @@ export function createGrass(scene, layout, { depth = -40 } = {}) {
   return {
     base,
     macro: addLayer(scene, macro, depth + 1),
+    decals: addLayer(scene, decals, depth + 2),
   };
 }
