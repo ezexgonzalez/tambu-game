@@ -38,6 +38,7 @@ test('la superficie usa tres grounds en regiones orgánicas, no una grilla de ti
   assert.equal(assets.filter((asset) => asset === GRASS_ASSETS.ground01.key).length, 1);
   assert.equal(assets.filter((asset) => asset === GRASS_ASSETS.ground02.key).length, 2);
   assert.equal(assets.filter((asset) => asset === GRASS_ASSETS.ground03.key).length, 3);
+  assert.equal(layout.base[0].full, true);
   assert.ok(layout.base.every(({ points }) => points.length >= 4));
 });
 
@@ -71,6 +72,10 @@ test('el renderer compone base orgánica antes de los macros, sin capas no aprob
   assert.ok(macroIndex > 0);
   assert.ok(renderer.indexOf('base: baseLayers') < macroIndex);
   assert.match(renderer, /tileSprite/);
+  assert.match(renderer, /enableFilters\(\)/);
+  assert.match(renderer, /filters\.internal\.addMask/);
+  assert.doesNotMatch(renderer, /createGeometryMask/);
+  assert.doesNotMatch(renderer, /\.setMask\s*\(/);
   assert.doesNotMatch(renderer, /clusters|accents|micro/);
   assert.doesNotMatch(renderer, /worn/);
 });

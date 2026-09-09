@@ -13,7 +13,7 @@ function polygon(points) {
 export const GRASS_CALIBRATION_LAYOUT = {
   bounds: { x: 0, y: 0, width: 384, height: 256 },
   base: [
-    { asset: GRASS_ASSETS.ground01.key, points: polygon([[0, 0], [384, 0], [384, 256], [0, 256]]) },
+    { asset: GRASS_ASSETS.ground01.key, full: true, points: polygon([[0, 0], [384, 0], [384, 256], [0, 256]]) },
     { asset: GRASS_ASSETS.ground02.key, points: polygon([[0, 0], [72, 0], [92, 60], [64, 122], [84, 196], [0, 220]]) },
     { asset: GRASS_ASSETS.ground03.key, points: polygon([[384, 172], [306, 192], [280, 256], [384, 256]]) },
   ],
@@ -35,7 +35,7 @@ export function createPatioGrassLayout({ terrain }) {
     // Base 01 remains the calm, continuous surface. The two overlays deliberately live
     // at the sides and corners so the pool's playable centre stays visually quiet.
     base: [
-      { asset: GRASS_ASSETS.ground01.key, points: polygon([[0, 150], [1680, 150], [1680, 960], [0, 960]]) },
+      { asset: GRASS_ASSETS.ground01.key, full: true, points: polygon([[0, 150], [1680, 150], [1680, 960], [0, 960]]) },
       {
         asset: GRASS_ASSETS.ground02.key,
         points: polygon([[0, 150], [238, 150], [200, 252], [262, 350], [190, 450], [248, 540], [212, 620], [250, 720], [0, 720]]),
