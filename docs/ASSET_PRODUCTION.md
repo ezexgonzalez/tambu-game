@@ -1,14 +1,24 @@
-# Asset Production Pack v0.1 — Patio
+# Asset Production Pack v0.2 — Patio
 
 Este documento define qué arte producir primero para convertir `PatioScene` de prototipo técnico a escena pixel-art real sin perder tiempo en assets prematuros.
 
-## Objetivo de v0.1 visual
+## Fuentes de verdad
+
+Antes de producir cualquier asset consultar:
+
+- `docs/ART_DIRECTION.md` → visión, jerarquía y atmósfera.
+- `docs/PIXEL_ART_STYLE_GUIDE.md` → paletas estrictas, noche, pixel density, IA, transparencia y validación.
+- `docs/HUMAN_SCALE.md` → proporciones y escala respecto de Tambu.
+
+Si un backlog antiguo contradice una regla nueva de estilo, prevalece `PIXEL_ART_STYLE_GUIDE.md`.
+
+## Objetivo de v0.2 visual
 
 La escena debe dejar de sentirse como formas dibujadas sobre un fondo y empezar a leerse como un videojuego 2D coherente.
 
 Al terminar este pack deben estar resueltos:
 
-- suelo y césped con textura real;
+- suelo y césped con textura real nocturna;
 - piscina reconocible y con profundidad visual;
 - casa/fondo con ventanas y puerta de BAÑO;
 - barra y zona DJ con identidad;
@@ -20,18 +30,20 @@ Al terminar este pack deben estar resueltos:
 
 ## Estándar visual
 
-- Tile base: `16x16 px`.
+- Grid lógico: `16x16 px`.
+- La resolución visual de un asset puede superar 16x16 y ocupar múltiples tiles.
 - Tambu es la unidad humana oficial del juego.
 - Frame fuente de Tambu: `32x48 px`.
 - Escala runtime de Tambu: `1.24`.
 - Envolvente nominal runtime: `39.68x59.52 world px` con cámara `zoom = 1`.
 - El resto de personajes, objetos y arquitectura deben calibrarse contra Tambu; no se debe reescalar a Tambu para hacer encajar assets nuevos.
 - Pixel art limpio, de lectura rápida y detalle medio.
-- Máximo 2–3 tonos principales por material/objeto.
+- Máximo 2–3 tonos principales por material/objeto normal.
 - `image-rendering: pixelated` siempre activo.
 - Evitar blur y antialias dentro del arte.
-- Las luces y glows se agregan desde Phaser/CSS, no pintados de forma exagerada dentro de los sprites.
-- Consultar `docs/HUMAN_SCALE.md` para cualquier decisión de escala.
+- Todo asset nace cromáticamente preparado para noche.
+- Las luces y glows grandes se agregan desde Phaser/CSS, no pintados dentro de sprites.
+- Generación IA: **una imagen = un asset**. Nunca sheets/collages como fuente de producción.
 
 ## Qué sigue provisional
 
@@ -52,23 +64,79 @@ El objetivo es validar primero el lenguaje visual del patio.
 
 # FASE 1 — Kit mínimo del entorno
 
-## 1. Césped
+## 1. Césped nocturno
 
-### Assets reales
-- `grass_01.png`
-- `grass_02.png`
-- `grass_03.png`
-- `grass_04.png`
-- `grass_worn_01.png`
-- `grass_worn_02.png`
+El césped es el primer material a cerrar porque ocupa la mayor superficie del patio.
 
-### Reglas
-- variación sutil, no ruido excesivo;
-- 3 verdes principales;
-- zonas gastadas cerca de barra, piscina y recorridos.
+### Producción inmediata — orden de prioridad
+
+#### Ground obligatorio
+
+1. `grass_ground_01.png`
+2. `grass_ground_02.png`
+3. `grass_ground_03.png`
+4. `grass_ground_04.png` solo si la repetición lo justifica
+
+#### Macro variation
+
+5. `grass_macro_soft_01.png`
+6. `grass_macro_soft_02.png`
+7. `grass_macro_dark_01.png`
+
+#### Vegetación de borde
+
+8. `grass_cluster_soft_01.png`
+9. `grass_cluster_soft_02.png`
+10. `bush_edge_horizontal_01.png`
+11. `bush_edge_horizontal_02.png` si se necesita evitar repetición
+12. corners/verticales solo cuando el mapa los requiera
+
+#### Accents posteriores
+
+- `flower_white_01.png`
+- `flower_pink_01.png`
+- `leaf_01.png`
+- pequeñas plantas
+
+### Reglas cerradas
+
+- paleta Night Grass oficial de `PIXEL_ART_STYLE_GUIDE.md`;
+- verde frío / teal profundo;
+- superficie relativamente uniforme y suave;
+- variantes por patrón/densidad, no por cambio de hue;
+- todo el patio visualmente verde;
+- **sin `worn`**;
+- **sin tierra marrón**;
+- **sin caminos gastados**;
+- sin checker;
+- sin microdetalle de alto contraste repartido uniformemente;
+- clusters más densos hacia bordes y rincones;
+- centro jugable más limpio;
+- flores y hojas solo como acentos raros.
+
+### Regla IA
+
+Cada asset se genera como imagen independiente.
+
+No crear una sheet completa para después recortarla.
+
+### Gate de aprobación ground
+
+Cada `grass_ground_*` debe:
+
+1. pertenecer a la misma paleta;
+2. pasar repeat test mínimo `3x3`;
+3. no mostrar costuras;
+4. no mostrar diagonales/patrones obvios;
+5. funcionar junto a otra variante;
+6. verse correctamente a zoom `1`;
+7. mantener Tambu legible a `scale: 1.24`.
 
 ### Reemplaza
-El checker verde generado por `Phaser.Graphics`.
+
+El sistema visual provisional de césped cuando la nueva familia esté aprobada. La implementación actual no se reemplaza por assets experimentales aislados.
+
+Ver `docs/PHASE_1_GRASS.md`.
 
 ---
 
@@ -82,8 +150,9 @@ El checker verde generado por `Phaser.Graphics`.
 
 ### Reglas
 - camino cálido, contrastando con el césped;
-- madera oscura/cálida para el deck;
-- bordes claros para facilitar lectura de colisiones.
+- madera oscura/cálida ya adaptada al ambiente nocturno;
+- bordes claros para facilitar lectura de colisiones;
+- paleta y pixel density según `PIXEL_ART_STYLE_GUIDE.md`.
 
 ---
 
@@ -307,7 +376,7 @@ Más energía y presencia. Silueta/pose más dinámica.
 ### Cami
 Más segura/filosa. Diferenciar por pelo, outfit y postura.
 
-### Alcance v0.1
+### Alcance v0.2
 Un idle claro por personaje. Las animaciones de charla vienen después.
 
 ### Regla proporcional
@@ -317,7 +386,7 @@ Deben compartir el mismo sistema humano de Tambu; diferenciarlas por diseño, no
 
 ## 4. Amigos reales
 
-En v0.1 pueden seguir con placeholder mejorado.
+En v0.2 pueden seguir con placeholder mejorado.
 
 Orden futuro recomendado cuando lleguen las fotos:
 
@@ -406,7 +475,7 @@ public/assets/
 
 # Orden exacto de implementación
 
-1. Césped real.
+1. Césped nocturno real y aprobado.
 2. Camino/deck.
 3. Piscina real.
 4. Casa + BAÑO.
@@ -423,7 +492,7 @@ No pasar al siguiente mapa hasta que este conjunto defina un lenguaje visual reu
 
 ---
 
-# Criterio de aprobación v0.1
+# Criterio de aprobación v0.2
 
 El pack se considera exitoso cuando:
 
@@ -435,4 +504,5 @@ El pack se considera exitoso cuando:
 - los objetos ya no parecen simples rectángulos de prototipo;
 - las colisiones continúan siendo legibles visualmente;
 - el mapa se siente poblado pero no saturado;
-- el ambient light complementa la escena sin competir con ella.
+- el ambient light complementa la escena sin competir con ella;
+- los assets parecen pertenecer al mismo juego incluso antes de la iluminación dinámica.
