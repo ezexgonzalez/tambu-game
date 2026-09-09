@@ -6,17 +6,26 @@ export const GRASS_BASE_KEYS = [
   GRASS_ASSETS.ground03.key,
 ];
 
-function polygon(points) {
-  return points.map(([x, y]) => ({ x, y }));
+function createDistribution({ center, edgeSize }) {
+  return {
+    center,
+    edgeSize,
+    weights: {
+      center: [88, 12, 0],
+      sides: [65, 25, 10],
+      edges: [56, 27, 17],
+    },
+  };
 }
 
 export const GRASS_CALIBRATION_LAYOUT = {
   bounds: { x: 0, y: 0, width: 384, height: 256 },
-  base: [
-    { asset: GRASS_ASSETS.ground01.key, full: true, points: polygon([[0, 0], [384, 0], [384, 256], [0, 256]]) },
-    { asset: GRASS_ASSETS.ground02.key, points: polygon([[0, 0], [72, 0], [92, 60], [64, 122], [84, 196], [0, 220]]) },
-    { asset: GRASS_ASSETS.ground03.key, points: polygon([[384, 172], [306, 192], [280, 256], [384, 256]]) },
-  ],
+  tileSize: 64,
+  seed: 417,
+  distribution: createDistribution({
+    center: { x: 96, y: 56, width: 192, height: 128 },
+    edgeSize: 48,
+  }),
   macro: [
     { asset: GRASS_ASSETS.macroSoft01.key, x: 6, y: 76, scale: 0.16 },
     { asset: GRASS_ASSETS.macroSoft02.key, x: 300, y: 8, scale: 0.13 },
@@ -27,30 +36,62 @@ export const GRASS_CALIBRATION_LAYOUT = {
   },
 };
 
-export function createPatioGrassLayout({ terrain }) {
+export function createPatioGrassLayout({ terrain, pool }) {
   const { grass } = terrain;
 
   return {
     bounds: grass,
-    // Base 01 remains the calm, continuous surface. The two overlays deliberately live
-    // at the sides and corners so the pool's playable centre stays visually quiet.
-    base: [
-      { asset: GRASS_ASSETS.ground01.key, full: true, points: polygon([[0, 150], [1680, 150], [1680, 960], [0, 960]]) },
-      {
-        asset: GRASS_ASSETS.ground02.key,
-        points: polygon([[0, 150], [238, 150], [200, 252], [262, 350], [190, 450], [248, 540], [212, 620], [250, 720], [0, 720]]),
+    tileSize: 64,
+    seed: 9721,
+    distribution: createDistribution({
+      center: {
+        x: pool.x - 160,
+        y: terrain.deck.y + terrain.deck.height,
+        width: pool.width + 320,
+        height: pool.height + 180,
       },
-      {
-        asset: GRASS_ASSETS.ground02.key,
-        points: polygon([[1680, 150], [1442, 150], [1478, 252], [1418, 350], [1490, 450], [1432, 540], [1468, 620], [1430, 720], [1680, 720]]),
-      },
-      { asset: GRASS_ASSETS.ground03.key, points: polygon([[0, 758], [176, 744], [308, 826], [274, 960], [0, 960]]) },
-      { asset: GRASS_ASSETS.ground03.key, points: polygon([[1680, 740], [1510, 754], [1380, 852], [1430, 960], [1680, 960]]) },
-      { asset: GRASS_ASSETS.ground03.key, points: polygon([[0, 150], [144, 150], [192, 222], [130, 286], [0, 270]]) },
-    ],
+      edgeSize: 128,
+    }),
     macro: [
       { asset: GRASS_ASSETS.macroSoft01.key, x: 44, y: 360, scale: 0.35 },
       { asset: GRASS_ASSETS.macroSoft02.key, x: 1294, y: 680, scale: 0.35 },
     ],
   };
+}
+
+function hashTile(x, y, seed) {
+  let value = (x * 374761393 + y * 668265263 + seed * 1442695041) >>> 0;
+  value = (value ^ (value >>> 13)) * 1274126177;
+  return (value ^ (value >>> 16)) >>> 0;
+}
+
+function isWithin({ x, y, width, height }, pointX, pointY) {
+  return pointX >= x && pointX < x + width && pointY >= y && pointY < y + height;
+}
+
+function getZoneWeights(layout, worldX, worldY) {
+  const { bounds, distribution } = layout;
+
+  if (isWithin(distribution.center, worldX, worldY)) {
+    return distribution.weights.center;
+  }
+
+  const edgeSize = distribution.edgeSize;
+  const isEdge = worldX < bounds.x + edgeSize
+    || worldX >= bounds.x + bounds.width - edgeSize
+    || worldY >= bounds.y + bounds.height - edgeSize;
+
+  return isEdge ? distribution.weights.edges : distribution.weights.sides;
+}
+
+export function getGrassGroundKey(column, row, layout) {
+  const { bounds, tileSize, seed } = layout;
+  const worldX = bounds.x + column * tileSize + tileSize / 2;
+  const worldY = bounds.y + row * tileSize + tileSize / 2;
+  const [ground01, ground02] = getZoneWeights(layout, worldX, worldY);
+  const bucket = hashTile(column, row, seed) % 100;
+
+  if (bucket < ground01) return GRASS_BASE_KEYS[0];
+  if (bucket < ground01 + ground02) return GRASS_BASE_KEYS[1];
+  return GRASS_BASE_KEYS[2];
 }
