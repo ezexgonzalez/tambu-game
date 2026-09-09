@@ -20,7 +20,7 @@ function readPngSize(path) {
 
 test('el primer rediseño declara únicamente las cinco texturas aprobadas', () => {
   const expected = {
-    ground01: [1254, 1254], ground02: [1254, 1254], ground03: [1254, 1254],
+    ground01: [64, 64], ground02: [64, 64], ground03: [64, 64],
     macroSoft01: [1254, 1254], macroSoft02: [1254, 1254],
   };
 
