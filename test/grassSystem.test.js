@@ -57,7 +57,7 @@ function getTileShareInBounds(layout, area, key) {
 test('el Grass Pass declara tres grounds runtime y dos macros sin assets extra', () => {
   const expected = {
     ground01: [64, 64], ground02: [64, 64], ground03: [64, 64],
-    macroSoft01: [1254, 1254], macroSoft02: [1254, 1254],
+    macroSoft01: [256, 256], macroSoft02: [256, 256],
   };
 
   assert.deepEqual(Object.keys(GRASS_ASSETS).sort(), Object.keys(expected).sort());
@@ -132,7 +132,7 @@ test('el patio conserva macros, sin worn, clusters ni accents', () => {
 
   assert.deepEqual(layout.bounds, PATIO_LAYOUT.terrain.grass);
   assert.equal(layout.macro.length, 2);
-  assert.ok(layout.macro.every(({ scale }) => scale === 0.35));
+  assert.ok(layout.macro.every(({ alpha, scale }) => alpha === 0.72 && scale === 1));
   assert.equal('worn' in layout, false);
   assert.equal('clusters' in layout, false);
   assert.equal('accents' in layout, false);

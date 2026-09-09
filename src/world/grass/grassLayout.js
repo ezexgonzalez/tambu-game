@@ -27,8 +27,8 @@ export const GRASS_CALIBRATION_LAYOUT = {
     edgeSize: 48,
   }),
   macro: [
-    { asset: GRASS_ASSETS.macroSoft01.key, x: 6, y: 76, scale: 0.16 },
-    { asset: GRASS_ASSETS.macroSoft02.key, x: 300, y: 8, scale: 0.13 },
+    { asset: GRASS_ASSETS.macroSoft01.key, x: 8, y: 72, alpha: 0.72, scale: 0.72 },
+    { asset: GRASS_ASSETS.macroSoft02.key, x: 196, y: 8, alpha: 0.72, scale: 0.72 },
   ],
   tambuSpots: {
     quiet: { x: 192, y: 136 },
@@ -53,8 +53,8 @@ export function createPatioGrassLayout({ terrain, pool }) {
       edgeSize: 128,
     }),
     macro: [
-      { asset: GRASS_ASSETS.macroSoft01.key, x: 44, y: 360, scale: 0.35 },
-      { asset: GRASS_ASSETS.macroSoft02.key, x: 1294, y: 680, scale: 0.35 },
+      { asset: GRASS_ASSETS.macroSoft01.key, x: 44, y: 360, alpha: 0.72, scale: 1 },
+      { asset: GRASS_ASSETS.macroSoft02.key, x: 1294, y: 680, alpha: 0.72, scale: 1 },
     ],
   };
 }
