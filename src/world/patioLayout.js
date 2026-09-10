@@ -62,9 +62,6 @@ const DJ = {
   y: 212,
   width: 322,
   height: 126,
-  booth: { offsetX: 26, offsetY: 2, width: 270, height: 122 },
-  counter: { offsetX: 42, offsetY: 98, width: 238, height: 24 },
-  label: { offsetX: 161, offsetY: 16 },
   speakers: [
     { x: 92, y: 225, width: 48, height: 94 },
     { x: 414, y: 225, width: 48, height: 94 },

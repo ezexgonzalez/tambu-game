@@ -4,12 +4,14 @@ import { createGrass } from './grass/createGrass.js';
 import { createPatioGrassLayout } from './grass/grassLayout.js';
 import { preloadGrass } from './grass/preloadGrass.js';
 import { createDeckSurface, preloadDeckSurface } from './deck/deckSurface.js';
+import { createDjBooth, preloadDjBooth } from './dj/djBooth.js';
 import { createHouseFacade, preloadHouseFacade } from './house/houseFacade.js';
 import { PATIO_LAYOUT } from './patioLayout.js';
 
 export function preloadPatioWorld(scene) {
   preloadGrass(scene);
   preloadDeckSurface(scene);
+  preloadDjBooth(scene);
   preloadHouseFacade(scene);
   scene.load.spritesheet('terrain', '/assets/tiles/terrain/terrain.png', {
     frameWidth: TILE_SIZE,
@@ -218,7 +220,7 @@ function drawArchitectureAndProps(scene) {
 
   createHouseFacade(scene, PATIO_LAYOUT);
   drawBar(scene, graphics);
-  drawDj(scene, graphics);
+  createDjBooth(scene, PATIO_LAYOUT.dj);
 
   PATIO_LAYOUT.partyTables.forEach(({ x, y }) => drawPartyTable(graphics, x, y));
   drawCooler(graphics);
@@ -313,103 +315,6 @@ function drawBarLamp(graphics, x, y) {
   graphics.fillRect(x - 4, y - 7, 8, 12);
   graphics.fillStyle(0xfff0b2, 1);
   graphics.fillRect(x - 1, y - 5, 3, 8);
-}
-
-function drawDj(scene, graphics) {
-  const { dj } = PATIO_LAYOUT;
-  const { booth, counter, label } = dj;
-
-  graphics.fillStyle(0x080a12, 0.4);
-  graphics.fillRect(dj.x + 8, dj.y + 9, dj.width + 5, dj.height + 5);
-  graphics.fillStyle(0x171525, 1);
-  graphics.fillRect(dj.x + booth.offsetX, dj.y + booth.offsetY, booth.width, booth.height);
-  graphics.fillStyle(0x0b0d19, 1);
-  graphics.fillRect(dj.x + booth.offsetX + 8, dj.y + booth.offsetY + 18, booth.width - 16, 71);
-
-  graphics.fillStyle(0x45415f, 1);
-  graphics.fillRect(dj.x + booth.offsetX, dj.y + booth.offsetY, booth.width, 8);
-  graphics.fillRect(dj.x + booth.offsetX, dj.y + booth.offsetY, 8, 89);
-  graphics.fillRect(dj.x + booth.offsetX + booth.width - 8, dj.y + booth.offsetY, 8, 89);
-  graphics.lineStyle(2, 0x7a75a0, 0.7);
-  for (let x = dj.x + booth.offsetX + 10; x < dj.x + booth.offsetX + booth.width - 10; x += 24) {
-    graphics.lineBetween(x, dj.y + booth.offsetY + 2, x + 12, dj.y + booth.offsetY + 7);
-    graphics.lineBetween(x + 12, dj.y + booth.offsetY + 2, x, dj.y + booth.offsetY + 7);
-  }
-
-  graphics.fillStyle(0x7b45ff, 0.05);
-  graphics.fillTriangle(dj.x + 75, dj.y + 30, dj.x + 26, dj.y + 99, dj.x + 131, dj.y + 99);
-  graphics.fillStyle(0x4aa9ff, 0.05);
-  graphics.fillTriangle(dj.x + 245, dj.y + 30, dj.x + 190, dj.y + 99, dj.x + 296, dj.y + 99);
-  drawDjLight(graphics, dj.x + 74, dj.y + 25, 0xa45bff);
-  drawDjLight(graphics, dj.x + 246, dj.y + 25, 0x61bcff);
-
-  graphics.fillStyle(0x5a5475, 1);
-  graphics.fillRect(dj.x + counter.offsetX, dj.y + counter.offsetY - 10, counter.width, counter.height + 10);
-  graphics.fillStyle(0x8f7bc2, 0.55);
-  graphics.fillRect(dj.x + counter.offsetX, dj.y + counter.offsetY - 10, counter.width, 4);
-  graphics.fillStyle(0x232036, 1);
-  graphics.fillRect(dj.x + counter.offsetX + 8, dj.y + counter.offsetY - 4, counter.width - 16, 20);
-
-  for (let deck = 0; deck < 3; deck += 1) {
-    const deckX = dj.x + counter.offsetX + 20 + deck * 68;
-    graphics.fillStyle(0x0d101b, 1);
-    graphics.fillRect(deckX, dj.y + counter.offsetY, 48, 11);
-    graphics.fillStyle(deck === 1 ? 0xd66bd1 : 0x679ee8, 0.9);
-    graphics.fillRect(deckX + 5, dj.y + counter.offsetY + 3, 8, 3);
-    graphics.fillRect(deckX + 33, dj.y + counter.offsetY + 3, 8, 3);
-  }
-
-  graphics.fillStyle(0x2b263e, 1);
-  graphics.fillRect(dj.x + booth.offsetX, dj.y + booth.offsetY + 89, booth.width, 33);
-  graphics.fillStyle(0x594d77, 0.65);
-  for (let x = dj.x + booth.offsetX + 12; x < dj.x + booth.offsetX + booth.width - 8; x += 34) {
-    graphics.fillRect(x, dj.y + booth.offsetY + 96, 22, 3);
-  }
-
-  const djLabel = scene.add.text(dj.x + label.offsetX, dj.y + label.offsetY + 81, 'DJ', {
-    fontFamily: 'monospace',
-    fontSize: '18px',
-    color: '#e7dcff',
-    fontStyle: 'bold',
-  }).setOrigin(0.5);
-  djLabel.setShadow(0, 0, '#8d65ff', 5, true, true);
-
-  dj.speakers.forEach(({ x, y, width, height }) => {
-    graphics.fillStyle(0x080910, 0.35);
-    graphics.fillRect(x + 4, y + 6, width, height);
-    graphics.fillStyle(0x151722, 1);
-    graphics.fillRect(x, y, width, height);
-    graphics.lineStyle(2, 0x515369, 0.85);
-    graphics.strokeRect(x + 3, y + 3, width - 6, height - 6);
-    drawSpeakerCone(graphics, x + 24, y + 27, 13);
-    drawSpeakerCone(graphics, x + 24, y + 63, 19);
-    graphics.fillStyle(0x8c69c9, 0.7);
-    graphics.fillRect(x + 6, y + height - 8, width - 12, 2);
-  });
-}
-
-function drawDjLight(graphics, x, y, color) {
-  graphics.fillStyle(color, 0.05);
-  graphics.fillCircle(x, y, 19);
-  graphics.fillStyle(color, 0.16);
-  graphics.fillCircle(x, y, 10);
-  graphics.fillStyle(color, 1);
-  graphics.fillRect(x - 5, y - 4, 10, 8);
-  graphics.fillStyle(0xffffff, 0.8);
-  graphics.fillRect(x - 2, y - 2, 4, 3);
-}
-
-function drawSpeakerCone(graphics, x, y, radius) {
-  graphics.fillStyle(0x090b12, 1);
-  graphics.fillCircle(x, y, radius + 2);
-  graphics.lineStyle(2, 0x3f4359, 1);
-  graphics.strokeCircle(x, y, radius);
-  graphics.fillStyle(0x262a3a, 1);
-  graphics.fillCircle(x, y, radius - 4);
-  graphics.fillStyle(0x0d0f18, 1);
-  graphics.fillCircle(x, y, Math.max(4, radius - 10));
-  graphics.fillStyle(0x6c7191, 0.45);
-  graphics.fillCircle(x - 3, y - 4, 3);
 }
 
 function drawPartyTable(graphics, x, y) {
