@@ -136,10 +136,10 @@ Una generación IA puede entregar colores cercanos durante exploración, pero **
 
 Antes de integrar, el asset debe:
 
-1. mantener el mismo hue frío/teal;
+1. mantener el mismo verde nocturno natural, con menos azul que la familia anterior;
 2. evitar verdes amarillentos;
 3. evitar aumentos fuertes de saturación;
-4. mantener luminosidad comparable con los ground ya aprobados;
+4. mantener luminosidad comparable con el tileset aprobado;
 5. poder normalizarse a esta paleta sin destruir su lectura.
 
 No introducir una nueva familia de verde porque una generación aislada se vea linda.

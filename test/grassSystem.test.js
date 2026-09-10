@@ -103,12 +103,19 @@ test('la calibración usa el mismo renderer y una única posición de Tambu', ()
 test('el renderer crea una sola TilemapLayer y no usa imágenes por celda ni masks', () => {
   const renderer = readFileSync(new URL('../src/world/grass/createGrass.js', import.meta.url), 'utf8');
   const layoutSource = readFileSync(new URL('../src/world/grass/grassLayout.js', import.meta.url), 'utf8');
+  const runtimeSources = [
+    renderer,
+    layoutSource,
+    readFileSync(new URL('../src/world/grass/preloadGrass.js', import.meta.url), 'utf8'),
+    readFileSync(new URL('../src/scenes/GrassCalibrationScene.js', import.meta.url), 'utf8'),
+  ].join('\n');
 
   assert.match(renderer, /scene\.make\.tilemap/);
   assert.match(renderer, /addTilesetImage/);
   assert.match(renderer, /createLayer/);
   assert.doesNotMatch(renderer, /scene\.add\.image|enableFilters|addMask|createGeometryMask|\.setMask\s*\(/);
   assert.doesNotMatch(layoutSource, /Math\.random|patches|clusters|decals|ground01|ground02|ground03/);
+  assert.doesNotMatch(runtimeSources, /grass_ground_|grass_patch_|grass_cluster_|grass_tuft_/);
 });
 
 test('el patio integra el nuevo grass sin reactivar el renderer procedural', () => {
