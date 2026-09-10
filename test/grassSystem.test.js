@@ -1,18 +1,23 @@
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import test from 'node:test';
+import { createGrass } from '../src/world/grass/createGrass.js';
 import {
+  createGrassDetailData,
   createGrassTileData,
   createPatioGrassLayout,
   getGrassSourceTileId,
   GRASS_CALIBRATION_LAYOUT,
   GRASS_SOURCE_TILE_POOLS,
   GRASS_TILE_SIZE,
+  PLANT_DETAIL_SOURCE_TILE_IDS,
+  PLANT_DETAIL_TILE_PATTERNS,
 } from '../src/world/grass/grassLayout.js';
-import { GRASS_TILESET } from '../src/world/grass/preloadGrass.js';
+import { GRASS_TILESETS, preloadGrass } from '../src/world/grass/preloadGrass.js';
 import { PATIO_LAYOUT } from '../src/world/patioLayout.js';
 
-const DISALLOWED_SOURCE_TILE_IDS = new Set([2, 10, 35]);
+const DISALLOWED_BASE_TILE_IDS = new Set([2, 10, 35]);
+const DISALLOWED_PLANT_TILE_IDS = new Set([966, 967, 998, 999]);
 
 function readPngSize(path) {
   const png = readFileSync(new URL(`../public${path}`, import.meta.url));
@@ -23,30 +28,53 @@ function readPngSize(path) {
   };
 }
 
-function flattenPools() {
+function flattenBasePools() {
   return Object.values(GRASS_SOURCE_TILE_POOLS).flat();
 }
 
-test('grass usa un único tileset fuente de 256x256', () => {
+test('grass carga exactamente los dos tilesets actuales con sus dimensiones originales', () => {
   const grassAssetDirectory = new URL('../public/assets/tiles/grass/', import.meta.url);
+  const loaded = [];
 
-  assert.deepEqual(readdirSync(grassAssetDirectory), ['tx_tileset_grass_night.png']);
-  assert.equal(GRASS_TILESET.path, '/assets/tiles/grass/tx_tileset_grass_night.png');
-  assert.deepEqual(readPngSize(GRASS_TILESET.path), { width: 256, height: 256 });
+  preloadGrass({ load: { image: (key, path) => loaded.push({ key, path }) } });
+
+  assert.deepEqual(readdirSync(grassAssetDirectory), [
+    'tx_plant_grass_details_night.png',
+    'tx_tileset_grass_night.png',
+  ]);
+  assert.deepEqual(readPngSize(GRASS_TILESETS.base.path), { width: 256, height: 256 });
+  assert.deepEqual(readPngSize(GRASS_TILESETS.detail.path), { width: 512, height: 512 });
+  assert.equal(GRASS_TILESETS.base.tileSize, 16);
+  assert.equal(GRASS_TILESETS.detail.tileSize, 16);
+  assert.equal(loaded.length, 2);
 });
 
-test('la fuente se interpreta como tiles 16x16 con ids válidos y aprobados', () => {
-  const sourceIds = flattenPools();
+test('la base usa tiles 16x16 válidos y nunca selecciona frames excluidos', () => {
+  const sourceIds = flattenBasePools();
 
   assert.equal(GRASS_TILE_SIZE, 16);
-  assert.equal(GRASS_TILESET.tileSize, 16);
   assert.equal(new Set(sourceIds).size, sourceIds.length);
   assert.ok(sourceIds.every((id) => Number.isInteger(id) && id >= 0 && id < 256));
-  assert.ok(sourceIds.every((id) => !DISALLOWED_SOURCE_TILE_IDS.has(id)));
+  assert.ok(sourceIds.every((id) => !DISALLOWED_BASE_TILE_IDS.has(id)));
 });
 
-test('la selección de tile es determinista y solo usa los pools permitidos', () => {
-  const permittedIds = new Set(flattenPools());
+test('el whitelist vegetal contiene solo fragmentos de grass inferior autorizado', () => {
+  assert.equal(PLANT_DETAIL_TILE_PATTERNS.length, 15);
+  assert.equal(PLANT_DETAIL_SOURCE_TILE_IDS.length, 60);
+  assert.equal(new Set(PLANT_DETAIL_SOURCE_TILE_IDS).size, 60);
+  assert.ok(PLANT_DETAIL_TILE_PATTERNS.every((pattern) => (
+    pattern.length === 2 && pattern.every((row) => row.length === 2)
+  )));
+  assert.ok(PLANT_DETAIL_SOURCE_TILE_IDS.every((id) => {
+    const row = Math.floor(id / 32);
+    const column = id % 32;
+    return row >= 24 && row <= 31 && column >= 0 && column <= 7;
+  }));
+  assert.ok(PLANT_DETAIL_SOURCE_TILE_IDS.every((id) => !DISALLOWED_PLANT_TILE_IDS.has(id)));
+});
+
+test('la selección de base es determinista y solo usa sus pools permitidos', () => {
+  const permittedIds = new Set(flattenBasePools());
   const first = [];
   const second = [];
 
@@ -61,64 +89,92 @@ test('la selección de tile es determinista y solo usa los pools permitidos', ()
   assert.ok(first.every((id) => permittedIds.has(id)));
 });
 
-test('la distribución conserva base dominante, detalle suave y detalle medio escaso', () => {
-  const categories = new Map();
-  Object.entries(GRASS_SOURCE_TILE_POOLS).forEach(([category, ids]) => {
-    ids.forEach((id) => categories.set(id, category));
-  });
-  const counts = { base: 0, verySmall: 0, soft: 0, medium: 0 };
-  const sampleSize = 10000;
-
-  for (let index = 0; index < sampleSize; index += 1) {
-    const id = getGrassSourceTileId(index % 100, Math.floor(index / 100), 9721);
-    counts[categories.get(id)] += 1;
-  }
-
-  assert.ok(counts.base / sampleSize > 0.74 && counts.base / sampleSize < 0.82);
-  assert.ok((counts.verySmall + counts.soft) / sampleSize > 0.16);
-  assert.ok((counts.verySmall + counts.soft) / sampleSize < 0.24);
-  assert.ok(counts.medium / sampleSize > 0.01 && counts.medium / sampleSize < 0.03);
-});
-
-test('la matriz cubre todo el grass bounds sin huecos', () => {
+test('base y detalle cubren la matriz completa; detalle deja celdas vacías', () => {
   const layout = createPatioGrassLayout(PATIO_LAYOUT);
   const expectedColumns = Math.ceil(layout.bounds.width / GRASS_TILE_SIZE);
   const expectedRows = Math.ceil(layout.bounds.height / GRASS_TILE_SIZE);
+  const permittedDetailIds = new Set(PLANT_DETAIL_SOURCE_TILE_IDS);
+  const detailIds = layout.detailData.flat();
 
-  assert.equal(layout.tileSize, GRASS_TILE_SIZE);
   assert.equal(layout.data.length, expectedRows);
+  assert.equal(layout.detailData.length, expectedRows);
   assert.ok(layout.data.every((row) => row.length === expectedColumns));
+  assert.ok(layout.detailData.every((row) => row.length === expectedColumns));
   assert.ok(expectedColumns * GRASS_TILE_SIZE >= layout.bounds.width);
   assert.ok(expectedRows * GRASS_TILE_SIZE >= layout.bounds.height);
+  assert.ok(detailIds.includes(-1));
+  assert.ok(detailIds.some((id) => id !== -1));
+  assert.ok(detailIds.every((id) => id === -1 || permittedDetailIds.has(id)));
   assert.deepEqual(layout.data, createGrassTileData(layout));
+  assert.deepEqual(layout.detailData, createGrassDetailData(layout));
 });
 
-test('la calibración usa el mismo renderer y una única posición de Tambu', () => {
+test('la matriz vegetal es determinista y conserva la misma configuración en calibración', () => {
+  const first = createPatioGrassLayout(PATIO_LAYOUT);
+  const second = createPatioGrassLayout(PATIO_LAYOUT);
+
+  assert.deepEqual(first.detailData, second.detailData);
   assert.deepEqual(GRASS_CALIBRATION_LAYOUT.bounds, { x: 0, y: 0, width: 384, height: 256 });
   assert.equal(GRASS_CALIBRATION_LAYOUT.tileSize, GRASS_TILE_SIZE);
-  assert.deepEqual(GRASS_CALIBRATION_LAYOUT.tambuSpot, { x: 192, y: 136 });
-  assert.equal('tambusSpots' in GRASS_CALIBRATION_LAYOUT, false);
+  assert.ok(GRASS_CALIBRATION_LAYOUT.detailData.flat().some((id) => id !== -1));
 });
 
-test('el renderer crea una sola TilemapLayer y no usa imágenes por celda ni masks', () => {
+test('el renderer crea dos TilemapLayers alineadas y ordenadas', () => {
+  const layout = createPatioGrassLayout(PATIO_LAYOUT);
+  const calls = [];
+  const scene = {
+    make: {
+      tilemap(config) {
+        const map = {
+          config,
+          addTilesetImage(name, key) {
+            return { name, key };
+          },
+          createLayer(index, tileset, x, y) {
+            const layer = {
+              depth: null,
+              setDepth(depth) {
+                this.depth = depth;
+                return this;
+              },
+            };
+            calls.push({ index, tileset, x, y, layer });
+            return layer;
+          },
+        };
+        return map;
+      },
+    },
+  };
+
+  const result = createGrass(scene, layout);
+
+  assert.equal(calls.length, 2);
+  assert.deepEqual(calls.map(({ x, y }) => ({ x, y })), [layout.bounds, layout.bounds].map(({ x, y }) => ({ x, y })));
+  assert.equal(result.baseLayer.depth, -40);
+  assert.equal(result.detailLayer.depth, -39);
+  assert.notEqual(result.baseMap, result.detailMap);
+  assert.equal(result.baseTileset.key, GRASS_TILESETS.base.key);
+  assert.equal(result.detailTileset.key, GRASS_TILESETS.detail.key);
+});
+
+test('el grass no usa random, assets legacy, imágenes por celda ni masks', () => {
   const renderer = readFileSync(new URL('../src/world/grass/createGrass.js', import.meta.url), 'utf8');
   const layoutSource = readFileSync(new URL('../src/world/grass/grassLayout.js', import.meta.url), 'utf8');
   const runtimeSources = [
     renderer,
     layoutSource,
     readFileSync(new URL('../src/world/grass/preloadGrass.js', import.meta.url), 'utf8'),
-    readFileSync(new URL('../src/scenes/GrassCalibrationScene.js', import.meta.url), 'utf8'),
   ].join('\n');
 
   assert.match(renderer, /scene\.make\.tilemap/);
-  assert.match(renderer, /addTilesetImage/);
-  assert.match(renderer, /createLayer/);
+  assert.match(renderer, /createTilemapLayer/);
   assert.doesNotMatch(renderer, /scene\.add\.image|enableFilters|addMask|createGeometryMask|\.setMask\s*\(/);
-  assert.doesNotMatch(layoutSource, /Math\.random|patches|clusters|decals|ground01|ground02|ground03/);
-  assert.doesNotMatch(runtimeSources, /grass_ground_|grass_patch_|grass_cluster_|grass_tuft_/);
+  assert.doesNotMatch(layoutSource, /Math\.random/);
+  assert.doesNotMatch(runtimeSources, /grass_ground_|grass_patch_|grass_cluster_|grass_tuft_|grass_macro_|grass_micro_/);
 });
 
-test('el patio integra el nuevo grass sin reactivar el renderer procedural', () => {
+test('el patio conserva la integración modular sin renderer procedural', () => {
   const patioWorld = readFileSync(new URL('../src/world/createPatioWorld.js', import.meta.url), 'utf8');
 
   assert.match(patioWorld, /createGrass\(scene, createPatioGrassLayout\(PATIO_LAYOUT\)/);

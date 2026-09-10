@@ -159,26 +159,26 @@ Debe verse:
 - rico de cerca;
 - tranquilo de lejos.
 
-## Fuente de verdad runtime
+## Fuentes de verdad runtime
 
-- archivo único: `public/assets/tiles/grass/tx_tileset_grass_night.png`;
-- tamaño de imagen: `256x256 px`;
-- grilla fuente: `16x16 px`;
-- lectura: 16 columnas por 16 filas;
+- base: `public/assets/tiles/grass/tx_tileset_grass_night.png`, `256x256 px`;
+- detalle: `public/assets/tiles/grass/tx_plant_grass_details_night.png`, `512x512 px`;
+- ambos usan grilla fuente `16x16 px`;
 - los IDs de frame autorizados se declaran en `src/world/grass/grassLayout.js`;
-- no recortar el tileset en PNG individuales;
-- no modificar los píxeles del archivo integrado.
+- no recortar los tilesets en PNG individuales;
+- no modificar los píxeles de los archivos integrados.
 
-La composición mezcla tiles de base, detalle muy pequeño, detalle suave y detalle medio. No carga como ground los frames de flores, piedras, bordes ni elementos amarillos del mismo sheet.
+La composición base mezcla tiles planos, detalle muy pequeño, detalle suave y detalle medio. La segunda capa usa únicamente grass bajo de filas `24..31` y columnas `0..7` del sheet vegetal; árboles, arbustos y elementos no-grass quedan fuera de scope.
 
 ## Composición de superficie
 
-- base plana dominante: aproximadamente `78%`;
-- detalles muy pequeños y suaves: aproximadamente `20%` combinados;
-- matas medianas: aproximadamente `2%`;
+- base plana dominante: aproximadamente `65–68%`;
+- detalles muy pequeños y suaves: aproximadamente `28–33%` combinados;
+- matas medianas de base: aproximadamente `4–5%`;
+- detalle vegetal adicional: disperso y más frecuente hacia bordes;
 - distribución determinista por coordenada y seed;
-- sin checker, ruido aleatorio runtime, overlays separados ni máscaras;
-- una única `TilemapLayer` cubre el grass bounds completo.
+- sin checker, ruido aleatorio runtime, imágenes por celda ni máscaras;
+- dos `TilemapLayer` alineadas cubren el grass bounds completo.
 
 ---
 
@@ -449,9 +449,9 @@ Decisiones cerradas:
 - variaciones por patrón y densidad dentro del tileset aprobado;
 - grilla runtime de `16x16 px`;
 - selección determinista de frames permitidos;
-- una sola `TilemapLayer`, sin assets legacy ni capas de imágenes por celda.
+- dos `TilemapLayer` 16×16, sin assets legacy ni capas de imágenes por celda.
 
-La fuente de verdad es `public/assets/tiles/grass/tx_tileset_grass_night.png` y utiliza la paleta `NG-01` a `NG-07` de este documento.
+Las fuentes de verdad son `tx_tileset_grass_night.png` y `tx_plant_grass_details_night.png`; el runtime restringe el segundo sheet al grass bajo autorizado.
 
 ---
 

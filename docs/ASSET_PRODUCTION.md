@@ -66,19 +66,22 @@ El objetivo es validar primero el lenguaje visual del patio.
 
 ## 1. Césped nocturno
 
-El césped ocupa la mayor superficie del patio y su producción V1 queda cerrada con un único tileset runtime.
+El césped ocupa la mayor superficie del patio y su producción V1 usa dos tilesets runtime complementarios.
 
-### Asset aprobado
+### Assets aprobados
 
 ```text
 public/assets/tiles/grass/tx_tileset_grass_night.png
+public/assets/tiles/grass/tx_plant_grass_details_night.png
 ```
 
-- imagen `256x256 px`;
-- grilla de tiles fuente `16x16 px`;
-- fuente de verdad única para el grass del patio;
+- `tx_tileset_grass_night.png`: base `256x256 px`;
+- `tx_plant_grass_details_night.png`: detalle vegetal `512x512 px`;
+- ambos usan una grilla fuente de `16x16 px`;
 - no recortar a PNG individuales;
-- no modificar ni regenerar sus píxeles durante integración.
+- no modificar ni regenerar sus píxeles durante integración;
+- el segundo sheet se conserva entero, pero esta fase solo autoriza grass bajo de filas `24..31` y columnas `0..7`;
+- árboles, troncos y arbustos del sheet de detalle quedan fuera de scope.
 
 ### Paleta oficial
 
@@ -88,19 +91,20 @@ Usar exclusivamente la paleta Night Grass vigente de `PIXEL_ART_STYLE_GUIDE.md`:
 
 ### Runtime aprobado
 
-- una matriz determinista de IDs de frame fuente;
-- una sola `TilemapLayer` para todo `PATIO_LAYOUT.terrain.grass`;
-- aproximadamente `78%` base, `20%` detalle pequeño/suave y `2%` detalle medio;
+- una matriz determinista de base y otra matriz dispersa de detalle;
+- dos `TilemapLayer` alineadas sobre `PATIO_LAYOUT.terrain.grass`;
+- base aproximada: `65–68%` plana, `8–10%` muy pequeña, `20–23%` suave y `4–5%` media;
+- detalle vegetal extra: escaso en centro y progresivamente mayor hacia bordes;
 - sin `Math.random()`;
 - sin máscaras;
 - sin `scene.add.image()` por celda;
-- sin assets separados de ground, macro, patch, cluster, tuft o accent.
+- sin reintroducir assets legacy separados de ground, macro, patch, cluster, tuft o accent.
 
-Los pools autorizados viven en `src/world/grass/grassLayout.js`. No seleccionar frames con flores, piedras, bordes, tonos amarillos ni contenido ajeno al grass base.
+Los pools autorizados viven en `src/world/grass/grassLayout.js`. Del sheet base no se seleccionan flores, piedras, bordes ni tonos amarillos. Del sheet vegetal solo se usan los 15 patrones de grass bajo explícitamente autorizados; el patrón marrón y toda la vegetación superior quedan excluidos.
 
 ### Reemplaza
 
-La familia legacy completa de grounds de 64 px, patches, clusters, tufts, macros y accents.
+La familia legacy completa de grounds de 64 px, patches, clusters, tufts, macros y accents. El segundo tileset no reactiva esa arquitectura: también se renderiza mediante Tilemap.
 
 Ver `docs/PHASE_1_GRASS.md`.
 
