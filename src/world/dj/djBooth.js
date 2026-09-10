@@ -24,12 +24,12 @@ export function createDjBooth(scene, dj) {
     // Semantic layers: floor -> rear support -> actor -> console/structure -> front occluders.
     platform: dj.y + 10,
     shelf: dj.y + 28,
-    console: dj.y + 58,
+    console: dj.y + 34,
     supports: dj.y + 70,
     truss: dj.y + 71,
     speakers: dj.y + 109,
     booth: dj.y + 114,
-    stage: dj.y + 115,
+    stage: dj.y + 113,
   };
 
   const stage = scene.add.image(centerX, stageBottom, DJ_ASSETS.stageBase.key)
