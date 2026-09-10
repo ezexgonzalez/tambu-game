@@ -1,49 +1,33 @@
-import { getGrassGroundKey } from './grassLayout.js';
-
-function addLayer(scene, items, depth) {
-  return items.map(({
-    asset,
-    x,
-    y,
-    alpha = 1,
-    scale = 1,
-    flipX = false,
-    flipY = false,
-  }) => scene.add.image(x, y, asset)
-    .setOrigin(0)
-    .setDepth(depth)
-    .setAlpha(alpha)
-    .setScale(scale)
-    .setFlipX(flipX)
-    .setFlipY(flipY));
-}
+import { GRASS_TILESET } from './preloadGrass.js';
 
 export function createGrass(scene, layout, { depth = -40 } = {}) {
-  const {
-    bounds,
+  const { bounds, data, tileSize } = layout;
+  const map = scene.make.tilemap({
+    data,
+    tileWidth: tileSize,
+    tileHeight: tileSize,
+  });
+  const tileset = map.addTilesetImage(
+    GRASS_TILESET.name,
+    GRASS_TILESET.key,
     tileSize,
-    patches = [],
-    clusters = [],
-    decals = [],
-  } = layout;
-  const base = [];
-  const columns = Math.ceil(bounds.width / tileSize);
-  const rows = Math.ceil(bounds.height / tileSize);
+    tileSize,
+    0,
+    0,
+    GRASS_TILESET.firstGid,
+  );
 
-  for (let row = 0; row < rows; row += 1) {
-    for (let column = 0; column < columns; column += 1) {
-      base.push(scene.add.image(
-        bounds.x + column * tileSize,
-        bounds.y + row * tileSize,
-        getGrassGroundKey(column, row, layout),
-      ).setOrigin(0).setDepth(depth));
-    }
+  if (!tileset) {
+    throw new Error(`Could not create grass tileset: ${GRASS_TILESET.key}`);
   }
 
-  return {
-    base,
-    patches: addLayer(scene, patches, depth + 1),
-    clusters: addLayer(scene, clusters, depth + 2),
-    decals: addLayer(scene, decals, depth + 3),
-  };
+  const layer = map.createLayer(0, tileset, bounds.x, bounds.y);
+
+  if (!layer) {
+    throw new Error('Could not create grass tilemap layer');
+  }
+
+  layer.setDepth(depth);
+
+  return { map, layer, tileset };
 }

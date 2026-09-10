@@ -114,27 +114,21 @@ Reglas:
 
 # 6. NIGHT GRASS — paleta oficial estricta
 
-La referencia cromática oficial del césped es la variante aprobada el `2026-09-09`: césped frío, teal/verde profundo, uniforme y suave.
+La referencia cromática oficial del césped es el tileset aprobado `tx_tileset_grass_night.png`: césped nocturno verde profundo, uniforme y suave.
 
 ## Colores oficiales
 
 | ID | Rol | Hex |
 |---|---|---|
-| `NG-01` | Deep shadow | `#112A2F` |
-| `NG-02` | Shadow | `#112F31` |
-| `NG-03` | Dark base | `#123232` |
-| `NG-04` | Base | `#153B35` |
-| `NG-05` | Mid grass | `#194137` |
-| `NG-06` | Soft light | `#1C4839` |
-| `NG-07` | Highlight | `#25553D` |
+| `NG-01` | Deep base | `#122D23` |
+| `NG-02` | Base shadow | `#153427` |
+| `NG-03` | Main grass | `#183A2B` |
+| `NG-04` | Mid grass | `#1C4230` |
+| `NG-05` | Soft light | `#214A35` |
+| `NG-06` | Blade light | `#28533A` |
+| `NG-07` | Sparse highlight | `#316040` |
 
-### Distribución tonal objetivo para ground
-
-- `NG-01` a `NG-04`: **60–70%** del área visible.
-- `NG-05` y `NG-06`: **20–30%**.
-- `NG-07`: **5–10% máximo**.
-
-No hace falta usar los siete colores en todos los assets.
+No hace falta usar los siete colores en cada tile fuente. El tileset completo es la referencia de distribución tonal aprobada.
 
 ### Regla de normalización
 
@@ -165,50 +159,26 @@ Debe verse:
 - rico de cerca;
 - tranquilo de lejos.
 
-## Ground principal
+## Fuente de verdad runtime
 
-- textura corta;
-- contraste bajo;
-- distribución orgánica;
-- sin checker;
-- sin costuras visibles;
-- sin grandes matas hero repetidas;
-- sin flores integradas en la textura base;
-- sin tierra;
-- sin zonas marrones;
-- sin caminos gastados.
+- archivo único: `public/assets/tiles/grass/tx_tileset_grass_night.png`;
+- tamaño de imagen: `256x256 px`;
+- grilla fuente: `16x16 px`;
+- lectura: 16 columnas por 16 filas;
+- los IDs de frame autorizados se declaran en `src/world/grass/grassLayout.js`;
+- no recortar el tileset en PNG individuales;
+- no modificar los píxeles del archivo integrado.
 
-## Variantes ground
+La composición mezcla tiles de base, detalle muy pequeño, detalle suave y detalle medio. No carga como ground los frames de flores, piedras, bordes ni elementos amarillos del mismo sheet.
 
-Las variantes cambian **patrón y densidad**, no identidad cromática.
+## Composición de superficie
 
-`grass_ground_01`, `02`, `03`, etc. deben sentirse como el mismo césped bajo la misma noche.
-
-No se acepta que una variante sea más amarilla, más brillante o más saturada que las demás de forma evidente.
-
-## Macro variation
-
-- cambios amplios de valor;
-- todo dentro de verdes oficiales;
-- bordes orgánicos;
-- contraste muy bajo;
-- deben percibirse subconscientemente al mirar el mapa entero.
-
-## Clusters
-
-- 2–3 verdes principales derivados de Night Grass;
-- mayor detalle que ground;
-- uso principalmente en bordes, rincones y vegetación decorativa;
-- no cubrir circulación ni pies de personajes.
-
-## Accents
-
-Flores y hojas aparecen poco.
-
-- blanco: crema nocturno, no blanco puro;
-- rosa: apagado/desaturado;
-- jamás fluorescente;
-- no teñir el ground alrededor.
+- base plana dominante: aproximadamente `78%`;
+- detalles muy pequeños y suaves: aproximadamente `20%` combinados;
+- matas medianas: aproximadamente `2%`;
+- distribución determinista por coordenada y seed;
+- sin checker, ruido aleatorio runtime, overlays separados ni máscaras;
+- una única `TilemapLayer` cubre el grass bounds completo.
 
 ---
 
@@ -367,7 +337,7 @@ Cada imagen debe nacer con la función técnica de su asset final.
 3. limpiar texto/fondo;
 4. entregar esos recortes a Work.
 
-Las sheets solo pueden existir como **referencia conceptual** y jamás son fuente de assets finales.
+Las sheets conceptuales solo pueden existir como referencia y jamás son fuente de assets finales. Un tileset técnico autorado directamente para su grilla runtime sí puede ser un asset final; `tx_tileset_grass_night.png` es el precedente aprobado para césped.
 
 ---
 
@@ -385,11 +355,11 @@ Todo prompt de asset debe indicar, como mínimo:
 8. si requiere transparencia;
 9. qué elementos están prohibidos.
 
-## Prompt base obligatorio para Night Grass
+## Prompt base para exploraciones futuras de Night Grass
 
 Incluir conceptualmente:
 
-> top-down 2D pixel art, nighttime lawn, cool deep teal-green palette, soft low-contrast grass, uniform atmospheric surface, colors derived from #112A2F #112F31 #123232 #153B35 #194137 #1C4839 #25553D, no dirt, no brown, no yellow-green daylight tones, no flowers unless requested, no objects, no text, no UI
+> top-down 2D pixel art, nighttime lawn, deep green palette, soft low-contrast grass, uniform atmospheric surface, colors derived from #122D23 #153427 #183A2B #1C4230 #214A35 #28533A #316040, no dirt, no brown, no yellow-green daylight tones, no flowers unless requested, no objects, no text, no UI
 
 Para variantes ground cambiar **patrón/densidad**, no la paleta.
 
@@ -474,13 +444,14 @@ Decisiones cerradas:
 - no tierra marrón;
 - no caminos gastados;
 - look nocturno desde el PNG;
-- base fría/teal;
+- base verde nocturna profunda;
 - superficie relativamente uniforme;
-- variaciones por patrón y valor, no por cambio de hue;
-- mayor vegetación hacia bordes;
-- centro jugable visualmente más tranquilo.
+- variaciones por patrón y densidad dentro del tileset aprobado;
+- grilla runtime de `16x16 px`;
+- selección determinista de frames permitidos;
+- una sola `TilemapLayer`, sin assets legacy ni capas de imágenes por celda.
 
-La primera familia cromática aprobada utiliza la paleta `NG-01` a `NG-07` de este documento.
+La fuente de verdad es `public/assets/tiles/grass/tx_tileset_grass_night.png` y utiliza la paleta `NG-01` a `NG-07` de este documento.
 
 ---
 

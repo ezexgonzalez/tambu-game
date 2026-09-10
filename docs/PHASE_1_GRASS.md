@@ -1,167 +1,121 @@
 # Tambu Game — Fase 1 · Night Grass
 
-**Estado runtime actual:** primer rediseño de Ground + Macro integrado.
-**Estado de arte:** esta pasada usa únicamente tres grounds aprobados y dos macros suaves aprobados.
-**Scope:** solo césped; no autoriza cambios de deck, piscina, barra, DJ, NPCs ni iluminación final.
+**Estado runtime:** tileset único integrado.
+**Estado de arte:** asset aprobado y congelado para esta fase.
+**Scope:** solo césped; no autoriza cambios de deck, piscina, barra, DJ, NPCs ni iluminación.
 
 ---
 
 # Fuente de verdad
 
-Para cualquier asset nuevo de césped prevalece:
+El césped V1 utiliza exclusivamente:
 
-1. `docs/PIXEL_ART_STYLE_GUIDE.md` — paleta, noche, pixel density, generación IA y validación.
-2. `docs/ART_DIRECTION.md` — objetivo visual y jerarquía.
-3. este archivo — decisiones específicas de la Fase 1.
+```text
+public/assets/tiles/grass/tx_tileset_grass_night.png
+```
 
-El runtime no carga los assets V3 de micro, clusters, acentos, setos ni macro oscuro durante esta pasada.
+Es un PNG `256x256 px` organizado como una grilla de `16x16` tiles fuente de `16x16 px`.
 
-La hoja/reference de cualquier pack conceptual es **solo referencia**. Nunca se recorta para fabricar assets finales.
+Reglas cerradas:
 
----
+- no modificar sus píxeles;
+- no regenerarlo;
+- no recortarlo a assets independientes;
+- no mantener versiones legacy dentro del repositorio;
+- los IDs de frame permitidos viven en `src/world/grass/grassLayout.js`.
 
-# Decisiones cerradas de césped
-
-- Todo el patio permanece visualmente verde.
-- No existe capa `worn`.
-- No se usa tierra marrón.
-- No se usan caminos gastados.
-- El césped nace cromáticamente nocturno.
-- Temperatura: verde frío / teal profundo.
-- Ground relativamente uniforme y suave.
-- Variaciones por patrón, densidad y valor; no por cambio evidente de hue.
-- Mayor riqueza vegetal hacia bordes y rincones.
-- Centro jugable más tranquilo.
-- Flores/hojas quedan para una pasada posterior.
-- El césped nunca compite con piscina, Tambu, NPCs, barra o DJ.
+Para paleta, densidad y lenguaje visual prevalece `docs/PIXEL_ART_STYLE_GUIDE.md`.
 
 ---
 
 # Paleta oficial Night Grass
 
-Usar la paleta estricta definida en `PIXEL_ART_STYLE_GUIDE.md`:
+| ID | Hex |
+|---|---|
+| `NG-01` | `#122D23` |
+| `NG-02` | `#153427` |
+| `NG-03` | `#183A2B` |
+| `NG-04` | `#1C4230` |
+| `NG-05` | `#214A35` |
+| `NG-06` | `#28533A` |
+| `NG-07` | `#316040` |
+
+No seleccionar del sheet flores, piedras, amarillos, bordes ni elementos que no sean césped.
+
+---
+
+# Arquitectura runtime
+
+El sistema conserva tres módulos pequeños:
+
+- `preloadGrass.js`: carga una sola textura;
+- `grassLayout.js`: contiene tile size, seed, pools aprobados y genera la matriz;
+- `createGrass.js`: crea el Tilemap, registra el Tileset y renderiza una sola `TilemapLayer`.
+
+Flujo:
 
 ```text
-NG-01  #112A2F  Deep shadow
-NG-02  #112F31  Shadow
-NG-03  #123232  Dark base
-NG-04  #153B35  Base
-NG-05  #194137  Mid grass
-NG-06  #1C4839  Soft light
-NG-07  #25553D  Highlight
+PATIO_LAYOUT.terrain.grass
+→ matriz determinista de source frame IDs
+→ Phaser Tilemap
+→ una TilemapLayer a depth de suelo
 ```
 
-Las variantes nuevas deben sentirse como **el mismo césped bajo la misma noche**.
+El patio mide aproximadamente `1680x810 px`, por lo que la matriz usa `ceil(width / 16)` por `ceil(height / 16)` y cubre el bounds completo sin huecos.
 
-No aceptar una variante más amarilla, saturada o luminosa solo porque se vea bien de forma aislada.
+No se usan:
 
----
-
-# Nueva producción — prioridad
-
-La nueva familia se produce en imágenes independientes.
-
-## Ground obligatorio
-
-- `grass_ground_01.png`
-- `grass_ground_02.png`
-- `grass_ground_03.png`
-- `grass_ground_04.png` solo si la repetición lo justifica
-
-## Variación macro
-
-- `grass_macro_soft_01.png`
-- `grass_macro_soft_02.png`
-- `grass_macro_dark_01.png`
-
-## Vegetación de borde
-
-- `grass_cluster_soft_01.png`
-- `grass_cluster_soft_02.png`
-- `bush_edge_horizontal_01.png`
-- variantes/corners solo cuando la composición los necesite
-
-## Acentos posteriores
-
-- `flower_white_01.png`
-- `flower_pink_01.png`
-- `leaf_01.png`
-- pequeñas plantas
-
-No producir clutter extra antes de aprobar ground + macro + primer cluster.
+- `GeometryMask`;
+- `FilterMask`;
+- polygon clipping;
+- `scene.add.image()` por celda;
+- overlays runtime separados;
+- `Math.random()`.
 
 ---
 
-# Regla IA obligatoria
+# Composición determinista
 
-**Una imagen = un asset.**
+La selección depende únicamente de:
 
-No generar:
+- columna;
+- fila;
+- seed fija.
 
-- sheets;
-- collages;
-- pack presentations;
-- atlas conceptuales como fuente de producción;
-- una imagen grande para después recortarla.
+Cada reload produce exactamente la misma superficie.
 
-Los assets finales se generan individualmente para su función técnica.
+Distribución objetivo:
 
----
+- base plana: aproximadamente `78%`;
+- detalle muy pequeño y suave: aproximadamente `20%` combinado;
+- matas medianas: aproximadamente `2%`.
 
-# Gate para ground
-
-Antes de aprobar `grass_ground_*`:
-
-1. comprobar paleta contra `NG-01…NG-07`;
-2. repetir la textura al menos `3x3`;
-3. revisar costuras X/Y;
-4. revisar patrones diagonales y manchas repetidas;
-5. combinarla con otra variante candidata;
-6. verla a `camera zoom = 1`;
-7. colocar Tambu real encima a `scale: 1.24`.
-
-Una textura no está aprobada solo porque se vea bien como imagen individual.
-
----
-
-# Arquitectura runtime actual
-
-La primera composición integrada renderiza:
-
-```text
-ground base → regiones laterales/rincones → macro suave
-```
-
-La distribución apunta aproximadamente a 70% `ground_01`, 20% `ground_02` y 10% `ground_03`: el centro alrededor de la piscina permanece más uniforme y la variación queda en laterales/bordes. Solo se usan `grass_macro_soft_01` y `grass_macro_soft_02`, con una cobertura visual moderada fuera del centro jugable.
-
-Clusters, flores, hojas, setos, worn, tierra y `grass_macro_dark_01` no forman parte de esta integración.
-
-No se reintroduce `worn`.
-
-`createPatioWorld.js` y la composición del patio no deben alterar colisiones ni macro-layout para acomodar el césped nuevo.
-
-Tambu se conserva como referencia humana:
-
-- frame fuente `32x48`;
-- runtime `scale: 1.24`;
-- cámara `zoom = 1`.
+Los pools usan IDs de frame 0-based del tileset. La rareza se decide antes de seleccionar una variante dentro del pool, por lo que el tamaño desigual de los pools no altera la distribución visual prevista.
 
 ---
 
 # Calibración
 
-Durante desarrollo se mantienen disponibles:
+`GrassCalibrationScene` usa el mismo layout de tiles y el mismo renderer que el patio. Mantiene una única posición de Tambu para comprobar:
 
-```text
-/?scene=grass-calibration&grassSpot=quiet
-/?scene=grass-calibration&grassSpot=dense
-```
+- lectura a `camera zoom = 1`;
+- escala runtime `1.24`;
+- ausencia de costuras o huecos;
+- jerarquía visual frente al personaje.
 
-`quiet` debe mostrar Tambu sobre ground tranquilo.  
-`dense` debe probar la lectura junto a una variación macro suave sin cubrir su silueta.
+Los conceptos legacy `quiet` y `dense` quedan retirados porque ya no existen capas separadas de macros o clusters.
 
 ---
 
-# Próxima validación
+# Criterio de aprobación
 
-Antes de extender el sistema con clusters o acentos, verificar la composición actual junto a Tambu a zoom 1 y confirmar que los macros no dominan el mapa. No avanzar a Deck como producción final hasta cerrar esta calibración del césped.
+La fase queda aprobada cuando:
+
+1. el grass bounds está completamente cubierto;
+2. solo se carga el tileset oficial;
+3. la distribución es estable entre reloads;
+4. los tiles de base dominan;
+5. las matas medianas son escasas;
+6. no aparecen frames prohibidos;
+7. piscina, Tambu y NPCs conservan prioridad visual;
+8. no hay errores de render ni assets faltantes.

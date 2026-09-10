@@ -8,11 +8,6 @@ import { preloadGrass } from '../world/grass/preloadGrass.js';
 
 const SCENE_KEY = 'GrassCalibrationScene';
 
-function getRequestedSpot() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('grassSpot') === 'dense' ? 'dense' : 'quiet';
-}
-
 export class GrassCalibrationScene extends Phaser.Scene {
   constructor() {
     super(SCENE_KEY);
@@ -24,8 +19,7 @@ export class GrassCalibrationScene extends Phaser.Scene {
   }
 
   create() {
-    const { bounds, tambuSpots } = GRASS_CALIBRATION_LAYOUT;
-    const spot = tambuSpots[getRequestedSpot()];
+    const { bounds, tambuSpot } = GRASS_CALIBRATION_LAYOUT;
 
     this.cameras.main.setBackgroundColor('#10151f');
     this.cameras.main.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
@@ -39,8 +33,8 @@ export class GrassCalibrationScene extends Phaser.Scene {
     createGrass(this, GRASS_CALIBRATION_LAYOUT);
 
     createTambuAnimations(this);
-    this.add.ellipse(spot.x, spot.y + 20, 22, 7, 0x111827, 0.42).setDepth(0);
-    this.add.sprite(spot.x, spot.y, TAMBU_SPRITE.key, 0)
+    this.add.ellipse(tambuSpot.x, tambuSpot.y + 20, 22, 7, 0x111827, 0.42).setDepth(0);
+    this.add.sprite(tambuSpot.x, tambuSpot.y, TAMBU_SPRITE.key, 0)
       .setScale(TAMBU_SPRITE.scale)
       .setDepth(1)
       .play(`${TAMBU_SPRITE.key}-idle-down`);

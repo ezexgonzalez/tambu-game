@@ -43,7 +43,7 @@ Al terminar este pack deben estar resueltos:
 - Evitar blur y antialias dentro del arte.
 - Todo asset nace cromáticamente preparado para noche.
 - Las luces y glows grandes se agregan desde Phaser/CSS, no pintados dentro de sprites.
-- Generación IA: **una imagen = un asset**. Nunca sheets/collages como fuente de producción.
+- Generación IA: **una imagen = un asset**. Nunca sheets/collages conceptuales como fuente de producción; los tilesets técnicos autorados directamente para runtime son una excepción explícita.
 
 ## Qué sigue provisional
 
@@ -66,75 +66,41 @@ El objetivo es validar primero el lenguaje visual del patio.
 
 ## 1. Césped nocturno
 
-El césped es el primer material a cerrar porque ocupa la mayor superficie del patio.
+El césped ocupa la mayor superficie del patio y su producción V1 queda cerrada con un único tileset runtime.
 
-### Producción inmediata — orden de prioridad
+### Asset aprobado
 
-#### Ground obligatorio
+```text
+public/assets/tiles/grass/tx_tileset_grass_night.png
+```
 
-1. `grass_ground_01.png`
-2. `grass_ground_02.png`
-3. `grass_ground_03.png`
-4. `grass_ground_04.png` solo si la repetición lo justifica
+- imagen `256x256 px`;
+- grilla de tiles fuente `16x16 px`;
+- fuente de verdad única para el grass del patio;
+- no recortar a PNG individuales;
+- no modificar ni regenerar sus píxeles durante integración.
 
-#### Macro variation
+### Paleta oficial
 
-5. `grass_macro_soft_01.png`
-6. `grass_macro_soft_02.png`
-7. `grass_macro_dark_01.png`
+Usar exclusivamente la paleta Night Grass vigente de `PIXEL_ART_STYLE_GUIDE.md`:
 
-#### Vegetación de borde
+`#122D23`, `#153427`, `#183A2B`, `#1C4230`, `#214A35`, `#28533A`, `#316040`.
 
-8. `grass_cluster_soft_01.png`
-9. `grass_cluster_soft_02.png`
-10. `bush_edge_horizontal_01.png`
-11. `bush_edge_horizontal_02.png` si se necesita evitar repetición
-12. corners/verticales solo cuando el mapa los requiera
+### Runtime aprobado
 
-#### Accents posteriores
+- una matriz determinista de IDs de frame fuente;
+- una sola `TilemapLayer` para todo `PATIO_LAYOUT.terrain.grass`;
+- aproximadamente `78%` base, `20%` detalle pequeño/suave y `2%` detalle medio;
+- sin `Math.random()`;
+- sin máscaras;
+- sin `scene.add.image()` por celda;
+- sin assets separados de ground, macro, patch, cluster, tuft o accent.
 
-- `flower_white_01.png`
-- `flower_pink_01.png`
-- `leaf_01.png`
-- pequeñas plantas
-
-### Reglas cerradas
-
-- paleta Night Grass oficial de `PIXEL_ART_STYLE_GUIDE.md`;
-- verde frío / teal profundo;
-- superficie relativamente uniforme y suave;
-- variantes por patrón/densidad, no por cambio de hue;
-- todo el patio visualmente verde;
-- **sin `worn`**;
-- **sin tierra marrón**;
-- **sin caminos gastados**;
-- sin checker;
-- sin microdetalle de alto contraste repartido uniformemente;
-- clusters más densos hacia bordes y rincones;
-- centro jugable más limpio;
-- flores y hojas solo como acentos raros.
-
-### Regla IA
-
-Cada asset se genera como imagen independiente.
-
-No crear una sheet completa para después recortarla.
-
-### Gate de aprobación ground
-
-Cada `grass_ground_*` debe:
-
-1. pertenecer a la misma paleta;
-2. pasar repeat test mínimo `3x3`;
-3. no mostrar costuras;
-4. no mostrar diagonales/patrones obvios;
-5. funcionar junto a otra variante;
-6. verse correctamente a zoom `1`;
-7. mantener Tambu legible a `scale: 1.24`.
+Los pools autorizados viven en `src/world/grass/grassLayout.js`. No seleccionar frames con flores, piedras, bordes, tonos amarillos ni contenido ajeno al grass base.
 
 ### Reemplaza
 
-El sistema visual provisional de césped cuando la nueva familia esté aprobada. La implementación actual no se reemplaza por assets experimentales aislados.
+La familia legacy completa de grounds de 64 px, patches, clusters, tufts, macros y accents.
 
 Ver `docs/PHASE_1_GRASS.md`.
 

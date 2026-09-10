@@ -1,258 +1,71 @@
-import { GRASS_ASSETS } from './preloadGrass.js';
+export const GRASS_TILE_SIZE = 16;
 
-export const GRASS_BASE_KEYS = [
-  GRASS_ASSETS.ground01.key,
-  GRASS_ASSETS.ground02.key,
-  GRASS_ASSETS.ground03.key,
-];
+export const GRASS_SOURCE_TILE_POOLS = Object.freeze({
+  base: Object.freeze([
+    0, 1, 3, 7, 11, 15, 16, 17, 19, 21, 28, 33, 34, 36, 39, 42, 44, 47, 49, 51,
+    52, 53, 64, 70, 72, 78, 80, 81, 86, 87, 89, 94, 95, 97, 100, 102, 110, 117, 125,
+  ]),
+  verySmall: Object.freeze([6, 14, 18, 26, 61, 68, 76, 108]),
+  soft: Object.freeze([
+    4, 5, 13, 20, 38, 46, 54, 55, 62, 63, 66, 83, 85, 96, 101, 104, 109, 118, 119, 126,
+  ]),
+  medium: Object.freeze([
+    22, 23, 30, 32, 48, 50, 58, 60, 65, 67, 69, 71, 73, 77, 84, 98, 103, 113, 114, 115,
+  ]),
+});
 
-export const GRASS_DECAL_KEYS = [
-  GRASS_ASSETS.tuftSmall01.key,
-  GRASS_ASSETS.tuftSmall02.key,
-  GRASS_ASSETS.tuftSmall03.key,
-  GRASS_ASSETS.tuftPair01.key,
-];
+const POOL_DISTRIBUTION = Object.freeze([
+  { maximum: 78, pool: GRASS_SOURCE_TILE_POOLS.base },
+  { maximum: 85, pool: GRASS_SOURCE_TILE_POOLS.verySmall },
+  { maximum: 98, pool: GRASS_SOURCE_TILE_POOLS.soft },
+  { maximum: 100, pool: GRASS_SOURCE_TILE_POOLS.medium },
+]);
 
-export const GRASS_CLUSTER_KEYS = [
-  GRASS_ASSETS.clusterMedium01.key,
-  GRASS_ASSETS.clusterMedium02.key,
-  GRASS_ASSETS.clusterMedium03.key,
-];
-
-const DECAL_SIZES = [16, 16, 16, 24];
-const CLUSTER_SIZES = [32, 32, 48];
-
-function createDistribution({ center, edgeSize }) {
-  return {
-    center,
-    edgeSize,
-    weights: {
-      center: [88, 12, 0],
-      sides: [67, 24, 9],
-      edges: [59, 27, 14],
-    },
-  };
-}
-
-export const GRASS_CALIBRATION_LAYOUT = {
-  bounds: { x: 0, y: 0, width: 384, height: 256 },
-  tileSize: 64,
-  seed: 417,
-  distribution: createDistribution({
-    center: { x: 96, y: 56, width: 192, height: 128 },
-    edgeSize: 48,
-  }),
-  patches: [
-    { asset: GRASS_ASSETS.patchSoft01.key, x: 4, y: 48, alpha: 0.82 },
-    { asset: GRASS_ASSETS.patchSoft01.key, x: 214, y: 0, alpha: 0.82, flipX: true },
-    { asset: GRASS_ASSETS.patchSoft02.key, x: 252, y: 152, alpha: 0.78, flipY: true },
-  ],
-  clusters: createGrassClusters({
-    bounds: { x: 0, y: 0, width: 384, height: 256 },
-    center: { x: 96, y: 56, width: 192, height: 128 },
-    edgeSize: 48,
-    seed: 417,
-  }),
-  decals: createGrassDecals({
-    bounds: { x: 0, y: 0, width: 384, height: 256 },
-    center: { x: 96, y: 56, width: 192, height: 128 },
-    edgeSize: 48,
-    seed: 417,
-  }),
-  tambuSpots: {
-    quiet: { x: 192, y: 136 },
-    dense: { x: 304, y: 210 },
-  },
-};
-
-export function createPatioGrassLayout({
-  terrain,
-  pool,
-  plants = [],
-  edgeShrubs = [],
-  edgeGardens = [],
-  garlands = [],
-}) {
-  const { grass } = terrain;
-  const center = {
-    x: pool.x - 160,
-    y: terrain.deck.y + terrain.deck.height,
-    width: pool.width + 320,
-    height: pool.height + 180,
-  };
-  const vegetationAnchors = [
-    ...plants.map(({ x, y }) => ({ x, y })),
-    ...edgeShrubs.map(({ x, y }) => ({ x, y })),
-    ...edgeGardens.map(({ x, y, width, height }) => ({
-      x: x + width / 2,
-      y: y + height / 2,
-    })),
-    ...garlands.flatMap(({ x1, y1, x2, y2 }) => [{ x: x1, y: y1 }, { x: x2, y: y2 }]),
-  ];
-
-  return {
-    bounds: grass,
-    tileSize: 64,
-    seed: 9721,
-    distribution: createDistribution({
-      center,
-      edgeSize: 128,
-    }),
-    patches: [
-      { asset: GRASS_ASSETS.patchSoft02.key, x: 18, y: 382, alpha: 0.78 },
-      { asset: GRASS_ASSETS.patchSoft01.key, x: 2, y: 516, alpha: 0.82, flipY: true },
-      { asset: GRASS_ASSETS.patchSoft02.key, x: 12, y: 770, alpha: 0.78, flipX: true },
-      { asset: GRASS_ASSETS.patchSoft01.key, x: 280, y: 862, alpha: 0.82 },
-      { asset: GRASS_ASSETS.patchSoft02.key, x: 558, y: 850, alpha: 0.78, flipY: true },
-      { asset: GRASS_ASSETS.patchSoft02.key, x: 1002, y: 850, alpha: 0.78, flipX: true },
-      { asset: GRASS_ASSETS.patchSoft01.key, x: 1112, y: 774, alpha: 0.82 },
-      { asset: GRASS_ASSETS.patchSoft02.key, x: 1522, y: 392, alpha: 0.78, flipX: true },
-      { asset: GRASS_ASSETS.patchSoft01.key, x: 1540, y: 638, alpha: 0.82, flipY: true },
-    ],
-    clusters: createGrassClusters({
-      bounds: grass,
-      center,
-      edgeSize: 128,
-      seed: 9721,
-      anchors: vegetationAnchors,
-    }),
-    decals: createGrassDecals({
-      bounds: grass,
-      center,
-      edgeSize: 128,
-      seed: 9721,
-    }),
-  };
-}
-
-function hashTile(x, y, seed) {
-  let value = (x * 374761393 + y * 668265263 + seed * 1442695041) >>> 0;
-  value = (value ^ (value >>> 13)) * 1274126177;
+function hashGrassCell(column, row, seed, salt = 0) {
+  let value = Math.imul(column + 1, 374761393)
+    ^ Math.imul(row + 1, 668265263)
+    ^ Math.imul(seed + salt, 1442695041);
+  value = Math.imul(value ^ (value >>> 13), 1274126177);
   return (value ^ (value >>> 16)) >>> 0;
 }
 
-function isWithin({ x, y, width, height }, pointX, pointY) {
-  return pointX >= x && pointX < x + width && pointY >= y && pointY < y + height;
+export function getGrassSourceTileId(column, row, seed) {
+  const distributionValue = hashGrassCell(column, row, seed) % 100;
+  const { pool } = POOL_DISTRIBUTION.find(({ maximum }) => distributionValue < maximum);
+  const variantValue = hashGrassCell(column, row, seed, 7919);
+
+  return pool[variantValue % pool.length];
 }
 
-function isNearEdge(bounds, edgeSize, x, y) {
-  return x < bounds.x + edgeSize
-    || x >= bounds.x + bounds.width - edgeSize
-    || y < bounds.y + edgeSize
-    || y >= bounds.y + bounds.height - edgeSize;
+export function createGrassTileData({ bounds, tileSize = GRASS_TILE_SIZE, seed }) {
+  const columns = Math.ceil(bounds.width / tileSize);
+  const rows = Math.ceil(bounds.height / tileSize);
+
+  return Array.from({ length: rows }, (_, row) => (
+    Array.from({ length: columns }, (_, column) => getGrassSourceTileId(column, row, seed))
+  ));
 }
 
-function clamp(value, minimum, maximum) {
-  return Math.max(minimum, Math.min(maximum, value));
+function createLayout(bounds, seed, extra = {}) {
+  const layout = {
+    bounds: { ...bounds },
+    tileSize: GRASS_TILE_SIZE,
+    seed,
+    ...extra,
+  };
+
+  return {
+    ...layout,
+    data: createGrassTileData(layout),
+  };
 }
 
-function isNearAnchor(anchors, x, y) {
-  return anchors.some((anchor) => {
-    const deltaX = anchor.x - x;
-    const deltaY = anchor.y - y;
-    return deltaX * deltaX + deltaY * deltaY < 110 * 110;
-  });
-}
+export const GRASS_CALIBRATION_LAYOUT = createLayout(
+  { x: 0, y: 0, width: 384, height: 256 },
+  417,
+  { tambuSpot: { x: 192, y: 136 } },
+);
 
-function createGrassClusters({ bounds, center, edgeSize, seed, anchors = [] }) {
-  const spacing = 88;
-  const columns = Math.ceil(bounds.width / spacing);
-  const rows = Math.ceil(bounds.height / spacing);
-  const clusters = [];
-
-  for (let row = 0; row < rows; row += 1) {
-    for (let column = 0; column < columns; column += 1) {
-      const cellX = bounds.x + column * spacing + spacing / 2;
-      const cellY = bounds.y + row * spacing + spacing / 2;
-      const edge = isNearEdge(bounds, edgeSize, cellX, cellY);
-      const central = !edge && isWithin(center, cellX, cellY);
-      const anchorBoost = isNearAnchor(anchors, cellX, cellY) ? 8 : 0;
-      const frequency = Math.min(50, (edge ? 40 : central ? 2 : 20) + anchorBoost);
-      const value = hashTile(column, row, seed + 8101);
-
-      if (value % 100 >= frequency) continue;
-
-      const variantValue = hashTile(column, row, seed + 9319);
-      const variantBucket = variantValue % 100;
-      const variant = variantBucket < 35 ? 0 : variantBucket < 70 ? 1 : 2;
-      const width = CLUSTER_SIZES[variant];
-      const jitterX = (hashTile(column, row, seed + 10301) % 37) - 18;
-      const jitterY = (hashTile(column, row, seed + 11717) % 29) - 14;
-
-      clusters.push({
-        asset: GRASS_CLUSTER_KEYS[variant],
-        x: clamp(cellX - width / 2 + jitterX, bounds.x, bounds.x + bounds.width - width),
-        y: clamp(cellY - 16 + jitterY, bounds.y, bounds.y + bounds.height - 32),
-        flipX: (variantValue & 1) === 1,
-        flipY: (variantValue & 2) === 2,
-      });
-    }
-  }
-
-  return clusters;
-}
-
-function createGrassDecals({ bounds, center, edgeSize, seed }) {
-  const spacing = 48;
-  const columns = Math.ceil(bounds.width / spacing);
-  const rows = Math.ceil(bounds.height / spacing);
-  const decals = [];
-
-  for (let row = 0; row < rows; row += 1) {
-    for (let column = 0; column < columns; column += 1) {
-      const cellX = bounds.x + column * spacing + spacing / 2;
-      const cellY = bounds.y + row * spacing + spacing / 2;
-      const edge = isNearEdge(bounds, edgeSize, cellX, cellY);
-      const central = !edge && isWithin(center, cellX, cellY);
-      const frequency = edge ? 25 : central ? 6 : 14;
-      const value = hashTile(column, row, seed + 1301);
-
-      if (value % 100 >= frequency) continue;
-
-      const variantValue = hashTile(column, row, seed + 2719);
-      const variantBucket = variantValue % 100;
-      const variant = variantBucket < 29 ? 0 : variantBucket < 56 ? 1 : variantBucket < 84 ? 2 : 3;
-      const size = DECAL_SIZES[variant];
-      const jitterX = (hashTile(column, row, seed + 4001) % 25) - 12;
-      const jitterY = (hashTile(column, row, seed + 6151) % 25) - 12;
-
-      decals.push({
-        asset: GRASS_DECAL_KEYS[variant],
-        x: clamp(cellX - size / 2 + jitterX, bounds.x, bounds.x + bounds.width - size),
-        y: clamp(cellY - size / 2 + jitterY, bounds.y, bounds.y + bounds.height - size),
-        alpha: edge ? 1 : central ? 0.9 : 0.96,
-        flipX: (variantValue & 1) === 1,
-        flipY: (variantValue & 2) === 2,
-      });
-    }
-  }
-
-  return decals;
-}
-
-function getZoneWeights(layout, worldX, worldY) {
-  const { bounds, distribution } = layout;
-
-  if (isWithin(distribution.center, worldX, worldY)) {
-    return distribution.weights.center;
-  }
-
-  const edgeSize = distribution.edgeSize;
-  const isEdge = worldX < bounds.x + edgeSize
-    || worldX >= bounds.x + bounds.width - edgeSize
-    || worldY >= bounds.y + bounds.height - edgeSize;
-
-  return isEdge ? distribution.weights.edges : distribution.weights.sides;
-}
-
-export function getGrassGroundKey(column, row, layout) {
-  const { bounds, tileSize, seed } = layout;
-  const worldX = bounds.x + column * tileSize + tileSize / 2;
-  const worldY = bounds.y + row * tileSize + tileSize / 2;
-  const [ground01, ground02] = getZoneWeights(layout, worldX, worldY);
-  const bucket = hashTile(column, row, seed) % 100;
-
-  if (bucket < ground01) return GRASS_BASE_KEYS[0];
-  if (bucket < ground01 + ground02) return GRASS_BASE_KEYS[1];
-  return GRASS_BASE_KEYS[2];
+export function createPatioGrassLayout({ terrain }) {
+  return createLayout(terrain.grass, 9721);
 }
