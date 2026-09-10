@@ -11,16 +11,17 @@ export function preloadPlayer(scene) {
 }
 
 export function createPlayer(scene) {
-  const { sprite: spriteConfig, start, depth, initialFacing, label: labelConfig } = PLAYER_CONFIG;
+  const { sprite: spriteConfig, start, initialFacing, label: labelConfig } = PLAYER_CONFIG;
 
   createTambuAnimations(scene);
 
   const sprite = scene.physics.add.sprite(start.x, start.y, spriteConfig.key, 0);
   sprite.setScale(spriteConfig.scale);
   sprite.setCollideWorldBounds(true);
-  sprite.setDepth(depth);
   sprite.body.setSize(spriteConfig.bodyWidth, spriteConfig.bodyHeight);
   sprite.body.setOffset(spriteConfig.bodyOffsetX, spriteConfig.bodyOffsetY);
+  const footDepth = sprite.body.bottom;
+  sprite.setDepth(footDepth);
   sprite.play(`${spriteConfig.key}-idle-${initialFacing}`);
 
   const label = scene.add.text(
@@ -28,7 +29,7 @@ export function createPlayer(scene) {
     start.y + labelConfig.initialOffsetY,
     labelConfig.text,
     labelConfig.style,
-  ).setOrigin(0.5).setDepth(labelConfig.depth);
+  ).setOrigin(0.5).setDepth(footDepth + 1);
 
   const cursors = scene.input.keyboard.createCursorKeys();
   const wasd = scene.input.keyboard.addKeys({

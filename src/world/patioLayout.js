@@ -66,14 +66,13 @@ const DJ = {
     { x: 110, y: 231, width: 42, height: 80 },
     { x: 382, y: 231, width: 42, height: 80 },
   ],
-  colliders: [
-    // Continuous physical front: no entry below the booth lip or through its side gaps.
-    { x: 267, y: 288, width: 250, height: 58 },
-    { x: 131, y: 270, width: 38, height: 68 },
-    { x: 403, y: 270, width: 38, height: 68 },
-    { x: 173, y: 234, width: 24, height: 64 },
-    { x: 361, y: 234, width: 24, height: 64 },
-    { x: 267, y: 250, width: 174, height: 14 },
+  // Top-left rectangles local to the DJ area. They model only grounded solid footprints.
+  collisionRects: [
+    { id: 'front', x: 26, y: 58, width: 250, height: 56 },
+    { id: 'speaker-left', x: -4, y: 88, width: 38, height: 20 },
+    { id: 'speaker-right', x: 266, y: 88, width: 38, height: 20 },
+    { id: 'support-left', x: 37, y: 59, width: 32, height: 14 },
+    { id: 'support-right', x: 225, y: 59, width: 32, height: 14 },
   ],
 };
 

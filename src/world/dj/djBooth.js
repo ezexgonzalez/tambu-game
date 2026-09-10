@@ -21,14 +21,15 @@ export function createDjBooth(scene, dj) {
   const centerX = dj.x + dj.width / 2;
   const stageBottom = dj.y + dj.height;
   const rigDepth = {
-    stage: stageBottom,
-    platform: dj.y + 78,
+    // Semantic layers: floor -> rear support -> actor -> console/structure -> front occluders.
+    platform: dj.y + 10,
+    shelf: dj.y + 28,
+    console: dj.y + 58,
     supports: dj.y + 70,
     truss: dj.y + 71,
-    console: dj.y + 56,
-    shelf: dj.y + 58,
     speakers: dj.y + 109,
-    booth: dj.y + 116,
+    booth: dj.y + 114,
+    stage: dj.y + 115,
   };
 
   const stage = scene.add.image(centerX, stageBottom, DJ_ASSETS.stageBase.key)

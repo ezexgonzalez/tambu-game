@@ -8,9 +8,10 @@ export function updatePlayer(player, { canMove = true } = {}) {
     player.sprite.x,
     player.sprite.y + PLAYER_CONFIG.label.offsetY,
   );
-  // World actors sort by their feet so foreground structures can occlude them naturally.
-  player.sprite.setDepth(player.sprite.y);
-  player.label.setDepth(player.sprite.y + 1);
+  // Arcade body.bottom is Tambu's actual grounded contact line, unlike sprite.y (its visual origin).
+  const footDepth = player.sprite.body.bottom;
+  player.sprite.setDepth(footDepth);
+  player.label.setDepth(footDepth + 1);
 
   if (canMove) {
     applyMovement(player);
