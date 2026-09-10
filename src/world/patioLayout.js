@@ -58,13 +58,19 @@ const BAR = {
 };
 
 const DJ = {
-  x: 106,
-  y: 212,
-  width: 322,
-  height: 126,
+  x: 116,
+  y: 202,
+  width: 302,
+  height: 120,
   speakers: [
-    { x: 92, y: 225, width: 48, height: 94 },
-    { x: 414, y: 225, width: 48, height: 94 },
+    { x: 110, y: 231, width: 42, height: 80 },
+    { x: 382, y: 231, width: 42, height: 80 },
+  ],
+  colliders: [
+    { x: 267, y: 288, width: 212, height: 42 },
+    { x: 131, y: 270, width: 38, height: 68 },
+    { x: 403, y: 270, width: 38, height: 68 },
+    { x: 267, y: 311, width: 246, height: 16 },
   ],
 };
 

@@ -18,45 +18,45 @@ export function preloadDjBooth(scene) {
 
 export function createDjBooth(scene, dj) {
   const centerX = dj.x + dj.width / 2;
-  const stageBottom = dj.y + dj.height + 4;
+  const stageBottom = dj.y + dj.height;
 
   const stage = scene.add.image(centerX, stageBottom, DJ_ASSETS.stageBase.key)
     .setOrigin(0.5, 1)
     .setDepth(8);
 
-  // The open upper part of this platform is deliberately reserved for the DJ.
-  const backPlatform = scene.add.image(centerX, dj.y + 80, DJ_ASSETS.backPlatform.key)
+  // This clean platform deliberately reserves standing room behind the controller.
+  const backPlatform = scene.add.image(centerX, dj.y + 78, DJ_ASSETS.backPlatform.key)
     .setOrigin(0.5, 1)
     .setDepth(9);
 
-  const truss = scene.add.image(centerX, dj.y - 37, DJ_ASSETS.backTruss.key)
+  const truss = scene.add.image(centerX, dj.y - 29, DJ_ASSETS.backTruss.key)
     .setOrigin(0.5, 0)
     .setDepth(10);
 
-  const lightLeft = scene.add.image(centerX - 86, dj.y - 30, DJ_ASSETS.lightLeft.key)
+  const lightLeft = scene.add.image(centerX - 68, dj.y - 18, DJ_ASSETS.lightLeft.key)
     .setOrigin(0.5, 0)
     .setDepth(11);
-  const lightRight = scene.add.image(centerX + 86, dj.y - 30, DJ_ASSETS.lightRight.key)
+  const lightRight = scene.add.image(centerX + 68, dj.y - 18, DJ_ASSETS.lightRight.key)
     .setOrigin(0.5, 0)
     .setDepth(11);
 
-  const booth = scene.add.image(centerX, dj.y + 125, DJ_ASSETS.boothFront.key)
+  const booth = scene.add.image(centerX, dj.y + 114, DJ_ASSETS.boothFront.key)
     .setOrigin(0.5, 1)
     .setDepth(12);
 
   const leftSpeaker = scene.add.image(
     dj.speakers[0].x,
-    dj.speakers[0].y - 6,
+    dj.speakers[0].y,
     DJ_ASSETS.speakerTallLeft.key,
   ).setOrigin(0).setDepth(13);
   const rightSpeaker = scene.add.image(
     dj.speakers[1].x,
-    dj.speakers[1].y - 6,
+    dj.speakers[1].y,
     DJ_ASSETS.speakerTallRight.key,
   ).setOrigin(0).setDepth(13);
 
   // Controller faces screen-bottom; the DJ stands in the clear platform above it.
-  const consoleTop = scene.add.image(centerX, dj.y + 39, DJ_ASSETS.consoleTop.key)
+  const consoleTop = scene.add.image(centerX, dj.y + 43, DJ_ASSETS.consoleTop.key)
     .setOrigin(0.5, 0)
     .setDepth(14);
 
