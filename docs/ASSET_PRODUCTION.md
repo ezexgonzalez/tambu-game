@@ -43,7 +43,7 @@ Al terminar este pack deben estar resueltos:
 - Evitar blur y antialias dentro del arte.
 - Todo asset nace cromáticamente preparado para noche.
 - Las luces y glows grandes se agregan desde Phaser/CSS, no pintados dentro de sprites.
-- Generación IA: **una imagen = un asset**. Nunca sheets/collages conceptuales como fuente de producción; los tilesets técnicos autorados directamente para runtime son una excepción explícita.
+- Generación IA: **una generación = un kit coherente de assets relacionados**. La sheet es una fuente intermedia; antes de runtime sus piezas se separan, limpian, normalizan y exportan como PNG finales independientes.
 
 ## Qué sigue provisional
 

@@ -102,7 +102,6 @@ export const PATIO_LAYOUT = {
     grass: { x: 0, y: 150, width: WORLD.width, height: WORLD.height - 150 },
     deck: { x: 0, y: 150, width: WORLD.width, height: 120 },
     deckEdge: { x: 0, y: 254, width: WORLD.width, height: 16 },
-    deckDetails: { startX: 64, y: 166, width: 48, height: 72, stepX: 160 },
     deckLights: [116, 350, 584, 818, 1052, 1286, 1520],
     entry: { x: 1456, y: 800, width: 96, height: 160, playerSpawnY: 890 },
   },

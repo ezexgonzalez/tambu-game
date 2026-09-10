@@ -315,29 +315,26 @@ Las texturas ground pueden ser opacas si su función es cubrir superficie.
 
 # 13. Regla obligatoria para generación IA
 
-## Una imagen = un asset
+## Una generación = un kit coherente
 
-Nunca generar como entrega de producción:
+Cuando se necesite arte relacionado, una generación visual debe producir un kit con múltiples assets, piezas o variantes coherentes dentro de una misma imagen.
 
-- sprite sheets conceptuales;
-- collages;
-- atlas visuales;
-- presentación de pack;
-- varios objetos en una misma imagen;
-- una imagen grande para después recortarla.
+La sheet generada es una **fuente intermedia**, no un asset de runtime. Antes de integrarla se debe:
 
-Si se necesitan ocho assets, se producen **ocho imágenes independientes**.
+1. identificar cada pieza autorizada;
+2. recortarla y separarla;
+3. eliminar por completo el fondo temporal y cualquier halo;
+4. normalizar escala y pixel density con nearest-neighbor;
+5. exportar cada asset final como PNG independiente y bien nombrado.
 
-Cada imagen debe nacer con la función técnica de su asset final.
+Los assets finales mantienen las reglas de pixel art real, sin blur ni antialias, con transparencia real cuando corresponda y sin residuos de la sheet.
 
 ### Está prohibido para producción
 
-1. generar una sheet;
-2. recortarla automáticamente;
-3. limpiar texto/fondo;
-4. entregar esos recortes a Work.
-
-Las sheets conceptuales solo pueden existir como referencia y jamás son fuente de assets finales. Un tileset técnico autorado directamente para su grilla runtime sí puede ser un asset final; `tx_tileset_grass_night.png` es el precedente aprobado para césped.
+- generar cada pieza relacionada en una imagen aislada;
+- cargar la sheet intermedia directamente en runtime;
+- conservar paneles, labels, marcos o fondos de presentación;
+- agrupar los recortes finales en un único PNG cuando el runtime requiere archivos separados.
 
 ---
 

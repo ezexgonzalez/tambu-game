@@ -3,11 +3,13 @@ import { TERRAIN_TILE, TILE_SIZE } from '../data/terrainTiles.js';
 import { createGrass } from './grass/createGrass.js';
 import { createPatioGrassLayout } from './grass/grassLayout.js';
 import { preloadGrass } from './grass/preloadGrass.js';
+import { createDeckSurface, preloadDeckSurface } from './deck/deckSurface.js';
 import { createHouseFacade, preloadHouseFacade } from './house/houseFacade.js';
 import { PATIO_LAYOUT } from './patioLayout.js';
 
 export function preloadPatioWorld(scene) {
   preloadGrass(scene);
+  preloadDeckSurface(scene);
   preloadHouseFacade(scene);
   scene.load.spritesheet('terrain', '/assets/tiles/terrain/terrain.png', {
     frameWidth: TILE_SIZE,
@@ -21,27 +23,11 @@ export function createPatioWorld(scene) {
 }
 
 function drawTerrain(scene) {
-  const { world, terrain } = PATIO_LAYOUT;
-  const { deck, deckEdge, deckDetails, entry } = terrain;
+  const { terrain } = PATIO_LAYOUT;
+  const { entry } = terrain;
 
   createGrass(scene, createPatioGrassLayout(PATIO_LAYOUT), { depth: -30 });
-
-  scene.add.tileSprite(deck.x, deck.y, deck.width, deck.height, 'terrain', TERRAIN_TILE.DECK_A)
-    .setOrigin(0)
-    .setDepth(-24);
-
-  scene.add.tileSprite(deckEdge.x, deckEdge.y, deckEdge.width, deckEdge.height, 'terrain', TERRAIN_TILE.DECK_EDGE_BOTTOM)
-    .setOrigin(0)
-    .setDepth(-23);
-
-  for (let x = deckDetails.startX; x < world.width; x += deckDetails.stepX) {
-    scene.add.tileSprite(x, deckDetails.y, deckDetails.width, deckDetails.height, 'terrain', TERRAIN_TILE.DECK_B)
-      .setOrigin(0)
-      .setDepth(-22)
-      .setAlpha(0.34);
-  }
-
-  drawDeckSurface(scene);
+  createDeckSurface(scene, terrain);
 
   scene.add.tileSprite(entry.x, entry.y, entry.width, entry.height, 'terrain', TERRAIN_TILE.PATH_A)
     .setOrigin(0)
@@ -67,41 +53,6 @@ function drawTerrain(scene) {
   ).setOrigin(0).setDepth(-16);
 
   drawPixelPool(scene);
-}
-
-function drawDeckSurface(scene) {
-  const { deck, deckLights } = PATIO_LAYOUT.terrain;
-  const planks = scene.add.graphics().setDepth(-21);
-
-  planks.fillStyle(0x1d1010, 0.18);
-  planks.fillRect(deck.x, deck.y, deck.width, 5);
-  planks.fillRect(deck.x, deck.y + deck.height - 18, deck.width, 18);
-
-  for (let y = deck.y + 8; y < deck.y + 104; y += 16) {
-    planks.lineStyle(2, 0x2a1716, 0.36);
-    planks.lineBetween(deck.x, y, deck.x + deck.width, y);
-    planks.lineStyle(1, 0xc8925e, 0.18);
-    planks.lineBetween(deck.x, y + 2, deck.x + deck.width, y + 2);
-
-    const row = Math.floor((y - deck.y) / 16);
-    for (let x = 28 + (row % 2) * 48; x < deck.width; x += 96) {
-      planks.fillStyle(0x281617, 0.34);
-      planks.fillRect(x, y - 7, 2, 7);
-      planks.fillStyle(0xd19b68, 0.14);
-      planks.fillRect(x + 18, y - 10, 24, 2);
-    }
-  }
-
-  deckLights.forEach((x) => {
-    planks.fillStyle(0xffc968, 0.08);
-    planks.fillCircle(x, deck.y + deck.height - 11, 19);
-    planks.fillStyle(0xffd981, 0.18);
-    planks.fillCircle(x, deck.y + deck.height - 11, 10);
-    planks.fillStyle(0xffe2a0, 1);
-    planks.fillRect(x - 5, deck.y + deck.height - 13, 10, 4);
-    planks.fillStyle(0x9c6333, 1);
-    planks.fillRect(x - 6, deck.y + deck.height - 9, 12, 2);
-  });
 }
 
 function drawPixelPool(scene) {

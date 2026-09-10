@@ -470,7 +470,7 @@ La UI final no queda congelada en esta fase; solo queda fijada su relación est�
 - NPCs alineados como grilla;
 - sombras blandas realistas mezcladas con sprites sin volumen;
 - copiar literalmente una referencia generada;
-- usar una sheet conceptual como fuente de recortes finales;
+- cargar una sheet intermedia directamente en runtime sin separar y limpiar sus piezas;
 - cambiar el macro-layout para hacer que una ilustración encaje;
 - diseñar assets aislados sin probarlos dentro del mapa.
 
@@ -486,8 +486,8 @@ Para Tier A y Tier B:
 2. **Definir footprint** — tamaño, colisión y espacio jugable actual.
 3. **Calibrar con Tambu** — colocar frame real de Tambu y determinar proporción objetivo.
 4. **Referencia / exploración** — IA, boceto o referencias visuales pueden proponer dirección.
-5. **Diseño individual** — una imagen = un asset final candidate.
-6. **Normalización** — perspectiva, escala, paleta, pixel density, bordes y detalle.
+5. **Kit coherente** — una generación reúne múltiples piezas o variantes relacionadas.
+6. **Separación y normalización** — recorte, transparencia, perspectiva, escala, paleta, pixel density, bordes y detalle de cada asset final.
 7. **Prueba con Tambu** — asset + Tambu a escala runtime real.
 8. **Integración** — colocarlo en el patio real.
 9. **Iluminación / sombra** — resolver contacto y fuente local.
@@ -497,13 +497,12 @@ Para Tier A y Tier B:
 
 ## Regla específica de generación IA
 
-- una imagen = un asset;
-- no sheets como entrega de producción;
-- no collages;
-- no pack presentations para recortar;
-- no atlas conceptuales como fuente de PNG finales;
+- una generación = un kit coherente de múltiples assets relacionados;
+- la sheet es una fuente intermedia, nunca un asset cargado directamente en runtime;
+- cada pieza se recorta, limpia y exporta como PNG final separado;
+- no conservar fondos, labels, marcos ni residuos de presentación;
 - transparencia real cuando corresponda;
-- cualquier sheet puede usarse únicamente como referencia visual.
+- pixel art final sin blur ni antialias.
 
 Ver reglas completas en `docs/PIXEL_ART_STYLE_GUIDE.md`.
 
