@@ -67,13 +67,13 @@ const DJ = {
     { x: 382, y: 231, width: 42, height: 80 },
   ],
   colliders: [
-    { x: 267, y: 290, width: 212, height: 40 },
+    // Continuous physical front: no entry below the booth lip or through its side gaps.
+    { x: 267, y: 288, width: 250, height: 58 },
     { x: 131, y: 270, width: 38, height: 68 },
     { x: 403, y: 270, width: 38, height: 68 },
     { x: 173, y: 234, width: 24, height: 64 },
     { x: 361, y: 234, width: 24, height: 64 },
-    { x: 267, y: 258, width: 174, height: 18 },
-    { x: 267, y: 311, width: 246, height: 16 },
+    { x: 267, y: 250, width: 174, height: 14 },
   ],
 };
 

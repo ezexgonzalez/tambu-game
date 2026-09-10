@@ -25,8 +25,8 @@ export function createDjBooth(scene, dj) {
     platform: dj.y + 78,
     supports: dj.y + 70,
     truss: dj.y + 71,
-    console: dj.y + 63,
-    shelf: dj.y + 76,
+    console: dj.y + 56,
+    shelf: dj.y + 58,
     speakers: dj.y + 109,
     booth: dj.y + 116,
   };
@@ -63,7 +63,8 @@ export function createDjBooth(scene, dj) {
     DJ_ASSETS.speakerTallRight.key,
   ).setOrigin(0).setDepth(rigDepth.speakers);
 
-  const consoleShelf = scene.add.image(centerX, dj.y + 45, DJ_ASSETS.consoleShelf.key)
+  // Keep the support surface inside the booth body, behind the side supports and front panel.
+  const consoleShelf = scene.add.image(centerX, dj.y + 39, DJ_ASSETS.consoleShelf.key)
     .setOrigin(0.5, 0)
     .setDepth(rigDepth.shelf);
 
