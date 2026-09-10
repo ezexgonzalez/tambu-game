@@ -44,8 +44,8 @@ export function createDjBooth(scene, dj) {
     .setOrigin(0.5, 0)
     .setDepth(rigDepth.truss);
   const supports = [
-    scene.add.image(centerX - 89, dj.y - 20, DJ_ASSETS.supportLeft.key).setOrigin(0.5, 0).setDepth(rigDepth.supports),
-    scene.add.image(centerX + 89, dj.y - 20, DJ_ASSETS.supportRight.key).setOrigin(0.5, 0).setDepth(rigDepth.supports),
+    scene.add.image(centerX - 94, dj.y - 20, DJ_ASSETS.supportLeft.key).setOrigin(0.5, 0).setDepth(rigDepth.supports),
+    scene.add.image(centerX + 94, dj.y - 20, DJ_ASSETS.supportRight.key).setOrigin(0.5, 0).setDepth(rigDepth.supports),
   ];
 
   const booth = scene.add.image(centerX, dj.y + 114, DJ_ASSETS.boothFront.key)
