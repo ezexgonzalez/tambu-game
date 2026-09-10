@@ -47,22 +47,22 @@ function createWindow(scene, window) {
   ).setDepth(1);
 }
 
-function createHouseDoor(scene, door) {
+function createHouseDoor(scene, door, floorY) {
   scene.add.image(
     door.x + door.width / 2,
-    door.y,
+    floorY,
     HOUSE_ASSETS.doorHouse.key,
-  ).setOrigin(0.5, 0).setDepth(1);
+  ).setOrigin(0.5, 1).setDepth(1);
 }
 
-function createBathroomDoor(scene, bathroom) {
+function createBathroomDoor(scene, bathroom, floorY) {
   const centerX = bathroom.x + bathroom.width / 2;
 
-  scene.add.image(centerX, bathroom.y - 2, HOUSE_ASSETS.doorBathroom.key)
-    .setOrigin(0.5, 0)
+  const door = scene.add.image(centerX, floorY, HOUSE_ASSETS.doorBathroom.key)
+    .setOrigin(0.5, 1)
     .setDepth(1);
 
-  scene.add.text(centerX, bathroom.y + 10, 'BAÑO', {
+  scene.add.text(centerX, floorY - door.height + 12, 'BAÑO', {
     fontFamily: 'monospace',
     fontSize: '8px',
     color: '#171a20',
@@ -79,6 +79,8 @@ function createWallPlanters(scene, wallPlanters) {
 }
 
 export function createHouseFacade(scene, { house, wallPlanters }) {
+  const floorY = house.y + house.height;
+
   scene.add.tileSprite(
     house.x,
     house.y,
@@ -96,8 +98,8 @@ export function createHouseFacade(scene, { house, wallPlanters }) {
   ).setOrigin(0).setDepth(1);
 
   house.windows.forEach((window) => createWindow(scene, window));
-  createHouseDoor(scene, house.secondaryDoor);
-  createBathroomDoor(scene, house.bathroom);
+  createHouseDoor(scene, house.secondaryDoor, floorY);
+  createBathroomDoor(scene, house.bathroom, floorY);
 
   house.lamps.forEach(({ x, y }) => {
     scene.add.image(x + 7, y - 8, HOUSE_ASSETS.wallLamp.key)
