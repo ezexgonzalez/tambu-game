@@ -19,7 +19,13 @@ function addLayer(scene, items, depth) {
 }
 
 export function createGrass(scene, layout, { depth = -40 } = {}) {
-  const { bounds, tileSize, macro, decals = [] } = layout;
+  const {
+    bounds,
+    tileSize,
+    patches = [],
+    clusters = [],
+    decals = [],
+  } = layout;
   const base = [];
   const columns = Math.ceil(bounds.width / tileSize);
   const rows = Math.ceil(bounds.height / tileSize);
@@ -36,7 +42,8 @@ export function createGrass(scene, layout, { depth = -40 } = {}) {
 
   return {
     base,
-    macro: addLayer(scene, macro, depth + 1),
-    decals: addLayer(scene, decals, depth + 2),
+    patches: addLayer(scene, patches, depth + 1),
+    clusters: addLayer(scene, clusters, depth + 2),
+    decals: addLayer(scene, decals, depth + 3),
   };
 }
