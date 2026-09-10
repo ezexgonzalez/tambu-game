@@ -20,47 +20,57 @@ export function preloadDjBooth(scene) {
 export function createDjBooth(scene, dj) {
   const centerX = dj.x + dj.width / 2;
   const stageBottom = dj.y + dj.height;
+  const rigDepth = {
+    stage: stageBottom,
+    platform: dj.y + 78,
+    supports: dj.y + 70,
+    truss: dj.y + 71,
+    console: dj.y + 63,
+    shelf: dj.y + 76,
+    speakers: dj.y + 109,
+    booth: dj.y + 116,
+  };
 
   const stage = scene.add.image(centerX, stageBottom, DJ_ASSETS.stageBase.key)
     .setOrigin(0.5, 1)
-    .setDepth(8);
+    .setDepth(rigDepth.stage);
 
   // This clean platform deliberately reserves standing room behind the controller.
   const backPlatform = scene.add.image(centerX, dj.y + 78, DJ_ASSETS.backPlatform.key)
     .setOrigin(0.5, 1)
-    .setDepth(9);
+    .setDepth(rigDepth.platform);
 
   const truss = scene.add.image(centerX, dj.y - 31, DJ_ASSETS.lightTruss.key)
     .setOrigin(0.5, 0)
-    .setDepth(10);
+    .setDepth(rigDepth.truss);
   const supports = [
-    scene.add.image(centerX - 89, dj.y - 20, DJ_ASSETS.supportLeft.key).setOrigin(0.5, 0).setDepth(11),
-    scene.add.image(centerX + 89, dj.y - 20, DJ_ASSETS.supportRight.key).setOrigin(0.5, 0).setDepth(11),
+    scene.add.image(centerX - 89, dj.y - 20, DJ_ASSETS.supportLeft.key).setOrigin(0.5, 0).setDepth(rigDepth.supports),
+    scene.add.image(centerX + 89, dj.y - 20, DJ_ASSETS.supportRight.key).setOrigin(0.5, 0).setDepth(rigDepth.supports),
   ];
 
   const booth = scene.add.image(centerX, dj.y + 114, DJ_ASSETS.boothFront.key)
     .setOrigin(0.5, 1)
-    .setDepth(14);
+    .setDepth(rigDepth.booth);
 
   const leftSpeaker = scene.add.image(
     dj.speakers[0].x,
     dj.speakers[0].y,
     DJ_ASSETS.speakerTallLeft.key,
-  ).setOrigin(0).setDepth(13);
+  ).setOrigin(0).setDepth(rigDepth.speakers);
   const rightSpeaker = scene.add.image(
     dj.speakers[1].x,
     dj.speakers[1].y,
     DJ_ASSETS.speakerTallRight.key,
-  ).setOrigin(0).setDepth(13);
+  ).setOrigin(0).setDepth(rigDepth.speakers);
 
   const consoleShelf = scene.add.image(centerX, dj.y + 45, DJ_ASSETS.consoleShelf.key)
     .setOrigin(0.5, 0)
-    .setDepth(12);
+    .setDepth(rigDepth.shelf);
 
   // Controller sits on the shelf; the open deck above remains reserved for the future DJ.
   const consoleTop = scene.add.image(centerX, dj.y + 24, DJ_ASSETS.consoleTop.key)
     .setOrigin(0.5, 0)
-    .setDepth(13);
+    .setDepth(rigDepth.console);
 
   return {
     stage,
