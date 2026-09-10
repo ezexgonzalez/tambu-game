@@ -3,10 +3,12 @@ import { TERRAIN_TILE, TILE_SIZE } from '../data/terrainTiles.js';
 import { createGrass } from './grass/createGrass.js';
 import { createPatioGrassLayout } from './grass/grassLayout.js';
 import { preloadGrass } from './grass/preloadGrass.js';
+import { createHouseFacade, preloadHouseFacade } from './house/houseFacade.js';
 import { PATIO_LAYOUT } from './patioLayout.js';
 
 export function preloadPatioWorld(scene) {
   preloadGrass(scene);
+  preloadHouseFacade(scene);
   scene.load.spritesheet('terrain', '/assets/tiles/terrain/terrain.png', {
     frameWidth: TILE_SIZE,
     frameHeight: TILE_SIZE,
@@ -263,7 +265,7 @@ function drawPoolCoping(scene, { x, y, width, height }) {
 function drawArchitectureAndProps(scene) {
   const graphics = scene.add.graphics();
 
-  drawHouse(scene, graphics);
+  createHouseFacade(scene, PATIO_LAYOUT);
   drawBar(scene, graphics);
   drawDj(scene, graphics);
 
@@ -274,171 +276,6 @@ function drawArchitectureAndProps(scene) {
   drawPatioLanterns(graphics);
   drawGarlands(graphics);
   drawClutter(graphics);
-}
-
-function drawHouse(scene, graphics) {
-  const { house } = PATIO_LAYOUT;
-
-  graphics.fillStyle(0xbcb6b2, 1);
-  graphics.fillRect(house.x, house.y, house.width, house.height);
-  graphics.fillStyle(0xd8d1ca, 1);
-  graphics.fillRect(house.x, house.y + 18, house.width, 104);
-  graphics.fillStyle(0xeee7dc, 1);
-  graphics.fillRect(house.x, house.y, house.width, house.topBandHeight);
-  graphics.fillStyle(0xa69e97, 1);
-  graphics.fillRect(house.x, house.middleBand.y, house.width, house.middleBand.height);
-  graphics.fillStyle(0x615c5c, 1);
-  graphics.fillRect(house.x, house.bottomBand.y, house.width, house.bottomBand.height);
-  graphics.fillStyle(0x12151d, 0.3);
-  graphics.fillRect(house.x, house.height - 3, house.width, 12);
-
-  for (let x = 18; x < house.width; x += 58) {
-    const seed = (x * 5) % 17;
-    graphics.fillStyle(seed % 2 === 0 ? 0xffffff : 0x776f6d, seed % 2 === 0 ? 0.11 : 0.08);
-    graphics.fillRect(x, 23 + (seed % 9) * 10, 2 + (seed % 4), 2);
-  }
-
-  house.verticalCuts.forEach((x) => {
-    graphics.fillStyle(0x817a78, 0.3);
-    graphics.fillRect(x - 4, 18, 6, 104);
-    graphics.fillStyle(0xf4eee5, 0.48);
-    graphics.fillRect(x - 3, 18, 4, 102);
-  });
-
-  house.windows.forEach((window, index) => drawWindow(graphics, window, index));
-
-  drawSecondaryDoor(graphics, house.secondaryDoor);
-  drawBathroom(scene, graphics, house.bathroom);
-  house.lamps.forEach((lamp) => drawWallLamp(graphics, lamp));
-  drawWallPlanters(graphics);
-}
-
-function drawWindow(graphics, window, index) {
-  const { x, y, width, height, warm, silhouettes } = window;
-  const glow = warm ? 0xffca69 : 0x718dff;
-  const glass = warm ? 0xc88b47 : 0x29345e;
-  const glassShade = warm ? 0x72523b : 0x1a2348;
-
-  graphics.fillStyle(glow, warm ? 0.06 : 0.035);
-  graphics.fillRect(x - 12, y - 10, width + 24, height + 26);
-  graphics.fillStyle(0x37343b, 1);
-  graphics.fillRect(x - 5, y - 5, width + 10, height + 12);
-  graphics.fillStyle(0x171a27, 1);
-  graphics.fillRect(x, y, width, height);
-  graphics.fillStyle(glass, 0.96);
-  graphics.fillRect(x + 7, y + 7, width - 14, height - 14);
-  graphics.fillStyle(glassShade, 0.55);
-  graphics.fillRect(x + width / 2 + 3, y + 7, width / 2 - 10, height - 14);
-
-  if (warm) {
-    graphics.fillStyle(0xffe3a1, 0.2);
-    graphics.fillRect(x + 12, y + 9, 10, height - 20);
-    graphics.fillRect(x + width / 2 + 12, y + 9, 6, height - 20);
-  } else {
-    graphics.fillStyle(0x8fa8ff, 0.1);
-    graphics.fillRect(x + 10, y + 8, 8, height - 18);
-  }
-
-  for (let silhouette = 0; silhouette < silhouettes; silhouette += 1) {
-    const silhouetteX = x + 28 + silhouette * 34 + (index % 2) * 5;
-    graphics.fillStyle(0x171822, warm ? 0.7 : 0.5);
-    graphics.fillCircle(silhouetteX, y + 28, 6);
-    graphics.fillRect(silhouetteX - 7, y + 34, 14, 13);
-  }
-
-  graphics.lineStyle(3, 0x10121a, 1);
-  graphics.lineBetween(x + Math.floor(width / 2), y, x + Math.floor(width / 2), y + height);
-  graphics.lineStyle(2, 0x6f6764, 0.8);
-  graphics.lineBetween(x, y + height, x + width, y + height);
-  graphics.fillStyle(0xf2e8dc, 0.38);
-  graphics.fillRect(x + 4, y + 3, width - 8, 2);
-}
-
-function drawSecondaryDoor(graphics, door) {
-  graphics.fillStyle(0x3b3538, 1);
-  graphics.fillRect(door.x, door.y, door.width, door.height);
-  graphics.fillStyle(0x211d22, 1);
-  graphics.fillRect(door.x + 8, door.y + 8, 56, 88);
-  graphics.fillStyle(0x6c4b3b, 1);
-  graphics.fillRect(door.x + 22, door.y + 18, 28, 24);
-  graphics.fillStyle(0x9b6a45, 0.5);
-  graphics.fillRect(door.x + 25, door.y + 21, 22, 18);
-  graphics.lineStyle(2, 0x4e3831, 1);
-  graphics.strokeRect(door.x + 15, door.y + 52, 42, 32);
-  graphics.fillStyle(0xd9c37d, 1);
-  graphics.fillCircle(door.x + 54, door.y + 60, 3);
-  graphics.fillStyle(0xffd57a, 0.08);
-  graphics.fillCircle(door.x + 54, door.y + 60, 12);
-}
-
-function drawBathroom(scene, graphics, bathroom) {
-  graphics.fillStyle(0x514c50, 1);
-  graphics.fillRect(bathroom.x, bathroom.y, bathroom.width, bathroom.height);
-  graphics.fillStyle(0x302d32, 1);
-  graphics.fillRect(bathroom.x + 12, bathroom.y + 12, 86, 98);
-  graphics.fillStyle(0x141923, 1);
-  graphics.fillRect(bathroom.x + 27, bathroom.y + 20, 56, 20);
-  graphics.fillStyle(0x8dd8d0, 0.08);
-  graphics.fillRect(bathroom.x + 30, bathroom.y + 23, 50, 14);
-  scene.add.text(bathroom.x + 55, bathroom.y + 30, 'BAÑO', {
-    fontFamily: 'monospace',
-    fontSize: '11px',
-    color: '#cfd7dc',
-    fontStyle: 'bold',
-  }).setOrigin(0.5);
-  graphics.fillStyle(0xe8e2d4, 1);
-  graphics.fillCircle(bathroom.x + 42, bathroom.y + 56, 4);
-  graphics.fillRect(bathroom.x + 38, bathroom.y + 62, 8, 13);
-  graphics.fillCircle(bathroom.x + 68, bathroom.y + 56, 4);
-  graphics.fillRect(bathroom.x + 64, bathroom.y + 62, 8, 13);
-  graphics.fillStyle(0xd9c37d, 1);
-  graphics.fillCircle(bathroom.x + 88, bathroom.y + 68, 3);
-  graphics.fillStyle(0xa79c91, 1);
-  graphics.fillRect(bathroom.x + 4, bathroom.y + 2, 106, 3);
-  graphics.lineStyle(2, 0x18161a, 0.7);
-  graphics.strokeRect(bathroom.x + 17, bathroom.y + 82, 76, 23);
-}
-
-function drawWallLamp(graphics, { x, y }) {
-  graphics.fillStyle(0xffcf67, 0.035);
-  graphics.fillCircle(x + 7, y + 14, 32);
-  graphics.fillStyle(0xffd87c, 0.075);
-  graphics.fillCircle(x + 7, y + 14, 23);
-  graphics.fillStyle(0x4b484d, 1);
-  graphics.fillRect(x, y, 14, 28);
-  graphics.fillStyle(0xffdf8a, 1);
-  graphics.fillRect(x + 3, y + 4, 8, 16);
-  graphics.fillStyle(0xfff1bd, 0.9);
-  graphics.fillRect(x + 5, y + 6, 3, 12);
-  graphics.fillStyle(0x232229, 1);
-  graphics.fillRect(x - 2, y - 2, 18, 3);
-  graphics.fillRect(x - 2, y + 26, 18, 3);
-}
-
-function drawWallPlanters(graphics) {
-  PATIO_LAYOUT.wallPlanters.forEach(({ x, y, width }, planterIndex) => {
-    graphics.fillStyle(0x161920, 0.28);
-    graphics.fillRect(x + 3, y + 6, width, 19);
-    graphics.fillStyle(0x4b505d, 1);
-    graphics.fillRect(x, y, width, 17);
-    graphics.fillStyle(0x747a87, 1);
-    graphics.fillRect(x - 3, y - 2, width + 6, 5);
-    graphics.fillStyle(0x252a33, 1);
-    graphics.fillRect(x + 5, y + 12, width - 10, 5);
-
-    for (let leaf = 0; leaf < Math.floor(width / 12); leaf += 1) {
-      const leafX = x + 7 + leaf * 12;
-      const leafY = y - 4 - ((leaf + planterIndex) % 3) * 3;
-      graphics.fillStyle((leaf + planterIndex) % 2 === 0 ? 0x2f7044 : 0x438553, 1);
-      graphics.fillCircle(leafX, leafY, 6);
-      graphics.fillStyle(0x77a75e, 0.55);
-      graphics.fillRect(leafX - 1, leafY - 5, 2, 6);
-      if ((leaf + planterIndex) % 4 === 0) {
-        graphics.fillStyle(0xe9a65f, 1);
-        graphics.fillRect(leafX - 2, leafY - 6, 3, 3);
-      }
-    }
-  });
 }
 
 function drawBar(scene, graphics) {
