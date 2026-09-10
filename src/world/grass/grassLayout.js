@@ -28,8 +28,8 @@ function createDistribution({ center, edgeSize }) {
     edgeSize,
     weights: {
       center: [88, 12, 0],
-      sides: [65, 25, 10],
-      edges: [56, 27, 17],
+      sides: [67, 24, 9],
+      edges: [59, 27, 14],
     },
   };
 }
