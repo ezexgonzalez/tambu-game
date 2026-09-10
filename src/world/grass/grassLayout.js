@@ -1,17 +1,10 @@
 export const GRASS_TILE_SIZE = 16;
 
 export const GRASS_SOURCE_TILE_POOLS = Object.freeze({
-  base: Object.freeze([
-    0, 1, 3, 7, 11, 15, 16, 17, 19, 21, 28, 33, 34, 36, 39, 42, 44, 47, 49, 51,
-    52, 53, 64, 70, 72, 78, 80, 81, 86, 87, 89, 94, 95, 97, 100, 102, 110, 117, 125,
-  ]),
-  verySmall: Object.freeze([6, 14, 18, 26, 61, 68, 76, 108]),
-  soft: Object.freeze([
-    4, 5, 13, 20, 38, 46, 54, 55, 62, 63, 66, 83, 85, 96, 101, 104, 109, 118, 119, 126,
-  ]),
-  medium: Object.freeze([
-    22, 23, 30, 32, 48, 50, 58, 60, 65, 67, 69, 71, 73, 77, 84, 98, 103, 113, 114, 115,
-  ]),
+  base: Object.freeze([0]),
+  verySmall: Object.freeze([6, 14, 68, 76, 108]),
+  soft: Object.freeze([5, 13, 55, 63, 96, 101, 104, 109]),
+  medium: Object.freeze([23, 50, 58, 60, 65, 71, 73, 84, 98, 115]),
 });
 
 const PLANT_DETAIL_PATTERN_ORIGINS = Object.freeze([
@@ -28,17 +21,49 @@ export const PLANT_DETAIL_TILE_PATTERNS = Object.freeze(
   ])),
 );
 
+// Classified by the visible mass of each complete 32x32 plant, not by its tile fragments.
+export const PLANT_DETAIL_PATTERN_GROUPS = Object.freeze({
+  light: Object.freeze([11, 12, 13, 14]),
+  medium: Object.freeze([4, 5, 6, 7, 8, 9, 10]),
+  dense: Object.freeze([0, 1, 2, 3]),
+});
+
 export const PLANT_DETAIL_SOURCE_TILE_IDS = Object.freeze(
   PLANT_DETAIL_TILE_PATTERNS.flat(2),
 );
 
-const BASE_SHARE = 67;
+const BASE_SHARE = 66;
 const VERY_SMALL_SHARE = 9;
 const MEDIUM_SHARE = 4;
 const BASE_COARSE_CELL_SIZE = 8;
 const BASE_SHARE_MODULATION = Object.freeze([-2, -1, 0, 0, 1, 2]);
-const DETAIL_COARSE_CELL_SIZE = 5;
+const DETAIL_ANCHOR_CELL_SIZE = 8;
 const DETAIL_PATTERN_SIZE = 2;
+
+const DETAIL_GROUP_SHAPES = Object.freeze({
+  1: Object.freeze([
+    Object.freeze([[0, 0]]),
+  ]),
+  2: Object.freeze([
+    Object.freeze([[0, 0], [3, 1]]),
+    Object.freeze([[1, 0], [0, 3]]),
+    Object.freeze([[0, 1], [3, 0]]),
+    Object.freeze([[0, 0], [2, 3]]),
+    Object.freeze([[0, 2], [3, 0]]),
+  ]),
+  3: Object.freeze([
+    Object.freeze([[0, 1], [3, 0], [2, 4]]),
+    Object.freeze([[1, 0], [0, 3], [4, 2]]),
+    Object.freeze([[0, 0], [4, 1], [2, 4]]),
+    Object.freeze([[3, 0], [0, 2], [4, 4]]),
+  ]),
+});
+
+const DETAIL_PLACEMENT_CHANCES = Object.freeze({
+  center: Object.freeze({ quiet: 18, normal: 33, rich: 48 }),
+  intermediate: Object.freeze({ quiet: 38, normal: 58, rich: 74 }),
+  edge: Object.freeze({ quiet: 56, normal: 76, rich: 90 }),
+});
 
 function hashGrassCell(column, row, seed, salt = 0) {
   let value = Math.imul(column + 1, 374761393)
@@ -91,10 +116,99 @@ function isNearEdge(bounds, edgeSize, pointX, pointY) {
     || pointY >= bounds.y + bounds.height - edgeSize;
 }
 
-function getDetailPlacementChance(layout, worldX, worldY) {
-  if (isWithin(layout.detailCenter, worldX, worldY)) return 10;
-  if (isNearEdge(layout.bounds, layout.detailEdgeSize, worldX, worldY)) return 38;
-  return 23;
+function getDetailZone(layout, worldX, worldY) {
+  if (isWithin(layout.detailCenter, worldX, worldY)) return 'center';
+  if (isNearEdge(layout.bounds, layout.detailEdgeSize, worldX, worldY)) return 'edge';
+  return 'intermediate';
+}
+
+function getDetailDensityState(anchorColumn, anchorRow, seed) {
+  const broadValue = hashGrassCell(
+    Math.floor(anchorColumn / 2),
+    Math.floor(anchorRow / 2),
+    seed,
+    12011,
+  ) % 100;
+  const crossingValue = hashGrassCell(
+    Math.floor((anchorColumn + 1) / 3),
+    Math.floor((anchorRow + 2) / 3),
+    seed,
+    12457,
+  ) % 100;
+  const densityValue = (broadValue * 3 + crossingValue) / 4;
+
+  if (densityValue < 28) return 'quiet';
+  if (densityValue >= 72) return 'rich';
+  return 'normal';
+}
+
+function getDetailGroupSize(zone, densityState, value) {
+  if (zone === 'center') {
+    return densityState === 'rich' && value % 100 < 22 ? 2 : 1;
+  }
+
+  if (zone === 'intermediate') {
+    if (densityState === 'quiet') return value % 100 < 22 ? 2 : 1;
+    if (densityState === 'rich') return value % 100 < 12 ? 3 : 2;
+    return value % 100 < 58 ? 2 : 1;
+  }
+
+  if (densityState === 'quiet') return value % 100 < 48 ? 2 : 1;
+  if (densityState === 'rich') return value % 100 < 58 ? 3 : 2;
+  return value % 100 < 18 ? 3 : 2;
+}
+
+function getPatternPool(zone, densityState, patternIndex, value) {
+  if (zone === 'center') {
+    return patternIndex > 0 || value % 100 < 82
+      ? PLANT_DETAIL_PATTERN_GROUPS.light
+      : PLANT_DETAIL_PATTERN_GROUPS.medium;
+  }
+
+  if (zone === 'intermediate') {
+    return (patternIndex + value) % 3 === 0
+      ? PLANT_DETAIL_PATTERN_GROUPS.light
+      : PLANT_DETAIL_PATTERN_GROUPS.medium;
+  }
+
+  if (densityState === 'rich' && patternIndex === 0 && value % 100 < 62) {
+    return PLANT_DETAIL_PATTERN_GROUPS.dense;
+  }
+
+  return (patternIndex + value) % 4 === 0
+    ? PLANT_DETAIL_PATTERN_GROUPS.light
+    : PLANT_DETAIL_PATTERN_GROUPS.medium;
+}
+
+function getShapeBounds(shape) {
+  return {
+    width: Math.max(...shape.map(([column]) => column)) + DETAIL_PATTERN_SIZE,
+    height: Math.max(...shape.map(([, row]) => row)) + DETAIL_PATTERN_SIZE,
+  };
+}
+
+function selectGroupShape(groupSize, availableColumns, availableRows, value) {
+  for (let size = groupSize; size >= 1; size -= 1) {
+    const shapes = DETAIL_GROUP_SHAPES[size].filter((shape) => {
+      const shapeBounds = getShapeBounds(shape);
+      return shapeBounds.width <= availableColumns && shapeBounds.height <= availableRows;
+    });
+
+    if (shapes.length > 0) return shapes[value % shapes.length];
+  }
+
+  return null;
+}
+
+function selectPatternIndex(pool, value, usedPatternIndexes) {
+  const initialIndex = value % pool.length;
+
+  for (let offset = 0; offset < pool.length; offset += 1) {
+    const patternIndex = pool[(initialIndex + offset) % pool.length];
+    if (!usedPatternIndexes.has(patternIndex)) return patternIndex;
+  }
+
+  return pool[initialIndex];
 }
 
 export function createGrassDetailData({
@@ -107,35 +221,60 @@ export function createGrassDetailData({
   const columns = Math.ceil(bounds.width / tileSize);
   const rows = Math.ceil(bounds.height / tileSize);
   const data = Array.from({ length: rows }, () => Array(columns).fill(-1));
-  const coarseColumns = Math.ceil(columns / DETAIL_COARSE_CELL_SIZE);
-  const coarseRows = Math.ceil(rows / DETAIL_COARSE_CELL_SIZE);
+  const anchorColumns = Math.ceil(columns / DETAIL_ANCHOR_CELL_SIZE);
+  const anchorRows = Math.ceil(rows / DETAIL_ANCHOR_CELL_SIZE);
   const layout = { bounds, detailCenter, detailEdgeSize };
 
-  for (let coarseRow = 0; coarseRow < coarseRows; coarseRow += 1) {
-    for (let coarseColumn = 0; coarseColumn < coarseColumns; coarseColumn += 1) {
-      const blockColumn = coarseColumn * DETAIL_COARSE_CELL_SIZE;
-      const blockRow = coarseRow * DETAIL_COARSE_CELL_SIZE;
-      const availableColumns = Math.min(DETAIL_COARSE_CELL_SIZE, columns - blockColumn);
-      const availableRows = Math.min(DETAIL_COARSE_CELL_SIZE, rows - blockRow);
+  for (let anchorRow = 0; anchorRow < anchorRows; anchorRow += 1) {
+    for (let anchorColumn = 0; anchorColumn < anchorColumns; anchorColumn += 1) {
+      const blockColumn = anchorColumn * DETAIL_ANCHOR_CELL_SIZE;
+      const blockRow = anchorRow * DETAIL_ANCHOR_CELL_SIZE;
+      const availableColumns = Math.min(DETAIL_ANCHOR_CELL_SIZE, columns - blockColumn);
+      const availableRows = Math.min(DETAIL_ANCHOR_CELL_SIZE, rows - blockRow);
 
       if (availableColumns < DETAIL_PATTERN_SIZE || availableRows < DETAIL_PATTERN_SIZE) continue;
 
       const worldX = bounds.x + (blockColumn + availableColumns / 2) * tileSize;
       const worldY = bounds.y + (blockRow + availableRows / 2) * tileSize;
-      const placementValue = hashGrassCell(coarseColumn, coarseRow, seed, 12011);
+      const zone = getDetailZone(layout, worldX, worldY);
+      const densityState = getDetailDensityState(anchorColumn, anchorRow, seed);
+      const placementValue = hashGrassCell(anchorColumn, anchorRow, seed, 13103);
+      const placementChance = DETAIL_PLACEMENT_CHANCES[zone][densityState];
 
-      if (placementValue % 100 >= getDetailPlacementChance(layout, worldX, worldY)) continue;
+      if (placementValue % 100 >= placementChance) continue;
 
-      const offsetRangeX = availableColumns - DETAIL_PATTERN_SIZE + 1;
-      const offsetRangeY = availableRows - DETAIL_PATTERN_SIZE + 1;
-      const column = blockColumn + hashGrassCell(coarseColumn, coarseRow, seed, 13759) % offsetRangeX;
-      const row = blockRow + hashGrassCell(coarseColumn, coarseRow, seed, 15401) % offsetRangeY;
-      const patternValue = hashGrassCell(coarseColumn, coarseRow, seed, 17107);
-      const pattern = PLANT_DETAIL_TILE_PATTERNS[patternValue % PLANT_DETAIL_TILE_PATTERNS.length];
+      const groupValue = hashGrassCell(anchorColumn, anchorRow, seed, 13759);
+      const groupSize = getDetailGroupSize(zone, densityState, groupValue);
+      const shapeValue = hashGrassCell(anchorColumn, anchorRow, seed, 14321);
+      const shape = selectGroupShape(groupSize, availableColumns, availableRows, shapeValue);
+      if (!shape) continue;
 
-      for (let patternRow = 0; patternRow < DETAIL_PATTERN_SIZE; patternRow += 1) {
-        for (let patternColumn = 0; patternColumn < DETAIL_PATTERN_SIZE; patternColumn += 1) {
-          data[row + patternRow][column + patternColumn] = pattern[patternRow][patternColumn];
+      const shapeBounds = getShapeBounds(shape);
+      const originColumn = blockColumn + hashGrassCell(anchorColumn, anchorRow, seed, 15401)
+        % (availableColumns - shapeBounds.width + 1);
+      const originRow = blockRow + hashGrassCell(anchorColumn, anchorRow, seed, 16001)
+        % (availableRows - shapeBounds.height + 1);
+      const usedPatternIndexes = new Set();
+
+      for (let groupIndex = 0; groupIndex < shape.length; groupIndex += 1) {
+        const [columnOffset, rowOffset] = shape[groupIndex];
+        const patternValue = hashGrassCell(
+          anchorColumn + columnOffset,
+          anchorRow + rowOffset,
+          seed,
+          17107 + groupIndex * 977,
+        );
+        const patternPool = getPatternPool(zone, densityState, groupIndex, patternValue);
+        const patternIndex = selectPatternIndex(patternPool, patternValue, usedPatternIndexes);
+        const pattern = PLANT_DETAIL_TILE_PATTERNS[patternIndex];
+        const column = originColumn + columnOffset;
+        const row = originRow + rowOffset;
+        usedPatternIndexes.add(patternIndex);
+
+        for (let patternRow = 0; patternRow < DETAIL_PATTERN_SIZE; patternRow += 1) {
+          for (let patternColumn = 0; patternColumn < DETAIL_PATTERN_SIZE; patternColumn += 1) {
+            data[row + patternRow][column + patternColumn] = pattern[patternRow][patternColumn];
+          }
         }
       }
     }

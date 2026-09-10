@@ -10,6 +10,7 @@ import {
   GRASS_CALIBRATION_LAYOUT,
   GRASS_SOURCE_TILE_POOLS,
   GRASS_TILE_SIZE,
+  PLANT_DETAIL_PATTERN_GROUPS,
   PLANT_DETAIL_SOURCE_TILE_IDS,
   PLANT_DETAIL_TILE_PATTERNS,
 } from '../src/world/grass/grassLayout.js';
@@ -30,6 +31,48 @@ function readPngSize(path) {
 
 function flattenBasePools() {
   return Object.values(GRASS_SOURCE_TILE_POOLS).flat();
+}
+
+const DETAIL_PATTERN_BY_TOP_LEFT_ID = new Map(
+  PLANT_DETAIL_TILE_PATTERNS.map((pattern, index) => [pattern[0][0], index]),
+);
+
+function getDetailPatternStarts(layout) {
+  const starts = [];
+
+  layout.detailData.forEach((row, rowIndex) => {
+    row.forEach((tileId, columnIndex) => {
+      if (DETAIL_PATTERN_BY_TOP_LEFT_ID.has(tileId)) {
+        starts.push({
+          column: columnIndex,
+          row: rowIndex,
+          patternIndex: DETAIL_PATTERN_BY_TOP_LEFT_ID.get(tileId),
+        });
+      }
+    });
+  });
+
+  return starts;
+}
+
+function getLayoutZone(layout, column, row) {
+  const worldX = layout.bounds.x + (column + 0.5) * layout.tileSize;
+  const worldY = layout.bounds.y + (row + 0.5) * layout.tileSize;
+  const center = layout.detailCenter;
+
+  if (
+    worldX >= center.x && worldX < center.x + center.width
+    && worldY >= center.y && worldY < center.y + center.height
+  ) return 'center';
+
+  if (
+    worldX < layout.bounds.x + layout.detailEdgeSize
+    || worldX >= layout.bounds.x + layout.bounds.width - layout.detailEdgeSize
+    || worldY < layout.bounds.y + layout.detailEdgeSize
+    || worldY >= layout.bounds.y + layout.bounds.height - layout.detailEdgeSize
+  ) return 'edge';
+
+  return 'intermediate';
 }
 
 test('grass carga exactamente los dos tilesets actuales con sus dimensiones originales', () => {
@@ -71,6 +114,15 @@ test('el whitelist vegetal contiene solo fragmentos de grass inferior autorizado
     return row >= 24 && row <= 31 && column >= 0 && column <= 7;
   }));
   assert.ok(PLANT_DETAIL_SOURCE_TILE_IDS.every((id) => !DISALLOWED_PLANT_TILE_IDS.has(id)));
+});
+
+test('los 15 patrones se clasifican una sola vez por su masa visual', () => {
+  const classifiedIndexes = Object.values(PLANT_DETAIL_PATTERN_GROUPS).flat();
+
+  assert.deepEqual(Object.keys(PLANT_DETAIL_PATTERN_GROUPS), ['light', 'medium', 'dense']);
+  assert.equal(classifiedIndexes.length, PLANT_DETAIL_TILE_PATTERNS.length);
+  assert.equal(new Set(classifiedIndexes).size, PLANT_DETAIL_TILE_PATTERNS.length);
+  assert.deepEqual([...classifiedIndexes].sort((a, b) => a - b), [...Array(15).keys()]);
 });
 
 test('la selección de base es determinista y solo usa sus pools permitidos', () => {
@@ -117,6 +169,67 @@ test('la matriz vegetal es determinista y conserva la misma configuración en ca
   assert.deepEqual(GRASS_CALIBRATION_LAYOUT.bounds, { x: 0, y: 0, width: 384, height: 256 });
   assert.equal(GRASS_CALIBRATION_LAYOUT.tileSize, GRASS_TILE_SIZE);
   assert.ok(GRASS_CALIBRATION_LAYOUT.detailData.flat().some((id) => id !== -1));
+});
+
+test('cada mata vegetal conserva completo su bloque fuente 2x2', () => {
+  const layout = createPatioGrassLayout(PATIO_LAYOUT);
+
+  layout.detailData.forEach((row, rowIndex) => {
+    row.forEach((tileId, columnIndex) => {
+      if (tileId === -1) return;
+
+      const sourceRow = Math.floor(tileId / 32);
+      const sourceColumn = tileId % 32;
+      const fragmentRow = sourceRow % 2;
+      const fragmentColumn = sourceColumn % 2;
+      const patternRow = rowIndex - fragmentRow;
+      const patternColumn = columnIndex - fragmentColumn;
+      const topLeftId = (sourceRow - fragmentRow) * 32 + sourceColumn - fragmentColumn;
+      const patternIndex = DETAIL_PATTERN_BY_TOP_LEFT_ID.get(topLeftId);
+
+      assert.notEqual(patternIndex, undefined);
+      assert.equal(
+        layout.detailData[patternRow][patternColumn],
+        PLANT_DETAIL_TILE_PATTERNS[patternIndex][0][0],
+      );
+      assert.equal(
+        layout.detailData[patternRow + 1][patternColumn + 1],
+        PLANT_DETAIL_TILE_PATTERNS[patternIndex][1][1],
+      );
+    });
+  });
+});
+
+test('la composición forma grupos irregulares y mantiene el centro más limpio que los bordes', () => {
+  const layout = createPatioGrassLayout(PATIO_LAYOUT);
+  const starts = getDetailPatternStarts(layout);
+  const patternCounts = { center: 0, intermediate: 0, edge: 0 };
+  const cellCounts = { center: 0, intermediate: 0, edge: 0 };
+
+  starts.forEach(({ column, row }) => {
+    patternCounts[getLayoutZone(layout, column + 1, row + 1)] += 1;
+  });
+  layout.detailData.forEach((row, rowIndex) => {
+    row.forEach((_, columnIndex) => {
+      cellCounts[getLayoutZone(layout, columnIndex, rowIndex)] += 1;
+    });
+  });
+
+  const centerDensity = patternCounts.center / cellCounts.center;
+  const intermediateDensity = patternCounts.intermediate / cellCounts.intermediate;
+  const edgeDensity = patternCounts.edge / cellCounts.edge;
+  const neighborCounts = starts.map((start, index) => starts.filter((other, otherIndex) => (
+    index !== otherIndex
+    && Math.max(
+      Math.abs(start.column - other.column),
+      Math.abs(start.row - other.row),
+    ) <= 5
+  )).length);
+
+  assert.ok(intermediateDensity > centerDensity);
+  assert.ok(edgeDensity > intermediateDensity);
+  assert.ok(neighborCounts.some((count) => count === 0));
+  assert.ok(neighborCounts.some((count) => count >= 1));
 });
 
 test('el renderer crea dos TilemapLayers alineadas y ordenadas', () => {
