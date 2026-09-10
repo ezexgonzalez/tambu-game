@@ -9,9 +9,6 @@ const DJ_ASSETS = Object.freeze({
   speakerTallRight: Object.freeze({ key: 'dj-speaker-tall-02', path: `${DJ_ASSET_ROOT}/speaker_tall_02.png` }),
   trussPortal: Object.freeze({ key: 'dj-truss-portal-01', path: `${DJ_ASSET_ROOT}/dj_truss_portal_01.png` }),
   consoleShelf: Object.freeze({ key: 'dj-console-shelf-01', path: `${DJ_ASSET_ROOT}/dj_console_shelf_01.png` }),
-  cupBlue: Object.freeze({ key: 'dj-cup-blue-01', path: `${DJ_ASSET_ROOT}/dj_cup_blue_01.png` }),
-  cupRed: Object.freeze({ key: 'dj-cup-red-01', path: `${DJ_ASSET_ROOT}/dj_cup_red_01.png` }),
-  bottle: Object.freeze({ key: 'dj-bottle-01', path: `${DJ_ASSET_ROOT}/dj_bottle_01.png` }),
 });
 
 export function preloadDjBooth(scene) {
@@ -31,7 +28,7 @@ export function createDjBooth(scene, dj) {
     .setOrigin(0.5, 1)
     .setDepth(9);
 
-  const truss = scene.add.image(centerX, dj.y - 29, DJ_ASSETS.trussPortal.key)
+  const truss = scene.add.image(centerX, dj.y - 27, DJ_ASSETS.trussPortal.key)
     .setOrigin(0.5, 0)
     .setDepth(10);
 
@@ -50,7 +47,7 @@ export function createDjBooth(scene, dj) {
     DJ_ASSETS.speakerTallRight.key,
   ).setOrigin(0).setDepth(13);
 
-  const consoleShelf = scene.add.image(centerX, dj.y + 47, DJ_ASSETS.consoleShelf.key)
+  const consoleShelf = scene.add.image(centerX, dj.y + 45, DJ_ASSETS.consoleShelf.key)
     .setOrigin(0.5, 0)
     .setDepth(14);
 
@@ -58,11 +55,6 @@ export function createDjBooth(scene, dj) {
   const consoleTop = scene.add.image(centerX, dj.y + 24, DJ_ASSETS.consoleTop.key)
     .setOrigin(0.5, 0)
     .setDepth(16);
-  const props = [
-    scene.add.image(centerX - 68, dj.y + 31, DJ_ASSETS.cupBlue.key).setOrigin(0.5, 0).setDepth(17),
-    scene.add.image(centerX + 66, dj.y + 20, DJ_ASSETS.bottle.key).setOrigin(0.5, 0).setDepth(17),
-    scene.add.image(centerX + 78, dj.y + 34, DJ_ASSETS.cupRed.key).setOrigin(0.5, 0).setDepth(17),
-  ];
 
   return {
     stage,
@@ -73,6 +65,5 @@ export function createDjBooth(scene, dj) {
     speakers: [leftSpeaker, rightSpeaker],
     consoleTop,
     consoleShelf,
-    props,
   };
 }
