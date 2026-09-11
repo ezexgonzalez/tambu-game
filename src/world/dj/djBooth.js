@@ -10,6 +10,10 @@ const DJ_ASSETS = Object.freeze({
   supportLeft: Object.freeze({ key: 'dj-light-support-left-01', path: `${DJ_ASSET_ROOT}/dj_light_support_left_01.png` }),
   supportRight: Object.freeze({ key: 'dj-light-support-right-01', path: `${DJ_ASSET_ROOT}/dj_light_support_right_01.png` }),
   consoleShelf: Object.freeze({ key: 'dj-console-shelf-01', path: `${DJ_ASSET_ROOT}/dj_console_shelf_01.png` }),
+  consoleFacingDj: Object.freeze({ key: 'dj-console-facing-dj-01', path: `${DJ_ASSET_ROOT}/dj_console_facing_dj_01.png` }),
+  headphones: Object.freeze({ key: 'dj-headphones-02', path: `${DJ_ASSET_ROOT}/dj_headphones_02.png` }),
+  cupAmber: Object.freeze({ key: 'dj-cup-amber-02', path: `${DJ_ASSET_ROOT}/dj_cup_amber_02.png` }),
+  bottleTall: Object.freeze({ key: 'dj-bottle-tall-02', path: `${DJ_ASSET_ROOT}/dj_bottle_tall_02.png` }),
 });
 
 export function preloadDjBooth(scene) {
@@ -20,9 +24,11 @@ export function createDjBooth(scene, dj) {
   const centerX = dj.x + dj.width / 2;
   const stageBottom = dj.y + dj.height;
   const rigDepth = {
-    // Semantic layers: floor -> actor -> shelf -> structure -> front occluders.
+    // Semantic layers: floor -> actor -> shelf -> console/props -> structure -> front occluders.
     platform: dj.y + 10,
     shelf: dj.y + 67,
+    console: dj.y + 68,
+    surfaceProps: dj.y + 69,
     supports: dj.y + 70,
     truss: dj.y + 71,
     speakers: dj.y + 109,
@@ -67,6 +73,18 @@ export function createDjBooth(scene, dj) {
     .setOrigin(0.5, 0)
     .setDepth(rigDepth.shelf);
 
+  // The console faces the DJ, rests on the shelf and stays below the lighting structure.
+  const console = scene.add.image(centerX, dj.y + 51, DJ_ASSETS.consoleFacingDj.key)
+    .setOrigin(0.5, 1)
+    .setDepth(rigDepth.console);
+
+  // A few asymmetric surface details keep the booth lived-in without crowding the DJ position.
+  const surfaceProps = [
+    scene.add.image(centerX - 59, dj.y + 51, DJ_ASSETS.headphones.key).setOrigin(0.5, 1).setDepth(rigDepth.surfaceProps),
+    scene.add.image(centerX + 35, dj.y + 50, DJ_ASSETS.cupAmber.key).setOrigin(0.5, 1).setDepth(rigDepth.surfaceProps),
+    scene.add.image(centerX + 57, dj.y + 51, DJ_ASSETS.bottleTall.key).setOrigin(0.5, 1).setDepth(rigDepth.surfaceProps),
+  ];
+
   return {
     stage,
     backPlatform,
@@ -75,5 +93,7 @@ export function createDjBooth(scene, dj) {
     booth,
     speakers: [leftSpeaker, rightSpeaker],
     consoleShelf,
+    console,
+    surfaceProps,
   };
 }
