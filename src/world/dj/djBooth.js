@@ -1,4 +1,5 @@
 const DJ_ASSET_ROOT = '/assets/props/dj';
+const DJ_SPEAKER_PULSE_ANIMATION = 'dj-speaker-pulse-v1';
 
 const DJ_ASSETS = Object.freeze({
   boothFront: Object.freeze({ key: 'dj-booth-front-01', path: `${DJ_ASSET_ROOT}/dj_booth_front_01.png` }),
@@ -14,10 +15,17 @@ const DJ_ASSETS = Object.freeze({
   headphones: Object.freeze({ key: 'dj-headphones-02', path: `${DJ_ASSET_ROOT}/dj_headphones_02.png` }),
   cupAmber: Object.freeze({ key: 'dj-cup-amber-02', path: `${DJ_ASSET_ROOT}/dj_cup_amber_02.png` }),
   bottleTall: Object.freeze({ key: 'dj-bottle-tall-02', path: `${DJ_ASSET_ROOT}/dj_bottle_tall_02.png` }),
+  speakerPulseFrames: Object.freeze({ key: 'dj-speaker-pulse-frames-01', path: `${DJ_ASSET_ROOT}/dj_speaker_pulse_frames_01.png` }),
 });
 
 export function preloadDjBooth(scene) {
-  Object.values(DJ_ASSETS).forEach(({ key, path }) => scene.load.image(key, path));
+  Object.values(DJ_ASSETS)
+    .filter(({ key }) => key !== DJ_ASSETS.speakerPulseFrames.key)
+    .forEach(({ key, path }) => scene.load.image(key, path));
+  scene.load.spritesheet(DJ_ASSETS.speakerPulseFrames.key, DJ_ASSETS.speakerPulseFrames.path, {
+    frameWidth: 42,
+    frameHeight: 80,
+  });
 }
 
 export function createDjBooth(scene, dj) {
@@ -68,6 +76,27 @@ export function createDjBooth(scene, dj) {
     DJ_ASSETS.speakerTallRight.key,
   ).setOrigin(0).setDepth(rigDepth.speakers);
 
+  if (!scene.anims.exists(DJ_SPEAKER_PULSE_ANIMATION)) {
+    scene.anims.create({
+      key: DJ_SPEAKER_PULSE_ANIMATION,
+      frames: scene.anims.generateFrameNumbers(DJ_ASSETS.speakerPulseFrames.key, { start: 0, end: 3 }),
+      frameRate: 7,
+      repeat: -1,
+    });
+  }
+
+  // Transparent overlays animate only the speaker cones; the existing speaker art and colliders stay untouched.
+  const speakerPulses = [
+    scene.add.sprite(dj.speakers[0].x, dj.speakers[0].y, DJ_ASSETS.speakerPulseFrames.key)
+      .setOrigin(0)
+      .setDepth(rigDepth.speakers + 0.1)
+      .play(DJ_SPEAKER_PULSE_ANIMATION),
+    scene.add.sprite(dj.speakers[1].x, dj.speakers[1].y, DJ_ASSETS.speakerPulseFrames.key)
+      .setOrigin(0)
+      .setDepth(rigDepth.speakers + 0.1)
+      .play(DJ_SPEAKER_PULSE_ANIMATION),
+  ];
+
   // The empty shelf sits in front of the DJ position and below the structural rig.
   const consoleShelf = scene.add.image(centerX, dj.y + 39, DJ_ASSETS.consoleShelf.key)
     .setOrigin(0.5, 0)
@@ -92,6 +121,7 @@ export function createDjBooth(scene, dj) {
     supports,
     booth,
     speakers: [leftSpeaker, rightSpeaker],
+    speakerPulses,
     consoleShelf,
     console,
     surfaceProps,
