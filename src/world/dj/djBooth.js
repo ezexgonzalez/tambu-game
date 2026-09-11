@@ -1,5 +1,8 @@
 const DJ_ASSET_ROOT = '/assets/props/dj';
+const DJ_CHARACTER_ASSET_ROOT = '/assets/characters/dj';
 const DJ_SPEAKER_PULSE_ANIMATION = 'dj-speaker-pulse-v1';
+const DJ_RESIDENT_IDLE_ANIMATION = 'dj-resident-idle-v1';
+const DJ_RESIDENT_MIX_ANIMATION = 'dj-resident-mix-v1';
 
 const DJ_ASSETS = Object.freeze({
   boothFront: Object.freeze({ key: 'dj-booth-front-01', path: `${DJ_ASSET_ROOT}/dj_booth_front_01.png` }),
@@ -18,6 +21,10 @@ const DJ_ASSETS = Object.freeze({
   speakerPulseFrames: Object.freeze({ key: 'dj-speaker-pulse-frames-01', path: `${DJ_ASSET_ROOT}/dj_speaker_pulse_frames_01.png` }),
 });
 
+const DJ_CHARACTER_ASSETS = Object.freeze({
+  resident: Object.freeze({ key: 'dj-resident-01', path: `${DJ_CHARACTER_ASSET_ROOT}/dj_resident_01.png` }),
+});
+
 export function preloadDjBooth(scene) {
   Object.values(DJ_ASSETS)
     .filter(({ key }) => key !== DJ_ASSETS.speakerPulseFrames.key)
@@ -26,6 +33,10 @@ export function preloadDjBooth(scene) {
     frameWidth: 42,
     frameHeight: 80,
   });
+  Object.values(DJ_CHARACTER_ASSETS).forEach(({ key, path }) => scene.load.spritesheet(key, path, {
+    frameWidth: 32,
+    frameHeight: 48,
+  }));
 }
 
 export function createDjBooth(scene, dj) {
@@ -34,6 +45,7 @@ export function createDjBooth(scene, dj) {
   const rigDepth = {
     // Semantic layers: floor -> actor -> shelf -> console/props -> structure -> front occluders.
     platform: dj.y + 10,
+    residentDj: dj.y + 60,
     shelf: dj.y + 67,
     console: dj.y + 68,
     surfaceProps: dj.y + 69,
@@ -97,6 +109,42 @@ export function createDjBooth(scene, dj) {
       .play(DJ_SPEAKER_PULSE_ANIMATION),
   ];
 
+  if (!scene.anims.exists(DJ_RESIDENT_IDLE_ANIMATION)) {
+    scene.anims.create({
+      key: DJ_RESIDENT_IDLE_ANIMATION,
+      frames: scene.anims.generateFrameNumbers(DJ_CHARACTER_ASSETS.resident.key, { start: 0, end: 3 }),
+      frameRate: 4,
+      repeat: -1,
+    });
+    scene.anims.create({
+      key: DJ_RESIDENT_MIX_ANIMATION,
+      frames: scene.anims.generateFrameNumbers(DJ_CHARACTER_ASSETS.resident.key, { start: 4, end: 7 }),
+      frameRate: 5,
+      repeat: 0,
+    });
+  }
+
+  // Static resident performer: behind the shelf/console, but in front of the back platform.
+  const residentDj = scene.add.sprite(centerX, dj.y + 56, DJ_CHARACTER_ASSETS.resident.key)
+    .setOrigin(0.5, 1)
+    .setScale(1.24)
+    .setDepth(rigDepth.residentDj)
+    .play(DJ_RESIDENT_IDLE_ANIMATION);
+
+  const mixIntervals = [3600, 4600, 3200];
+  let nextMixInterval = 0;
+  const scheduleMix = () => {
+    scene.time.delayedCall(mixIntervals[nextMixInterval], () => {
+      nextMixInterval = (nextMixInterval + 1) % mixIntervals.length;
+      residentDj.play(DJ_RESIDENT_MIX_ANIMATION);
+      residentDj.once(`animationcomplete-${DJ_RESIDENT_MIX_ANIMATION}`, () => {
+        residentDj.play(DJ_RESIDENT_IDLE_ANIMATION);
+        scheduleMix();
+      });
+    });
+  };
+  scheduleMix();
+
   // The empty shelf sits in front of the DJ position and below the structural rig.
   const consoleShelf = scene.add.image(centerX, dj.y + 39, DJ_ASSETS.consoleShelf.key)
     .setOrigin(0.5, 0)
@@ -122,6 +170,7 @@ export function createDjBooth(scene, dj) {
     booth,
     speakers: [leftSpeaker, rightSpeaker],
     speakerPulses,
+    residentDj,
     consoleShelf,
     console,
     surfaceProps,
