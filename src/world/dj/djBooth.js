@@ -2,7 +2,6 @@ const DJ_ASSET_ROOT = '/assets/props/dj';
 
 const DJ_ASSETS = Object.freeze({
   boothFront: Object.freeze({ key: 'dj-booth-front-01', path: `${DJ_ASSET_ROOT}/dj_booth_front_01.png` }),
-  consoleTop: Object.freeze({ key: 'dj-console-top-01', path: `${DJ_ASSET_ROOT}/dj_console_top_01.png` }),
   backPlatform: Object.freeze({ key: 'dj-back-platform-01', path: `${DJ_ASSET_ROOT}/dj_back_platform_01.png` }),
   stageBase: Object.freeze({ key: 'dj-stage-base-01', path: `${DJ_ASSET_ROOT}/dj_stage_base_01.png` }),
   speakerTallLeft: Object.freeze({ key: 'dj-speaker-tall-01', path: `${DJ_ASSET_ROOT}/speaker_tall_01.png` }),
@@ -21,10 +20,9 @@ export function createDjBooth(scene, dj) {
   const centerX = dj.x + dj.width / 2;
   const stageBottom = dj.y + dj.height;
   const rigDepth = {
-    // Semantic layers: floor -> rear support -> actor -> console/structure -> front occluders.
+    // Semantic layers: floor -> actor -> shelf -> structure -> front occluders.
     platform: dj.y + 10,
-    shelf: dj.y + 28,
-    console: dj.y + 34,
+    shelf: dj.y + 67,
     supports: dj.y + 70,
     truss: dj.y + 71,
     speakers: dj.y + 109,
@@ -36,7 +34,7 @@ export function createDjBooth(scene, dj) {
     .setOrigin(0.5, 1)
     .setDepth(rigDepth.stage);
 
-  // This clean platform deliberately reserves standing room behind the controller.
+  // This clean platform deliberately reserves standing room for the future DJ.
   const backPlatform = scene.add.image(centerX, dj.y + 78, DJ_ASSETS.backPlatform.key)
     .setOrigin(0.5, 1)
     .setDepth(rigDepth.platform);
@@ -64,15 +62,10 @@ export function createDjBooth(scene, dj) {
     DJ_ASSETS.speakerTallRight.key,
   ).setOrigin(0).setDepth(rigDepth.speakers);
 
-  // Keep the support surface inside the booth body, behind the side supports and front panel.
+  // The empty shelf sits in front of the DJ position and below the structural rig.
   const consoleShelf = scene.add.image(centerX, dj.y + 39, DJ_ASSETS.consoleShelf.key)
     .setOrigin(0.5, 0)
     .setDepth(rigDepth.shelf);
-
-  // Controller sits on the shelf; the open deck above remains reserved for the future DJ.
-  const consoleTop = scene.add.image(centerX, dj.y + 24, DJ_ASSETS.consoleTop.key)
-    .setOrigin(0.5, 0)
-    .setDepth(rigDepth.console);
 
   return {
     stage,
@@ -81,7 +74,6 @@ export function createDjBooth(scene, dj) {
     supports,
     booth,
     speakers: [leftSpeaker, rightSpeaker],
-    consoleTop,
     consoleShelf,
   };
 }
