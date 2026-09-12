@@ -25,7 +25,7 @@ export function getPatioCollisionZones() {
   return [
     centeredZone(house),
     centeredZone(pool),
-    centeredZone(bar),
+    ...bar.collisionRects.map((rect) => localRectZone(bar, rect)),
     ...dj.collisionRects.map((rect) => localRectZone(dj, rect)),
     ...partyTables.map((table) => ({
       x: table.x,
