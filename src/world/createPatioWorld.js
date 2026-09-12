@@ -5,6 +5,7 @@ import { createPatioGrassLayout } from './grass/grassLayout.js';
 import { preloadGrass } from './grass/preloadGrass.js';
 import { createDeckSurface, preloadDeckSurface } from './deck/deckSurface.js';
 import { createDjBooth, preloadDjBooth } from './dj/djBooth.js';
+import { createBar, preloadBar } from './bar/barStructure.js';
 import { createHouseFacade, preloadHouseFacade } from './house/houseFacade.js';
 import { PATIO_LAYOUT } from './patioLayout.js';
 
@@ -12,6 +13,7 @@ export function preloadPatioWorld(scene) {
   preloadGrass(scene);
   preloadDeckSurface(scene);
   preloadDjBooth(scene);
+  preloadBar(scene);
   preloadHouseFacade(scene);
   scene.load.spritesheet('terrain', '/assets/tiles/terrain/terrain.png', {
     frameWidth: TILE_SIZE,
@@ -219,7 +221,7 @@ function drawArchitectureAndProps(scene) {
   const graphics = scene.add.graphics();
 
   createHouseFacade(scene, PATIO_LAYOUT);
-  drawBar(scene, graphics);
+  createBar(scene, PATIO_LAYOUT.bar);
   createDjBooth(scene, PATIO_LAYOUT.dj);
 
   PATIO_LAYOUT.partyTables.forEach(({ x, y }) => drawPartyTable(graphics, x, y));
@@ -229,92 +231,6 @@ function drawArchitectureAndProps(scene) {
   drawPatioLanterns(graphics);
   drawGarlands(graphics);
   drawClutter(graphics);
-}
-
-function drawBar(scene, graphics) {
-  const { bar } = PATIO_LAYOUT;
-  const { body, counter, inset, label, bottles } = bar;
-
-  graphics.fillStyle(0x090b12, 0.34);
-  graphics.fillRect(bar.x + 6, bar.y + 9, bar.width + 7, bar.height + 4);
-  graphics.fillStyle(0x241525, 1);
-  graphics.fillRect(bar.x + body.offsetX, bar.y + body.offsetY, body.width, body.height);
-  graphics.fillStyle(0x49304b, 1);
-  graphics.fillRect(bar.x + body.offsetX, bar.y + body.offsetY, body.width, 43);
-  graphics.fillStyle(0xa73984, 0.35);
-  graphics.fillRect(bar.x + body.offsetX + 4, bar.y + body.offsetY + 38, body.width - 8, 3);
-  graphics.fillStyle(0xff5ad4, 0.08);
-  graphics.fillRect(bar.x + body.offsetX + 12, bar.y + body.offsetY + 35, body.width - 24, 10);
-
-  graphics.fillStyle(0x15121c, 1);
-  graphics.fillRect(bar.x + inset.offsetX, bar.y + inset.offsetY + 21, inset.width, inset.height + 36);
-  graphics.fillStyle(0x72516b, 0.7);
-  graphics.fillRect(bar.x + inset.offsetX, bar.y + inset.offsetY + 50, inset.width, 3);
-  graphics.fillRect(bar.x + inset.offsetX, bar.y + inset.offsetY + 79, inset.width, 3);
-
-  graphics.fillStyle(0x63405b, 1);
-  graphics.fillRect(bar.x + 10, bar.y + 42, 10, 92);
-  graphics.fillRect(bar.x + bar.width - 20, bar.y + 42, 10, 92);
-  graphics.fillStyle(0xb27691, 0.45);
-  graphics.fillRect(bar.x + 13, bar.y + 45, 2, 83);
-  graphics.fillRect(bar.x + bar.width - 17, bar.y + 45, 2, 83);
-
-  drawBarLamp(graphics, bar.x + 27, bar.y + 57);
-  drawBarLamp(graphics, bar.x + bar.width - 27, bar.y + 57);
-
-  const barLabel = scene.add.text(bar.x + label.offsetX, bar.y + label.offsetY, 'BARRA', {
-    fontFamily: 'monospace',
-    fontSize: '18px',
-    color: '#ffb8ee',
-    fontStyle: 'bold',
-  }).setOrigin(0.5);
-  barLabel.setShadow(0, 0, '#ff45cd', 7, true, true);
-
-  graphics.lineStyle(2, 0xffa6e4, 0.9);
-  graphics.lineBetween(bar.x + 251, bar.y + 9, bar.x + 267, bar.y + 9);
-  graphics.lineBetween(bar.x + 254, bar.y + 9, bar.x + 260, bar.y + 18);
-  graphics.lineBetween(bar.x + 264, bar.y + 9, bar.x + 260, bar.y + 18);
-  graphics.lineBetween(bar.x + 260, bar.y + 18, bar.x + 260, bar.y + 25);
-  graphics.lineBetween(bar.x + 255, bar.y + 25, bar.x + 265, bar.y + 25);
-
-  const bottleColors = [0x7ccf8d, 0xf0bd5f, 0x91a9ff, 0xd96868, 0xc38ed8];
-  for (let i = 0; i < bottles.count; i += 1) {
-    const x = bar.x + bottles.offsetX + (i % bottles.columns) * bottles.columnGap;
-    const y = bar.y + bottles.offsetY + Math.floor(i / bottles.columns) * bottles.rowGap;
-    graphics.fillStyle(0x090b12, 0.75);
-    graphics.fillRect(x - 2, y - 6, bottles.width + 4, bottles.height + 8);
-    graphics.fillStyle(bottleColors[i % bottleColors.length], 1);
-    graphics.fillRect(x, y, bottles.width, bottles.height);
-    graphics.fillRect(x + 3, y - 5, 2, 6);
-    graphics.fillStyle(0xf5f1df, 0.82);
-    graphics.fillRect(x + 2, y + 6, bottles.width - 4, 4);
-    graphics.fillStyle(0xffffff, 0.42);
-    graphics.fillRect(x + 1, y + 2, 2, 7);
-    graphics.fillStyle(0x31222e, 1);
-    graphics.fillRect(x + 2, y - 7, 4, 2);
-  }
-
-  graphics.fillStyle(0x9a637e, 1);
-  graphics.fillRect(bar.x + counter.offsetX, bar.y + counter.offsetY, counter.width, counter.height);
-  graphics.fillStyle(0xd59ab3, 0.65);
-  graphics.fillRect(bar.x + counter.offsetX, bar.y + counter.offsetY, counter.width, 4);
-  graphics.fillStyle(0x33202f, 1);
-  graphics.fillRect(bar.x + counter.offsetX + 8, bar.y + counter.offsetY + 20, counter.width - 16, 8);
-  graphics.fillStyle(0xff4fc5, 0.2);
-  graphics.fillRect(bar.x + counter.offsetX + 14, bar.y + counter.offsetY + 25, counter.width - 28, 3);
-}
-
-function drawBarLamp(graphics, x, y) {
-  graphics.fillStyle(0xffba57, 0.055);
-  graphics.fillCircle(x, y, 22);
-  graphics.fillStyle(0xffca67, 0.13);
-  graphics.fillCircle(x, y, 13);
-  graphics.fillStyle(0x3d2832, 1);
-  graphics.fillRect(x - 2, y - 17, 4, 11);
-  graphics.fillStyle(0xffd778, 1);
-  graphics.fillRect(x - 4, y - 7, 8, 12);
-  graphics.fillStyle(0xfff0b2, 1);
-  graphics.fillRect(x - 1, y - 5, 3, 8);
 }
 
 function drawPartyTable(graphics, x, y) {

@@ -37,24 +37,14 @@ const POOL = {
 };
 
 const BAR = {
-  x: 1226,
-  y: 180,
-  width: 320,
-  height: 156,
-  body: { offsetX: 10, offsetY: 2, width: 300, height: 152 },
-  counter: { offsetX: 0, offsetY: 127, width: 320, height: 28 },
-  inset: { offsetX: 30, offsetY: 26, width: 260, height: 38 },
-  label: { offsetX: 160, offsetY: 16 },
-  bottles: {
-    offsetX: 42,
-    offsetY: 82,
-    columns: 8,
-    count: 16,
-    columnGap: 30,
-    rowGap: 28,
-    width: 8,
-    height: 19,
-  },
+  // Visual assembly anchor. Collision is intentionally limited to the grounded front counter.
+  x: 1231,
+  y: 155,
+  width: 310,
+  height: 284,
+  collisionRects: [
+    { id: 'front-counter', x: 4, y: 190, width: 302, height: 70 },
+  ],
 };
 
 const DJ = {
