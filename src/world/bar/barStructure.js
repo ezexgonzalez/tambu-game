@@ -17,6 +17,16 @@ const COUNTERTOP_FRONT_SEAM = Object.freeze({
   overlapSourcePixels: 2,
 });
 
+// Horizontal seam markers, measured from the actual opaque structural spans.
+// The countertop's lower rail is narrower than its full top slab, so the
+// front is fitted to that rail instead of either PNG canvas.
+const COUNTERTOP_FRONT_HORIZONTAL_FIT = Object.freeze({
+  countertopSupportLeft: 6,
+  countertopSupportRight: 282,
+  frontCounterTopLeft: 4,
+  frontCounterTopRight: 305,
+});
+
 export function preloadBar(scene) {
   Object.values(BAR_ASSETS).forEach(({ key, path }) => scene.load.image(key, path));
 }
@@ -45,6 +55,26 @@ export function createBar(scene, bar) {
     - COUNTERTOP_FRONT_SEAM.overlapSourcePixels,
   );
   const surfaceBottom = frontCounterTop - scaled(2);
+  const countertopSupportCenter =
+    (COUNTERTOP_FRONT_HORIZONTAL_FIT.countertopSupportLeft
+      + COUNTERTOP_FRONT_HORIZONTAL_FIT.countertopSupportRight) / 2
+    - dimensions.countertop.width / 2;
+  const frontCounterTopCenter =
+    (COUNTERTOP_FRONT_HORIZONTAL_FIT.frontCounterTopLeft
+      + COUNTERTOP_FRONT_HORIZONTAL_FIT.frontCounterTopRight) / 2
+    - dimensions.frontCounter.width / 2;
+  const countertopSupportWidth =
+    COUNTERTOP_FRONT_HORIZONTAL_FIT.countertopSupportRight
+    - COUNTERTOP_FRONT_HORIZONTAL_FIT.countertopSupportLeft
+    + 1;
+  const frontCounterTopWidth =
+    COUNTERTOP_FRONT_HORIZONTAL_FIT.frontCounterTopRight
+    - COUNTERTOP_FRONT_HORIZONTAL_FIT.frontCounterTopLeft
+    + 1;
+  const frontCounterScaleX = scale * (countertopSupportWidth / frontCounterTopWidth);
+  const frontCounterX = centerX
+    + scaled(countertopSupportCenter)
+    - frontCounterTopCenter * frontCounterScaleX;
   const signTop = backShelfTop - scaled(dimensions.sign.height - signIntoBackShelfOverlap);
   const depth = {
     backShelf: backShelfTop + scaled(63),
@@ -74,9 +104,9 @@ export function createBar(scene, bar) {
     scene.add.image(centerX + scaled(100), surfaceBottom, BAR_ASSETS.iceBucket.key).setOrigin(0.5, 1).setScale(scale).setDepth(depth.props),
   ];
 
-  const frontCounter = scene.add.image(centerX, frontCounterTop, BAR_ASSETS.frontCounter.key)
+  const frontCounter = scene.add.image(frontCounterX, frontCounterTop, BAR_ASSETS.frontCounter.key)
     .setOrigin(0.5, 0)
-    .setScale(scale)
+    .setScale(frontCounterScaleX, scale)
     .setDepth(depth.frontCounter);
 
   return { backShelf, sign, countertop, props, frontCounter };
