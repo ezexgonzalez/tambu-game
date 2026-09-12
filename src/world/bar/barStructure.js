@@ -19,15 +19,15 @@ const BAR_CHARACTER_ASSETS = Object.freeze({
 });
 
 // Source-space assembly measured directly from the approved modular kit.
-// All modules use the exact same runtime scale; the top overhang is part of the kit geometry.
+// The front and base are expanded horizontally to the same structural span as the work surface.
 const BAR_FRONT_ASSEMBLY = Object.freeze({
   width: 1264,
   topOffsetY: 122,
   counterSurfaceSourceY: 118,
   modules: Object.freeze({
     countertop: Object.freeze({ asset: 'countertopCenter', x: 0, y: 0 }),
-    front: Object.freeze({ asset: 'frontCenter', x: 64, y: 118 }),
-    base: Object.freeze({ asset: 'baseCenter', x: 58, y: 428 }),
+    front: Object.freeze({ asset: 'frontCenter', x: 0, y: 118, matchAssemblyWidth: true }),
+    base: Object.freeze({ asset: 'baseCenter', x: 0, y: 428, matchAssemblyWidth: true }),
   }),
 });
 
@@ -41,11 +41,16 @@ export function preloadBar(scene) {
 
 function createBarFrontAssembly(scene, { centerX, topY, scale, depth }) {
   const assemblyLeftX = centerX - BAR_FRONT_ASSEMBLY.width * scale / 2;
-  const addModule = ({ asset, x, y }, moduleDepth) => scene.add.image(
-    assemblyLeftX + x * scale,
-    topY + y * scale,
-    BAR_ASSETS[asset].key,
-  ).setOrigin(0).setScale(scale).setDepth(moduleDepth);
+  const addModule = ({ asset, x, y, matchAssemblyWidth = false }, moduleDepth) => {
+    const sourceWidth = scene.textures.get(BAR_ASSETS[asset].key).getSourceImage().width;
+    const scaleX = matchAssemblyWidth ? BAR_FRONT_ASSEMBLY.width * scale / sourceWidth : scale;
+
+    return scene.add.image(
+      assemblyLeftX + x * scale,
+      topY + y * scale,
+      BAR_ASSETS[asset].key,
+    ).setOrigin(0).setScale(scaleX, scale).setDepth(moduleDepth);
+  };
 
   const countertop = addModule(BAR_FRONT_ASSEMBLY.modules.countertop, depth.countertop);
   const front = addModule(BAR_FRONT_ASSEMBLY.modules.front, depth.front);
