@@ -17,32 +17,45 @@ export function preloadBar(scene) {
 // The bar is assembled as semantic planes: rear shelving, work surface, then its solid front.
 export function createBar(scene, bar) {
   const centerX = bar.x + bar.width / 2;
-  const depth = {
-    backShelf: bar.y + 70,
-    sign: bar.y + 75,
-    countertop: bar.y + 165,
-    props: bar.y + 166,
-    frontCounter: bar.y + 220,
+  const dimensions = {
+    sign: scene.textures.get(BAR_ASSETS.sign.key).getSourceImage(),
+    backShelf: scene.textures.get(BAR_ASSETS.backShelf.key).getSourceImage(),
+    countertop: scene.textures.get(BAR_ASSETS.countertop.key).getSourceImage(),
+    frontCounter: scene.textures.get(BAR_ASSETS.frontCounter.key).getSourceImage(),
   };
 
-  const backShelf = scene.add.image(centerX, bar.y + 7, BAR_ASSETS.backShelf.key)
+  // Structural geometry is derived from true asset bounds rather than unrelated offsets.
+  const backShelfTop = bar.y + 7;
+  const countertopTop = backShelfTop + dimensions.backShelf.height - 60;
+  const frontCounterTop = countertopTop + dimensions.countertop.height - 21;
+  const surfaceBottom = frontCounterTop - 2;
+  const signTop = backShelfTop - (dimensions.sign.height - 72);
+  const depth = {
+    backShelf: backShelfTop + 63,
+    sign: backShelfTop + 68,
+    countertop: countertopTop + 20,
+    props: countertopTop + 21,
+    frontCounter: frontCounterTop + 44,
+  };
+
+  const backShelf = scene.add.image(centerX, backShelfTop, BAR_ASSETS.backShelf.key)
     .setOrigin(0.5, 0)
     .setDepth(depth.backShelf);
-  const sign = scene.add.image(centerX, bar.y - 4, BAR_ASSETS.sign.key)
+  const sign = scene.add.image(centerX, signTop, BAR_ASSETS.sign.key)
     .setOrigin(0.5, 0)
     .setDepth(depth.sign);
-  const countertop = scene.add.image(centerX, bar.y + 145, BAR_ASSETS.countertop.key)
+  const countertop = scene.add.image(centerX, countertopTop, BAR_ASSETS.countertop.key)
     .setOrigin(0.5, 0)
     .setDepth(depth.countertop);
 
   // Keep the work area asymmetric and the middle clear for a future bartender.
   const props = [
-    scene.add.image(centerX - 88, bar.y + 174, BAR_ASSETS.shaker.key).setOrigin(0.5, 1).setDepth(depth.props),
-    scene.add.image(centerX + 58, bar.y + 174, BAR_ASSETS.lowball.key).setOrigin(0.5, 1).setDepth(depth.props),
-    scene.add.image(centerX + 100, bar.y + 174, BAR_ASSETS.iceBucket.key).setOrigin(0.5, 1).setDepth(depth.props),
+    scene.add.image(centerX - 88, surfaceBottom, BAR_ASSETS.shaker.key).setOrigin(0.5, 1).setDepth(depth.props),
+    scene.add.image(centerX + 58, surfaceBottom, BAR_ASSETS.lowball.key).setOrigin(0.5, 1).setDepth(depth.props),
+    scene.add.image(centerX + 100, surfaceBottom, BAR_ASSETS.iceBucket.key).setOrigin(0.5, 1).setDepth(depth.props),
   ];
 
-  const frontCounter = scene.add.image(centerX, bar.y + 176, BAR_ASSETS.frontCounter.key)
+  const frontCounter = scene.add.image(centerX, frontCounterTop, BAR_ASSETS.frontCounter.key)
     .setOrigin(0.5, 0)
     .setDepth(depth.frontCounter);
 

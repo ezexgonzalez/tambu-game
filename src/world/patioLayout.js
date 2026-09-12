@@ -37,13 +37,13 @@ const POOL = {
 };
 
 const BAR = {
-  // Visual assembly anchor. Collision is intentionally limited to the grounded front counter.
+  // Visual assembly anchor. The sign is aerial; the whole furniture body is a solid footprint.
   x: 1231,
   y: 155,
   width: 310,
   height: 284,
   collisionRects: [
-    { id: 'front-counter', x: 4, y: 190, width: 302, height: 70 },
+    { id: 'body', x: 0, y: 7, width: 310, height: 277 },
   ],
 };
 

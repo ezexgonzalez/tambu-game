@@ -9,9 +9,9 @@ function centeredZone({ x, y, width, height }) {
   };
 }
 
-function localRectZone(parent, rect) {
+function localRectZone(parent, rect, prefix) {
   return {
-    id: `dj-${rect.id}`,
+    id: `${prefix}-${rect.id}`,
     x: parent.x + rect.x + rect.width / 2,
     y: parent.y + rect.y + rect.height / 2,
     width: rect.width,
@@ -25,8 +25,8 @@ export function getPatioCollisionZones() {
   return [
     centeredZone(house),
     centeredZone(pool),
-    ...bar.collisionRects.map((rect) => localRectZone(bar, rect)),
-    ...dj.collisionRects.map((rect) => localRectZone(dj, rect)),
+    ...bar.collisionRects.map((rect) => localRectZone(bar, rect, 'bar')),
+    ...dj.collisionRects.map((rect) => localRectZone(dj, rect, 'dj')),
     ...partyTables.map((table) => ({
       x: table.x,
       y: table.y + table.colliderCenterOffsetY,
