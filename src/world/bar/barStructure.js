@@ -10,6 +10,13 @@ const BAR_ASSETS = Object.freeze({
   iceBucket: Object.freeze({ key: 'bar-ice-bucket-01', path: `${BAR_ASSET_ROOT}/bar_ice_bucket_01.png` }),
 });
 
+// Source-pixel seam markers, measured on the visible central structure rather than PNG canvas edges.
+const COUNTERTOP_FRONT_SEAM = Object.freeze({
+  countertopSupportRailY: 47,
+  frontCounterSupportLipY: 15,
+  overlapSourcePixels: 2,
+});
+
 export function preloadBar(scene) {
   Object.values(BAR_ASSETS).forEach(({ key, path }) => scene.load.image(key, path));
 }
@@ -28,12 +35,15 @@ export function createBar(scene, bar) {
 
   // Structural geometry is derived from true asset bounds rather than unrelated offsets.
   const backShelfToCountertopOverlap = 60;
-  const countertopToFrontCounterOverlap = 16;
   const signIntoBackShelfOverlap = 72;
   const backShelfTop = bar.y + scaled(7);
   const countertopTop = backShelfTop + scaled(dimensions.backShelf.height - backShelfToCountertopOverlap);
-  // The lower countertop rail meets the upper front-counter lip with a measured 16px seam overlap.
-  const frontCounterTop = countertopTop + scaled(dimensions.countertop.height - countertopToFrontCounterOverlap);
+  // Join the measured lower countertop rail to the front counter's actual support lip.
+  const frontCounterTop = countertopTop + scaled(
+    COUNTERTOP_FRONT_SEAM.countertopSupportRailY
+    - COUNTERTOP_FRONT_SEAM.frontCounterSupportLipY
+    - COUNTERTOP_FRONT_SEAM.overlapSourcePixels,
+  );
   const surfaceBottom = frontCounterTop - scaled(2);
   const signTop = backShelfTop - scaled(dimensions.sign.height - signIntoBackShelfOverlap);
   const depth = {
