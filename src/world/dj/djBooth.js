@@ -2,7 +2,8 @@ const DJ_ASSET_ROOT = '/assets/props/dj';
 const DJ_CHARACTER_ASSET_ROOT = '/assets/characters/dj';
 const DJ_SPEAKER_PULSE_ANIMATION = 'dj-speaker-pulse-v1';
 const DJ_RESIDENT_IDLE_ANIMATION = 'dj-resident-idle-v1';
-const DJ_RESIDENT_MIX_ANIMATION = 'dj-resident-mix-v1';
+const DJ_RESIDENT_HEADPHONE_LEFT_ANIMATION = 'dj-resident-headphone-left-v1';
+const DJ_RESIDENT_HEADPHONE_RIGHT_ANIMATION = 'dj-resident-headphone-right-v1';
 
 const DJ_ASSETS = Object.freeze({
   boothFront: Object.freeze({ key: 'dj-booth-front-01', path: `${DJ_ASSET_ROOT}/dj_booth_front_01.png` }),
@@ -112,14 +113,23 @@ export function createDjBooth(scene, dj) {
   if (!scene.anims.exists(DJ_RESIDENT_IDLE_ANIMATION)) {
     scene.anims.create({
       key: DJ_RESIDENT_IDLE_ANIMATION,
-      frames: scene.anims.generateFrameNumbers(DJ_CHARACTER_ASSETS.resident.key, { start: 0, end: 3 }),
-      frameRate: 4,
+      // Frames 0 and 2 are the two approved neutral poses.
+      frames: scene.anims.generateFrameNumbers(DJ_CHARACTER_ASSETS.resident.key, { frames: [0, 2] }),
+      frameRate: 2,
       repeat: -1,
     });
     scene.anims.create({
-      key: DJ_RESIDENT_MIX_ANIMATION,
-      frames: scene.anims.generateFrameNumbers(DJ_CHARACTER_ASSETS.resident.key, { start: 4, end: 7 }),
-      frameRate: 5,
+      // Frame 1 is the left hand-to-headphone gesture; it returns to neutral.
+      key: DJ_RESIDENT_HEADPHONE_LEFT_ANIMATION,
+      frames: scene.anims.generateFrameNumbers(DJ_CHARACTER_ASSETS.resident.key, { frames: [0, 1, 0] }),
+      frameRate: 4,
+      repeat: 0,
+    });
+    scene.anims.create({
+      // Frame 3 is the matching right-side gesture, using the second neutral pose.
+      key: DJ_RESIDENT_HEADPHONE_RIGHT_ANIMATION,
+      frames: scene.anims.generateFrameNumbers(DJ_CHARACTER_ASSETS.resident.key, { frames: [2, 3, 2] }),
+      frameRate: 4,
       repeat: 0,
     });
   }
@@ -131,19 +141,23 @@ export function createDjBooth(scene, dj) {
     .setDepth(rigDepth.residentDj)
     .play(DJ_RESIDENT_IDLE_ANIMATION);
 
-  const mixIntervals = [3600, 4600, 3200];
-  let nextMixInterval = 0;
-  const scheduleMix = () => {
-    scene.time.delayedCall(mixIntervals[nextMixInterval], () => {
-      nextMixInterval = (nextMixInterval + 1) % mixIntervals.length;
-      residentDj.play(DJ_RESIDENT_MIX_ANIMATION);
-      residentDj.once(`animationcomplete-${DJ_RESIDENT_MIX_ANIMATION}`, () => {
+  const headphoneIntervals = [3600, 4600, 3200];
+  const headphoneGestures = [DJ_RESIDENT_HEADPHONE_LEFT_ANIMATION, DJ_RESIDENT_HEADPHONE_RIGHT_ANIMATION];
+  let nextHeadphoneInterval = 0;
+  let nextHeadphoneGesture = 0;
+  const scheduleHeadphoneGesture = () => {
+    scene.time.delayedCall(headphoneIntervals[nextHeadphoneInterval], () => {
+      const gesture = headphoneGestures[nextHeadphoneGesture];
+      nextHeadphoneInterval = (nextHeadphoneInterval + 1) % headphoneIntervals.length;
+      nextHeadphoneGesture = (nextHeadphoneGesture + 1) % headphoneGestures.length;
+      residentDj.play(gesture);
+      residentDj.once(`animationcomplete-${gesture}`, () => {
         residentDj.play(DJ_RESIDENT_IDLE_ANIMATION);
-        scheduleMix();
+        scheduleHeadphoneGesture();
       });
     });
   };
-  scheduleMix();
+  scheduleHeadphoneGesture();
 
   // The empty shelf sits in front of the DJ position and below the structural rig.
   const consoleShelf = scene.add.image(centerX, dj.y + 39, DJ_ASSETS.consoleShelf.key)
