@@ -44,7 +44,8 @@ const BAR = {
   height: 246,
   scale: 0.85,
   collisionRects: [
-    { id: 'body', x: 0, y: 6, width: 264, height: 240 },
+    // The modular front ends at y=220 relative to the bar anchor; retain a small grounded margin.
+    { id: 'body', x: 0, y: 6, width: 264, height: 220 },
   ],
 };
 

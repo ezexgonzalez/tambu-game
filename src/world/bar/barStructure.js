@@ -6,8 +6,9 @@ const BAR_BARTENDER_WORK_ANIMATION = 'bar-bartender-work-v1';
 const BAR_ASSETS = Object.freeze({
   sign: Object.freeze({ key: 'bar-sign-01', path: `${BAR_ASSET_ROOT}/bar_sign_01.png` }),
   backShelf: Object.freeze({ key: 'bar-back-shelf-01', path: `${BAR_ASSET_ROOT}/bar_back_shelf_01.png` }),
-  countertop: Object.freeze({ key: 'bar-countertop-01', path: `${BAR_ASSET_ROOT}/bar_countertop_01.png` }),
-  frontCounter: Object.freeze({ key: 'bar-front-counter-01', path: `${BAR_ASSET_ROOT}/bar_front_counter_01.png` }),
+  countertopCenter: Object.freeze({ key: 'bar-countertop-center-02', path: `${BAR_ASSET_ROOT}/bar_countertop_center_02.png` }),
+  frontCenter: Object.freeze({ key: 'bar-front-center-02', path: `${BAR_ASSET_ROOT}/bar_front_center_02.png` }),
+  baseCenter: Object.freeze({ key: 'bar-base-center-02', path: `${BAR_ASSET_ROOT}/bar_base_center_02.png` }),
   shaker: Object.freeze({ key: 'bar-shaker-01', path: `${BAR_ASSET_ROOT}/bar_shaker_01.png` }),
   lowball: Object.freeze({ key: 'bar-lowball-01', path: `${BAR_ASSET_ROOT}/bar_lowball_01.png` }),
   iceBucket: Object.freeze({ key: 'bar-ice-bucket-01', path: `${BAR_ASSET_ROOT}/bar_ice_bucket_01.png` }),
@@ -17,20 +18,17 @@ const BAR_CHARACTER_ASSETS = Object.freeze({
   bartender: Object.freeze({ key: 'bar-bartender-01', path: `${BAR_CHARACTER_ASSET_ROOT}/bartender_01.png` }),
 });
 
-// Source-pixel seam markers, measured on the visible central structure rather than PNG canvas edges.
-const COUNTERTOP_FRONT_SEAM = Object.freeze({
-  countertopSupportRailY: 47,
-  frontCounterSupportLipY: 15,
-  overlapSourcePixels: 2,
-});
-
-// External visible bounds, measured from the opaque body of each PNG.
-// These are the edges that must read as one continuous bar unit in-game.
-const COUNTERTOP_FRONT_BODY_FIT = Object.freeze({
-  countertopLeft: 0,
-  countertopRight: 303,
-  frontCounterLeft: 0,
-  frontCounterRight: 309,
+// Source-space assembly measured directly from the approved modular kit.
+// All modules use the exact same runtime scale; the top overhang is part of the kit geometry.
+const BAR_FRONT_ASSEMBLY = Object.freeze({
+  width: 1264,
+  topOffsetY: 122,
+  counterSurfaceSourceY: 118,
+  modules: Object.freeze({
+    countertop: Object.freeze({ asset: 'countertopCenter', x: 0, y: 0 }),
+    front: Object.freeze({ asset: 'frontCenter', x: 64, y: 118 }),
+    base: Object.freeze({ asset: 'baseCenter', x: 58, y: 428 }),
+  }),
 });
 
 export function preloadBar(scene) {
@@ -41,67 +39,57 @@ export function preloadBar(scene) {
   });
 }
 
-// The bar is assembled as semantic planes: rear shelving, work surface, then its solid front.
+function createBarFrontAssembly(scene, { centerX, topY, scale, depth }) {
+  const assemblyLeftX = centerX - BAR_FRONT_ASSEMBLY.width * scale / 2;
+  const addModule = ({ asset, x, y }, moduleDepth) => scene.add.image(
+    assemblyLeftX + x * scale,
+    topY + y * scale,
+    BAR_ASSETS[asset].key,
+  ).setOrigin(0).setScale(scale).setDepth(moduleDepth);
+
+  const countertop = addModule(BAR_FRONT_ASSEMBLY.modules.countertop, depth.countertop);
+  const front = addModule(BAR_FRONT_ASSEMBLY.modules.front, depth.front);
+  const base = addModule(BAR_FRONT_ASSEMBLY.modules.base, depth.base);
+  const baseHeight = scene.textures.get(BAR_ASSETS.baseCenter.key).getSourceImage().height;
+
+  return {
+    countertop,
+    front,
+    base,
+    counterSurfaceY: topY + BAR_FRONT_ASSEMBLY.counterSurfaceSourceY * scale,
+    bottomY: topY + (BAR_FRONT_ASSEMBLY.modules.base.y + baseHeight) * scale,
+  };
+}
+
+// The bar is assembled as semantic planes: rear shelving, bartender, work surface, then its solid front.
 export function createBar(scene, bar) {
   const centerX = bar.x + bar.width / 2;
-  const scale = bar.scale ?? 1;
-  const scaled = (value) => value * scale;
-  const dimensions = {
-    sign: scene.textures.get(BAR_ASSETS.sign.key).getSourceImage(),
-    backShelf: scene.textures.get(BAR_ASSETS.backShelf.key).getSourceImage(),
-    countertop: scene.textures.get(BAR_ASSETS.countertop.key).getSourceImage(),
-    frontCounter: scene.textures.get(BAR_ASSETS.frontCounter.key).getSourceImage(),
-  };
-
-  // Structural geometry is derived from true asset bounds rather than unrelated offsets.
-  const backShelfToCountertopOverlap = 60;
-  const signIntoBackShelfOverlap = 72;
-  const backShelfTop = bar.y + scaled(7);
-  const countertopTop = backShelfTop + scaled(dimensions.backShelf.height - backShelfToCountertopOverlap);
-  // Join the measured lower countertop rail to the front counter's actual support lip.
-  const frontCounterTop = countertopTop + scaled(
-    COUNTERTOP_FRONT_SEAM.countertopSupportRailY
-    - COUNTERTOP_FRONT_SEAM.frontCounterSupportLipY
-    - COUNTERTOP_FRONT_SEAM.overlapSourcePixels,
-  );
-  const surfaceBottom = frontCounterTop - scaled(2);
-  const countertopVisibleCenter =
-    (COUNTERTOP_FRONT_BODY_FIT.countertopLeft
-      + COUNTERTOP_FRONT_BODY_FIT.countertopRight) / 2
-    - dimensions.countertop.width / 2;
-  const frontCounterVisibleCenter =
-    (COUNTERTOP_FRONT_BODY_FIT.frontCounterLeft
-      + COUNTERTOP_FRONT_BODY_FIT.frontCounterRight) / 2
-    - dimensions.frontCounter.width / 2;
-  const countertopVisibleWidth =
-    COUNTERTOP_FRONT_BODY_FIT.countertopRight
-    - COUNTERTOP_FRONT_BODY_FIT.countertopLeft
-    + 1;
-  const frontCounterVisibleWidth =
-    COUNTERTOP_FRONT_BODY_FIT.frontCounterRight
-    - COUNTERTOP_FRONT_BODY_FIT.frontCounterLeft
-    + 1;
-  const countertopScaleX = scale * (frontCounterVisibleWidth / countertopVisibleWidth);
-  const countertopX = centerX
-    + scaled(frontCounterVisibleCenter)
-    - countertopVisibleCenter * countertopScaleX;
-  const signTop = backShelfTop - scaled(dimensions.sign.height - signIntoBackShelfOverlap);
+  const shelfScale = bar.scale ?? 1;
+  const scaledShelf = (value) => value * shelfScale;
+  const frontAssemblyScale = bar.width / BAR_FRONT_ASSEMBLY.width;
+  const signHeight = scene.textures.get(BAR_ASSETS.sign.key).getSourceImage().height;
+  const backShelfTop = bar.y + scaledShelf(7);
+  const signTop = backShelfTop - scaledShelf(signHeight - 72);
+  const frontAssemblyTop = bar.y + BAR_FRONT_ASSEMBLY.topOffsetY;
+  const counterSurfaceY = frontAssemblyTop
+    + BAR_FRONT_ASSEMBLY.counterSurfaceSourceY * frontAssemblyScale;
   const depth = {
-    backShelf: backShelfTop + scaled(63),
-    sign: backShelfTop + scaled(68),
-    bartender: countertopTop + scaled(18),
-    countertop: countertopTop + scaled(20),
-    props: countertopTop + scaled(21),
-    frontCounter: frontCounterTop + scaled(44),
+    backShelf: backShelfTop + scaledShelf(63),
+    sign: backShelfTop + scaledShelf(68),
+    bartender: counterSurfaceY - 8,
+    countertop: counterSurfaceY - 6,
+    props: counterSurfaceY - 5,
+    front: counterSurfaceY + 44,
+    base: counterSurfaceY + 45,
   };
 
   const backShelf = scene.add.image(centerX, backShelfTop, BAR_ASSETS.backShelf.key)
     .setOrigin(0.5, 0)
-    .setScale(scale)
+    .setScale(shelfScale)
     .setDepth(depth.backShelf);
   const sign = scene.add.image(centerX, signTop, BAR_ASSETS.sign.key)
     .setOrigin(0.5, 0)
-    .setScale(scale)
+    .setScale(shelfScale)
     .setDepth(depth.sign);
 
   if (!scene.anims.exists(BAR_BARTENDER_IDLE_ANIMATION)) {
@@ -119,8 +107,12 @@ export function createBar(scene, bar) {
     });
   }
 
-  // Decorative resident: the counter and props naturally occlude his lower body.
-  const bartender = scene.add.sprite(centerX, countertopTop + scaled(22), BAR_CHARACTER_ASSETS.bartender.key)
+  // Decorative resident: the assembly's countertop and front naturally occlude his lower body.
+  const bartender = scene.add.sprite(
+    centerX,
+    counterSurfaceY - frontAssemblyScale * 24,
+    BAR_CHARACTER_ASSETS.bartender.key,
+  )
     .setOrigin(0.5, 1)
     .setScale(1.24)
     .setDepth(depth.bartender)
@@ -137,22 +129,22 @@ export function createBar(scene, bar) {
   };
   scheduleBartenderWork();
 
-  const countertop = scene.add.image(countertopX, countertopTop, BAR_ASSETS.countertop.key)
-    .setOrigin(0.5, 0)
-    .setScale(countertopScaleX, scale)
-    .setDepth(depth.countertop);
+  const frontAssembly = createBarFrontAssembly(scene, {
+    centerX,
+    topY: frontAssemblyTop,
+    scale: frontAssemblyScale,
+    depth,
+  });
 
-  // Keep the work area asymmetric and the middle clear for a future bartender.
+  // Keep the work area asymmetric and the middle clear for the bartender.
   const props = [
-    scene.add.image(centerX - scaled(88), surfaceBottom, BAR_ASSETS.shaker.key).setOrigin(0.5, 1).setScale(scale).setDepth(depth.props),
-    scene.add.image(centerX + scaled(58), surfaceBottom, BAR_ASSETS.lowball.key).setOrigin(0.5, 1).setScale(scale).setDepth(depth.props),
-    scene.add.image(centerX + scaled(100), surfaceBottom, BAR_ASSETS.iceBucket.key).setOrigin(0.5, 1).setScale(scale).setDepth(depth.props),
+    scene.add.image(centerX - scaledShelf(88), counterSurfaceY - frontAssemblyScale * 8, BAR_ASSETS.shaker.key)
+      .setOrigin(0.5, 1).setScale(shelfScale).setDepth(depth.props),
+    scene.add.image(centerX + scaledShelf(58), counterSurfaceY - frontAssemblyScale * 8, BAR_ASSETS.lowball.key)
+      .setOrigin(0.5, 1).setScale(shelfScale).setDepth(depth.props),
+    scene.add.image(centerX + scaledShelf(100), counterSurfaceY - frontAssemblyScale * 8, BAR_ASSETS.iceBucket.key)
+      .setOrigin(0.5, 1).setScale(shelfScale).setDepth(depth.props),
   ];
 
-  const frontCounter = scene.add.image(centerX, frontCounterTop, BAR_ASSETS.frontCounter.key)
-    .setOrigin(0.5, 0)
-    .setScale(scale)
-    .setDepth(depth.frontCounter);
-
-  return { backShelf, sign, bartender, countertop, props, frontCounter };
+  return { backShelf, sign, bartender, frontAssembly, props };
 }
