@@ -1,4 +1,7 @@
 const BAR_ASSET_ROOT = '/assets/props/bar';
+const BAR_CHARACTER_ASSET_ROOT = '/assets/characters/bartender';
+const BAR_BARTENDER_IDLE_ANIMATION = 'bar-bartender-idle-v1';
+const BAR_BARTENDER_WORK_ANIMATION = 'bar-bartender-work-v1';
 
 const BAR_ASSETS = Object.freeze({
   sign: Object.freeze({ key: 'bar-sign-01', path: `${BAR_ASSET_ROOT}/bar_sign_01.png` }),
@@ -8,6 +11,10 @@ const BAR_ASSETS = Object.freeze({
   shaker: Object.freeze({ key: 'bar-shaker-01', path: `${BAR_ASSET_ROOT}/bar_shaker_01.png` }),
   lowball: Object.freeze({ key: 'bar-lowball-01', path: `${BAR_ASSET_ROOT}/bar_lowball_01.png` }),
   iceBucket: Object.freeze({ key: 'bar-ice-bucket-01', path: `${BAR_ASSET_ROOT}/bar_ice_bucket_01.png` }),
+});
+
+const BAR_CHARACTER_ASSETS = Object.freeze({
+  bartender: Object.freeze({ key: 'bar-bartender-01', path: `${BAR_CHARACTER_ASSET_ROOT}/bartender_01.png` }),
 });
 
 // Source-pixel seam markers, measured on the visible central structure rather than PNG canvas edges.
@@ -28,6 +35,10 @@ const COUNTERTOP_FRONT_BODY_FIT = Object.freeze({
 
 export function preloadBar(scene) {
   Object.values(BAR_ASSETS).forEach(({ key, path }) => scene.load.image(key, path));
+  scene.load.spritesheet(BAR_CHARACTER_ASSETS.bartender.key, BAR_CHARACTER_ASSETS.bartender.path, {
+    frameWidth: 32,
+    frameHeight: 48,
+  });
 }
 
 // The bar is assembled as semantic planes: rear shelving, work surface, then its solid front.
@@ -78,6 +89,7 @@ export function createBar(scene, bar) {
   const depth = {
     backShelf: backShelfTop + scaled(63),
     sign: backShelfTop + scaled(68),
+    bartender: countertopTop + scaled(18),
     countertop: countertopTop + scaled(20),
     props: countertopTop + scaled(21),
     frontCounter: frontCounterTop + scaled(44),
@@ -91,6 +103,40 @@ export function createBar(scene, bar) {
     .setOrigin(0.5, 0)
     .setScale(scale)
     .setDepth(depth.sign);
+
+  if (!scene.anims.exists(BAR_BARTENDER_IDLE_ANIMATION)) {
+    scene.anims.create({
+      key: BAR_BARTENDER_IDLE_ANIMATION,
+      frames: scene.anims.generateFrameNumbers(BAR_CHARACTER_ASSETS.bartender.key, { frames: [0, 1, 5, 1] }),
+      frameRate: 2,
+      repeat: -1,
+    });
+    scene.anims.create({
+      key: BAR_BARTENDER_WORK_ANIMATION,
+      frames: scene.anims.generateFrameNumbers(BAR_CHARACTER_ASSETS.bartender.key, { frames: [2, 3, 4, 2] }),
+      frameRate: 3,
+      repeat: 0,
+    });
+  }
+
+  // Decorative resident: the counter and props naturally occlude his lower body.
+  const bartender = scene.add.sprite(centerX, countertopTop + scaled(22), BAR_CHARACTER_ASSETS.bartender.key)
+    .setOrigin(0.5, 1)
+    .setScale(1.24)
+    .setDepth(depth.bartender)
+    .play(BAR_BARTENDER_IDLE_ANIMATION);
+
+  const scheduleBartenderWork = () => {
+    scene.time.delayedCall(5200, () => {
+      bartender.play(BAR_BARTENDER_WORK_ANIMATION);
+      bartender.once(`animationcomplete-${BAR_BARTENDER_WORK_ANIMATION}`, () => {
+        bartender.play(BAR_BARTENDER_IDLE_ANIMATION);
+        scheduleBartenderWork();
+      });
+    });
+  };
+  scheduleBartenderWork();
+
   const countertop = scene.add.image(countertopX, countertopTop, BAR_ASSETS.countertop.key)
     .setOrigin(0.5, 0)
     .setScale(countertopScaleX, scale)
@@ -108,5 +154,5 @@ export function createBar(scene, bar) {
     .setScale(scale)
     .setDepth(depth.frontCounter);
 
-  return { backShelf, sign, countertop, props, frontCounter };
+  return { backShelf, sign, bartender, countertop, props, frontCounter };
 }
