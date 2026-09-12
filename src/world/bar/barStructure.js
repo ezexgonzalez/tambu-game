@@ -25,11 +25,15 @@ export function createBar(scene, bar) {
   };
 
   // Structural geometry is derived from true asset bounds rather than unrelated offsets.
+  const backShelfToCountertopOverlap = 60;
+  const countertopToFrontCounterOverlap = 16;
+  const signIntoBackShelfOverlap = 72;
   const backShelfTop = bar.y + 7;
-  const countertopTop = backShelfTop + dimensions.backShelf.height - 60;
-  const frontCounterTop = countertopTop + dimensions.countertop.height - 21;
+  const countertopTop = backShelfTop + dimensions.backShelf.height - backShelfToCountertopOverlap;
+  // The lower countertop rail meets the upper front-counter lip with a measured 16px seam overlap.
+  const frontCounterTop = countertopTop + dimensions.countertop.height - countertopToFrontCounterOverlap;
   const surfaceBottom = frontCounterTop - 2;
-  const signTop = backShelfTop - (dimensions.sign.height - 72);
+  const signTop = backShelfTop - (dimensions.sign.height - signIntoBackShelfOverlap);
   const depth = {
     backShelf: backShelfTop + 63,
     sign: backShelfTop + 68,
