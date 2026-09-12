@@ -17,14 +17,13 @@ const COUNTERTOP_FRONT_SEAM = Object.freeze({
   overlapSourcePixels: 2,
 });
 
-// Horizontal seam markers, measured from the actual opaque structural spans.
-// The countertop's lower rail is narrower than its full top slab, so the
-// front is fitted to that rail instead of either PNG canvas.
-const COUNTERTOP_FRONT_HORIZONTAL_FIT = Object.freeze({
-  countertopSupportLeft: 6,
-  countertopSupportRight: 282,
-  frontCounterTopLeft: 4,
-  frontCounterTopRight: 305,
+// External visible bounds, measured from the opaque body of each PNG.
+// These are the edges that must read as one continuous bar unit in-game.
+const COUNTERTOP_FRONT_BODY_FIT = Object.freeze({
+  countertopLeft: 0,
+  countertopRight: 303,
+  frontCounterLeft: 0,
+  frontCounterRight: 309,
 });
 
 export function preloadBar(scene) {
@@ -55,26 +54,26 @@ export function createBar(scene, bar) {
     - COUNTERTOP_FRONT_SEAM.overlapSourcePixels,
   );
   const surfaceBottom = frontCounterTop - scaled(2);
-  const countertopSupportCenter =
-    (COUNTERTOP_FRONT_HORIZONTAL_FIT.countertopSupportLeft
-      + COUNTERTOP_FRONT_HORIZONTAL_FIT.countertopSupportRight) / 2
+  const countertopVisibleCenter =
+    (COUNTERTOP_FRONT_BODY_FIT.countertopLeft
+      + COUNTERTOP_FRONT_BODY_FIT.countertopRight) / 2
     - dimensions.countertop.width / 2;
-  const frontCounterTopCenter =
-    (COUNTERTOP_FRONT_HORIZONTAL_FIT.frontCounterTopLeft
-      + COUNTERTOP_FRONT_HORIZONTAL_FIT.frontCounterTopRight) / 2
+  const frontCounterVisibleCenter =
+    (COUNTERTOP_FRONT_BODY_FIT.frontCounterLeft
+      + COUNTERTOP_FRONT_BODY_FIT.frontCounterRight) / 2
     - dimensions.frontCounter.width / 2;
-  const countertopSupportWidth =
-    COUNTERTOP_FRONT_HORIZONTAL_FIT.countertopSupportRight
-    - COUNTERTOP_FRONT_HORIZONTAL_FIT.countertopSupportLeft
+  const countertopVisibleWidth =
+    COUNTERTOP_FRONT_BODY_FIT.countertopRight
+    - COUNTERTOP_FRONT_BODY_FIT.countertopLeft
     + 1;
-  const frontCounterTopWidth =
-    COUNTERTOP_FRONT_HORIZONTAL_FIT.frontCounterTopRight
-    - COUNTERTOP_FRONT_HORIZONTAL_FIT.frontCounterTopLeft
+  const frontCounterVisibleWidth =
+    COUNTERTOP_FRONT_BODY_FIT.frontCounterRight
+    - COUNTERTOP_FRONT_BODY_FIT.frontCounterLeft
     + 1;
-  const frontCounterScaleX = scale * (countertopSupportWidth / frontCounterTopWidth);
-  const frontCounterX = centerX
-    + scaled(countertopSupportCenter)
-    - frontCounterTopCenter * frontCounterScaleX;
+  const countertopScaleX = scale * (frontCounterVisibleWidth / countertopVisibleWidth);
+  const countertopX = centerX
+    + scaled(frontCounterVisibleCenter)
+    - countertopVisibleCenter * countertopScaleX;
   const signTop = backShelfTop - scaled(dimensions.sign.height - signIntoBackShelfOverlap);
   const depth = {
     backShelf: backShelfTop + scaled(63),
@@ -92,9 +91,9 @@ export function createBar(scene, bar) {
     .setOrigin(0.5, 0)
     .setScale(scale)
     .setDepth(depth.sign);
-  const countertop = scene.add.image(centerX, countertopTop, BAR_ASSETS.countertop.key)
+  const countertop = scene.add.image(countertopX, countertopTop, BAR_ASSETS.countertop.key)
     .setOrigin(0.5, 0)
-    .setScale(scale)
+    .setScale(countertopScaleX, scale)
     .setDepth(depth.countertop);
 
   // Keep the work area asymmetric and the middle clear for a future bartender.
@@ -104,9 +103,9 @@ export function createBar(scene, bar) {
     scene.add.image(centerX + scaled(100), surfaceBottom, BAR_ASSETS.iceBucket.key).setOrigin(0.5, 1).setScale(scale).setDepth(depth.props),
   ];
 
-  const frontCounter = scene.add.image(frontCounterX, frontCounterTop, BAR_ASSETS.frontCounter.key)
+  const frontCounter = scene.add.image(centerX, frontCounterTop, BAR_ASSETS.frontCounter.key)
     .setOrigin(0.5, 0)
-    .setScale(frontCounterScaleX, scale)
+    .setScale(scale)
     .setDepth(depth.frontCounter);
 
   return { backShelf, sign, countertop, props, frontCounter };
