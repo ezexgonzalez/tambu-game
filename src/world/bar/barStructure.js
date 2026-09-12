@@ -17,6 +17,8 @@ export function preloadBar(scene) {
 // The bar is assembled as semantic planes: rear shelving, work surface, then its solid front.
 export function createBar(scene, bar) {
   const centerX = bar.x + bar.width / 2;
+  const scale = bar.scale ?? 1;
+  const scaled = (value) => value * scale;
   const dimensions = {
     sign: scene.textures.get(BAR_ASSETS.sign.key).getSourceImage(),
     backShelf: scene.textures.get(BAR_ASSETS.backShelf.key).getSourceImage(),
@@ -28,39 +30,43 @@ export function createBar(scene, bar) {
   const backShelfToCountertopOverlap = 60;
   const countertopToFrontCounterOverlap = 16;
   const signIntoBackShelfOverlap = 72;
-  const backShelfTop = bar.y + 7;
-  const countertopTop = backShelfTop + dimensions.backShelf.height - backShelfToCountertopOverlap;
+  const backShelfTop = bar.y + scaled(7);
+  const countertopTop = backShelfTop + scaled(dimensions.backShelf.height - backShelfToCountertopOverlap);
   // The lower countertop rail meets the upper front-counter lip with a measured 16px seam overlap.
-  const frontCounterTop = countertopTop + dimensions.countertop.height - countertopToFrontCounterOverlap;
-  const surfaceBottom = frontCounterTop - 2;
-  const signTop = backShelfTop - (dimensions.sign.height - signIntoBackShelfOverlap);
+  const frontCounterTop = countertopTop + scaled(dimensions.countertop.height - countertopToFrontCounterOverlap);
+  const surfaceBottom = frontCounterTop - scaled(2);
+  const signTop = backShelfTop - scaled(dimensions.sign.height - signIntoBackShelfOverlap);
   const depth = {
-    backShelf: backShelfTop + 63,
-    sign: backShelfTop + 68,
-    countertop: countertopTop + 20,
-    props: countertopTop + 21,
-    frontCounter: frontCounterTop + 44,
+    backShelf: backShelfTop + scaled(63),
+    sign: backShelfTop + scaled(68),
+    countertop: countertopTop + scaled(20),
+    props: countertopTop + scaled(21),
+    frontCounter: frontCounterTop + scaled(44),
   };
 
   const backShelf = scene.add.image(centerX, backShelfTop, BAR_ASSETS.backShelf.key)
     .setOrigin(0.5, 0)
+    .setScale(scale)
     .setDepth(depth.backShelf);
   const sign = scene.add.image(centerX, signTop, BAR_ASSETS.sign.key)
     .setOrigin(0.5, 0)
+    .setScale(scale)
     .setDepth(depth.sign);
   const countertop = scene.add.image(centerX, countertopTop, BAR_ASSETS.countertop.key)
     .setOrigin(0.5, 0)
+    .setScale(scale)
     .setDepth(depth.countertop);
 
   // Keep the work area asymmetric and the middle clear for a future bartender.
   const props = [
-    scene.add.image(centerX - 88, surfaceBottom, BAR_ASSETS.shaker.key).setOrigin(0.5, 1).setDepth(depth.props),
-    scene.add.image(centerX + 58, surfaceBottom, BAR_ASSETS.lowball.key).setOrigin(0.5, 1).setDepth(depth.props),
-    scene.add.image(centerX + 100, surfaceBottom, BAR_ASSETS.iceBucket.key).setOrigin(0.5, 1).setDepth(depth.props),
+    scene.add.image(centerX - scaled(88), surfaceBottom, BAR_ASSETS.shaker.key).setOrigin(0.5, 1).setScale(scale).setDepth(depth.props),
+    scene.add.image(centerX + scaled(58), surfaceBottom, BAR_ASSETS.lowball.key).setOrigin(0.5, 1).setScale(scale).setDepth(depth.props),
+    scene.add.image(centerX + scaled(100), surfaceBottom, BAR_ASSETS.iceBucket.key).setOrigin(0.5, 1).setScale(scale).setDepth(depth.props),
   ];
 
   const frontCounter = scene.add.image(centerX, frontCounterTop, BAR_ASSETS.frontCounter.key)
     .setOrigin(0.5, 0)
+    .setScale(scale)
     .setDepth(depth.frontCounter);
 
   return { backShelf, sign, countertop, props, frontCounter };

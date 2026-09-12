@@ -38,12 +38,13 @@ const POOL = {
 
 const BAR = {
   // Visual assembly anchor. The sign is aerial; the whole furniture body is a solid footprint.
-  x: 1231,
+  x: 1254,
   y: 194,
-  width: 310,
-  height: 284,
+  width: 264,
+  height: 246,
+  scale: 0.85,
   collisionRects: [
-    { id: 'body', x: 0, y: 7, width: 310, height: 282 },
+    { id: 'body', x: 0, y: 6, width: 264, height: 240 },
   ],
 };
 
