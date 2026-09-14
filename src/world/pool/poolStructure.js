@@ -1,12 +1,13 @@
 const POOL_ASSET_ROOT = '/assets/props/pool';
 const PROP_SCALE = 0.25;
 
-// Measured from pool_frame_03.png. Water overlaps the frame beneath its opaque inner wall.
-const INNER_WATER_RECT = Object.freeze({ x: 34, y: 54, width: 556, height: 204 });
+// Measured from the transparent opening of pool_frame_04.png. The water remains one
+// continuous image behind the modular frame's inner wall.
+const INNER_WATER_RECT = Object.freeze({ x: 20, y: 22, width: 584, height: 260 });
 
 const POOL_ASSETS = Object.freeze({
-  frame: { key: 'pool-frame-03', path: `${POOL_ASSET_ROOT}/pool_frame_03.png` },
-  water: { key: 'pool-water-surface-02', path: `${POOL_ASSET_ROOT}/pool_water_surface_02.png` },
+  frame: { key: 'pool-frame-04', path: `${POOL_ASSET_ROOT}/pool_frame_04.png` },
+  water: { key: 'pool-water-surface-03', path: `${POOL_ASSET_ROOT}/pool_water_surface_03.png` },
   lightOn: { key: 'pool-light-on-02', path: `${POOL_ASSET_ROOT}/pool_light_03.png` },
   ladder: { key: 'pool-ladder-01', path: `${POOL_ASSET_ROOT}/pool_ladder_01.png` },
   ring: { key: 'pool-float-ring-01', path: `${POOL_ASSET_ROOT}/pool_float_ring_01.png` },
@@ -37,7 +38,7 @@ export function createPool(scene, pool) {
     addProp(
       scene,
       waterX + INNER_WATER_RECT.width * position - lightTexture.width * PROP_SCALE / 2,
-      waterY + 24,
+      waterY + 12,
       'lightOn',
       -9,
     );
@@ -46,5 +47,5 @@ export function createPool(scene, pool) {
   addProp(scene, pool.x + 122, pool.y + 116, 'ring', -8);
   addProp(scene, pool.x + 335, pool.y + 173, 'ball', -8);
   scene.add.image(pool.x, pool.y, POOL_ASSETS.frame.key).setOrigin(0).setDepth(-6);
-  addProp(scene, pool.x + pool.width - 64, pool.y + 20, 'ladder', -5);
+  addProp(scene, pool.x + pool.width - 64, pool.y + 8, 'ladder', -5);
 }
