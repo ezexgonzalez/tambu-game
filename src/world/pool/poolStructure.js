@@ -1,11 +1,11 @@
 const POOL_ASSET_ROOT = '/assets/props/pool';
 const PROP_SCALE = 0.25;
 
-// Measured from pool_frame_02.png. Water overlaps the frame by two pixels beneath its opaque inner wall.
+// Measured from pool_frame_03.png. Water overlaps the frame beneath its opaque inner wall.
 const INNER_WATER_RECT = Object.freeze({ x: 34, y: 54, width: 556, height: 204 });
 
 const POOL_ASSETS = Object.freeze({
-  frame: { key: 'pool-frame-02', path: `${POOL_ASSET_ROOT}/pool_frame_02.png` },
+  frame: { key: 'pool-frame-03', path: `${POOL_ASSET_ROOT}/pool_frame_03.png` },
   water: { key: 'pool-water-surface-02', path: `${POOL_ASSET_ROOT}/pool_water_surface_02.png` },
   lightOn: { key: 'pool-light-on-02', path: `${POOL_ASSET_ROOT}/pool_light_03.png` },
   ladder: { key: 'pool-ladder-01', path: `${POOL_ASSET_ROOT}/pool_ladder_01.png` },
