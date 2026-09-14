@@ -191,3 +191,21 @@ La muestra de calibración visual de Fase 1 debe incluir a Tambu **sin reescalar
 - una fuente fría.
 
 A partir de esa muestra se fijará el tamaño visual definitivo de los primeros assets del entorno.
+
+---
+
+# 10. Regla de producción para personajes humanos
+
+Tambu es el calibrador obligatorio para cualquier humano nuevo. El estándar de producción es:
+
+- canvas por frame: `32x48 px`;
+- escala runtime: `TAMBU_SPRITE.scale` (`1.24` actualmente);
+- referencia primaria: frame `0` de Tambu, idle mirando hacia abajo;
+- baseline: los pies visibles comparten la misma línea del frame de referencia;
+- la silueta visible se normaliza contra Tambu, no contra el borde transparente del canvas;
+- un spritesheet generado se exporta a `32x48` sin padding excesivo ni escalado runtime correctivo;
+- toda la animación recibe un único escalado uniforme nearest-neighbor: nunca factores distintos por frame ni estiramiento X/Y;
+- el factor se calcula primero por altura visible de los frames neutrales y se limita para que ninguna pose de trabajo corte cabeza, manos o pies;
+- antes de aprobar, se compara a zoom de runtime junto a Tambu: dos adultos normales deben percibirse de altura equivalente salvo una diferencia de diseño intencional.
+
+El runtime no es el lugar para compensar un recorte o export defectuoso. Si un humano con `32x48 @ 1.24` se percibe fuera de escala, se corrige su arte dentro de esos frames y se conserva la misma escala runtime.

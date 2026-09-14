@@ -1,3 +1,5 @@
+import { TAMBU_SPRITE } from '../../data/tambuSprite.js';
+
 const BAR_ASSET_ROOT = '/assets/props/bar';
 const BAR_CHARACTER_ASSET_ROOT = '/assets/characters/bartender';
 const BAR_BARTENDER_IDLE_ANIMATION = 'bar-bartender-idle-v1';
@@ -119,7 +121,8 @@ export function createBar(scene, bar) {
     BAR_CHARACTER_ASSETS.bartender.key,
   )
     .setOrigin(0.5, 1)
-    .setScale(1.24)
+    // Human characters share Tambu's production runtime scale; visual calibration lives in the sheet.
+    .setScale(TAMBU_SPRITE.scale)
     .setDepth(depth.bartender)
     .play(BAR_BARTENDER_IDLE_ANIMATION);
 
