@@ -33,7 +33,7 @@ const POOL = {
   y: 432,
   width: 624,
   height: 304,
-  internalLights: [0.12, 0.34, 0.56, 0.78],
+  internalLights: [0.16, 0.47, 0.76],
 };
 
 const BAR = {
