@@ -7,6 +7,7 @@ import { createDeckSurface, preloadDeckSurface } from './deck/deckSurface.js';
 import { createDjBooth, preloadDjBooth } from './dj/djBooth.js';
 import { createBar, preloadBar } from './bar/barStructure.js';
 import { createHouseFacade, preloadHouseFacade } from './house/houseFacade.js';
+import { createPool, preloadPool } from './pool/poolStructure.js';
 import { PATIO_LAYOUT } from './patioLayout.js';
 
 export function preloadPatioWorld(scene) {
@@ -15,6 +16,7 @@ export function preloadPatioWorld(scene) {
   preloadDjBooth(scene);
   preloadBar(scene);
   preloadHouseFacade(scene);
+  preloadPool(scene);
   scene.load.spritesheet('terrain', '/assets/tiles/terrain/terrain.png', {
     frameWidth: TILE_SIZE,
     frameHeight: TILE_SIZE,
@@ -56,167 +58,8 @@ function drawTerrain(scene) {
     TERRAIN_TILE.PATH_EDGE_RIGHT,
   ).setOrigin(0).setDepth(-16);
 
-  drawPixelPool(scene);
+  createPool(scene, PATIO_LAYOUT.pool);
 }
-
-function drawPixelPool(scene) {
-  const { x, y, width, height, internalLights } = PATIO_LAYOUT.pool;
-  const innerX = x + TILE_SIZE;
-  const innerY = y + TILE_SIZE;
-  const innerWidth = width - TILE_SIZE * 2;
-  const innerHeight = height - TILE_SIZE * 2;
-
-  scene.add.rectangle(x + width / 2 + 8, y + height / 2 + 12, width + 14, height + 14, 0x061018, 0.34)
-    .setDepth(-14);
-
-  scene.add.tileSprite(innerX, innerY, innerWidth, innerHeight, 'terrain', TERRAIN_TILE.WATER_A)
-    .setOrigin(0)
-    .setDepth(-12);
-
-  for (let rowY = innerY + 32; rowY < innerY + innerHeight - 16; rowY += 64) {
-    scene.add.tileSprite(innerX + 16, rowY, innerWidth - 32, 16, 'terrain', TERRAIN_TILE.WATER_B)
-      .setOrigin(0)
-      .setDepth(-11)
-      .setAlpha(0.45);
-  }
-
-  for (let rowY = innerY + 8; rowY < innerY + innerHeight - 12; rowY += 48) {
-    scene.add.tileSprite(innerX + 8, rowY, innerWidth - 16, 16, 'terrain', TERRAIN_TILE.WATER_C)
-      .setOrigin(0)
-      .setDepth(-11)
-      .setAlpha(0.2);
-  }
-
-  const glints = scene.add.tileSprite(
-    innerX,
-    innerY,
-    innerWidth,
-    innerHeight,
-    'terrain',
-    TERRAIN_TILE.WATER_GLINT,
-  ).setOrigin(0).setDepth(-10).setAlpha(0.23);
-
-  scene.tweens.add({
-    targets: glints,
-    tilePositionX: TILE_SIZE,
-    duration: 2100,
-    ease: 'Linear',
-    repeat: -1,
-  });
-
-  drawPoolWaterTexture(scene, { x, y, width, height, innerX, innerY, innerWidth, innerHeight, internalLights });
-
-  scene.add.tileSprite(x + TILE_SIZE, y, width - TILE_SIZE * 2, TILE_SIZE, 'terrain', TERRAIN_TILE.POOL_EDGE_TOP)
-    .setOrigin(0)
-    .setDepth(-8);
-  scene.add.tileSprite(
-    x + TILE_SIZE,
-    y + height - TILE_SIZE,
-    width - TILE_SIZE * 2,
-    TILE_SIZE,
-    'terrain',
-    TERRAIN_TILE.POOL_EDGE_BOTTOM,
-  ).setOrigin(0).setDepth(-8);
-  scene.add.tileSprite(x, y + TILE_SIZE, TILE_SIZE, height - TILE_SIZE * 2, 'terrain', TERRAIN_TILE.POOL_EDGE_LEFT)
-    .setOrigin(0)
-    .setDepth(-8);
-  scene.add.tileSprite(
-    x + width - TILE_SIZE,
-    y + TILE_SIZE,
-    TILE_SIZE,
-    height - TILE_SIZE * 2,
-    'terrain',
-    TERRAIN_TILE.POOL_EDGE_RIGHT,
-  ).setOrigin(0).setDepth(-8);
-
-  scene.add.image(x, y, 'terrain', TERRAIN_TILE.POOL_CORNER_TL).setOrigin(0).setDepth(-7);
-  scene.add.image(x + width - TILE_SIZE, y, 'terrain', TERRAIN_TILE.POOL_CORNER_TR).setOrigin(0).setDepth(-7);
-  scene.add.image(x, y + height - TILE_SIZE, 'terrain', TERRAIN_TILE.POOL_CORNER_BL).setOrigin(0).setDepth(-7);
-  scene.add.image(x + width - TILE_SIZE, y + height - TILE_SIZE, 'terrain', TERRAIN_TILE.POOL_CORNER_BR)
-    .setOrigin(0)
-    .setDepth(-7);
-
-  drawPoolCoping(scene, { x, y, width, height });
-
-  const graphics = scene.add.graphics().setDepth(-5);
-  graphics.lineStyle(3, 0xe7eef1, 1);
-  graphics.lineBetween(x + width - 53, y + 29, x + width - 53, y + 79);
-  graphics.lineBetween(x + width - 33, y + 29, x + width - 33, y + 79);
-  graphics.lineBetween(x + width - 53, y + 43, x + width - 33, y + 43);
-  graphics.lineBetween(x + width - 53, y + 61, x + width - 33, y + 61);
-  graphics.lineStyle(1, 0x7d9aa7, 0.8);
-  graphics.lineBetween(x + width - 50, y + 31, x + width - 50, y + 77);
-  graphics.lineBetween(x + width - 30, y + 31, x + width - 30, y + 77);
-
-  graphics.fillStyle(0x9a6a2e, 0.45);
-  graphics.fillCircle(x + 151, y + 132, 24);
-  graphics.fillStyle(0xf4c95e, 1);
-  graphics.fillCircle(x + 148, y + 128, 22);
-  graphics.fillStyle(0xffdd79, 1);
-  graphics.fillCircle(x + 143, y + 123, 15);
-  graphics.fillStyle(0x1889a9, 1);
-  graphics.fillCircle(x + 148, y + 128, 10);
-  graphics.fillStyle(0x86d8dc, 0.7);
-  graphics.fillRect(x + 134, y + 115, 8, 3);
-}
-
-function drawPoolWaterTexture(scene, pool) {
-  const water = scene.add.graphics().setDepth(-9);
-
-  water.fillStyle(0x39d4e6, 0.07);
-  water.fillRect(pool.innerX, pool.innerY, pool.innerWidth, pool.innerHeight);
-
-  for (let row = 0; row < 9; row += 1) {
-    for (let column = 0; column < 18; column += 1) {
-      const cellX = pool.innerX + 8 + column * 34 + (row % 2) * 11;
-      const cellY = pool.innerY + 10 + row * 29;
-      const seed = (row * 19 + column * 7) % 13;
-      const length = 8 + (seed % 4) * 3;
-
-      water.lineStyle(1, seed % 3 === 0 ? 0xb2f4f1 : 0x6bcedd, seed % 4 === 0 ? 0.5 : 0.3);
-      water.lineBetween(cellX, cellY, cellX + length, cellY - 3 + (seed % 3) * 3);
-      if (seed % 2 === 0) {
-        water.lineBetween(cellX + length, cellY - 3 + (seed % 3) * 3, cellX + length + 5, cellY + 4);
-      }
-    }
-  }
-
-  const lights = scene.add.graphics().setDepth(-6);
-  pool.internalLights.forEach((position) => {
-    const lightX = pool.innerX + pool.innerWidth * position;
-    const lightY = pool.innerY + 14;
-    lights.fillStyle(0x8df8f0, 0.05);
-    lights.fillEllipse(lightX, lightY + 20, 86, 54);
-    lights.fillStyle(0xa8fff4, 0.13);
-    lights.fillEllipse(lightX, lightY + 10, 48, 28);
-    lights.fillStyle(0xd6fff6, 0.92);
-    lights.fillRect(lightX - 10, lightY - 2, 20, 4);
-    lights.fillStyle(0xffffff, 0.78);
-    lights.fillRect(lightX - 5, lightY - 3, 10, 2);
-  });
-}
-
-function drawPoolCoping(scene, { x, y, width, height }) {
-  const coping = scene.add.graphics().setDepth(-6);
-
-  coping.lineStyle(2, 0xf0e7d8, 0.72);
-  coping.lineBetween(x + 5, y + 4, x + width - 5, y + 4);
-  coping.lineBetween(x + 5, y + height - 4, x + width - 5, y + height - 4);
-  coping.lineStyle(2, 0x72737a, 0.55);
-  coping.lineBetween(x + 5, y + 13, x + width - 5, y + 13);
-  coping.lineBetween(x + 5, y + height - 13, x + width - 5, y + height - 13);
-
-  for (let offset = TILE_SIZE; offset < width; offset += 48) {
-    coping.lineStyle(1, 0x756f6b, 0.58);
-    coping.lineBetween(x + offset, y, x + offset, y + TILE_SIZE);
-    coping.lineBetween(x + offset, y + height - TILE_SIZE, x + offset, y + height);
-  }
-  for (let offset = TILE_SIZE; offset < height; offset += 48) {
-    coping.lineBetween(x, y + offset, x + TILE_SIZE, y + offset);
-    coping.lineBetween(x + width - TILE_SIZE, y + offset, x + width, y + offset);
-  }
-}
-
 function drawArchitectureAndProps(scene) {
   const graphics = scene.add.graphics();
 
