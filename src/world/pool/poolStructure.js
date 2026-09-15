@@ -7,7 +7,7 @@ const INNER_WATER_RECT = Object.freeze({ x: 20, y: 22, width: 584, height: 260 }
 
 const POOL_ASSETS = Object.freeze({
   frame: { key: 'pool-frame-04', path: `${POOL_ASSET_ROOT}/pool_frame_04.png` },
-  water: { key: 'pool-water-surface-06', path: `${POOL_ASSET_ROOT}/pool_water_surface_06.png` },
+  water: { key: 'pool-water-surface-07', path: `${POOL_ASSET_ROOT}/pool_water_surface_07.png` },
   lightOn: { key: 'pool-light-on-02', path: `${POOL_ASSET_ROOT}/pool_light_03.png` },
   ladder: { key: 'pool-ladder-01', path: `${POOL_ASSET_ROOT}/pool_ladder_01.png` },
   ring: { key: 'pool-float-ring-01', path: `${POOL_ASSET_ROOT}/pool_float_ring_01.png` },
