@@ -122,11 +122,6 @@ export const PATIO_LAYOUT = {
     colliderWidth: 68,
     colliderHeight: 50,
   },
-  plants: [
-    { x: 70, y: 430 },
-    { x: 1600, y: 470 },
-    { x: 1160, y: 825 },
-  ],
   garlands: [
     { x1: 76, y1: 378, x2: 910, y2: 378, sag: 22, poleHeight: 58 },
     { x1: 1140, y1: 458, x2: 1590, y2: 446, sag: 18, poleHeight: 62 },
