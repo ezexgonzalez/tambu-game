@@ -8,7 +8,7 @@ import { createDjBooth, preloadDjBooth } from './dj/djBooth.js';
 import { createBar, preloadBar } from './bar/barStructure.js';
 import { createHouseFacade, preloadHouseFacade } from './house/houseFacade.js';
 import { createPool, preloadPool } from './pool/poolStructure.js';
-import { createPatioAmbient, preloadPatioAmbient } from './patioAmbient.js';
+import { createPatioPerimeter, preloadPatioPerimeter } from './patioPerimeter.js';
 import { PATIO_LAYOUT } from './patioLayout.js';
 
 export function preloadPatioWorld(scene) {
@@ -18,7 +18,7 @@ export function preloadPatioWorld(scene) {
   preloadBar(scene);
   preloadHouseFacade(scene);
   preloadPool(scene);
-  preloadPatioAmbient(scene);
+  preloadPatioPerimeter(scene);
   scene.load.spritesheet('terrain', '/assets/tiles/terrain/terrain.png', {
     frameWidth: TILE_SIZE,
     frameHeight: TILE_SIZE,
@@ -61,6 +61,7 @@ function drawTerrain(scene) {
   ).setOrigin(0).setDepth(-16);
 
   createPool(scene, PATIO_LAYOUT.pool);
+  createPatioPerimeter(scene, PATIO_LAYOUT);
 }
 function drawArchitectureAndProps(scene) {
   const graphics = scene.add.graphics();
@@ -68,46 +69,69 @@ function drawArchitectureAndProps(scene) {
   createHouseFacade(scene, PATIO_LAYOUT);
   createBar(scene, PATIO_LAYOUT.bar);
   createDjBooth(scene, PATIO_LAYOUT.dj);
-  createPatioAmbient(scene, PATIO_LAYOUT);
-  drawEdgeGardens(graphics);
+  PATIO_LAYOUT.partyTables.forEach(({ x, y }) => drawPartyTable(graphics, x, y));
+  drawCooler(graphics);
   drawPatioLanterns(graphics);
   drawGarlands(graphics);
   drawClutter(graphics);
 }
 
-function drawEdgeGardens(graphics) {
-  PATIO_LAYOUT.edgeGardens.forEach(({ x, y, width, height }, bedIndex) => {
-    graphics.fillStyle(0x091b14, 0.42);
-    graphics.fillRect(x + 4, y + 5, width, height);
-    graphics.fillStyle(0x163924, 1);
-    graphics.fillRect(x, y, width, height);
-    graphics.fillStyle(0x315b35, 1);
-    graphics.fillRect(x, y, width, 4);
+function drawPartyTable(graphics, x, y) {
+  graphics.fillStyle(0x070b0e, 0.32);
+  graphics.fillEllipse(x + 5, y + 8, 72, 28);
+  graphics.fillStyle(0x38251f, 1);
+  graphics.fillCircle(x, y, 34);
+  graphics.fillStyle(0x76513a, 1);
+  graphics.fillCircle(x, y, 32);
+  graphics.lineStyle(2, 0xa9794d, 0.55);
+  graphics.strokeCircle(x, y, 26);
+  graphics.lineStyle(1, 0x432a21, 0.65);
+  graphics.lineBetween(x - 28, y - 5, x + 27, y + 4);
+  graphics.lineBetween(x - 24, y + 9, x + 22, y + 14);
+  graphics.fillStyle(0x2e201b, 1);
+  graphics.fillRect(x - 4, y + 24, 8, 36);
+  graphics.fillStyle(0xffcb64, 0.07);
+  graphics.fillCircle(x + 4, y - 6, 18);
+  graphics.fillStyle(0xf2d195, 1);
+  graphics.fillRect(x, y - 13, 8, 14);
+  graphics.fillStyle(0xfff0b0, 1);
+  graphics.fillRect(x + 2, y - 17, 4, 7);
+  graphics.fillStyle(0xffc94e, 0.9);
+  graphics.fillRect(x + 3, y - 19, 2, 3);
+  graphics.fillStyle(0x17130f, 1);
+  graphics.fillRect(x - 20, y - 12, 8, 17);
+  graphics.fillStyle(0xc99b62, 1);
+  graphics.fillRect(x - 18, y - 9, 4, 11);
+  graphics.fillStyle(0x9bc7d1, 1);
+  graphics.fillRect(x + 8, y - 13, 7, 14);
+  graphics.fillStyle(0xdaf4f1, 0.72);
+  graphics.fillRect(x + 10, y - 11, 2, 8);
+}
 
-    for (let offset = 8; offset < width - 5; offset += 17) {
-      const heightOffset = (offset * 3 + bedIndex * 7) % 9;
-      graphics.fillStyle(heightOffset % 2 === 0 ? 0x28643d : 0x3c7746, 1);
-      graphics.fillCircle(x + offset, y + 5 - heightOffset / 2, 7 + (heightOffset % 3));
-      graphics.fillStyle(0x75a45c, 0.35);
-      graphics.fillRect(x + offset - 1, y - heightOffset / 2, 2, 7);
-      if ((offset + bedIndex) % 5 === 0) {
-        graphics.fillStyle(0xe99e72, 1);
-        graphics.fillRect(x + offset + 3, y - 4, 3, 3);
-      }
-    }
-  });
+function drawCooler(graphics) {
+  const { cooler } = PATIO_LAYOUT;
+  graphics.fillStyle(0x081015, 0.28);
+  graphics.fillRect(cooler.x + 5, cooler.y + 7, cooler.width + 2, cooler.height + 2);
+  graphics.fillStyle(0xb8c9cd, 1);
+  graphics.fillRect(cooler.x, cooler.y, cooler.width, cooler.height);
+  graphics.fillStyle(0xe6eeee, 1);
+  graphics.fillRect(cooler.x + 2, cooler.y + 2, cooler.width - 4, 7);
+  graphics.fillStyle(0x71949e, 1);
+  graphics.fillRect(cooler.x + 8, cooler.y + 8, 42, 10);
+  graphics.fillStyle(0x3f6672, 1);
+  graphics.fillRect(cooler.x + 4, cooler.y + 22, cooler.width - 8, 3);
+  graphics.fillStyle(0xe9f3f3, 0.82);
+  graphics.fillRect(cooler.x + 7, cooler.y + 27, 8, 5);
+  graphics.fillRect(cooler.x + 43, cooler.y + 27, 8, 5);
 
-  PATIO_LAYOUT.edgeShrubs.forEach(({ x, y }, shrubIndex) => {
-    graphics.fillStyle(0x07160f, 0.4);
-    graphics.fillEllipse(x + 4, y + 7, 43, 63);
-    for (let leaf = 0; leaf < 7; leaf += 1) {
-      const offsetX = ((leaf * 11 + shrubIndex * 5) % 29) - 14;
-      const offsetY = ((leaf * 17) % 49) - 24;
-      graphics.fillStyle(leaf % 2 === 0 ? 0x215c38 : 0x347344, 1);
-      graphics.fillCircle(x + offsetX, y + offsetY, 10);
-      graphics.fillStyle(0x72a05b, 0.3);
-      graphics.fillRect(x + offsetX - 2, y + offsetY - 5, 3, 6);
-    }
+  [16, 29, 42].forEach((offsetX, index) => {
+    const x = cooler.x + offsetX;
+    graphics.fillStyle(index === 1 ? 0xd56678 : 0x67a8a0, 1);
+    graphics.fillRect(x, cooler.y - 5, 7, 13);
+    graphics.fillStyle(0x263139, 1);
+    graphics.fillRect(x + 2, cooler.y - 9, 3, 5);
+    graphics.fillStyle(0xd7f1eb, 0.6);
+    graphics.fillRect(x + 1, cooler.y - 2, 2, 6);
   });
 }
 

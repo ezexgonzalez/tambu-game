@@ -132,15 +132,6 @@ export const PATIO_LAYOUT = {
     { x: 1032, y: 105, width: 124 },
     { x: 1462, y: 105, width: 118 },
   ],
-  edgeGardens: [
-    { x: 18, y: 930, width: 340, height: 30 },
-    { x: 590, y: 934, width: 350, height: 26 },
-    { x: 1010, y: 932, width: 350, height: 28 },
-  ],
-  edgeShrubs: [
-    { x: 20, y: 520 }, { x: 24, y: 790 },
-    { x: 1658, y: 430 }, { x: 1656, y: 650 },
-  ],
   patioLanterns: [
     { x: 64, y: 666 },
     { x: 430, y: 900 },
