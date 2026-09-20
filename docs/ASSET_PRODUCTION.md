@@ -1,478 +1,335 @@
-# Asset Production Pack v0.2 — Patio
+# Tambu Game — Producción de assets del Patio
 
-Este documento define qué arte producir primero para convertir `PatioScene` de prototipo técnico a escena pixel-art real sin perder tiempo en assets prematuros.
+**Versión:** 1.0
+**Estado:** roadmap activo
+**Scope:** V1 · La fiesta
 
-## Fuentes de verdad
+Este documento define qué arte conviene producir a partir del estado actual y bajo qué contrato debe entregarse. No describe el estado global del juego: para eso prevalece [`CURRENT_STATE.md`](./CURRENT_STATE.md).
 
-Antes de producir cualquier asset consultar:
+## Lectura previa obligatoria
 
-- `docs/ART_DIRECTION.md` → visión, jerarquía y atmósfera.
-- `docs/PIXEL_ART_STYLE_GUIDE.md` → paletas estrictas, noche, pixel density, IA, transparencia y validación.
-- `docs/HUMAN_SCALE.md` → proporciones y escala respecto de Tambu.
+Antes de producir cualquier asset:
 
-Si un backlog antiguo contradice una regla nueva de estilo, prevalece `PIXEL_ART_STYLE_GUIDE.md`.
+1. `CURRENT_STATE.md` — vigencia, prioridades y sectores protegidos.
+2. `ART_DIRECTION.md` — intención y jerarquía visual.
+3. `PIXEL_ART_STYLE_GUIDE.md` — paletas, pixel density, transparencia y validación.
+4. `HUMAN_SCALE.md` — proporciones respecto de Tambu.
+5. Código, layout y assets vecinos del sector real donde se integrará.
 
-## Objetivo de v0.2 visual
+Si una especificación antigua contradice esta cadena, no se elige una versión por intuición: se reporta el conflicto.
 
-La escena debe dejar de sentirse como formas dibujadas sobre un fondo y empezar a leerse como un videojuego 2D coherente.
+## Objetivo de la etapa actual
 
-Al terminar este pack deben estar resueltos:
+El entorno principal ya tiene una base de producción en césped, deck, casa, piscina, barra, DJ y perímetro. El mayor déficit visual es la población del patio y, en segundo lugar, la capa de props que todavía se dibuja con primitives.
 
-- suelo y césped con textura real nocturna;
-- piscina reconocible y con profundidad visual;
-- casa/fondo con ventanas y puerta de BAÑO;
-- barra y zona DJ con identidad;
-- props suficientes para que la fiesta se sienta vivida;
-- Tambu integrado como referencia humana de producción;
-- NPC random con variantes modulares;
-- Sofi, Mili y Cami distinguibles;
-- HUD todavía funcional, aunque no definitivo.
+La producción se mueve de “construir el escenario base” hacia:
 
-## Estándar visual
+1. personajes interactuables;
+2. amigos;
+3. población modular;
+4. props ambientales activos;
+5. UI, feedback y polish.
 
-- Grid lógico: `16x16 px`.
-- La resolución visual de un asset puede superar 16x16 y ocupar múltiples tiles.
-- Tambu es la unidad humana oficial del juego.
-- Frame fuente de Tambu: `32x48 px`.
-- Escala runtime de Tambu: `1.24`.
-- Envolvente nominal runtime: `39.68x59.52 world px` con cámara `zoom = 1`.
-- El resto de personajes, objetos y arquitectura deben calibrarse contra Tambu; no se debe reescalar a Tambu para hacer encajar assets nuevos.
-- Pixel art limpio, de lectura rápida y detalle medio.
-- Máximo 2–3 tonos principales por material/objeto normal.
-- `image-rendering: pixelated` siempre activo.
-- Evitar blur y antialias dentro del arte.
-- Todo asset nace cromáticamente preparado para noche.
-- Las luces y glows grandes se agregan desde Phaser/CSS, no pintados dentro de sprites.
-- Generación IA: **una generación = un kit coherente de assets relacionados**. La sheet es una fuente intermedia; antes de runtime sus piezas se separan, limpian, normalizan y exportan como PNG finales independientes.
+No se vuelve a producir un sector estable salvo que exista un problema concreto y una tarea explícita.
 
-## Qué sigue provisional
+## Estado del arte disponible
 
-Estos elementos NO merecen arte final todavía:
+### Base vigente de runtime
 
-- retratos de diálogo;
-- animaciones complejas;
-- efectos de alcohol;
-- minijuego del baño;
-- decoración muy pequeña sin función visual;
-- sprites finales de todos los amigos reales;
-- UI final;
-- assets de otros mapas.
+- Tambu: `public/assets/characters/tambu/tambu.png`.
+- Césped: dos tilesets aprobados en `public/assets/tiles/grass/`.
+- Deck y props seleccionados: `public/assets/tiles/deck/` y `public/assets/props/deck/`.
+- Casa: `public/assets/tiles/house/`.
+- Piscina: ensamblaje activo definido en `src/world/pool/poolStructure.js`.
+- Barra y bartender: `src/world/bar/barStructure.js`.
+- DJ, estructura, consola y residente: `src/world/dj/djBooth.js`.
+- Perímetro: `src/world/patioPerimeter.js`, todavía en validación visual.
 
-El objetivo es validar primero el lenguaje visual del patio.
+Estos elementos son contexto de producción y referencia de coherencia. No son invitación a regenerarlos.
 
----
+### Candidatos no aprobados
 
-# FASE 1 — Kit mínimo del entorno
+`public/assets/props/patio/` conserva piezas de una pasada ambiental revertida. Pueden evaluarse y rescatarse individualmente, pero no forman un kit aprobado por el solo hecho de existir.
 
-## 1. Césped nocturno
+### Placeholders que sí deben reemplazarse
 
-El césped ocupa la mayor superficie del patio y su producción V1 usa dos tilesets runtime complementarios.
+- Sofi, Mili y Cami.
+- Eze, Pitity, Uriel, Santy, Thiago y Tobi.
+- NPCs de relleno.
+- Mesas, cooler, faroles, guirnaldas y clutter creados en `createPatioWorld.js` con Phaser Graphics.
+- UI funcional actual, en una etapa posterior.
 
-### Assets aprobados
+## Contrato obligatorio para producir assets
 
-```text
-public/assets/tiles/grass/tx_tileset_grass_night.png
-public/assets/tiles/grass/tx_plant_grass_details_night.png
-```
+Una tarea visual Tier A o Tier B debe definir antes de generar:
 
-- `tx_tileset_grass_night.png`: base `256x256 px`;
-- `tx_plant_grass_details_night.png`: detalle vegetal `512x512 px`;
-- ambos usan una grilla fuente de `16x16 px`;
-- no recortar a PNG individuales;
-- no modificar ni regenerar sus píxeles durante integración;
-- el segundo sheet se conserva entero, pero esta fase solo autoriza grass bajo de filas `24..31` y columnas `0..7`;
-- árboles, troncos y arbustos del sheet de detalle quedan fuera de scope.
+1. **Función:** qué aporta al juego y por qué existe.
+2. **Ubicación:** sector y vecinos reales.
+3. **Footprint:** tamaño objetivo en world pixels, anchor y posible colisión.
+4. **Escala humana:** comparación con Tambu `32x48 @ 1.24`.
+5. **Perspectiva:** top-down / 3/4 exacta del sector.
+6. **Jerarquía:** Tier A, B o C.
+7. **Paleta y luz:** familia material, noche y contraste permitido.
+8. **Estados:** frames, direcciones o variantes realmente necesarias.
+9. **Entrega:** PNGs separados, transparencia, nombres y dimensiones.
+10. **Validación:** prueba junto a Tambu y captura dentro del mapa.
 
-### Paleta oficial
+Ningún Tier A/B se aprueba aislado sobre un fondo vacío.
 
-Usar exclusivamente la paleta Night Grass vigente de `PIXEL_ART_STYLE_GUIDE.md`:
+## Pipeline de producción
 
-`#122D23`, `#153427`, `#183A2B`, `#1C4230`, `#214A35`, `#28533A`, `#316040`.
+### 1. Contexto
 
-### Runtime aprobado
+- leer el layout y el módulo de integración;
+- medir el espacio real;
+- identificar assets vecinos y profundidad;
+- determinar si ya existe una pieza reutilizable.
 
-- una matriz determinista de base y otra matriz dispersa de detalle;
-- dos `TilemapLayer` alineadas sobre `PATIO_LAYOUT.terrain.grass`;
-- base aproximada: `65–68%` plana, `8–10%` muy pequeña, `20–23%` suave y `4–5%` media;
-- detalle vegetal extra: escaso en centro y progresivamente mayor hacia bordes;
-- sin `Math.random()`;
-- sin máscaras;
-- sin `scene.add.image()` por celda;
-- sin reintroducir assets legacy separados de ground, macro, patch, cluster, tuft o accent.
-
-Los pools autorizados viven en `src/world/grass/grassLayout.js`. Del sheet base no se seleccionan flores, piedras, bordes ni tonos amarillos. Del sheet vegetal solo se usan los 15 patrones de grass bajo explícitamente autorizados; el patrón marrón y toda la vegetación superior quedan excluidos.
-
-### Reemplaza
-
-La familia legacy completa de grounds de 64 px, patches, clusters, tufts, macros y accents. El segundo tileset no reactiva esa arquitectura: también se renderiza mediante Tilemap.
-
-Ver `docs/PHASE_1_GRASS.md`.
-
----
-
-## 2. Camino / deck
-
-### Assets reales
-- `path_01.png`
-- `path_edge_01.png`
-- `deck_01.png`
-- `deck_edge_01.png`
-
-### Reglas
-- camino cálido, contrastando con el césped;
-- madera oscura/cálida ya adaptada al ambiente nocturno;
-- bordes claros para facilitar lectura de colisiones;
-- paleta y pixel density según `PIXEL_ART_STYLE_GUIDE.md`.
-
----
-
-## 3. Piscina
-
-### Assets reales
-- `pool_water_01.png`
-- `pool_water_02.png`
-- `pool_edge_top.png`
-- `pool_edge_bottom.png`
-- `pool_edge_left.png`
-- `pool_edge_right.png`
-- `pool_corner_tl.png`
-- `pool_corner_tr.png`
-- `pool_corner_bl.png`
-- `pool_corner_br.png`
-- `pool_ladder.png`
-- `pool_float.png`
-
-### Animación mínima
-Dos frames de agua alternando lentamente.
-
-### Reglas
-- protagonista visual del centro del patio;
-- cian/azul más luminoso que el entorno;
-- reflejos limitados;
-- borde de piedra/baldosa claro;
-- escalera, borde y props deben verificarse junto a Tambu a escala runtime real.
-
-### Reemplaza
-Rectángulos actuales de agua y borde.
-
----
-
-## 4. Casa / fondo
-
-### Assets reales
-- `wall_01.png`
-- `wall_shadow.png`
-- `window_lit.png`
-- `window_dim.png`
-- `door_generic.png`
-- `door_bathroom.png`
-- `bathroom_sign.png`
-
-### Regla de copy
-La señal visible debe decir `BAÑO` o usar iconografía reconocible. Nunca `WC`.
-
-### Reglas
-- pared crema/apagada;
-- ventanas con luz cálida;
-- profundidad simple mediante zócalo y sombra inferior;
-- puertas y elementos arquitectónicos se validan colocando a Tambu delante antes de aprobación.
-
----
-
-## 5. Barra
-
-### Assets reales
-- `bar_front.png`
-- `bar_top.png`
-- `bar_back_shelf.png`
-- `bar_stool.png`
-- `bottle_01.png` a `bottle_06.png`
-- `glass_01.png` a `glass_03.png`
-- `drink_01.png`
-- `drink_02.png`
-- `ice_bucket.png`
-
-### Reglas
-- debe leerse como punto de encuentro;
-- botellas de colores variados pero controlados;
-- mantener espacio libre delante para futura interacción;
-- altura y profundidad visual del mostrador deben resultar creíbles junto a Tambu.
+### 2. Especificación
 
----
-
-## 6. DJ / sonido
+- definir silueta, tamaño, estados y variantes;
+- decidir qué debe formar parte del PNG y qué debe resolver Phaser;
+- declarar colisión, anchor y oclusión esperada.
 
-### Assets reales
-- `dj_booth.png`
-- `dj_controller.png`
-- `speaker_01.png`
-- `speaker_02.png`
-- `party_light_fixture.png`
+### 3. Exploración
 
-### Reglas de escala
-- la cabina debe alojar un humano de la escala de Tambu de forma creíble;
-- controladores, parlantes y superficie de trabajo deben mantener lectura humana al tamaño real del juego.
+- usar referencias, boceto o generación para encontrar lenguaje;
+- generar una familia coherente cuando corresponda;
+- descartar cualquier propuesta que solo funcione ampliada o fuera del mapa.
 
-### Lo que sigue por código
-- haces de luz;
-- tintes;
-- flashes;
-- ambient light externo.
+### 4. Normalización
 
----
+- separar las piezas de cualquier sheet intermedia;
+- limpiar fondos, texto, marcos y residuos;
+- asegurar transparencia real;
+- corregir perspectiva, escala, bordes, pixel density y paleta;
+- exportar PNGs finales con nombres semánticos.
 
-# FASE 2 — Props que hacen que la fiesta viva
+### 5. Prueba contextual
 
-## Prioridad alta
-- `table_high.png`
-- `table_low.png`
-- `chair.png`
-- `cooler.png`
-- `plant_01.png`
-- `plant_02.png`
-- `cup_floor_01.png`
-- `cup_floor_02.png`
-- `bottle_floor_01.png`
-- `bottle_floor_02.png`
-- `can_floor_01.png`
-- `ashtray.png`
+- mostrar el asset junto a Tambu a escala runtime;
+- probarlo dentro del sector real;
+- revisar silueta, jerarquía, circulación, depth y contacto con el suelo;
+- comprobar que las variantes se sienten de la misma familia.
 
-## Prioridad media
-- reposera;
-- toalla;
-- pelota de piscina;
-- bolso/cartera;
-- caja de bebidas;
-- cenicero adicional;
-- pequeñas manchas/reflejos de suelo.
+### 6. Aprobación e integración
 
-## Regla de densidad
-No llenar cada tile. Los props se concentran donde naturalmente habría actividad: barra, mesas, piscina y grupos.
+- Dirección aprueba intención y resultado contextual.
+- Integración usa los PNG aprobados sin rediseñarlos.
+- Si la prueba revela un defecto de arte, vuelve a producción con un blocker concreto.
 
-## Regla de escala
-Todo prop Tier A o Tier B debe probarse al lado de Tambu antes de aprobarse. Para clutter muy pequeño se conserva primero la legibilidad y luego el realismo literal.
+## Roadmap visual activo
 
----
+# FASE A — Mujeres interactuables
 
-# FASE 3 — Personajes
+Crear una primera familia que resuelva a Sofi, Mili y Cami sin romper la escala de Tambu.
 
-## 1. Tambu — referencia cerrada
+## Entrega mínima por personaje
 
-Tambu ya cuenta con sprite de producción y **no debe rehacerse ni reescalarse como parte de este pack**.
+- spritesheet o frames definidos por un layout común;
+- cuatro direcciones si el evento del baño o futuras escenas requieren giro/desplazamiento;
+- idle y walk solo cuando el uso real lo justifique;
+- sombra de contacto coherente;
+- una silueta distinguible a zoom `1`;
+- outfit, pelo y postura propios;
+- dimensiones y orden de frames documentados.
 
-### Especificación actual
+La entrega exacta debe decidirse con el módulo de integración. No generar animaciones que el runtime todavía no vaya a usar.
 
-- frame: `32x48 px`;
-- spritesheet: `96x192 px`;
-- escala runtime: `1.24`;
-- envolvente nominal runtime: `39.68x59.52 world px`;
-- 12 frames / 4 direcciones;
-- fuente de verdad: `src/data/tambuSprite.js`.
+## Identidad visual
 
-### Animaciones actuales
-- idle_down
-- idle_up
-- idle_left
-- idle_right
-- walk_down
-- walk_up
-- walk_left
-- walk_right
+### Sofi
 
-### Objetivo
-Usar a Tambu para definir el estándar de proporciones del resto de humanos y del entorno.
+- tranquila, observadora y amable;
+- postura contenida;
+- silueta clara sin exceso de accesorios.
 
-### Regla
-Los assets nuevos se adaptan a Tambu. No ajustar su `scale: 1.24` para solucionar problemas de proporción ajenos.
+### Mili
 
----
+- energía más alta y pose más dinámica;
+- lectura social rápida y segura;
+- no comunicar su personalidad mediante una escala arbitrariamente mayor.
 
-## 2. NPC random — sistema modular
+### Cami
 
-No diseñar 30 personas a mano.
+- segura, filosa y con presencia;
+- distinguirla mediante outfit, pelo y postura;
+- mantenerla dentro de la misma familia visual.
 
-### Base proporcional
+## Gate de aprobación de la familia
 
-Los NPCs parten de la familia visual y escala humana definida por Tambu. Pueden variar silueta, altura aparente y ancho dentro de márgenes controlados, pero no deben sentirse de otro sistema de escala.
+- Las tres parecen pertenecer al mismo juego y al mismo sistema humano que Tambu.
+- Se distinguen sin labels.
+- Ninguna parece más detallada o de otra perspectiva.
+- Funcionan en sus posiciones actuales y en la caminata del baño.
+- El formato permite que Integration Engineer implemente las tres sin lógica especial innecesaria.
 
-### Componentes
+# FASE B — Amigos principales
 
-#### Peinados masculinos
-5 variantes.
+Producir una familia común para:
 
-#### Peinados femeninos
-5 variantes.
+1. Pitity;
+2. Uriel;
+3. Thiago;
+4. Tobi;
+5. Santy;
+6. Eze.
 
-#### Tonos de piel
-4 variantes.
+El orden puede cambiar por necesidad narrativa o disponibilidad de referencia, pero no se deben generar como seis estilos aislados.
 
-#### Torso masculino
-5 outfits.
+## Reglas
 
-#### Torso femenino
-5 outfits.
+- misma base proporcional y densidad que Tambu;
+- rasgos reconocibles mediante pelo, outfit, silueta y uno o dos detalles;
+- expresividad reservada para estados que tengan uso en gameplay;
+- evitar retratos o animaciones complejas antes de validar el cuerpo base.
 
-#### Piernas/calzado
-4 variantes.
+# FASE C — Población modular
 
-#### Accesorios
-- vaso;
-- celular;
-- gorra;
-- bolso/cartera;
-- anteojos.
+No diseñar treinta personas únicas. Construir un sistema reutilizable compatible con los estados ambientales previstos.
 
-### Estados visuales
-- idle;
-- charla;
+## Familia mínima
+
+- cuerpos/base de proporciones compatibles;
+- 4–6 peinados por familia necesaria;
+- 4 tonos de piel;
+- 6–8 outfits combinables;
+- variantes de piernas/calzado;
+- accesorios separados: vaso, celular, gorra, bolso y anteojos;
+- paleta controlada para evitar clones demasiado obvios.
+
+## Estados prioritarios
+
+- idle/charla;
 - baile;
 - tomar;
 - mirar celular;
-- beso.
+- beso o pareja, solo si se resuelve sin crear un sistema desproporcionado.
 
-### Implementación
-El juego combinará variantes por datos para generar diversidad sin crear sprites únicos innecesarios.
+El sistema debe probar diversidad sin perder coherencia, performance ni claridad social.
 
----
+# FASE D — Props ambientales activos
 
-## 3. Mujeres interactuables
+Reemplazar los primitives que siguen en `createPatioWorld.js` mediante familias pequeñas y contextualizadas.
 
-### Sofi
-Lectura tranquila y amable. Outfit simple, postura menos expansiva.
+## Orden recomendado
 
-### Mili
-Más energía y presencia. Silueta/pose más dinámica.
+1. mesas de fiesta y objetos de superficie;
+2. cooler y bebidas;
+3. faroles/postes;
+4. guirnaldas;
+5. clutter de suelo;
+6. mobiliario adicional solo si resuelve una necesidad de composición.
 
-### Cami
-Más segura/filosa. Diferenciar por pelo, outfit y postura.
+## Reglas de composición
 
-### Alcance v0.2
-Un idle claro por personaje. Las animaciones de charla vienen después.
+- no llenar cada vacío;
+- mayor densidad en barra, DJ, mesas y bordes sociales;
+- mantener aire en circulación, accesos y frente de interactuables;
+- todo prop con masa necesita contacto con el suelo;
+- Tier C acompaña y desaparece al mirar el mapa completo.
 
-### Regla proporcional
-Deben compartir el mismo sistema humano de Tambu; diferenciarlas por diseño, no mediante escalas arbitrarias.
+## Reutilización del kit existente
 
----
+Antes de generar una pieza nueva, revisar `public/assets/props/patio/`. Cada candidato debe pasar el mismo gate que un asset nuevo. Si falla escala, perspectiva o lenguaje, se descarta o se devuelve a producción; no se salva deformándolo en integración.
 
-## 4. Amigos reales
+# FASE E — UI y presentación
 
-En v0.2 pueden seguir con placeholder mejorado.
+Se aborda después de estabilizar la población visual y el loop completo de la noche.
 
-Orden futuro recomendado cuando lleguen las fotos:
+Alcance previsto:
 
-1. Pitity
-2. Uriel
-3. Thiago
-4. Tobi
-5. Santy
-6. Eze
+- HUD de vidas, alcohol y puntos;
+- prompt de interacción;
+- diálogo y opciones;
+- El Consejo;
+- outcomes;
+- evento del baño;
+- resumen final de la noche.
 
-Tambu permanece como referencia humana para todos.
+La UI debe compartir lenguaje pixel-art, pero priorizar lectura y jerarquía. No congelar un HUD final antes de definir gameplay de alcohol y cierre de run.
 
----
+## Reglas técnicas comunes
 
-# FASE 4 — UI mínima
+### Escala
 
-## Se mantiene provisional
-- vidas;
-- alcohol;
-- puntos;
-- `E · HABLAR`;
-- caja de diálogo.
+- Tambu sigue siendo la unidad oficial.
+- Autorar cerca del tamaño final cuando sea posible.
+- Evitar escalados no uniformes durante integración.
+- Un asset grande se mide por masa visible, no solo por su canvas transparente.
 
-## Primera mejora visual permitida
-- marco pixel-art simple;
-- iconos propios para corazón, alcohol y puntos;
-- tipografía compatible con estética retro.
+### Perspectiva
 
-No diseñar todavía HUD final porque puede cambiar cuando aparezcan El Consejo, estados sociales y mobile.
+- Vista top-down / 3/4 superior coherente.
+- Props de perímetro, muebles y superficies deben representar el ángulo desde el que realmente se ven.
+- No mezclar un objeto frontal con vecinos vistos desde arriba.
 
----
+### Paleta
 
-# Qué se dibuja y qué se resuelve por código
+- Los sprites nacen nocturnos.
+- Night Grass usa exclusivamente la paleta vigente de `PIXEL_ART_STYLE_GUIDE.md`.
+- Los materiales vecinos pueden derivar sus propios tonos sin contaminar el césped.
+- No usar overlays para esconder una base diurna incorrecta.
 
-## Sprite / tile real
-- césped;
-- piscina;
-- paredes;
-- ventanas;
-- puertas;
-- barra;
-- botellas;
-- mobiliario;
-- props;
-- personajes;
-- señales.
+### Transparencia
 
-## Phaser / CSS
-- ambient light exterior;
-- haces de luz;
-- tintes por zona;
-- pulso de luces;
-- cámara;
-- colisiones;
-- interacción;
-- transparencias;
-- feedback de selección;
-- partículas pequeñas.
+- PNG RGBA real cuando el asset no sea rectangular.
+- Sin fondos opacos accidentales.
+- Sin halo de antialias ni píxeles semitransparentes innecesarios en bordes duros.
 
----
+### Iluminación
 
-# Estructura de carpetas objetivo
+Dentro del sprite:
+
+- sombra de contacto;
+- highlight pixelado;
+- luz material localizada.
+
+Por Phaser:
+
+- glows amplios;
+- pulsos;
+- haces;
+- tintes de zona;
+- partículas y feedback temporal.
+
+### Nombres y entrega
+
+Formato recomendado:
 
 ```text
-public/assets/
-├── tiles/
-│   ├── grass/
-│   ├── path/
-│   ├── deck/
-│   ├── pool/
-│   └── house/
-├── props/
-│   ├── bar/
-│   ├── dj/
-│   ├── furniture/
-│   └── clutter/
-├── characters/
-│   ├── tambu/
-│   ├── friends/
-│   ├── women/
-│   └── random/
-└── ui/
+<familia>_<pieza>_<variante>_<version>.png
 ```
 
----
+Ejemplos:
 
-# Orden exacto de implementación
+```text
+women_sofi_idle_v1.png
+npc_hair_short_03_v1.png
+patio_table_round_02_v1.png
+```
 
-1. Césped nocturno real y aprobado.
-2. Camino/deck.
-3. Piscina real.
-4. Casa + BAÑO.
-5. Barra.
-6. DJ + parlantes.
-7. Props principales.
-8. Validación de escala de todos los assets contra Tambu.
-9. NPC modular v1.
-10. Sofi/Mili/Cami.
-11. Ajuste de iluminación y ambient light.
-12. Primera pasada del HUD.
+La entrega debe incluir:
 
-No pasar al siguiente mapa hasta que este conjunto defina un lenguaje visual reutilizable.
+- archivos finales separados;
+- dimensiones fuente;
+- anchor recomendado;
+- escala runtime prevista;
+- orden de frames si aplica;
+- colisión/footprint si aplica;
+- captura de prueba junto a Tambu;
+- captura de prueba dentro del mapa.
 
----
+## Criterio global de aprobación
 
-# Criterio de aprobación v0.2
+Un asset está listo cuando:
 
-El pack se considera exitoso cuando:
-
-- el jugador reconoce instantáneamente una fiesta en patio sin necesitar labels;
-- piscina, barra, DJ y baño tienen identidad propia;
-- todos los objetos importantes se sienten proporcionados para Tambu;
-- Tambu destaca entre NPCs sin romper la estética;
-- los NPC de relleno parecen variados aunque provengan de un sistema modular;
-- los objetos ya no parecen simples rectángulos de prototipo;
-- las colisiones continúan siendo legibles visualmente;
-- el mapa se siente poblado pero no saturado;
-- el ambient light complementa la escena sin competir con ella;
-- los assets parecen pertenecer al mismo juego incluso antes de la iluminación dinámica.
+- cumple una función real dentro del juego;
+- se lee a zoom `1`;
+- respeta escala, perspectiva, paleta y densidad;
+- pertenece a una familia coherente;
+- funciona junto a Tambu y a sus vecinos;
+- no bloquea circulación ni interacción;
+- tiene transparencia y archivos listos para runtime;
+- Dirección lo aprueba en contexto;
+- Integration Engineer no necesita rediseñarlo para usarlo.

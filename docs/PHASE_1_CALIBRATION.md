@@ -1,8 +1,10 @@
 # Tambu Game — Fase 1: Muestra de calibración visual
 
 **Versión:** 1.0  
-**Estado:** especificación aprobable antes de producción masiva  
+**Estado:** HISTÓRICO — calibración inicial completada
 **Scope:** Patio / V1  
+
+> Este documento conserva la especificación que se usó para iniciar la dirección visual. Ya no es una fuente activa de producción y contiene nombres, paletas y entregables reemplazados. Para trabajo nuevo consultar `CURRENT_STATE.md`, `PIXEL_ART_STYLE_GUIDE.md`, `HUMAN_SCALE.md` y `ASSET_PRODUCTION.md`. En particular, no reintroducir `grass_worn_01.png` ni la paleta de calibración histórica.
 
 Este documento define la primera producción visual real después de `ART_DIRECTION.md` y `HUMAN_SCALE.md`.
 

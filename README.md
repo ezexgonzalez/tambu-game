@@ -43,6 +43,18 @@ npm run build
 npm run preview
 ```
 
+## Documentación
+
+Antes de diseñar, producir assets o modificar el juego, empezar por:
+
+1. [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md) — estado y prioridades vigentes.
+2. [`docs/README.md`](docs/README.md) — mapa de fuentes de verdad y resolución de conflictos.
+3. El documento especializado de la tarea.
+
+Los documentos de fase antiguos no describen necesariamente el runtime actual.
+
 ## Estado
 
-`v0.1` — base técnica + bloque visual inicial del mapa Patio.
+`v0.1` — vertical slice jugable de la fiesta en el patio.
+
+La base técnica, el sistema social, Sofi/Mili/Cami, El Consejo y el evento del baño están implementados. El escenario combina sectores con assets de producción y una capa todavía provisional, especialmente personajes, props ambientales y UI. Ver el inventario completo en [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).

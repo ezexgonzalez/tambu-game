@@ -1,17 +1,19 @@
 # Tambu Game — Dirección de Arte
 
-**Versión:** 1.2  
-**Estado:** FASE 0 — baseline visual definida  
+**Versión:** 1.3
+**Estado:** dirección activa — baseline visual definida
 **Scope actual:** V1 · La fiesta / Patio
 
 Este documento fija **cómo debe verse y sentirse el juego**.
 
 Documentos complementarios y precedencia:
 
+- `docs/CURRENT_STATE.md` → estado, vigencia y sectores protegidos.
 - `docs/HUMAN_SCALE.md` → escala humana y proporciones.
 - `docs/PIXEL_ART_STYLE_GUIDE.md` → reglas técnicas estrictas de producción, paletas, pixel density, IA y validación.
 - `docs/ASSET_PRODUCTION.md` → qué assets producir y en qué orden.
-- `docs/PHASE_1_*.md` → decisiones específicas de fase.
+- `docs/PHASE_1_GRASS.md` → implementación vigente del césped.
+- `docs/PHASE_1_CALIBRATION.md` → registro histórico; no autoriza producción nueva.
 
 Si una decisión futura hace que un objeto se vea más detallado pero rompe esta dirección, la dirección visual tiene prioridad. Si una generación contradice una regla técnica o paleta de producción, prevalece `PIXEL_ART_STYLE_GUIDE.md`.
 
@@ -153,13 +155,13 @@ Evitar negro puro como sombra general del mundo. El negro puede reservarse para 
 
 ## Césped — familia oficial nocturna
 
-- Deep shadow: `#112A2F`
-- Shadow: `#112F31`
-- Dark base: `#123232`
-- Base: `#153B35`
-- Mid grass: `#194137`
-- Soft light: `#1C4839`
-- Highlight: `#25553D`
+- Deep base: `#122D23`
+- Base shadow: `#153427`
+- Main grass: `#183A2B`
+- Mid grass: `#1C4230`
+- Soft light: `#214A35`
+- Blade light: `#28533A`
+- Sparse highlight: `#316040`
 
 El césped debe sentirse como una superficie nocturna fría, uniforme y suave. Las variantes cambian patrón/densidad, no identidad cromática.
 
@@ -508,9 +510,11 @@ Ver reglas completas en `docs/PIXEL_ART_STYLE_GUIDE.md`.
 
 ---
 
-# 15. Gate visual antes de producir todo el patio
+# 15. Gate visual de calibración — completado
 
-Antes de rehacer decenas de assets se debe construir y aprobar una **muestra de calibración** con:
+La muestra de calibración que habilitó la producción del patio ya fue superada. Sus conclusiones vigentes —escala de Tambu, perspectiva, densidad, tratamiento nocturno y jerarquía— están incorporadas a esta dirección y al `PIXEL_ART_STYLE_GUIDE.md`.
+
+La siguiente lista se conserva como gate para una revisión material del lenguaje visual, no como trabajo pendiente de la etapa actual:
 
 - césped final candidate;
 - un tramo de deck;
@@ -530,7 +534,7 @@ La muestra debe validar simultáneamente:
 - sombra;
 - comportamiento de iluminación.
 
-Si esta muestra no funciona, se corrige antes de producir barra, DJ y resto del set.
+Si una futura revisión falla este gate, se corrige el sistema afectado antes de reemplazar en masa assets estables.
 
 ---
 

@@ -1,11 +1,12 @@
 # Tambu Game — Pixel Art Style Guide
 
-**Versión:** 1.0  
+**Versión:** 1.1
 **Estado:** FUENTE DE VERDAD DE PRODUCCIÓN VISUAL  
 **Scope actual:** V1 · Patio nocturno  
 
 Este documento fija las reglas técnicas estrictas para producir assets de Tambu Game.
 
+`CURRENT_STATE.md` define **qué está vigente, protegido, provisional o pendiente**.
 `ART_DIRECTION.md` define **qué debe sentirse y comunicar el juego**.  
 `PIXEL_ART_STYLE_GUIDE.md` define **cómo debe producirse visualmente cada asset**.  
 `HUMAN_SCALE.md` define **la escala humana y proporciones**.  
@@ -456,12 +457,15 @@ Las fuentes de verdad son `tx_tileset_grass_night.png` y `tx_plant_grass_details
 
 En caso de conflicto:
 
-1. `src/data/tambuSprite.js` + `docs/HUMAN_SCALE.md` → escala humana.
-2. `docs/PIXEL_ART_STYLE_GUIDE.md` → reglas técnicas visuales y paletas de producción.
-3. `docs/ART_DIRECTION.md` → visión y jerarquía artística.
-4. `docs/PHASE_1_*.md` → decisiones específicas de fase.
-5. `docs/ASSET_PRODUCTION.md` → backlog y orden de producción.
-6. notas antiguas / prompts / concepts → referencia, no autoridad.
+1. `docs/CURRENT_STATE.md` → vigencia, estado y sectores protegidos.
+2. `src/data/tambuSprite.js` + `docs/HUMAN_SCALE.md` → escala humana.
+3. `docs/PIXEL_ART_STYLE_GUIDE.md` → reglas técnicas visuales y paletas de producción.
+4. `docs/ART_DIRECTION.md` → visión y jerarquía artística.
+5. `docs/PHASE_1_GRASS.md` → implementación vigente del césped.
+6. `docs/ASSET_PRODUCTION.md` → backlog y orden de producción.
+7. documentos marcados como históricos, notas, prompts y concepts → referencia, no autoridad.
+
+Ver el mapa completo en `docs/README.md`. Una contradicción debe reportarse; no habilita a improvisar una solución.
 
 ---
 

@@ -2,6 +2,8 @@
 
 Documento vivo para registrar decisiones de diseño narrativo y social antes de implementarlas.
 
+Para saber qué conversaciones y sistemas están efectivamente integrados, consultar primero `CURRENT_STATE.md`.
+
 ## Objetivo del sistema
 
 Las conversaciones no deben funcionar como un árbol de "respuesta correcta / respuesta incorrecta". El jugador tiene que leer a la persona, interpretar el momento y decidir cuánto avanzar.
@@ -841,6 +843,12 @@ En cada beat, las opciones 1–3 alternan entre buena, amistosa y mala. La opci�
 
 El Consejo comparte la lectura social general, pero tiene callbacks propios de las señales de Mili para que Pitity, Eze y Tobi interpreten lo que realmente ocurrió sin arrastrar referencias narrativas de Sofi.
 
+## Cami V1 — implementada
+
+Cami usa la misma arquitectura data-driven y su fantasía central es **leer la ironía y sostener el ida y vuelta sin convertirlo en un personaje forzado**. Premia comeback, autoironía, banter y avance con timing; castiga literalidad, sobreanálisis y sobrejuego cuando Tambu ya venía intenso.
+
+Tiene cuatro beats, variantes contextuales, señales y Consejo propios. Sus outcomes son Baño, Instagram, Friendzone y Rechazo. Baño reutiliza `OutcomeEventSystem → BathroomEvent → BathroomResistance` con su propia secuencia de cierre.
+
 ---
 
 # Estado actual
@@ -860,6 +868,7 @@ Congelado como base:
 - regla anti-repetición;
 - Baño como outcome máximo de Sofi V5;
 - Mili V1 social;
+- Cami V1 social;
 - tono adulto/no autocensurado del grupo.
 
 Pendiente:
@@ -868,7 +877,6 @@ Pendiente:
 - playtest de rutas;
 - outcomes finales y recompensas si requieren ajuste;
 - alcohol;
-- Cami;
 - Thiago;
 - Uriel;
 - Santygamer;
