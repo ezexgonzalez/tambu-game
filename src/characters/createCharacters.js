@@ -1,4 +1,5 @@
 import { fillerGroups, patioFriends, patioWomen } from '../data/patioCharacters.js';
+import { createSofiSprite, preloadSofi } from './sofiSprite.js';
 
 const SHIRT_COLORS = [0xe8edf2, 0xd44f65, 0x6571c8, 0x3f9a74, 0xc4944c, 0x8965ad, 0x20242d, 0xd99caa];
 const SKIN_COLORS = [0xe8b990, 0xd79c73, 0xc5835f, 0xf0c8a7];
@@ -36,7 +37,10 @@ export function createCharacters(scene) {
   });
 
   return patioWomen.map((character) => {
-    const sprite = drawPerson(scene, character.x, character.y, character.palette, true);
+    const isSofi = character.id === 'sofi';
+    const sprite = isSofi
+      ? createSofiSprite(scene, character)
+      : drawPerson(scene, character.x, character.y, character.palette, true);
     const label = scene.add.text(character.x, character.y + 36, character.name, {
       fontFamily: 'monospace',
       fontSize: '12px',
@@ -50,8 +54,18 @@ export function createCharacters(scene) {
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    return { sprite, label, marker, character };
+    return {
+      sprite,
+      label,
+      marker,
+      character,
+      visual: isSofi ? 'sofi-sprite' : 'procedural',
+    };
   });
+}
+
+export function preloadCharacters(scene) {
+  preloadSofi(scene);
 }
 
 function drawPerson(scene, x, y, index, interactive = false) {

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { createCharacters } from '../characters/createCharacters.js';
+import { createCharacters, preloadCharacters } from '../characters/createCharacters.js';
 import { createPlayer, preloadPlayer } from '../player/createPlayer.js';
 import { updatePlayer } from '../player/updatePlayer.js';
 import { canInteractWithCharacter, createGameState } from '../state/gameState.js';
@@ -20,6 +20,7 @@ export class PatioScene extends Phaser.Scene {
   preload() {
     preloadPatioWorld(this);
     preloadPlayer(this);
+    preloadCharacters(this);
   }
 
   create() {

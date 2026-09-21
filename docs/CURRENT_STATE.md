@@ -105,10 +105,10 @@ Hay tests para sistema social, Sofi, Mili, Cami, Consejo, presentación y flujo 
 
 ### Personajes del patio
 
-- Sofi, Mili y Cami todavía son cuerpos construidos con rectángulos de Phaser.
+- Sofi usa el atlas final `women_sofi_atlas_v1.png` (12 frames de `32x48`, escala runtime `1.24` y depth por pies). Mili y Cami todavía son cuerpos construidos con rectángulos de Phaser.
 - Eze, Pitity, Uriel, Santy, Thiago y Tobi todavía usan el mismo sistema procedural.
 - Los NPCs de relleno también son placeholders; solo algunos tienen tween de baile o un indicador simple de actividad.
-- No existen todavía sprites finales de la población principal fuera de Tambu, bartender y DJ residente.
+- No existen todavía sprites finales de la población principal fuera de Tambu, Sofi, bartender y DJ residente.
 
 ### Props y ambientación activa
 
@@ -151,7 +151,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 ## No implementado
 
-- Sprites finales de Sofi, Mili, Cami, amigos y NPCs de relleno.
+- Sprites finales de Mili, Cami, amigos y NPCs de relleno.
 - Sistema modular de población/NPCs con outfits, peinados y acciones reutilizables.
 - Sistema general de eventos ambientales del patio; hoy existe el evento especial del baño, no una fiesta autónoma completa.
 - Gameplay de alcohol y sus efectos.
