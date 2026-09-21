@@ -450,6 +450,277 @@ El objetivo es sensación, no una fórmula perfecta.
 
 ---
 
+# 9.5. Bathroom Resistance — identidad narrativa por intento
+
+Esta idea pasa a considerarse **V1 MUST HAVE dentro del BathroomEvent**, no un microevento opcional.
+
+La Resistencia del Baño no debe sentirse como una barra abstracta con golpes anónimos.
+
+Debe convertirse en una escena viva del grupo.
+
+## Principio central
+
+A medida que Tambu consigue más Baños en una misma run:
+
+- los amigos entienden mejor qué está pasando;
+- las frases cambian;
+- aparecen referencias a lo sucedido antes;
+- aumenta el caos;
+- aumenta la presión del minijuego;
+- la dificultad crece con una explicación narrativa visible.
+
+La progresión cómica debe ser:
+
+### Baño 1 — sorpresa
+
+El grupo todavía está descubriendo qué pasó.
+
+Tono:
+
+> ¿Con quién te metiste?
+
+> Dale hijo de puta, salí.
+
+> Abrí, pajero.
+
+Debe sentirse como sorpresa, curiosidad y cargada.
+
+La dificultad es la más accesible de las tres.
+
+---
+
+### Baño 2 — incredulidad
+
+El grupo ya sabe que Tambu se encerró antes con otra chica.
+
+Ahora las frases pueden usar memoria real de la run.
+
+Ejemplo conceptual:
+
+> ¿OTRA VEZ?
+
+> ¿Con quién entraste ahora?
+
+> Pero si Sofi está afuera, hijo de puta.
+
+> No puede ser este pajero.
+
+Si el primer Baño fue con Sofi y el segundo es con Mili, el sistema puede mencionar a Sofi.
+
+No generar texto dinámico con IA.
+
+Las variantes deben escribirse a mano usando datos simples del estado de run:
+
+- currentGirl;
+- previousBathroomGirls;
+- bathroomCount;
+- resultados previos relevantes.
+
+La dificultad aumenta de forma moderada.
+
+Debe haber más presión, más golpes o intervalos menores.
+
+---
+
+### Baño 3 — caos absoluto
+
+Si Tambu llega al tercer Baño, el grupo ya perdió completamente la paciencia.
+
+Tono:
+
+> NOOO, OTRA VEZ NO.
+
+> ¿LA TERCERA?
+
+> SAQUEN A ESTE TIPO DEL BAÑO.
+
+> TAMBU HIJO DE PUTA.
+
+> ABRÍ LA PUERTA, ANIMAL.
+
+Las líneas exactas se escribirán más adelante personaje por personaje.
+
+Este tercer Bathroom Resistance puede funcionar como una especie de **boss final cómico de la perfect run**.
+
+La dificultad debe ser la mayor de las tres.
+
+La victoria de tres Baños debe sentirse merecida después de haber sobrevivido también al grupo.
+
+---
+
+## Presentación — caras de los amigos
+
+Los golpes y textos anónimos actuales deben evolucionar hacia intervenciones identificables.
+
+Cada intervención importante debe mostrar:
+
+- cara/retrato pixel-art del amigo;
+- nombre;
+- frase breve;
+- timing claro.
+
+Ejemplo conceptual:
+
+```
+[cara de Santy]
+SANTY
+"ABRÍ PAJERO."
+```
+
+Los retratos deben derivarse de los personajes aprobados cuando existan.
+
+No usar cajas de diálogo gigantes.
+
+El jugador está jugando al mismo tiempo.
+
+La barra de resistencia siempre debe permanecer visible y legible.
+
+Reglas:
+
+- una o dos voces simultáneas como máximo;
+- frases cortas;
+- lectura instantánea;
+- no cubrir el centro de gameplay;
+- entrada y salida rápida de los retratos.
+
+---
+
+## Personalidad de cada amigo
+
+Las líneas deben sentirse escritas para cada personaje, no como insultos intercambiables.
+
+Dirección inicial:
+
+- **Pitity:** mínimo de palabras, remates secos o absurdos;
+- **Tobi:** directo, cortante;
+- **Uriel:** social, incrédulo, intentando entender qué está pasando;
+- **Thiago:** descanso personal y familiar;
+- **Santy:** máxima desubicación y barbaridades;
+- **Eze:** puede arrancar más racional y terminar entrando también en el caos.
+
+Las voces definitivas se escribirán usando `CHARACTERS.md` y el lore aprobado.
+
+---
+
+## Golpe asociado a personaje
+
+Cuando un amigo interviene, su aparición puede tener una respuesta física coherente.
+
+Ejemplo:
+
+```
+Santy aparece
+↓
+dice una barbaridad
+↓
+PUM PUM PUM
+↓
+la resistencia recibe presión
+```
+
+Esto crea asociación entre personaje y gameplay.
+
+El objetivo es que quien juega termine reaccionando genuinamente contra el personaje que está golpeando.
+
+No todos los textos necesitan producir daño.
+
+Debe existir ritmo entre:
+
+- frase;
+- anticipación;
+- golpe;
+- recuperación;
+- siguiente intervención.
+
+---
+
+## Dificultad narrativa
+
+La dificultad no debe crecer únicamente porque un número oculto se multiplica.
+
+Debe sentirse que:
+
+### Baño 1
+poca gente afuera + golpes moderados.
+
+### Baño 2
+más gente entiende lo que pasa + mayor frecuencia/intensidad.
+
+### Baño 3
+caos grupal + intervenciones rápidas + golpes fuertes.
+
+La progresión mecánica debe acompañar la progresión cómica.
+
+Esto se combina con el rebalance base definido en la sección anterior.
+
+Los valores exactos siguen sujetos a playtest.
+
+---
+
+## Memoria de la run
+
+Bathroom Resistance debe poder consumir información mínima del estado de run para cambiar sus líneas.
+
+Ejemplos:
+
+- nombre de la primera chica;
+- cantidad de Baños anteriores;
+- éxito o fracaso anterior de la puerta;
+- chica actual;
+- orden de los Baños.
+
+Ejemplo:
+
+> "¿Mili ahora? Si hace diez minutos estabas con Sofi."
+
+Esto refuerza el principio general:
+
+> el mundo debe recordar lo que pasó.
+
+No todas las combinaciones necesitan texto exclusivo.
+
+Se pueden escribir pools contextuales pequeños y bien seleccionados.
+
+---
+
+## Chicas anteriores afuera
+
+Se puede explorar que una chica anterior aparezca o sea mencionada durante un Bathroom Resistance posterior.
+
+Ejemplo conceptual de tono:
+
+> Sofi: "...ah, espectacular."
+
+Debe usarse con moderación.
+
+No convertir cada segundo Baño en una escena de celos obligatoria.
+
+La reacción depende de personalidad, historial y contexto.
+
+---
+
+## Criterio de éxito
+
+Esta pasada se considera lograda cuando:
+
+- los tres Bathroom Resistance se sienten narrativamente distintos;
+- los amigos son reconocibles por cara y voz;
+- las frases recuerdan hechos reales de la run;
+- la intensidad crece entre primer, segundo y tercer Baño;
+- el texto nunca impide jugar;
+- la dificultad acompaña el caos sin volverse injusta;
+- perder sigue siendo gracioso;
+- el tercer intento funciona como clímax cómico de una perfect run.
+
+Esta capa de personalidad debe implementarse después de:
+
+1. corregir rutas/depth del BathroomEvent;
+2. rebalancear la dificultad base;
+3. disponer de los amigos visuales necesarios o retratos aprobados.
+
+
+---
+
 # 10. Evento Santy — interrupción camino al baño
 
 Este evento queda aprobado conceptualmente como candidato fuerte para V1.
