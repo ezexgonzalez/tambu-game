@@ -14,6 +14,13 @@ export const MILI_BLINK_SPRITE = {
   frameHeight: 48,
 };
 
+export const MILI_HAIR_ADJUST_SPRITE = {
+  key: 'mili-hair-adjust',
+  path: '/assets/characters/women/women_mili_hair_adjust_down_atlas_v1.png',
+  frameWidth: 32,
+  frameHeight: 48,
+};
+
 export const MILI_ANIMS = {
   down: { idle: 1, walk: [1, 0, 2, 1] },
   left: { idle: 4, walk: [4, 3, 5, 4] },
@@ -24,25 +31,31 @@ export const MILI_ANIMS = {
 export const MILI_STATES = Object.freeze({
   IDLE: 'idle',
   BLINK: 'blink',
+  HAIR_ADJUST: 'hair-adjust',
   WALK: 'walk',
 });
 
 export const MILI_BLINK_FRAME_RATE = 6;
+export const MILI_HAIR_ADJUST_FRAME_RATE = 6;
 export const MILI_WALK_FRAME_RATE = 8;
 export const MILI_IDLE_BLINK_DELAY_RANGE_MS = Object.freeze({ min: 5000, max: 10000 });
+export const MILI_IDLE_VARIATION_WEIGHTS = Object.freeze({
+  blink: 0.8,
+  hairAdjust: 0.2,
+});
 
 function cancelMiliIdleTimer(sprite) {
   sprite.miliIdleTimer?.remove?.();
   sprite.miliIdleTimer = null;
 }
 
-function clearMiliBlinkCompletion(sprite) {
-  const completion = sprite.miliBlinkCompletion;
+function clearMiliSpecialCompletion(sprite) {
+  const completion = sprite.miliSpecialCompletion;
   if (!completion) return;
 
   sprite.off?.(completion.event, completion.handler);
   sprite.removeListener?.(completion.event, completion.handler);
-  sprite.miliBlinkCompletion = null;
+  sprite.miliSpecialCompletion = null;
 }
 
 export function getMiliBlinkDelay(random = Math.random) {
@@ -50,7 +63,12 @@ export function getMiliBlinkDelay(random = Math.random) {
   return Math.round(min + Math.max(0, Math.min(1, random())) * (max - min));
 }
 
-function scheduleMiliBlink(sprite) {
+export function chooseMiliIdleVariation(random = Math.random) {
+  const roll = Math.max(0, Math.min(1, random()));
+  return roll < MILI_IDLE_VARIATION_WEIGHTS.blink ? 'blink' : 'hair-adjust';
+}
+
+function scheduleMiliVariation(sprite) {
   if (
     sprite.miliState !== MILI_STATES.IDLE
     || sprite.miliFacing !== 'down'
@@ -63,7 +81,9 @@ function scheduleMiliBlink(sprite) {
     getMiliBlinkDelay(random),
     () => {
       sprite.miliIdleTimer = null;
-      playMiliBlink(sprite);
+      if (sprite.miliState !== MILI_STATES.IDLE || sprite.miliFacing !== 'down') return;
+      if (chooseMiliIdleVariation(random) === 'hair-adjust') playMiliHairAdjust(sprite);
+      else playMiliBlink(sprite);
     },
   );
 }
@@ -76,6 +96,10 @@ export function preloadMili(scene) {
   scene.load.spritesheet(MILI_BLINK_SPRITE.key, MILI_BLINK_SPRITE.path, {
     frameWidth: MILI_BLINK_SPRITE.frameWidth,
     frameHeight: MILI_BLINK_SPRITE.frameHeight,
+  });
+  scene.load.spritesheet(MILI_HAIR_ADJUST_SPRITE.key, MILI_HAIR_ADJUST_SPRITE.path, {
+    frameWidth: MILI_HAIR_ADJUST_SPRITE.frameWidth,
+    frameHeight: MILI_HAIR_ADJUST_SPRITE.frameHeight,
   });
 }
 
@@ -100,6 +124,19 @@ export function createMiliAnimations(scene) {
           key: blinkKey,
           frames: Array.from({ length: 5 }, (_, frame) => ({ key: MILI_BLINK_SPRITE.key, frame })),
           frameRate: MILI_BLINK_FRAME_RATE,
+          repeat: 0,
+        });
+      }
+
+      const hairAdjustKey = `${MILI_SPRITE.key}-hair-adjust-down`;
+      if (!scene.anims.exists(hairAdjustKey)) {
+        scene.anims.create({
+          key: hairAdjustKey,
+          frames: Array.from({ length: 8 }, (_, frame) => ({
+            key: MILI_HAIR_ADJUST_SPRITE.key,
+            frame,
+          })),
+          frameRate: MILI_HAIR_ADJUST_FRAME_RATE,
           repeat: 0,
         });
       }
@@ -144,7 +181,7 @@ export function playMiliWalk(sprite, destination) {
   const key = `${MILI_SPRITE.key}-walk-${direction}`;
 
   cancelMiliIdleTimer(sprite);
-  clearMiliBlinkCompletion(sprite);
+  clearMiliSpecialCompletion(sprite);
   sprite.miliState = MILI_STATES.WALK;
   sprite.miliFacing = direction;
   if (sprite.anims?.currentAnim?.key !== key) sprite.play(key, true);
@@ -154,20 +191,31 @@ export function playMiliBlink(sprite) {
   if (sprite.miliState !== MILI_STATES.IDLE || sprite.miliFacing !== 'down') return;
 
   const key = `${MILI_SPRITE.key}-blink-down`;
+  playMiliSpecial(sprite, MILI_STATES.BLINK, key);
+}
+
+export function playMiliHairAdjust(sprite) {
+  if (sprite.miliState !== MILI_STATES.IDLE || sprite.miliFacing !== 'down') return;
+
+  const key = `${MILI_SPRITE.key}-hair-adjust-down`;
+  playMiliSpecial(sprite, MILI_STATES.HAIR_ADJUST, key);
+}
+
+function playMiliSpecial(sprite, state, key) {
   cancelMiliIdleTimer(sprite);
-  clearMiliBlinkCompletion(sprite);
-  sprite.miliState = MILI_STATES.BLINK;
+  clearMiliSpecialCompletion(sprite);
+  sprite.miliState = state;
 
   const handler = () => {
-    sprite.miliBlinkCompletion = null;
-    if (sprite.miliState === MILI_STATES.BLINK && sprite.miliFacing === 'down') {
+    sprite.miliSpecialCompletion = null;
+    if (sprite.miliState === state && sprite.miliFacing === 'down') {
       playMiliIdle(sprite, 'down');
     }
   };
   if (sprite.once) {
     const event = `animationcomplete-${key}`;
     sprite.once(event, handler);
-    sprite.miliBlinkCompletion = { event, handler };
+    sprite.miliSpecialCompletion = { event, handler };
   }
   sprite.play(key, true);
 }
@@ -176,9 +224,9 @@ export function playMiliIdle(sprite, direction = sprite.miliFacing ?? 'down') {
   const key = `${MILI_SPRITE.key}-idle-${direction}`;
 
   cancelMiliIdleTimer(sprite);
-  clearMiliBlinkCompletion(sprite);
+  clearMiliSpecialCompletion(sprite);
   sprite.miliState = MILI_STATES.IDLE;
   sprite.miliFacing = direction;
   if (sprite.anims?.currentAnim?.key !== key) sprite.play(key, true);
-  scheduleMiliBlink(sprite);
+  scheduleMiliVariation(sprite);
 }
