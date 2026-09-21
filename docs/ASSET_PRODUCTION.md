@@ -38,6 +38,7 @@ No se vuelve a producir un sector estable salvo que exista un problema concreto 
 
 - Tambu: `public/assets/characters/tambu/tambu.png`.
 - Sofi: walk, idle y special idles aprobados en `public/assets/characters/women/`, integrados desde `src/characters/sofiSprite.js`.
+- Mili: walk 4 direcciones, idle estático, blink down, hair adjust y drink down aprobados en `public/assets/characters/women/`, integrados desde `src/characters/miliSprite.js`; baseline congelada.
 - Césped: dos tilesets aprobados en `public/assets/tiles/grass/`.
 - Deck y props seleccionados: `public/assets/tiles/deck/` y `public/assets/props/deck/`.
 - Casa: `public/assets/tiles/house/`.
@@ -54,7 +55,7 @@ Estos elementos son contexto de producción y referencia de coherencia. No son i
 
 ### Placeholders que sí deben reemplazarse
 
-- Mili y Cami.
+- Cami.
 - Eze, Pitity, Uriel, Santy, Thiago y Tobi.
 - NPCs de relleno.
 - Mesas, cooler, faroles, guirnaldas y clutter creados en `createPatioWorld.js` con Phaser Graphics.
@@ -136,7 +137,7 @@ Ningún Tier A/B se aprueba aislado sobre un fondo vacío.
 
 # FASE A — Mujeres interactuables
 
-Sofi ya está resuelta e integrada como baseline de calidad. Completar la primera familia con Mili y Cami sin romper la escala ni el lenguaje visual establecido por Tambu y Sofi.
+Sofi y Mili ya están resueltas e integradas como baselines de calidad. Completar la primera familia con Cami sin romper la escala ni el lenguaje visual establecido por Tambu, Sofi y Mili.
 
 ## Entrega mínima por personaje
 
@@ -161,6 +162,8 @@ La entrega exacta debe decidirse con el módulo de integración. No generar anim
 
 ### Mili
 
+- baseline visual y técnica aprobada y congelada; no regenerar salvo bug concreto o tarea explícita;
+- walk 4 direcciones, idle estático, blink down ocasional, hair adjust y drink down esporádicos;
 - energía más alta y pose más dinámica;
 - lectura social rápida y segura;
 - no comunicar su personalidad mediante una escala arbitrariamente mayor.
