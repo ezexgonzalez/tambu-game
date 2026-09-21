@@ -1,4 +1,5 @@
 import { fillerGroups, patioFriends, patioWomen } from '../data/patioCharacters.js';
+import { createMiliSprite, preloadMili } from './miliSprite.js';
 import { createSofiSprite, preloadSofi } from './sofiSprite.js';
 
 const SHIRT_COLORS = [0xe8edf2, 0xd44f65, 0x6571c8, 0x3f9a74, 0xc4944c, 0x8965ad, 0x20242d, 0xd99caa];
@@ -38,8 +39,11 @@ export function createCharacters(scene) {
 
   return patioWomen.map((character) => {
     const isSofi = character.id === 'sofi';
+    const isMili = character.id === 'mili';
     const sprite = isSofi
       ? createSofiSprite(scene, character)
+      : isMili
+        ? createMiliSprite(scene, character)
       : drawPerson(scene, character.x, character.y, character.palette, true);
     const label = scene.add.text(character.x, character.y + 36, character.name, {
       fontFamily: 'monospace',
@@ -59,13 +63,14 @@ export function createCharacters(scene) {
       label,
       marker,
       character,
-      visual: isSofi ? 'sofi-sprite' : 'procedural',
+      visual: isSofi ? 'sofi-sprite' : isMili ? 'mili-sprite' : 'procedural',
     };
   });
 }
 
 export function preloadCharacters(scene) {
   preloadSofi(scene);
+  preloadMili(scene);
 }
 
 function drawPerson(scene, x, y, index, interactive = false) {

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { playMiliIdle, playMiliWalk, setMiliDepth } from '../characters/miliSprite.js';
 import { PLAYER_CONFIG } from '../player/playerConfig.js';
 import { playSofiIdle, playSofiWalk, setSofiDepth } from '../characters/sofiSprite.js';
 import {
@@ -54,17 +55,29 @@ function updatePlayerAnimation(player, destination) {
 }
 
 function updateNpcVisual(interactable, destination) {
-  if (interactable.visual !== 'sofi-sprite') return;
+  if (interactable.visual === 'sofi-sprite') {
+    playSofiWalk(interactable.sprite, destination);
+    setSofiDepth(interactable.sprite);
+    return;
+  }
 
-  playSofiWalk(interactable.sprite, destination);
-  setSofiDepth(interactable.sprite);
+  if (interactable.visual === 'mili-sprite') {
+    playMiliWalk(interactable.sprite, destination);
+    setMiliDepth(interactable.sprite);
+  }
 }
 
 function idleNpcVisual(interactable) {
-  if (interactable.visual !== 'sofi-sprite') return;
+  if (interactable.visual === 'sofi-sprite') {
+    playSofiIdle(interactable.sprite);
+    setSofiDepth(interactable.sprite);
+    return;
+  }
 
-  playSofiIdle(interactable.sprite);
-  setSofiDepth(interactable.sprite);
+  if (interactable.visual === 'mili-sprite') {
+    playMiliIdle(interactable.sprite);
+    setMiliDepth(interactable.sprite);
+  }
 }
 
 export function createBathroomEvent(scene, {

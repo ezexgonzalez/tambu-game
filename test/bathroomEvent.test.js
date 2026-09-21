@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { registerHooks } from 'node:module';
+import { MILI_CONVERSATION } from '../src/data/conversations/miliConversation.js';
 import { SOFI_CONVERSATION } from '../src/data/conversations/sofiConversation.js';
 import { PATIO_LAYOUT } from '../src/world/patioLayout.js';
 
@@ -125,6 +126,49 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
   assert.equal(player.sprite.y, PATIO_LAYOUT.events.bathroom.exit.y);
   assert.equal(interactable.sprite.visible, false);
   assert.ok(objects.filter(({ text }) => text).every(({ destroyed }) => destroyed));
+});
+
+test('Mili usa walk real, depth por pies y vuelve a idle durante BathroomEvent', () => {
+  const keys = {};
+  const objects = [];
+  const scene = {
+    input: { keyboard: { addKey(code) { keys[code] = { edge: false }; return keys[code]; } } },
+    add: {
+      rectangle(x, y) { const object = display(x, y); objects.push(object); return object; },
+      text(x, y, text) { const object = display(x, y, text); objects.push(object); return object; },
+    },
+    game: { loop: { delta: 50 } },
+  };
+  const player = { sprite: actor(400, 690), label: display(400, 724), facing: 'up' };
+  const interactable = {
+    sprite: actor(920, 350),
+    label: display(920, 386),
+    marker: display(920, 295),
+    visual: 'mili-sprite',
+  };
+  const event = createBathroomEvent(scene, {
+    player,
+    interactable,
+    outcome: MILI_CONVERSATION.outcomes.bathroom,
+    layout: PATIO_LAYOUT.events.bathroom,
+  });
+
+  const walkingKeys = new Set();
+  let frames = 0;
+  while (event.getMode() === 'walking' && frames < 200) {
+    assert.equal(event.update(), true);
+    if (interactable.sprite.anims.currentAnim?.key?.startsWith('mili-walk-')) {
+      walkingKeys.add(interactable.sprite.anims.currentAnim.key);
+    }
+    frames += 1;
+  }
+
+  assert.ok(frames < 200);
+  assert.ok(walkingKeys.size > 0);
+  assert.equal(event.getMode(), 'bathroom-achieved');
+  assert.match(interactable.sprite.anims.currentAnim.key, /^mili-idle-(down|left|right|up)$/);
+  assert.equal(interactable.sprite.depth, interactable.sprite.y + 30);
+  assert.ok(objects.some(({ text }) => text.includes('BAÑO CONSEGUIDO')));
 });
 
 test('SPACE sostenido mediante pulsaciones físicas permite asegurar la puerta', () => {
