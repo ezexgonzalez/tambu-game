@@ -24,8 +24,8 @@ La primera escena es **Fiesta en el patio**:
 - baño;
 - NPCs de relleno;
 - grupo de amigos;
-- 2–3 mujeres interactuables;
-- HUD y sistema de conversaciones en fases posteriores.
+- 3 mujeres interactuables;
+- HUD y sistema de conversaciones.
 
 ## Desarrollo local
 
