@@ -105,7 +105,7 @@ Hay tests para sistema social, Sofi, Mili, Cami, Consejo, presentación y flujo 
 
 ### Personajes del patio
 
-- Sofi usa `women_sofi_atlas_v1.png` para walk (12 frames de `32x48`) y `women_sofi_idle_atlas_v1.png` para idle estable con special-idle ocasional en cuatro direcciones (16 frames de `32x48`), con escala runtime `1.24` y depth por pies. Mili y Cami todavía son cuerpos construidos con rectángulos de Phaser.
+- Sofi usa `women_sofi_atlas_v1.png` para walk (12 frames de `32x48`) y `women_sofi_idle_atlas_v1.png` para idle estable con blink ocasional en cuatro direcciones (16 frames de `32x48`). También cuenta con special idles de teléfono y bebida solo en orientación down; mantiene escala runtime `1.24` y depth por pies. Mili y Cami todavía son cuerpos construidos con rectángulos de Phaser.
 - Eze, Pitity, Uriel, Santy, Thiago y Tobi todavía usan el mismo sistema procedural.
 - Los NPCs de relleno también son placeholders; solo algunos tienen tween de baile o un indicador simple de actividad.
 - No existen todavía sprites finales de la población principal fuera de Tambu, Sofi, bartender y DJ residente.

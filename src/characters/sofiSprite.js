@@ -14,6 +14,21 @@ export const SOFI_IDLE_SPRITE = {
   frameHeight: 48,
 };
 
+export const SOFI_SPECIAL_SPRITES = Object.freeze({
+  phone: {
+    key: 'sofi-phone',
+    path: '/assets/characters/women/women_sofi_idle_phone_down_atlas_v1.png',
+    frameWidth: 32,
+    frameHeight: 48,
+  },
+  drink: {
+    key: 'sofi-drink',
+    path: '/assets/characters/women/women_sofi_idle_drink_down_atlas_v1.png',
+    frameWidth: 32,
+    frameHeight: 48,
+  },
+});
+
 export const SOFI_ANIMS = {
   down: { idle: [0, 1, 2, 3], walk: [1, 0, 2, 0] },
   left: { idle: [4, 5, 6, 7], walk: [4, 3, 5, 3] },
@@ -29,17 +44,42 @@ export const SOFI_STATES = Object.freeze({
 
 export const SOFI_IDLE_FRAME_RATE = 1;
 export const SOFI_BLINK_FRAME_RATE = 4;
+export const SOFI_SPECIAL_FRAME_RATE = 5;
 export const SOFI_WALK_FRAME_RATE = 8;
 export const SOFI_IDLE_DELAY_RANGE_MS = Object.freeze({ min: 5000, max: 10000 });
+export const SOFI_IDLE_VARIATION_WEIGHTS = Object.freeze({
+  blink: 70,
+  phone: 15,
+  drink: 15,
+});
 
 function cancelSofiIdleTimer(sprite) {
   sprite.sofiIdleTimer?.remove?.();
   sprite.sofiIdleTimer = null;
 }
 
+function clearSofiSpecialCompletion(sprite) {
+  const completion = sprite.sofiSpecialCompletion;
+  if (!completion) return;
+
+  sprite.off?.(completion.event, completion.handler);
+  sprite.removeListener?.(completion.event, completion.handler);
+  sprite.sofiSpecialCompletion = null;
+}
+
 export function getSofiIdleDelay(random = Math.random) {
   const { min, max } = SOFI_IDLE_DELAY_RANGE_MS;
   return Math.round(min + Math.max(0, Math.min(1, random())) * (max - min));
+}
+
+export function chooseSofiIdleVariation(sprite, random = sprite.sofiVariationRandom ?? Math.random) {
+  if (sprite.sofiFacing !== 'down') return 'blink';
+
+  const { blink, phone, drink } = SOFI_IDLE_VARIATION_WEIGHTS;
+  const roll = Math.max(0, Math.min(1, random())) * (blink + phone + drink);
+  if (roll < blink) return 'blink';
+  if (roll < blink + phone) return 'phone';
+  return 'drink';
 }
 
 function scheduleSofiIdleVariation(sprite) {
@@ -54,24 +94,32 @@ function scheduleSofiIdleVariation(sprite) {
     getSofiIdleDelay(random),
     () => {
       sprite.sofiIdleTimer = null;
-      playSofiBlink(sprite);
+      playSofiVariation(sprite, chooseSofiIdleVariation(sprite));
     },
   );
 }
 
-function playSofiBlink(sprite) {
+function playSofiVariation(sprite, variation) {
   if (sprite.sofiState !== SOFI_STATES.IDLE) return;
 
   const direction = sprite.sofiFacing ?? 'down';
-  const blinkKey = `${SOFI_SPRITE.key}-special-idle-${direction}`;
-  const completeEvent = `animationcomplete-${blinkKey}`;
+  const animationKey = variation === 'blink'
+    ? `${SOFI_SPRITE.key}-special-idle-${direction}`
+    : `${SOFI_SPRITE.key}-special-${variation}-${direction}`;
+  const completeEvent = `animationcomplete-${animationKey}`;
 
   cancelSofiIdleTimer(sprite);
+  clearSofiSpecialCompletion(sprite);
   sprite.sofiState = SOFI_STATES.SPECIAL_IDLE;
-  sprite.once?.(completeEvent, () => {
+  const handler = () => {
+    sprite.sofiSpecialCompletion = null;
     if (sprite.sofiState === SOFI_STATES.SPECIAL_IDLE) playSofiIdle(sprite, direction);
-  });
-  sprite.play(blinkKey, true);
+  };
+  if (sprite.once) {
+    sprite.once(completeEvent, handler);
+    sprite.sofiSpecialCompletion = { event: completeEvent, handler };
+  }
+  sprite.play(animationKey, true);
 }
 
 export function preloadSofi(scene) {
@@ -82,6 +130,12 @@ export function preloadSofi(scene) {
   scene.load.spritesheet(SOFI_IDLE_SPRITE.key, SOFI_IDLE_SPRITE.path, {
     frameWidth: SOFI_IDLE_SPRITE.frameWidth,
     frameHeight: SOFI_IDLE_SPRITE.frameHeight,
+  });
+  Object.values(SOFI_SPECIAL_SPRITES).forEach((sprite) => {
+    scene.load.spritesheet(sprite.key, sprite.path, {
+      frameWidth: sprite.frameWidth,
+      frameHeight: sprite.frameHeight,
+    });
   });
 }
 
@@ -106,6 +160,20 @@ export function createSofiAnimations(scene) {
         frames: config.idle.map((frame) => ({ key: SOFI_IDLE_SPRITE.key, frame })),
         frameRate: SOFI_BLINK_FRAME_RATE,
         repeat: 0,
+      });
+    }
+
+    if (direction === 'down') {
+      Object.entries(SOFI_SPECIAL_SPRITES).forEach(([variation, sprite]) => {
+        const specialKey = `${SOFI_SPRITE.key}-special-${variation}-${direction}`;
+        if (scene.anims.exists(specialKey)) return;
+
+        scene.anims.create({
+          key: specialKey,
+          frames: Array.from({ length: 8 }, (_, frame) => ({ key: sprite.key, frame })),
+          frameRate: SOFI_SPECIAL_FRAME_RATE,
+          repeat: 0,
+        });
       });
     }
 
@@ -148,6 +216,7 @@ export function playSofiWalk(sprite, destination) {
   const key = `${SOFI_SPRITE.key}-walk-${direction}`;
 
   cancelSofiIdleTimer(sprite);
+  clearSofiSpecialCompletion(sprite);
   sprite.sofiState = SOFI_STATES.WALK;
   sprite.sofiFacing = direction;
   if (sprite.anims?.currentAnim?.key !== key) sprite.play(key, true);
@@ -157,6 +226,7 @@ export function playSofiIdle(sprite, direction = sprite.sofiFacing ?? 'down') {
   const key = `${SOFI_SPRITE.key}-idle-${direction}`;
 
   cancelSofiIdleTimer(sprite);
+  clearSofiSpecialCompletion(sprite);
   sprite.sofiState = SOFI_STATES.IDLE;
   sprite.sofiFacing = direction;
   if (sprite.anims?.currentAnim?.key !== key) sprite.play(key, true);

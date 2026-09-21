@@ -10,9 +10,13 @@ import {
   SOFI_IDLE_DELAY_RANGE_MS,
   SOFI_IDLE_FRAME_RATE,
   SOFI_IDLE_SPRITE,
+  SOFI_IDLE_VARIATION_WEIGHTS,
+  SOFI_SPECIAL_FRAME_RATE,
+  SOFI_SPECIAL_SPRITES,
   SOFI_SPRITE,
   SOFI_STATES,
   SOFI_WALK_FRAME_RATE,
+  chooseSofiIdleVariation,
 } from '../src/characters/sofiSprite.js';
 
 test('Sofi separates the approved walk and idle atlas contracts', () => {
@@ -31,9 +35,13 @@ test('Sofi separates the approved walk and idle atlas contracts', () => {
   assert.ok(SOFI_IDLE_FRAME_RATE < SOFI_WALK_FRAME_RATE);
   assert.ok(SOFI_BLINK_FRAME_RATE < SOFI_WALK_FRAME_RATE);
   assert.deepEqual(SOFI_IDLE_DELAY_RANGE_MS, { min: 5000, max: 10000 });
+  assert.deepEqual(SOFI_IDLE_VARIATION_WEIGHTS, { blink: 70, phone: 15, drink: 15 });
+  assert.ok(SOFI_SPECIAL_FRAME_RATE < SOFI_WALK_FRAME_RATE);
+  assert.equal(SOFI_SPECIAL_SPRITES.phone.frameWidth, 32);
+  assert.equal(SOFI_SPECIAL_SPRITES.drink.frameHeight, 48);
 });
 
-test('Sofi preloads both sheets and separates stable idle, special idle and walk', () => {
+test('Sofi preloads all sheets and separates stable idle, special idle and walk', () => {
   const sheets = [];
   const animations = [];
   const scene = {
@@ -55,7 +63,13 @@ test('Sofi preloads both sheets and separates stable idle, special idle and walk
   preloadSofi(scene);
   createSofiSprite(scene, { x: 400, y: 690 });
 
-  assert.deepEqual(sheets.map(({ key }) => key), ['sofi', 'sofi-idle']);
+  assert.deepEqual(sheets.map(({ key }) => key), ['sofi', 'sofi-idle', 'sofi-phone', 'sofi-drink']);
+  assert.equal(sheets[2].path, SOFI_SPECIAL_SPRITES.phone.path);
+  assert.equal(sheets[3].path, SOFI_SPECIAL_SPRITES.drink.path);
+  assert.deepEqual(sheets.slice(2).map(({ config }) => config), [
+    { frameWidth: 32, frameHeight: 48 },
+    { frameWidth: 32, frameHeight: 48 },
+  ]);
   const idleAnimations = animations.filter(({ key }) => /^sofi-idle-/.test(key));
   const specialIdleAnimations = animations.filter(({ key }) => /^sofi-special-idle-/.test(key));
   const walkAnimations = animations.filter(({ key }) => /^sofi-walk-/.test(key));
@@ -74,6 +88,14 @@ test('Sofi preloads both sheets and separates stable idle, special idle and walk
     && frameRate === SOFI_BLINK_FRAME_RATE
     && repeat === 0
   )));
+  for (const variation of ['phone', 'drink']) {
+    const animationsForVariation = animations.filter(({ key }) => key === `sofi-special-${variation}-down`);
+    assert.equal(animationsForVariation.length, 1);
+    assert.deepEqual(animationsForVariation[0].frames.map(({ frame }) => frame), [0, 1, 2, 3, 4, 5, 6, 7]);
+    assert.equal(animationsForVariation[0].frames[0].key, SOFI_SPECIAL_SPRITES[variation].key);
+    assert.equal(animationsForVariation[0].frameRate, SOFI_SPECIAL_FRAME_RATE);
+    assert.equal(animationsForVariation[0].repeat, 0);
+  }
   assert.ok(walkAnimations.every(({ frames, frameRate, repeat }) => (
     frames.length === 4
     && frames.every(({ key }) => key === SOFI_SPRITE.key)
@@ -106,7 +128,7 @@ test('Sofi starts idle-down with centered origin, Tambu scale and foot depth', (
 
   createSofiSprite(scene, { x: 400, y: 690 });
 
-  assert.equal(animations.length, 12);
+  assert.equal(animations.length, 14);
   assert.deepEqual(sprite.createdAt, { x: 400, y: 690, key: 'sofi-idle', frame: 0 });
   assert.deepEqual(sprite.origin, [0.5, 0.5]);
   assert.equal(sprite.scale, 1.24);
@@ -139,6 +161,7 @@ test('Sofi schedules an occasional special idle and returns to the stable pose',
     anims: { currentAnim: null },
     sofiFacing: 'down',
     sofiIdleRandom: () => 0.5,
+    sofiVariationRandom: () => 0,
     sofiScene: {
       time: {
         delayedCall(delay, callback) {
@@ -164,4 +187,81 @@ test('Sofi schedules an occasional special idle and returns to the stable pose',
   assert.equal(sprite.sofiState, SOFI_STATES.IDLE);
   assert.equal(sprite.anims.currentAnim.key, 'sofi-idle-down');
   assert.equal(timers.length, 2);
+});
+
+test('Sofi chooses phone and drink only while facing down', () => {
+  assert.equal(chooseSofiIdleVariation({ sofiFacing: 'down' }, () => 0.69), 'blink');
+  assert.equal(chooseSofiIdleVariation({ sofiFacing: 'down' }, () => 0.70), 'phone');
+  assert.equal(chooseSofiIdleVariation({ sofiFacing: 'down' }, () => 0.84), 'phone');
+  assert.equal(chooseSofiIdleVariation({ sofiFacing: 'down' }, () => 0.85), 'drink');
+  assert.equal(chooseSofiIdleVariation({ sofiFacing: 'left' }, () => 0.99), 'blink');
+  assert.equal(chooseSofiIdleVariation({ sofiFacing: 'up' }, () => 0.99), 'blink');
+});
+
+test('Sofi returns from phone and drink to idle-down without looping', () => {
+  const timers = [];
+  const listeners = {};
+  const sprite = {
+    anims: { currentAnim: null },
+    sofiFacing: 'down',
+    sofiIdleRandom: () => 0,
+    sofiVariationRandom: () => 0.70,
+    sofiScene: {
+      time: {
+        delayedCall(delay, callback) {
+          const timer = { delay, callback, remove() {} };
+          timers.push(timer);
+          return timer;
+        },
+      },
+    },
+    once(event, callback) { listeners[event] = callback; return this; },
+    off(event, callback) { if (listeners[event] === callback) delete listeners[event]; },
+    play(key) { this.anims.currentAnim = { key }; return this; },
+  };
+
+  playSofiIdle(sprite);
+  timers[0].callback();
+  assert.equal(sprite.sofiState, SOFI_STATES.SPECIAL_IDLE);
+  assert.equal(sprite.anims.currentAnim.key, 'sofi-special-phone-down');
+  listeners['animationcomplete-sofi-special-phone-down']();
+  assert.equal(sprite.sofiState, SOFI_STATES.IDLE);
+  assert.equal(sprite.anims.currentAnim.key, 'sofi-idle-down');
+
+  sprite.sofiVariationRandom = () => 0.99;
+  timers[1].callback();
+  assert.equal(sprite.anims.currentAnim.key, 'sofi-special-drink-down');
+  listeners['animationcomplete-sofi-special-drink-down']();
+  assert.equal(sprite.anims.currentAnim.key, 'sofi-idle-down');
+});
+
+test('Sofi walking interrupts a phone special idle and removes its completion listener', () => {
+  const listeners = {};
+  const sprite = {
+    x: 400,
+    y: 690,
+    anims: { currentAnim: null },
+    sofiFacing: 'down',
+    sofiScene: {
+      time: {
+        delayedCall(delay, callback) { return { delay, callback, remove() {} }; },
+      },
+    },
+    sofiIdleRandom: () => 0,
+    sofiVariationRandom: () => 0.70,
+    once(event, callback) { listeners[event] = callback; return this; },
+    off(event, callback) { if (listeners[event] === callback) delete listeners[event]; },
+    play(key) { this.anims.currentAnim = { key }; return this; },
+  };
+
+  playSofiIdle(sprite);
+  const timer = sprite.sofiIdleTimer;
+  timer.callback();
+  assert.equal(sprite.sofiState, SOFI_STATES.SPECIAL_IDLE);
+  assert.ok(listeners['animationcomplete-sofi-special-phone-down']);
+
+  playSofiWalk(sprite, { x: 500, y: 690 });
+  assert.equal(sprite.sofiState, SOFI_STATES.WALK);
+  assert.equal(sprite.anims.currentAnim.key, 'sofi-walk-right');
+  assert.equal(listeners['animationcomplete-sofi-special-phone-down'], undefined);
 });
