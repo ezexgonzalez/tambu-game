@@ -2,7 +2,7 @@
 
 **Versión:** 1.0
 **Última verificación:** 2026-09-21
-**Base inspeccionada:** `main@b7759bd`
+**Base inspeccionada:** `main@5b64dd9`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -79,7 +79,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 | Perímetro | Laterales top-down, seto inferior y uniones de esquina | En validación visual |
 | Tambu | Spritesheet 4 direcciones, idle y walk | Integrado / estable |
 | Sofi | Walk 4 direcciones, idle estable con blink ocasional, special idles de teléfono/bebida en down y caminata del evento del baño | Integrado / estable |
-| Mili | Atlas 4 direcciones, idle estático, blink down ocasional, hair adjust y drink down esporádicos, y caminata del evento del baño | En validación visual |
+| Mili | Atlas 4 direcciones, idle estático, blink down ocasional, hair adjust y drink down esporádicos, y caminata del evento del baño | Congelado |
 
 “Estable” significa que estos sectores son la base vigente. Una tarea nueva no puede reemplazarlos o reinterpretarlos si su scope no lo autoriza de forma explícita.
 
@@ -110,7 +110,7 @@ Hay tests para sistema social, Sofi, Mili, Cami, Consejo, presentación y flujo 
 - Cami todavía es un cuerpo construido con rectángulos de Phaser.
 - Eze, Pitity, Uriel, Santy, Thiago y Tobi todavía usan el mismo sistema procedural.
 - Los NPCs de relleno también son placeholders; solo algunos tienen tween de baile o un indicador simple de actividad.
-- No existen todavía sprites finales de la población principal fuera de Tambu, Sofi, bartender y DJ residente.
+- No existen todavía sprites finales de la población principal fuera de Tambu, Sofi, Mili, bartender y DJ residente.
 
 ### Props y ambientación activa
 
