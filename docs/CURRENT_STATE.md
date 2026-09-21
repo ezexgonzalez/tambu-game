@@ -78,7 +78,8 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 | DJ | Estructura por planos, consola, parlantes animados y DJ residente | Integrado / estable |
 | Perímetro | Laterales top-down, seto inferior y uniones de esquina | En validación visual |
 | Tambu | Spritesheet 4 direcciones, idle y walk | Integrado / estable |
-| Sofi | Walk 4 direcciones, idle estable con blink ocasional, special idles de teléfono/bebida en down y caminata del evento del baño | Integrado / estable |\n| Mili | Atlas 4 direcciones, idle base estático y caminata del evento del baño | Integrado / estable |
+| Sofi | Walk 4 direcciones, idle estable con blink ocasional, special idles de teléfono/bebida en down y caminata del evento del baño | Integrado / estable |
+| Mili | Atlas 4 direcciones, idle base estático y caminata del evento del baño | Integrado / estable |
 
 “Estable” significa que estos sectores son la base vigente. Una tarea nueva no puede reemplazarlos o reinterpretarlos si su scope no lo autoriza de forma explícita.
 
