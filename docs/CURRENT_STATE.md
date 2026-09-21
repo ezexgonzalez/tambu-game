@@ -1,8 +1,8 @@
 # Tambu Game — Estado actual
 
 **Versión:** 1.0
-**Última verificación:** 2026-09-20
-**Base inspeccionada:** `main@cdc4e59`
+**Última verificación:** 2026-09-21
+**Base inspeccionada:** `main@d37e16c`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -78,6 +78,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 | DJ | Estructura por planos, consola, parlantes animados y DJ residente | Integrado / estable |
 | Perímetro | Laterales top-down, seto inferior y uniones de esquina | En validación visual |
 | Tambu | Spritesheet 4 direcciones, idle y walk | Integrado / estable |
+| Sofi | Walk 4 direcciones, idle estable con blink ocasional, special idles de teléfono/bebida en down y caminata del evento del baño | Integrado / estable |
 
 “Estable” significa que estos sectores son la base vigente. Una tarea nueva no puede reemplazarlos o reinterpretarlos si su scope no lo autoriza de forma explícita.
 
@@ -105,7 +106,7 @@ Hay tests para sistema social, Sofi, Mili, Cami, Consejo, presentación y flujo 
 
 ### Personajes del patio
 
-- Sofi usa `women_sofi_atlas_v1.png` para walk (12 frames de `32x48`) y `women_sofi_idle_atlas_v1.png` para idle estable con blink ocasional en cuatro direcciones (16 frames de `32x48`). También cuenta con special idles de teléfono y bebida solo en orientación down; mantiene escala runtime `1.24` y depth por pies. Mili y Cami todavía son cuerpos construidos con rectángulos de Phaser.
+- Mili y Cami todavía son cuerpos construidos con rectángulos de Phaser.
 - Eze, Pitity, Uriel, Santy, Thiago y Tobi todavía usan el mismo sistema procedural.
 - Los NPCs de relleno también son placeholders; solo algunos tienen tween de baile o un indicador simple de actividad.
 - No existen todavía sprites finales de la población principal fuera de Tambu, Sofi, bartender y DJ residente.
@@ -166,7 +167,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **Personajes interactuables** — Sofi, Mili y Cami como primera familia visual.
+1. **Personajes interactuables** — Sofi queda como baseline aprobada; completar Mili y Cami con el mismo estándar visual y técnico.
 2. **Amigos principales** — siluetas y rasgos reconocibles dentro de la misma escala.
 3. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
 4. **Props ambientales activos** — reemplazar primitives solo con kits validados en contexto.

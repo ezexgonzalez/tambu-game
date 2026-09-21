@@ -37,6 +37,7 @@ No se vuelve a producir un sector estable salvo que exista un problema concreto 
 ### Base vigente de runtime
 
 - Tambu: `public/assets/characters/tambu/tambu.png`.
+- Sofi: walk, idle y special idles aprobados en `public/assets/characters/women/`, integrados desde `src/characters/sofiSprite.js`.
 - Césped: dos tilesets aprobados en `public/assets/tiles/grass/`.
 - Deck y props seleccionados: `public/assets/tiles/deck/` y `public/assets/props/deck/`.
 - Casa: `public/assets/tiles/house/`.
@@ -53,11 +54,23 @@ Estos elementos son contexto de producción y referencia de coherencia. No son i
 
 ### Placeholders que sí deben reemplazarse
 
-- Sofi, Mili y Cami.
+- Mili y Cami.
 - Eze, Pitity, Uriel, Santy, Thiago y Tobi.
 - NPCs de relleno.
 - Mesas, cooler, faroles, guirnaldas y clutter creados en `createPatioWorld.js` con Phaser Graphics.
 - UI funcional actual, en una etapa posterior.
+
+## Política de referencias visuales
+
+Para producción visual asistida por IA, la fuente principal debe ser un **visual master grande, claro y literal** del personaje u objeto aprobado.
+
+- No usar sprites runtime pequeños (por ejemplo frames de `32x48`) como referencia visual principal para crear o extender arte: al perder detalle, el agente tiende a reinterpretar rostro, pelo, silueta, manos o sombreado.
+- Los assets runtime pequeños sirven como referencia **técnica secundaria**: dimensiones, grid, orden de frames, naming, escala y contrato de integración.
+- Si todavía no existe una referencia literal suficientemente clara de la animación o variante buscada, primero se produce y aprueba ese visual master; recién después se normaliza al tamaño runtime.
+- El Art Director / Asset Studio trabaja sobre referencias literales aprobadas: puede limpiar, alinear y normalizar, pero no debe inventar un Tier A desde un asset runtime diminuto.
+- Cuando los visual masters se versionen en el repo, deben vivir fuera de `public/assets/` para no formar parte del runtime.
+
+Esta regla aplica especialmente a personajes Tier A/B y a animaciones donde ojos, manos, accesorios o microexpresiones puedan degradarse al reducir tamaño.
 
 ## Contrato obligatorio para producir assets
 
@@ -99,6 +112,7 @@ Ningún Tier A/B se aprueba aislado sobre un fondo vacío.
 
 ### 4. Normalización
 
+- normalizar desde el visual master aprobado hacia el tamaño runtime; no usar el asset runtime pequeño como fuente visual de reconstrucción;
 - separar las piezas de cualquier sheet intermedia;
 - limpiar fondos, texto, marcos y residuos;
 - asegurar transparencia real;
@@ -122,7 +136,7 @@ Ningún Tier A/B se aprueba aislado sobre un fondo vacío.
 
 # FASE A — Mujeres interactuables
 
-Crear una primera familia que resuelva a Sofi, Mili y Cami sin romper la escala de Tambu.
+Sofi ya está resuelta e integrada como baseline de calidad. Completar la primera familia con Mili y Cami sin romper la escala ni el lenguaje visual establecido por Tambu y Sofi.
 
 ## Entrega mínima por personaje
 
@@ -140,6 +154,7 @@ La entrega exacta debe decidirse con el módulo de integración. No generar anim
 
 ### Sofi
 
+- baseline visual y técnico aprobado; no regenerar salvo bug concreto o tarea explícita;
 - tranquila, observadora y amable;
 - postura contenida;
 - silueta clara sin exceso de accesorios.
@@ -254,7 +269,8 @@ La UI debe compartir lenguaje pixel-art, pero priorizar lectura y jerarquía. No
 ### Escala
 
 - Tambu sigue siendo la unidad oficial.
-- Autorar cerca del tamaño final cuando sea posible.
+- Para pixel art manual, autorar cerca del tamaño final cuando sea posible.
+- Para generación asistida por IA, partir de un visual master grande y normalizar después al tamaño runtime; no usar un frame runtime pequeño como referencia visual principal.
 - Evitar escalados no uniformes durante integración.
 - Un asset grande se mide por masa visible, no solo por su canvas transparente.
 
