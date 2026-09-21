@@ -9,8 +9,6 @@ import {
   MILI_BLINK_SPRITE,
   MILI_ANIMS,
   MILI_IDLE_BLINK_DELAY_RANGE_MS,
-  MILI_IDLE_FRAME_RATE,
-  MILI_IDLE_SPRITE,
   MILI_SPRITE,
   MILI_STATES,
   MILI_WALK_FRAME_RATE,
@@ -54,12 +52,9 @@ function characterScene(sheets = []) {
 
 test('Mili respeta el contrato del atlas aprobado', () => {
   assert.equal(MILI_SPRITE.path, '/assets/characters/women/women_mili_atlas_v1.png');
-  assert.equal(MILI_IDLE_SPRITE.path, '/assets/characters/women/women_mili_idle_down_atlas_v1.png');
   assert.equal(MILI_BLINK_SPRITE.path, '/assets/characters/women/women_mili_blink_down_atlas_v1.png');
   assert.equal(MILI_SPRITE.frameWidth, 32);
   assert.equal(MILI_SPRITE.frameHeight, 48);
-  assert.equal(MILI_IDLE_SPRITE.frameWidth, 32);
-  assert.equal(MILI_IDLE_SPRITE.frameHeight, 48);
   assert.equal(MILI_BLINK_SPRITE.frameWidth, 32);
   assert.equal(MILI_BLINK_SPRITE.frameHeight, 48);
   assert.equal(MILI_SPRITE.scale, 1.24);
@@ -91,10 +86,6 @@ test('Mili preload y animaciones separan idle estatico de walk en las cuatro dir
     path: MILI_SPRITE.path,
     config: { frameWidth: 32, frameHeight: 48 },
   }, {
-    key: 'mili-idle',
-    path: MILI_IDLE_SPRITE.path,
-    config: { frameWidth: 32, frameHeight: 48 },
-  }, {
     key: 'mili-blink',
     path: MILI_BLINK_SPRITE.path,
     config: { frameWidth: 32, frameHeight: 48 },
@@ -104,16 +95,8 @@ test('Mili preload y animaciones separan idle estatico de walk en las cuatro dir
   for (const [direction, config] of Object.entries(MILI_ANIMS)) {
     const idle = animations.find(({ key }) => key === `mili-idle-${direction}`);
     const walk = animations.find(({ key }) => key === `mili-walk-${direction}`);
-    if (direction === 'down') {
-      assert.deepEqual(idle.frames.map(({ key, frame }) => ({ key, frame })), Array.from(
-        { length: 8 },
-        (_, frame) => ({ key: MILI_IDLE_SPRITE.key, frame }),
-      ));
-      assert.equal(idle.frameRate, MILI_IDLE_FRAME_RATE);
-    } else {
-      assert.deepEqual(idle.frames, [{ key: MILI_SPRITE.key, frame: config.idle }]);
-      assert.equal(idle.frameRate, 1);
-    }
+    assert.deepEqual(idle.frames, [{ key: MILI_SPRITE.key, frame: config.idle }]);
+    assert.equal(idle.frameRate, 1);
     assert.equal(idle.repeat, -1);
     assert.deepEqual(walk.frames.map(({ frame }) => frame), config.walk);
     assert.equal(walk.frameRate, MILI_WALK_FRAME_RATE);
@@ -155,7 +138,7 @@ test('Mili inicia en down, orienta el walk y calcula depth por pies', () => {
 
   createMiliSprite(scene, { x: 920, y: 350 });
 
-  assert.deepEqual(sprite.createdAt, { x: 920, y: 350, key: 'mili-idle', frame: 0 });
+  assert.deepEqual(sprite.createdAt, { x: 920, y: 350, key: 'mili', frame: 1 });
   assert.deepEqual(sprite.origin, [0.5, 0.5]);
   assert.equal(sprite.scale, 1.24);
   assert.equal(sprite.depth, 380);
@@ -183,7 +166,7 @@ test('Mili inicia en down, orienta el walk y calcula depth por pies', () => {
   assert.equal(sprite.depth, 430);
 });
 
-test('Mili programa blink down ocasional y vuelve al idle breathing sin loop', () => {
+test('Mili programa blink down ocasional y vuelve al idle estatico sin loop', () => {
   const timers = [];
   const listeners = {};
   const sprite = {
@@ -235,6 +218,37 @@ test('Mili solo usa el blink nuevo mirando down', () => {
   assert.equal(getMiliBlinkDelay(() => 1), 10000);
 });
 
+test('Mili no programa blink fuera de down y lo vuelve a habilitar al regresar', () => {
+  const timers = [];
+  const sprite = {
+    miliState: MILI_STATES.IDLE,
+    miliFacing: 'left',
+    miliIdleRandom: () => 0,
+    miliScene: {
+      time: {
+        delayedCall(delay, callback) {
+          const timer = { delay, callback, removed: false, remove() { this.removed = true; } };
+          timers.push(timer);
+          return timer;
+        },
+      },
+    },
+    play(key) { this.anims.currentAnim = { key }; return this; },
+    anims: { currentAnim: null },
+  };
+
+  for (const direction of ['left', 'right', 'up']) {
+    playMiliIdle(sprite, direction);
+    assert.equal(timers.length, 0);
+  }
+
+  playMiliIdle(sprite, 'down');
+  assert.equal(timers.length, 1);
+  playMiliIdle(sprite, 'down');
+  assert.equal(timers.length, 2);
+  assert.equal(timers[0].removed, true);
+});
+
 test('Mili caminar interrumpe blink y elimina su listener de finalización', () => {
   const listeners = {};
   const sprite = {
@@ -270,13 +284,12 @@ test('createCharacters usa Mili real y conserva Sofi real y Cami procedural', ()
     'sofi-phone',
     'sofi-drink',
     'mili',
-    'mili-idle',
     'mili-blink',
   ]);
   assert.equal(interactables.find(({ character }) => character.id === 'sofi').visual, 'sofi-sprite');
   const mili = interactables.find(({ character }) => character.id === 'mili');
   assert.equal(mili.visual, 'mili-sprite');
-  assert.equal(mili.sprite.key, 'mili-idle');
+  assert.equal(mili.sprite.key, 'mili');
   assert.equal(mili.sprite.anims.currentAnim.key, 'mili-idle-down');
   assert.equal(interactables.find(({ character }) => character.id === 'cami').visual, 'procedural');
 });

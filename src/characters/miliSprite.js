@@ -7,13 +7,6 @@ export const MILI_SPRITE = {
   footDepthOffset: 30,
 };
 
-export const MILI_IDLE_SPRITE = {
-  key: 'mili-idle',
-  path: '/assets/characters/women/women_mili_idle_down_atlas_v1.png',
-  frameWidth: 32,
-  frameHeight: 48,
-};
-
 export const MILI_BLINK_SPRITE = {
   key: 'mili-blink',
   path: '/assets/characters/women/women_mili_blink_down_atlas_v1.png',
@@ -34,7 +27,6 @@ export const MILI_STATES = Object.freeze({
   WALK: 'walk',
 });
 
-export const MILI_IDLE_FRAME_RATE = 6;
 export const MILI_BLINK_FRAME_RATE = 6;
 export const MILI_WALK_FRAME_RATE = 8;
 export const MILI_IDLE_BLINK_DELAY_RANGE_MS = Object.freeze({ min: 5000, max: 10000 });
@@ -81,10 +73,6 @@ export function preloadMili(scene) {
     frameWidth: MILI_SPRITE.frameWidth,
     frameHeight: MILI_SPRITE.frameHeight,
   });
-  scene.load.spritesheet(MILI_IDLE_SPRITE.key, MILI_IDLE_SPRITE.path, {
-    frameWidth: MILI_IDLE_SPRITE.frameWidth,
-    frameHeight: MILI_IDLE_SPRITE.frameHeight,
-  });
   scene.load.spritesheet(MILI_BLINK_SPRITE.key, MILI_BLINK_SPRITE.path, {
     frameWidth: MILI_BLINK_SPRITE.frameWidth,
     frameHeight: MILI_BLINK_SPRITE.frameHeight,
@@ -99,10 +87,8 @@ export function createMiliAnimations(scene) {
     if (!scene.anims.exists(idleKey)) {
       scene.anims.create({
         key: idleKey,
-        frames: direction === 'down'
-          ? Array.from({ length: 8 }, (_, frame) => ({ key: MILI_IDLE_SPRITE.key, frame }))
-          : [{ key: MILI_SPRITE.key, frame: config.idle }],
-        frameRate: direction === 'down' ? MILI_IDLE_FRAME_RATE : 1,
+        frames: [{ key: MILI_SPRITE.key, frame: config.idle }],
+        frameRate: 1,
         repeat: -1,
       });
     }
@@ -133,7 +119,7 @@ export function createMiliAnimations(scene) {
 export function createMiliSprite(scene, character) {
   createMiliAnimations(scene);
 
-  const sprite = scene.add.sprite(character.x, character.y, MILI_IDLE_SPRITE.key, 0)
+  const sprite = scene.add.sprite(character.x, character.y, MILI_SPRITE.key, MILI_ANIMS.down.idle)
     .setOrigin(0.5, 0.5)
     .setScale(MILI_SPRITE.scale)
     .setDepth(character.y + MILI_SPRITE.footDepthOffset);
