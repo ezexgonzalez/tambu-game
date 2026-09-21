@@ -9,6 +9,8 @@ import {
   MILI_BLINK_FRAME_RATE,
   MILI_BLINK_SPRITE,
   MILI_ANIMS,
+  MILI_DRINK_FRAME_RATE,
+  MILI_DRINK_SPRITE,
   MILI_HAIR_ADJUST_FRAME_RATE,
   MILI_HAIR_ADJUST_SPRITE,
   MILI_IDLE_BLINK_DELAY_RANGE_MS,
@@ -17,6 +19,7 @@ import {
   MILI_STATES,
   MILI_WALK_FRAME_RATE,
   playMiliBlink,
+  playMiliDrink,
   playMiliHairAdjust,
   playMiliIdle,
   playMiliWalk,
@@ -65,6 +68,9 @@ test('Mili respeta el contrato del atlas aprobado', () => {
   assert.equal(MILI_HAIR_ADJUST_SPRITE.path, '/assets/characters/women/women_mili_hair_adjust_down_atlas_v1.png');
   assert.equal(MILI_HAIR_ADJUST_SPRITE.frameWidth, 32);
   assert.equal(MILI_HAIR_ADJUST_SPRITE.frameHeight, 48);
+  assert.equal(MILI_DRINK_SPRITE.path, '/assets/characters/women/women_mili_drink_down_atlas_v1.png');
+  assert.equal(MILI_DRINK_SPRITE.frameWidth, 32);
+  assert.equal(MILI_DRINK_SPRITE.frameHeight, 48);
   assert.equal(MILI_SPRITE.scale, 1.24);
   assert.equal(MILI_SPRITE.footDepthOffset, 30);
   assert.deepEqual(MILI_ANIMS, {
@@ -101,8 +107,12 @@ test('Mili preload y animaciones separan idle estatico de walk en las cuatro dir
     key: 'mili-hair-adjust',
     path: MILI_HAIR_ADJUST_SPRITE.path,
     config: { frameWidth: 32, frameHeight: 48 },
+  }, {
+    key: 'mili-drink',
+    path: MILI_DRINK_SPRITE.path,
+    config: { frameWidth: 32, frameHeight: 48 },
   }]);
-  assert.equal(animations.length, 10);
+  assert.equal(animations.length, 11);
 
   for (const [direction, config] of Object.entries(MILI_ANIMS)) {
     const idle = animations.find(({ key }) => key === `mili-idle-${direction}`);
@@ -130,6 +140,14 @@ test('Mili preload y animaciones separan idle estatico de walk en las cuatro dir
   ));
   assert.equal(hairAdjust.frameRate, MILI_HAIR_ADJUST_FRAME_RATE);
   assert.equal(hairAdjust.repeat, 0);
+
+  const drink = animations.find(({ key }) => key === 'mili-drink-down');
+  assert.deepEqual(drink.frames.map(({ key, frame }) => ({ key, frame })), Array.from(
+    { length: 8 },
+    (_, frame) => ({ key: MILI_DRINK_SPRITE.key, frame }),
+  ));
+  assert.equal(drink.frameRate, MILI_DRINK_FRAME_RATE);
+  assert.equal(drink.repeat, 0);
 });
 
 test('Mili inicia en down, orienta el walk y calcula depth por pies', () => {
@@ -229,7 +247,7 @@ test('Mili programa hair adjust como variacion menos frecuente y vuelve al idle 
   const sprite = {
     anims: { currentAnim: null },
     miliFacing: 'down',
-    miliIdleRandom: () => 0.9,
+    miliIdleRandom: () => 0.8,
     miliScene: {
       time: {
         delayedCall(delay, callback) {
@@ -255,9 +273,44 @@ test('Mili programa hair adjust como variacion menos frecuente y vuelve al idle 
   assert.equal(sprite.miliState, MILI_STATES.IDLE);
   assert.equal(sprite.anims.currentAnim.key, 'mili-idle-down');
   assert.equal(timers.length, 2);
-  assert.deepEqual(MILI_IDLE_VARIATION_WEIGHTS, { blink: 0.8, hairAdjust: 0.2 });
-  assert.equal(chooseMiliIdleVariation(() => 0.79), 'blink');
-  assert.equal(chooseMiliIdleVariation(() => 0.8), 'hair-adjust');
+  assert.deepEqual(MILI_IDLE_VARIATION_WEIGHTS, { blink: 0.7, hairAdjust: 0.15, drink: 0.15 });
+  assert.equal(chooseMiliIdleVariation(() => 0.69), 'blink');
+  assert.equal(chooseMiliIdleVariation(() => 0.7), 'hair-adjust');
+  assert.equal(chooseMiliIdleVariation(() => 0.85), 'drink');
+});
+
+test('Mili programa drink como variacion down ocasional y vuelve al idle estatico', () => {
+  const timers = [];
+  const listeners = {};
+  const sprite = {
+    anims: { currentAnim: null },
+    miliFacing: 'down',
+    miliIdleRandom: () => 0.95,
+    miliScene: {
+      time: {
+        delayedCall(delay, callback) {
+          const timer = { delay, callback, removed: false, remove() { this.removed = true; } };
+          timers.push(timer);
+          return timer;
+        },
+      },
+    },
+    once(event, callback) { listeners[event] = callback; return this; },
+    off(event, callback) { if (listeners[event] === callback) delete listeners[event]; },
+    play(key) { this.anims.currentAnim = { key }; return this; },
+  };
+
+  playMiliIdle(sprite);
+  timers[0].callback();
+
+  assert.equal(sprite.miliState, MILI_STATES.DRINK);
+  assert.equal(sprite.anims.currentAnim.key, 'mili-drink-down');
+  assert.ok(listeners['animationcomplete-mili-drink-down']);
+  listeners['animationcomplete-mili-drink-down']();
+
+  assert.equal(sprite.miliState, MILI_STATES.IDLE);
+  assert.equal(sprite.anims.currentAnim.key, 'mili-idle-down');
+  assert.equal(timers.length, 2);
 });
 
 test('Mili solo usa el blink nuevo mirando down', () => {
@@ -284,12 +337,14 @@ test('Mili no dispara hair adjust fuera de down ni durante otra variacion', () =
   };
 
   playMiliHairAdjust(sprite);
+  playMiliDrink(sprite);
   assert.equal(sprite.anims.currentAnim, null);
   assert.equal(sprite.miliState, MILI_STATES.IDLE);
 
   sprite.miliFacing = 'down';
   playMiliBlink(sprite);
   playMiliHairAdjust(sprite);
+  playMiliDrink(sprite);
   assert.equal(sprite.miliState, MILI_STATES.BLINK);
   assert.equal(sprite.anims.currentAnim.key, 'mili-blink-down');
 });
@@ -371,6 +426,29 @@ test('Mili caminar interrumpe hair adjust y elimina su listener de finalización
   assert.equal(listeners['animationcomplete-mili-hair-adjust-down'], undefined);
 });
 
+test('Mili caminar interrumpe drink y elimina su listener de finalización', () => {
+  const listeners = {};
+  const sprite = {
+    x: 400,
+    y: 350,
+    miliState: MILI_STATES.IDLE,
+    miliFacing: 'down',
+    anims: { currentAnim: null },
+    miliScene: { time: { delayedCall() { return { remove() {} }; } } },
+    once(event, callback) { listeners[event] = callback; return this; },
+    off(event, callback) { if (listeners[event] === callback) delete listeners[event]; },
+    play(key) { this.anims.currentAnim = { key }; return this; },
+  };
+
+  playMiliDrink(sprite);
+  assert.ok(listeners['animationcomplete-mili-drink-down']);
+  playMiliWalk(sprite, { x: 500, y: 350 });
+
+  assert.equal(sprite.miliState, MILI_STATES.WALK);
+  assert.equal(sprite.anims.currentAnim.key, 'mili-walk-right');
+  assert.equal(listeners['animationcomplete-mili-drink-down'], undefined);
+});
+
 test('createCharacters usa Mili real y conserva Sofi real y Cami procedural', () => {
   const sheets = [];
   const scene = characterScene(sheets);
@@ -385,6 +463,7 @@ test('createCharacters usa Mili real y conserva Sofi real y Cami procedural', ()
     'mili',
     'mili-blink',
     'mili-hair-adjust',
+    'mili-drink',
   ]);
   assert.equal(interactables.find(({ character }) => character.id === 'sofi').visual, 'sofi-sprite');
   const mili = interactables.find(({ character }) => character.id === 'mili');
