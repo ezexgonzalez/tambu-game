@@ -6,9 +6,12 @@ import {
   playSofiWalk,
   preloadSofi,
   SOFI_ANIMS,
+  SOFI_BLINK_FRAME_RATE,
+  SOFI_IDLE_DELAY_RANGE_MS,
   SOFI_IDLE_FRAME_RATE,
   SOFI_IDLE_SPRITE,
   SOFI_SPRITE,
+  SOFI_STATES,
   SOFI_WALK_FRAME_RATE,
 } from '../src/characters/sofiSprite.js';
 
@@ -26,9 +29,11 @@ test('Sofi separates the approved walk and idle atlas contracts', () => {
   assert.deepEqual(SOFI_ANIMS.right, { idle: [8, 9, 10, 11], walk: [7, 6, 8, 6] });
   assert.deepEqual(SOFI_ANIMS.up, { idle: [12, 13, 14, 15], walk: [10, 9, 11, 9] });
   assert.ok(SOFI_IDLE_FRAME_RATE < SOFI_WALK_FRAME_RATE);
+  assert.ok(SOFI_BLINK_FRAME_RATE < SOFI_WALK_FRAME_RATE);
+  assert.deepEqual(SOFI_IDLE_DELAY_RANGE_MS, { min: 5000, max: 10000 });
 });
 
-test('Sofi preloads both sheets and builds four-frame looping idle animations', () => {
+test('Sofi preloads both sheets and separates stable idle, special idle and walk', () => {
   const sheets = [];
   const animations = [];
   const scene = {
@@ -51,15 +56,23 @@ test('Sofi preloads both sheets and builds four-frame looping idle animations', 
   createSofiSprite(scene, { x: 400, y: 690 });
 
   assert.deepEqual(sheets.map(({ key }) => key), ['sofi', 'sofi-idle']);
-  const idleAnimations = animations.filter(({ key }) => key.includes('-idle-'));
-  const walkAnimations = animations.filter(({ key }) => key.includes('-walk-'));
+  const idleAnimations = animations.filter(({ key }) => /^sofi-idle-/.test(key));
+  const specialIdleAnimations = animations.filter(({ key }) => /^sofi-special-idle-/.test(key));
+  const walkAnimations = animations.filter(({ key }) => /^sofi-walk-/.test(key));
   assert.equal(idleAnimations.length, 4);
+  assert.equal(specialIdleAnimations.length, 4);
   assert.equal(walkAnimations.length, 4);
   assert.ok(idleAnimations.every(({ frames, frameRate, repeat }) => (
-    frames.length === 4
-    && frames.every(({ key }) => key === SOFI_IDLE_SPRITE.key)
+    frames.length === 1
+    && frames[0].key === SOFI_IDLE_SPRITE.key
     && frameRate === SOFI_IDLE_FRAME_RATE
     && repeat === -1
+  )));
+  assert.ok(specialIdleAnimations.every(({ frames, frameRate, repeat }) => (
+    frames.length === 4
+    && frames.every(({ key }) => key === SOFI_IDLE_SPRITE.key)
+    && frameRate === SOFI_BLINK_FRAME_RATE
+    && repeat === 0
   )));
   assert.ok(walkAnimations.every(({ frames, frameRate, repeat }) => (
     frames.length === 4
@@ -93,13 +106,14 @@ test('Sofi starts idle-down with centered origin, Tambu scale and foot depth', (
 
   createSofiSprite(scene, { x: 400, y: 690 });
 
-  assert.equal(animations.length, 8);
+  assert.equal(animations.length, 12);
   assert.deepEqual(sprite.createdAt, { x: 400, y: 690, key: 'sofi-idle', frame: 0 });
   assert.deepEqual(sprite.origin, [0.5, 0.5]);
   assert.equal(sprite.scale, 1.24);
   assert.equal(sprite.depth, 720);
   assert.equal(sprite.played, 'sofi-idle-down');
   assert.equal(sprite.sofiFacing, 'down');
+  assert.equal(sprite.sofiState, SOFI_STATES.IDLE);
 });
 
 test('Sofi returns to the idle matching her last walk direction', () => {
@@ -112,6 +126,42 @@ test('Sofi returns to the idle matching her last walk direction', () => {
 
   playSofiWalk(sprite, { x: 500, y: 690 });
   assert.equal(sprite.anims.currentAnim.key, 'sofi-walk-right');
+  assert.equal(sprite.sofiState, SOFI_STATES.WALK);
   playSofiIdle(sprite);
   assert.equal(sprite.anims.currentAnim.key, 'sofi-idle-right');
+  assert.equal(sprite.sofiState, SOFI_STATES.IDLE);
+});
+
+test('Sofi schedules an occasional special idle and returns to the stable pose', () => {
+  const timers = [];
+  const listeners = {};
+  const sprite = {
+    anims: { currentAnim: null },
+    sofiFacing: 'down',
+    sofiIdleRandom: () => 0.5,
+    sofiScene: {
+      time: {
+        delayedCall(delay, callback) {
+          const timer = { delay, callback, removed: false, remove() { this.removed = true; } };
+          timers.push(timer);
+          return timer;
+        },
+      },
+    },
+    once(event, callback) { listeners[event] = callback; return this; },
+    play(key) { this.anims.currentAnim = { key }; return this; },
+  };
+
+  playSofiIdle(sprite);
+  assert.equal(sprite.sofiState, SOFI_STATES.IDLE);
+  assert.equal(timers.length, 1);
+  assert.equal(timers[0].delay, 7500);
+
+  timers[0].callback();
+  assert.equal(sprite.sofiState, SOFI_STATES.SPECIAL_IDLE);
+  assert.equal(sprite.anims.currentAnim.key, 'sofi-special-idle-down');
+  listeners['animationcomplete-sofi-special-idle-down']();
+  assert.equal(sprite.sofiState, SOFI_STATES.IDLE);
+  assert.equal(sprite.anims.currentAnim.key, 'sofi-idle-down');
+  assert.equal(timers.length, 2);
 });

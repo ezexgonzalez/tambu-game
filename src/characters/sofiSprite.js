@@ -21,8 +21,58 @@ export const SOFI_ANIMS = {
   up: { idle: [12, 13, 14, 15], walk: [10, 9, 11, 9] },
 };
 
-export const SOFI_IDLE_FRAME_RATE = 2;
+export const SOFI_STATES = Object.freeze({
+  IDLE: 'idle',
+  SPECIAL_IDLE: 'special-idle',
+  WALK: 'walk',
+});
+
+export const SOFI_IDLE_FRAME_RATE = 1;
+export const SOFI_BLINK_FRAME_RATE = 4;
 export const SOFI_WALK_FRAME_RATE = 8;
+export const SOFI_IDLE_DELAY_RANGE_MS = Object.freeze({ min: 5000, max: 10000 });
+
+function cancelSofiIdleTimer(sprite) {
+  sprite.sofiIdleTimer?.remove?.();
+  sprite.sofiIdleTimer = null;
+}
+
+export function getSofiIdleDelay(random = Math.random) {
+  const { min, max } = SOFI_IDLE_DELAY_RANGE_MS;
+  return Math.round(min + Math.max(0, Math.min(1, random())) * (max - min));
+}
+
+function scheduleSofiIdleVariation(sprite) {
+  if (
+    sprite.sofiState !== SOFI_STATES.IDLE
+    || !sprite.sofiScene?.time?.delayedCall
+  ) return;
+
+  cancelSofiIdleTimer(sprite);
+  const random = sprite.sofiIdleRandom ?? Math.random;
+  sprite.sofiIdleTimer = sprite.sofiScene.time.delayedCall(
+    getSofiIdleDelay(random),
+    () => {
+      sprite.sofiIdleTimer = null;
+      playSofiBlink(sprite);
+    },
+  );
+}
+
+function playSofiBlink(sprite) {
+  if (sprite.sofiState !== SOFI_STATES.IDLE) return;
+
+  const direction = sprite.sofiFacing ?? 'down';
+  const blinkKey = `${SOFI_SPRITE.key}-special-idle-${direction}`;
+  const completeEvent = `animationcomplete-${blinkKey}`;
+
+  cancelSofiIdleTimer(sprite);
+  sprite.sofiState = SOFI_STATES.SPECIAL_IDLE;
+  sprite.once?.(completeEvent, () => {
+    if (sprite.sofiState === SOFI_STATES.SPECIAL_IDLE) playSofiIdle(sprite, direction);
+  });
+  sprite.play(blinkKey, true);
+}
 
 export function preloadSofi(scene) {
   scene.load.spritesheet(SOFI_SPRITE.key, SOFI_SPRITE.path, {
@@ -43,9 +93,19 @@ export function createSofiAnimations(scene) {
     if (!scene.anims.exists(idleKey)) {
       scene.anims.create({
         key: idleKey,
-        frames: config.idle.map((frame) => ({ key: SOFI_IDLE_SPRITE.key, frame })),
+        frames: [{ key: SOFI_IDLE_SPRITE.key, frame: config.idle[0] }],
         frameRate: SOFI_IDLE_FRAME_RATE,
         repeat: -1,
+      });
+    }
+
+    const specialIdleKey = `${SOFI_SPRITE.key}-special-idle-${direction}`;
+    if (!scene.anims.exists(specialIdleKey)) {
+      scene.anims.create({
+        key: specialIdleKey,
+        frames: config.idle.map((frame) => ({ key: SOFI_IDLE_SPRITE.key, frame })),
+        frameRate: SOFI_BLINK_FRAME_RATE,
+        repeat: 0,
       });
     }
 
@@ -68,8 +128,10 @@ export function createSofiSprite(scene, character) {
     .setScale(SOFI_SPRITE.scale)
     .setDepth(character.y + SOFI_SPRITE.footDepthOffset);
 
+  sprite.sofiScene = scene;
   sprite.sofiFacing = 'down';
-  sprite.play(`${SOFI_SPRITE.key}-idle-down`);
+  sprite.sofiState = SOFI_STATES.IDLE;
+  playSofiIdle(sprite, 'down');
   return sprite;
 }
 
@@ -85,13 +147,18 @@ export function playSofiWalk(sprite, destination) {
     : (dy >= 0 ? 'down' : 'up');
   const key = `${SOFI_SPRITE.key}-walk-${direction}`;
 
+  cancelSofiIdleTimer(sprite);
+  sprite.sofiState = SOFI_STATES.WALK;
   sprite.sofiFacing = direction;
-  if (sprite.anims.currentAnim?.key !== key) sprite.play(key, true);
+  if (sprite.anims?.currentAnim?.key !== key) sprite.play(key, true);
 }
 
 export function playSofiIdle(sprite, direction = sprite.sofiFacing ?? 'down') {
   const key = `${SOFI_SPRITE.key}-idle-${direction}`;
 
+  cancelSofiIdleTimer(sprite);
+  sprite.sofiState = SOFI_STATES.IDLE;
   sprite.sofiFacing = direction;
-  if (sprite.anims.currentAnim?.key !== key) sprite.play(key, true);
+  if (sprite.anims?.currentAnim?.key !== key) sprite.play(key, true);
+  scheduleSofiIdleVariation(sprite);
 }
