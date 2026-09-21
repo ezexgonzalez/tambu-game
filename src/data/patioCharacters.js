@@ -14,8 +14,8 @@ export const patioWomen = [
   {
     id: 'mili',
     name: 'Mili',
-    x: 920,
-    y: 350,
+    x: 930,
+    y: 330,
     palette: 8,
     conversation: MILI_CONVERSATION,
   },
@@ -46,7 +46,7 @@ export const fillerGroups = [
   // Deck / parte alta del patio.
   [545, 300, 16, 'chat'], [590, 305, 17, 'chat'], [650, 320, 18, 'drink'],
   [700, 325, 19, 'chat'], [745, 315, 20, 'chat'], [825, 300, 21, 'phone'],
-  [870, 360, 42, 'drink'], [915, 365, 43, 'chat'], [1010, 370, 44, 'chat'],
+  [1010, 370, 44, 'chat'],
   [1060, 365, 47, 'drink'],
 
   // Barra y sector derecho superior.
