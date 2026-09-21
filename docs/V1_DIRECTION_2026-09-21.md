@@ -994,6 +994,411 @@ Esto da mayor sensación de mundo vivo con poco sistema nuevo.
 
 ---
 
+# 14.5. Post-outcome character state — las chicas siguen en la fiesta
+
+Esta idea pasa a considerarse **parte importante de la V1**.
+
+Actualmente, después de resolver el arco principal de una chica, el runtime deja de permitir interacción principal y, en BathroomEvent, la chica puede quedar oculta al finalizar.
+
+La dirección aprobada es distinta:
+
+> resolver una chica no significa que desaparezca del mundo.
+
+Su conversación principal termina, pero ella sigue formando parte de la fiesta.
+
+---
+
+## Estados conceptuales
+
+Cada chica debe poder pasar de:
+
+```
+ACTIVE
+→ conversación principal disponible
+```
+
+a:
+
+```
+RESOLVED
+→ conversación principal cerrada
+→ sigue presente en el patio
+→ puede reaccionar
+→ puede moverse entre puntos sociales seguros
+```
+
+Esto aplica a todos los outcomes:
+
+- Baño;
+- Instagram;
+- Friendzone;
+- Rechazo.
+
+La resolución cierra el arco principal, no la existencia del personaje.
+
+---
+
+## BathroomEvent — entrada y salida física
+
+El BathroomEvent debe dejar de sentirse como una desaparición/reaparición mágica.
+
+Flujo conceptual deseado:
+
+```
+approach
+→ enter
+→ bathroom
+→ resistance
+→ resolution
+→ exit
+→ aftermath
+```
+
+### Entrada
+
+Tambu y la chica deben:
+
+- llegar al acceso real;
+- ejecutar una pequeña transición de entrada;
+- desaparecer detrás/desde el umbral de forma intencional.
+
+No ocultarlos demasiado pronto.
+
+### Salida
+
+Al terminar el evento:
+
+- salen Tambu y la chica;
+- no reaparece solo Tambu;
+- ambos aparecen desde el baño;
+- hacen una transición corta de salida;
+- caminan unos pasos hasta posiciones seguras;
+- recién entonces vuelve el control normal.
+
+No hace falta una cinemática larga.
+
+Puede resolverse con:
+
+- walk controlado;
+- 3–5 frames específicos;
+- ocultamiento detrás del plano de puerta;
+- una combinación simple de estas técnicas.
+
+---
+
+## Safe exit — corregir la salida defectuosa
+
+El runtime actual puede restaurar a Tambu en una posición donde atraviesa visualmente la barra/colisión antes de que la física normal vuelva a ordenar el movimiento.
+
+Esto debe corregirse.
+
+No restaurar al jugador directamente encima de colliders.
+
+Definir uno o más:
+
+`safeExitPoints`
+
+frente al baño.
+
+BathroomEvent se considera terminado únicamente cuando:
+
+- Tambu llegó a un punto seguro;
+- la chica llegó a su punto de salida;
+- ambos tienen depth correcto;
+- las físicas normales pueden reactivarse sin atravesar geometría.
+
+---
+
+## Aftermath inmediato
+
+Después de salir del baño puede existir una reacción breve entre Tambu y la chica.
+
+Ejemplos conceptuales:
+
+### Resistencia ganada
+
+> Mili: "¿Siempre son así?"
+
+### Resistencia perdida
+
+> Cami: "Tus amigos son un caso clínico."
+
+Estas líneas no son copy definitivo.
+
+La función es conectar:
+
+- minijuego;
+- personaje;
+- resultado;
+- regreso al patio.
+
+No abrir otra conversación completa.
+
+---
+
+# 14.6. Post-outcome reactions
+
+Una chica resuelta puede seguir siendo interactuable.
+
+La interacción cambia de propósito.
+
+## Antes de resolver
+
+```
+E
+→ conversación principal
+→ decisiones
+→ stats
+→ Consejo
+→ outcome
+```
+
+## Después de resolver
+
+```
+E
+→ reacción breve
+→ una o pocas líneas
+→ sin decisiones
+→ sin stats
+→ sin Consejo
+→ sin nuevo outcome
+```
+
+El prompt puede seguir siendo:
+
+`E · HABLAR CON <NOMBRE>`
+
+pero el marker visual debe diferenciar conversación principal de reacción posterior.
+
+Se puede evaluar:
+
+- quitar el `!`;
+- usar un indicador más discreto;
+- o no mostrar marker y dejar solo prompt por proximidad.
+
+No mantener una señal visual que prometa contenido principal ya agotado.
+
+---
+
+## Reacción según outcome
+
+Cada chica puede tener pools pequeños de reacciones según su resultado.
+
+### Baño
+
+Tono posible:
+
+- cómplice;
+- coqueto;
+- incómodo;
+- irónico;
+- seco;
+
+según personalidad.
+
+### Instagram
+
+Interés ligero o continuidad social.
+
+### Friendzone
+
+La relación puede seguir siendo amable.
+
+No tratar Friendzone como desaparición del personaje.
+
+### Rechazo
+
+Puede existir incomodidad, sequedad o humor.
+
+Volver a hablar con una chica que te rechazó puede ser contenido gracioso.
+
+El fracaso también debe producir mundo, no vacío.
+
+---
+
+## Reacción según contexto de run
+
+Las reacciones pueden tener variantes usando información ya existente:
+
+- outcome;
+- history;
+- signals;
+- bathroomHistory;
+- eventos ocurridos;
+- resultado previo de Bathroom Resistance.
+
+Conceptualmente:
+
+```
+character
++ outcome
++ relevantContext
+→ shortReaction
+```
+
+No convertir esto en otra conversación de cuatro beats.
+
+Una línea correcta de tres segundos puede aportar más vida que otra animación compleja.
+
+---
+
+# 14.7. Conocimiento contextual — las chicas no son omniscientes
+
+El gameState puede saber que algo ocurrió.
+
+Eso NO significa que todos los personajes lo sepan automáticamente.
+
+Separar conceptualmente:
+
+> el juego sabe
+
+de:
+
+> el personaje sabe.
+
+Una chica puede enterarse de otro Baño solo si existe una razón plausible.
+
+Ejemplos:
+
+- estaba cerca cuando salieron;
+- los amigos hicieron suficiente escándalo;
+- alguien comentó el hecho;
+- ocurrió un microevento relacionado;
+- el segundo/tercer Bathroom Resistance volvió el hecho imposible de ocultar.
+
+No construir un sistema complejo de simulación de rumores.
+
+Flags simples alcanzan para V1.
+
+Ejemplo conceptual:
+
+`knowsAboutOtherBathroom = true / false`
+
+o un set pequeño de hechos conocidos.
+
+Esto permite reacciones más naturales:
+
+> "...Mili también? Mirá vos."
+
+sin hacer que todas las chicas sepan todo mágicamente.
+
+---
+
+# 14.8. Social roaming — seguir con la fiesta sin parecer robots
+
+Después de resolverse, una chica no debe volver obligatoriamente a su posición original exacta.
+
+Eso se siente robótico.
+
+Tampoco hace falta implementar IA libre o pathfinding general.
+
+La dirección recomendada es **controlled social roaming**.
+
+Cada chica tiene una lista pequeña de anchors seguros.
+
+Ejemplo conceptual:
+
+### Sofi
+- barra tranquila;
+- lateral de pileta;
+- deck.
+
+### Mili
+- zona de baile;
+- barra;
+- grupo cercano a pileta.
+
+### Cami
+- sector derecho;
+- barra;
+- deck.
+
+Después de resolver su arco:
+
+1. sale de la situación;
+2. elige un anchor válido;
+3. camina usando su walk real;
+4. queda en idle;
+5. después de una pausa larga puede cambiar a otro anchor.
+
+No hacer movimiento constante.
+
+La sensación buscada es:
+
+> siguió con su noche.
+
+Ejemplo de ritmo:
+
+- 30–60 segundos quieta;
+- cambio ocasional de zona;
+- pausa larga;
+- otro cambio si corresponde.
+
+No:
+
+> izquierda → derecha → izquierda cada pocos segundos.
+
+---
+
+## Restricciones del roaming
+
+- no cruzar piscina/barra/colliders;
+- no bloquear accesos;
+- no superponerse con otra chica;
+- no interrumpir conversaciones;
+- no moverse durante BathroomEvent;
+- no moverse durante escenas críticas;
+- solo usar destinos previamente aprobados.
+
+No hace falta navegación general para V1.
+
+---
+
+# 14.9. Integración con post-win free roam
+
+Este sistema es especialmente importante después de conseguir los tres Baños y elegir:
+
+`SEGUIR DE FIESTA`
+
+En ese estado:
+
+- las conversaciones principales ya están cerradas;
+- las chicas siguen presentes;
+- pueden reaccionar;
+- pueden haberse enterado de otros hechos;
+- pueden cambiar de zona;
+- los amigos comentan la run;
+- aparecen microeventos;
+- el patio sigue vivo.
+
+Esto evita que el postgame sea caminar por un mapa vacío después de completar todo.
+
+La fantasía pasa a ser:
+
+> la fiesta continúa después del desastre que acabás de provocar.
+
+---
+
+# 14.10. Criterios de aceptación conceptuales
+
+Esta capa se considera lograda cuando:
+
+- ninguna chica desaparece injustificadamente después de resolver su arco;
+- BathroomEvent devuelve a Tambu y a la chica al mundo;
+- entrada/salida del baño no se siente como teletransporte;
+- Tambu no reaparece atravesando barra/colliders;
+- cada chica puede seguir existiendo en el patio;
+- las interacciones post-outcome son breves y contextuales;
+- no reabren stats ni outcome;
+- el movimiento posterior parece natural sin IA compleja;
+- el personaje puede recordar consecuencias reales de la run;
+- no todos conocen mágicamente todo;
+- el post-win free roam tiene contenido humano real.
+
+
+---
+
 # 15. Arquitectura — decisión
 
 La arquitectura actual es suficiente para V1.
