@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { PLAYER_CONFIG } from '../player/playerConfig.js';
-import { playSofiWalk, setSofiDepth } from '../characters/sofiSprite.js';
+import { playSofiIdle, playSofiWalk, setSofiDepth } from '../characters/sofiSprite.js';
 import {
   BATHROOM_RESISTANCE_CONFIG,
   advanceBathroomResistance,
@@ -60,6 +60,13 @@ function updateNpcVisual(interactable, destination) {
   setSofiDepth(interactable.sprite);
 }
 
+function idleNpcVisual(interactable) {
+  if (interactable.visual !== 'sofi-sprite') return;
+
+  playSofiIdle(interactable.sprite);
+  setSofiDepth(interactable.sprite);
+}
+
 export function createBathroomEvent(scene, {
   player,
   interactable,
@@ -105,6 +112,7 @@ export function createBathroomEvent(scene, {
   function enterBathroom() {
     mode = 'bathroom-achieved';
     player.sprite.setVelocity?.(0, 0);
+    idleNpcVisual(interactable);
     setVisible(player.sprite, false);
     setVisible(player.label, false);
     setVisible(npc, false);
@@ -244,6 +252,7 @@ export function createBathroomEvent(scene, {
     if (mode === 'walking') {
       restorePlayer(originalPlayerPosition);
       setPosition(npc, originalNpc.x, originalNpc.y);
+      idleNpcVisual(interactable);
       setVisible(npc, originalNpc.visible);
       setVisible(interactable.label, originalNpc.labelVisible);
       setVisible(interactable.marker, originalNpc.markerVisible);

@@ -70,6 +70,7 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
     sprite: actor(400, 690),
     label: display(400, 726),
     marker: display(400, 635),
+    visual: 'sofi-sprite',
   };
   const outcome = SOFI_CONVERSATION.outcomes.bathroom;
   const event = createBathroomEvent(scene, {
@@ -93,6 +94,7 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
   assert.equal(event.getMode(), 'bathroom-achieved');
   assert.equal(player.sprite.visible, false);
   assert.equal(interactable.sprite.visible, false);
+  assert.match(interactable.sprite.anims.currentAnim.key, /^sofi-idle-(down|left|right|up)$/);
   assert.ok(objects.some(({ text }) => text.includes('BAÑO CONSEGUIDO')));
 
   keys.ENTER.edge = true;
