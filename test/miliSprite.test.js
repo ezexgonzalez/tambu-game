@@ -449,7 +449,7 @@ test('Mili caminar interrumpe drink y elimina su listener de finalización', () 
   assert.equal(listeners['animationcomplete-mili-drink-down'], undefined);
 });
 
-test('createCharacters usa Mili real y conserva Sofi real y Cami procedural', () => {
+test('createCharacters usa sprites reales para Sofi, Mili y Cami', () => {
   const sheets = [];
   const scene = characterScene(sheets);
   preloadCharacters(scene);
@@ -464,11 +464,15 @@ test('createCharacters usa Mili real y conserva Sofi real y Cami procedural', ()
     'mili-blink',
     'mili-hair-adjust',
     'mili-drink',
+    'cami',
   ]);
   assert.equal(interactables.find(({ character }) => character.id === 'sofi').visual, 'sofi-sprite');
   const mili = interactables.find(({ character }) => character.id === 'mili');
   assert.equal(mili.visual, 'mili-sprite');
   assert.equal(mili.sprite.key, 'mili');
   assert.equal(mili.sprite.anims.currentAnim.key, 'mili-idle-down');
-  assert.equal(interactables.find(({ character }) => character.id === 'cami').visual, 'procedural');
+  const cami = interactables.find(({ character }) => character.id === 'cami');
+  assert.equal(cami.visual, 'cami-sprite');
+  assert.equal(cami.sprite.key, 'cami');
+  assert.equal(cami.sprite.anims.currentAnim.key, 'cami-idle-down');
 });

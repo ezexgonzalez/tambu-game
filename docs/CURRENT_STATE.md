@@ -2,7 +2,7 @@
 
 **Versión:** 1.0
 **Última verificación:** 2026-09-21
-**Base inspeccionada:** `main@5b64dd9`
+**Base inspeccionada:** `main@073c041`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -80,6 +80,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 | Tambu | Spritesheet 4 direcciones, idle y walk | Integrado / estable |
 | Sofi | Walk 4 direcciones, idle estable con blink ocasional, special idles de teléfono/bebida en down y caminata del evento del baño | Integrado / estable |
 | Mili | Atlas 4 direcciones, idle estático, blink down ocasional, hair adjust y drink down esporádicos, y caminata del evento del baño | Congelado |
+| Cami | Atlas 4 direcciones, idle estático, walk y caminata del evento del baño | En validación visual |
 
 “Estable” significa que estos sectores son la base vigente. Una tarea nueva no puede reemplazarlos o reinterpretarlos si su scope no lo autoriza de forma explícita.
 
@@ -107,10 +108,9 @@ Hay tests para sistema social, Sofi, Mili, Cami, Consejo, presentación y flujo 
 
 ### Personajes del patio
 
-- Cami todavía es un cuerpo construido con rectángulos de Phaser.
 - Eze, Pitity, Uriel, Santy, Thiago y Tobi todavía usan el mismo sistema procedural.
 - Los NPCs de relleno también son placeholders; solo algunos tienen tween de baile o un indicador simple de actividad.
-- No existen todavía sprites finales de la población principal fuera de Tambu, Sofi, Mili, bartender y DJ residente.
+- No existen todavía sprites finales de la población principal fuera de Tambu, Sofi, Mili, Cami, bartender y DJ residente.
 
 ### Props y ambientación activa
 
@@ -153,7 +153,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 ## No implementado
 
-- Sprites finales de Cami, amigos y NPCs de relleno.
+- Sprites finales de amigos y NPCs de relleno.
 - Sistema modular de población/NPCs con outfits, peinados y acciones reutilizables.
 - Sistema general de eventos ambientales del patio; hoy existe el evento especial del baño, no una fiesta autónoma completa.
 - Gameplay de alcohol y sus efectos.
@@ -168,7 +168,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **Personajes interactuables** — Sofi queda como baseline aprobada; completar Cami con el mismo estándar visual y técnico.
+1. **Personajes interactuables** — Sofi, Mili y Cami quedan como baselines visuales y técnicas; completar los amigos principales con el mismo estándar.
 2. **Amigos principales** — siluetas y rasgos reconocibles dentro de la misma escala.
 3. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
 4. **Props ambientales activos** — reemplazar primitives solo con kits validados en contexto.

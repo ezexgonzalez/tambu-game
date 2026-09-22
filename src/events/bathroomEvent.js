@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { playCamiIdle, playCamiWalk, setCamiDepth } from '../characters/camiSprite.js';
 import { playMiliIdle, playMiliWalk, setMiliDepth } from '../characters/miliSprite.js';
 import { PLAYER_CONFIG } from '../player/playerConfig.js';
 import { playSofiIdle, playSofiWalk, setSofiDepth } from '../characters/sofiSprite.js';
@@ -64,6 +65,12 @@ function updateNpcVisual(interactable, destination) {
   if (interactable.visual === 'mili-sprite') {
     playMiliWalk(interactable.sprite, destination);
     setMiliDepth(interactable.sprite);
+    return;
+  }
+
+  if (interactable.visual === 'cami-sprite') {
+    playCamiWalk(interactable.sprite, destination);
+    setCamiDepth(interactable.sprite);
   }
 }
 
@@ -77,6 +84,12 @@ function idleNpcVisual(interactable) {
   if (interactable.visual === 'mili-sprite') {
     playMiliIdle(interactable.sprite);
     setMiliDepth(interactable.sprite);
+    return;
+  }
+
+  if (interactable.visual === 'cami-sprite') {
+    playCamiIdle(interactable.sprite);
+    setCamiDepth(interactable.sprite);
   }
 }
 
