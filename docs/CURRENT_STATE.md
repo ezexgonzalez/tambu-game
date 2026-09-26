@@ -80,7 +80,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 | Tambu | Spritesheet 4 direcciones, idle y walk | Integrado / estable |
 | Sofi | Walk 4 direcciones, idle estable con blink ocasional, special idles de teléfono/bebida en down y caminata del evento del baño | Integrado / estable |
 | Mili | Atlas 4 direcciones, idle estático, blink down ocasional, hair adjust y drink down esporádicos, y caminata del evento del baño | Congelado |
-| Cami | Atlas 4 direcciones, idle estático, walk y caminata del evento del baño | En validación visual |
+| Cami | Atlas 4 direcciones, idle estático, blink/hair touch/hand-on-hip ocasionales en down, walk y caminata del evento del baño | En validación visual |
 
 “Estable” significa que estos sectores son la base vigente. Una tarea nueva no puede reemplazarlos o reinterpretarlos si su scope no lo autoriza de forma explícita.
 

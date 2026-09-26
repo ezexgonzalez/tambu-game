@@ -3,10 +3,14 @@ import assert from 'node:assert/strict';
 import {
   CAMI_ANIMS,
   CAMI_SPRITE,
+  CAMI_SPECIALS,
   CAMI_STATES,
+  CAMI_IDLE_DELAY_RANGE_MS,
   CAMI_WALK_FRAME_RATE,
+  chooseCamiIdleVariation,
   createCamiAnimations,
   createCamiSprite,
+  getCamiIdleDelay,
   playCamiIdle,
   playCamiWalk,
   preloadCami,
@@ -27,7 +31,7 @@ test('Cami respeta el contrato del atlas base aprobado', () => {
   });
 });
 
-test('Cami precarga el atlas y crea idle/walk para las cuatro direcciones', () => {
+test('Cami precarga los atlas y crea idle/walk y especiales down', () => {
   const sheets = [];
   const animations = [];
   const scene = {
@@ -45,8 +49,10 @@ test('Cami precarga el atlas y crea idle/walk para las cuatro direcciones', () =
     key: 'cami',
     path: CAMI_SPRITE.path,
     config: { frameWidth: 32, frameHeight: 48 },
-  }]);
-  assert.equal(animations.length, 8);
+  }, ...Object.values(CAMI_SPECIALS).map(({ key, path }) => ({
+    key, path, config: { frameWidth: 32, frameHeight: 48 },
+  }))]);
+  assert.equal(animations.length, 11);
 
   for (const [direction, config] of Object.entries(CAMI_ANIMS)) {
     const idle = animations.find(({ key }) => key === `cami-idle-${direction}`);
@@ -58,6 +64,23 @@ test('Cami precarga el atlas y crea idle/walk para las cuatro direcciones', () =
     assert.equal(walk.frameRate, CAMI_WALK_FRAME_RATE);
     assert.equal(walk.repeat, -1);
   }
+  for (const special of Object.values(CAMI_SPECIALS)) {
+    const animation = animations.find(({ key }) => key === `${special.key}-down`);
+    assert.deepEqual(animation.frames, Array.from({ length: special.frames }, (_, frame) => ({
+      key: special.key, frame,
+    })));
+    assert.equal(animation.repeat, 0);
+    assert.equal(animation.frameRate, special.frameRate);
+  }
+});
+
+test('Cami espera entre variaciones y favorece blink', () => {
+  assert.equal(getCamiIdleDelay(() => 0), CAMI_IDLE_DELAY_RANGE_MS.min);
+  assert.equal(getCamiIdleDelay(() => 1), CAMI_IDLE_DELAY_RANGE_MS.max);
+  assert.equal(chooseCamiIdleVariation(() => 0.69), 'blink');
+  assert.equal(chooseCamiIdleVariation(() => 0.70), 'hairTouch');
+  assert.equal(chooseCamiIdleVariation(() => 0.84), 'hairTouch');
+  assert.equal(chooseCamiIdleVariation(() => 0.85), 'handOnHip');
 });
 
 test('Cami inicia down, usa escala humana y actualiza depth por pies', () => {
@@ -112,4 +135,78 @@ test('Cami inicia down, usa escala humana y actualiza depth por pies', () => {
   sprite.y = 700;
   setCamiDepth(sprite);
   assert.equal(sprite.depth, 730);
+});
+
+function activeCami() {
+  const timers = [];
+  const listeners = new Map();
+  const sprite = {
+    x: 300, y: 400, camiState: CAMI_STATES.IDLE, camiFacing: 'down',
+    camiIdleRandom: () => 0,
+    camiScene: { time: { delayedCall(delay, callback) {
+      const timer = { delay, callback, removed: false, remove() { this.removed = true; } };
+      timers.push(timer);
+      return timer;
+    } } },
+    anims: { currentAnim: null },
+    play(key) { this.anims.currentAnim = { key }; return this; },
+    once(event, handler) { listeners.set(event, () => { listeners.delete(event); handler(); }); return this; },
+    off(event) { listeners.delete(event); return this; },
+  };
+  return { sprite, timers, listeners };
+}
+
+test('Cami ejecuta un especial a la vez y vuelve a idle down con una sola espera', () => {
+  for (const [roll, key] of [[0, 'blink'], [0.75, 'hair-touch'], [0.95, 'hand-on-hip']]) {
+    const { sprite, timers, listeners } = activeCami();
+    sprite.camiIdleRandom = () => roll;
+    playCamiIdle(sprite, 'down');
+    assert.equal(timers.length, 1);
+    timers[0].callback();
+    assert.equal(sprite.camiState, CAMI_STATES.SPECIAL_IDLE);
+    assert.equal(sprite.anims.currentAnim.key, `cami-${key}-down`);
+    assert.equal(listeners.size, 1);
+    listeners.get(`animationcomplete-cami-${key}-down`)();
+    assert.equal(sprite.camiState, CAMI_STATES.IDLE);
+    assert.equal(sprite.anims.currentAnim.key, 'cami-idle-down');
+    assert.equal(timers.length, 2);
+    assert.equal(listeners.size, 0);
+    playCamiIdle(sprite, 'down');
+    assert.equal(timers[1].removed, true);
+    assert.equal(timers.length, 3);
+  }
+});
+
+test('Cami walk interrumpe todos los especiales y callbacks tardíos no la devuelven a idle', () => {
+  for (const roll of [0, 0.75, 0.95]) {
+    const { sprite, timers, listeners } = activeCami();
+    sprite.camiIdleRandom = () => roll;
+    playCamiIdle(sprite, 'down');
+    timers[0].callback();
+    const callback = [...listeners.values()][0];
+    playCamiWalk(sprite, { x: 350, y: 400 });
+    assert.equal(sprite.camiState, CAMI_STATES.WALK);
+    assert.equal(sprite.anims.currentAnim.key, 'cami-walk-right');
+    assert.equal(listeners.size, 0);
+    callback();
+    assert.equal(sprite.camiState, CAMI_STATES.WALK);
+    assert.equal(sprite.anims.currentAnim.key, 'cami-walk-right');
+    playCamiIdle(sprite);
+    assert.equal(sprite.anims.currentAnim.key, 'cami-idle-right');
+    assert.equal(timers.length, 1);
+    playCamiIdle(sprite, 'down');
+    assert.equal(timers.length, 2);
+  }
+});
+
+test('Cami fuera de down no programa especiales y walk cancela timer pendiente', () => {
+  const { sprite, timers } = activeCami();
+  for (const direction of ['left', 'right', 'up']) playCamiIdle(sprite, direction);
+  assert.equal(timers.length, 0);
+  playCamiIdle(sprite, 'down');
+  playCamiWalk(sprite, { x: 300, y: 350 });
+  assert.equal(timers[0].removed, true);
+  timers[0].callback();
+  assert.equal(sprite.camiState, CAMI_STATES.WALK);
+  assert.equal(sprite.anims.currentAnim.key, 'cami-walk-up');
 });

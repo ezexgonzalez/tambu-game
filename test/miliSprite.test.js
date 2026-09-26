@@ -465,6 +465,9 @@ test('createCharacters usa sprites reales para Sofi, Mili y Cami', () => {
     'mili-hair-adjust',
     'mili-drink',
     'cami',
+    'cami-blink',
+    'cami-hair-touch',
+    'cami-hand-on-hip',
   ]);
   assert.equal(interactables.find(({ character }) => character.id === 'sofi').visual, 'sofi-sprite');
   const mili = interactables.find(({ character }) => character.id === 'mili');
