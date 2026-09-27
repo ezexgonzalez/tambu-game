@@ -435,18 +435,59 @@ La experiencia debe ser:
 
 El jugador debería sentir que hacia el final necesita realmente presionar rápido.
 
-Una referencia inicial para probar podría rondar:
+## Balance Pass 1 — baseline a implementar
 
-- resistencia inicial ~50;
-- drenaje ~18/s;
-- SPACE +4;
-- golpes más fuertes o frecuentes hacia la segunda mitad.
+FIRST COMPLETE NIGHT ya pasó QA manual, por lo que esta sección deja de ser una referencia abstracta y se abre como siguiente tarea funcional.
 
-Estos números NO quedan congelados.
+La dificultad se define por **ordinal de intento de Baño en la run**, contando el outcome social `bathroom` actual y los anteriores, independientemente de si una puerta previa terminó `secured` o `interrupted`. El grupo ya vivió ese intento y la presión siguiente debe crecer igual.
 
-La dificultad se ajustará mediante playtest manual.
+Duración común inicial:
 
-El objetivo es sensación, no una fórmula perfecta.
+- `durationMs: 10000`;
+- `SPACE: +4`;
+- cap de resistencia: `100`.
+
+La presión debe crecer dentro del mismo intento mediante tres tramos de drenaje:
+
+### Intento 1 — accesible, pero ya exige jugar
+
+- resistencia inicial: `55`;
+- drenaje `0–3.5 s: 12/s`;
+- drenaje `3.5–7 s: 15/s`;
+- drenaje `7–10 s: 18/s`;
+- daños programados de referencia: `[3, 4, 4, 5, 5, 6, 7]`.
+
+Objetivo aproximado: unas 30–35 pulsaciones bien distribuidas en 10 s.
+
+### Intento 2 — presión real
+
+- resistencia inicial: `52`;
+- drenaje `0–3.5 s: 14/s`;
+- drenaje `3.5–7 s: 18/s`;
+- drenaje `7–10 s: 22/s`;
+- daños programados de referencia: `[4, 5, 6, 6, 7, 8, 9]`.
+
+Objetivo aproximado: unas 40–45 pulsaciones bien distribuidas.
+
+### Intento 3 — clímax / boss cómico
+
+- resistencia inicial: `50`;
+- drenaje `0–3.5 s: 16/s`;
+- drenaje `3.5–7 s: 21/s`;
+- drenaje `7–10 s: 26/s`;
+- daños programados de referencia: `[5, 6, 7, 8, 9, 10, 12]`.
+
+Objetivo aproximado: unas 50–55 pulsaciones distribuidas; debe sentirse exigente pero ganable.
+
+Los tiempos actuales de los siete golpes pueden conservarse en este primer pass salvo que la implementación necesite un microajuste para evitar una muerte injusta. No agregar todavía caras, nombres ni líneas específicas de amigos.
+
+Estos valores **no quedan congelados como balance final**. Son una baseline deliberada de playtest. La aceptación se decide por sensación real:
+
+- intento 1: accesible sin ser automático;
+- intento 2: obliga a prestar atención;
+- intento 3: exige ritmo sostenido y funciona como clímax;
+- el último tercio de cada intento se siente más peligroso que el primero;
+- ninguna dificultad depende de FPS ni de mantener SPACE presionado.
 
 ---
 
