@@ -2,7 +2,7 @@
 
 **Versión:** 1.0
 **Última verificación:** 2026-09-26
-**Base inspeccionada:** `main@41e542f`
+**Base inspeccionada:** `main@1346e2c`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -98,7 +98,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 - `OutcomeEventSystem` desacopla el resultado social del evento especial.
 - Caminata de Tambu y la chica hasta el baño con rutas específicas por sector, diagonales/formation naturales, ritmo relajado y tramo común recién cerca de la puerta.
 - Depth por body/pies durante el recorrido y retorno de Tambu alineado frente a la puerta del baño, fuera de colliders.
-- Ocultamiento durante el evento y retorno de Tambu y la chica a posiciones seguras frente al baño; la chica vuelve en idle, con label visible y marker principal oculto.
+- Ocultamiento durante el evento y retorno de Tambu y la chica a posiciones seguras frente al baño; la chica vuelve en idle, con label visible y marker principal oculto. Pendiente inmediato: después de salir, cada chica debe caminar a un anchor social temporal propio para evitar acumulación en la puerta.
 - Anticipación, golpes, barra de resistencia, input con `SPACE`, éxito o fracaso y regreso al patio.
 - Conseguir Baño y sus puntos se persiste antes del minijuego; perder no revierte el outcome.
 
@@ -150,6 +150,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 ## En validación o ajuste
 
 - Perímetro actual: comprobar en juego continuidad de laterales, oclusión de pies en el seto inferior y uniones de ambas esquinas.
+- BathroomEvent post-outcome: la semántica `resolved` ya funciona, pero las chicas todavía quedan detenidas frente a la puerta y pueden acumularse; falta una ruta de retorno temporal por personaje.
 - Balance numérico de rutas sociales y recompensas: la estructura está implementada, pero el playtest puede justificar ajustes.
 - Composición ambiental general: debe evaluarse después de resolver población visual suficiente, evitando llenar espacios por llenar.
 
@@ -170,7 +171,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **Coherencia crítica** — las rutas del baño, señales sociales y semántica `resolved` están integradas; queda validación visual manual de la salida conjunta.
+1. **Coherencia crítica** — completar el retorno post-baño de Sofi, Mili y Cami a anchors sociales temporales seguros; después de eso, cerrar definitivamente esta pasada.
 2. **FIRST COMPLETE NIGHT** — intro `00:00 → 00:01`, estado de run, derrota por 0 vidas, victoria máxima por 3 Baños, final normal, resumen y restart limpio.
 3. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; necesarios también para dar identidad al Bathroom Resistance.
 4. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
