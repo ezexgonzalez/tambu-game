@@ -35,6 +35,9 @@ function createScene({ completeOnUpdate = false, outcomeActive = false, dialogue
   let gameOverUpdates = 0;
   let perfectNightShows = 0;
   let perfectNightUpdates = 0;
+  let normalEndShows = 0;
+  let normalEndUpdates = 0;
+  let normalEndSummary = null;
   let interactionHides = 0;
   let outcomeActiveNow = outcomeActive;
   let dialogueActiveNow = dialogueActive;
@@ -104,6 +107,11 @@ function createScene({ completeOnUpdate = false, outcomeActive = false, dialogue
     continue() { return scene.runState.continueParty(); },
     destroy() {},
   };
+  scene.normalEndUi = {
+    show(summary) { normalEndShows += 1; normalEndSummary = summary; },
+    update() { normalEndUpdates += 1; },
+    destroy() {},
+  };
   return {
     scene,
     getIntroUpdates: () => introUpdates,
@@ -113,6 +121,9 @@ function createScene({ completeOnUpdate = false, outcomeActive = false, dialogue
     getGameOverUpdates: () => gameOverUpdates,
     getPerfectNightShows: () => perfectNightShows,
     getPerfectNightUpdates: () => perfectNightUpdates,
+    getNormalEndShows: () => normalEndShows,
+    getNormalEndUpdates: () => normalEndUpdates,
+    getNormalEndSummary: () => normalEndSummary,
     getInteractionHides: () => interactionHides,
   };
 }
@@ -171,16 +182,78 @@ test('PatioScene evalúa finales cuando acaban evento y diálogo, sin esperar el
   assert.equal(getGameOverUpdates(), 1);
 });
 
-test('PatioScene no abre otra interacción en el frame que alcanza NORMAL_END', () => {
-  const { scene, getInteractionUpdates } = createScene();
+test('PatioScene presenta el snapshot de NORMAL_END y mantiene el mundo congelado', () => {
+  const {
+    scene,
+    getInteractionUpdates,
+    getInteractionHides,
+    getNormalEndShows,
+    getNormalEndUpdates,
+    getNormalEndSummary,
+    getReturnUpdates,
+  } = createScene();
+  scene.runState.completeIntro();
+  scene.gameState.player.points = 825;
+  scene.gameState.relationships.cami = { resolved: true, outcome: 'friendzone' };
+  scene.gameState.relationships.mili = {
+    resolved: true,
+    outcome: 'bathroom',
+    bathroomResult: 'secured',
+  };
+  scene.gameState.relationships.sofi = { resolved: true, outcome: 'instagram' };
+  scene.player.sprite.body.velocity = { x: 160, y: 0 };
+
+  scene.update();
+
+  assert.equal(scene.runState.getPhase(), RUN_PHASES.NORMAL_END);
+  assert.equal(getNormalEndShows(), 1);
+  assert.equal(getNormalEndUpdates(), 0);
+  assert.deepEqual(getNormalEndSummary(), {
+    points: 825,
+    lives: 3,
+    resolvedCount: 3,
+    securedBathroomCount: 1,
+    relationships: {
+      sofi: { outcome: 'instagram' },
+      mili: { outcome: 'bathroom', bathroomResult: 'secured' },
+      cami: { outcome: 'friendzone' },
+    },
+  });
+  assert.equal(getInteractionUpdates(), 0);
+  assert.ok(getInteractionHides() > 0);
+  assert.deepEqual(scene.player.sprite.body.velocity, { x: 0, y: 0 });
+  const velocityUpdates = scene.player.sprite.velocityUpdates;
+  const returnUpdates = getReturnUpdates();
+
+  scene.update();
+
+  assert.equal(getNormalEndShows(), 1);
+  assert.equal(getNormalEndUpdates(), 1);
+  assert.equal(getInteractionUpdates(), 0);
+  assert.equal(getReturnUpdates(), returnUpdates);
+  assert.equal(scene.player.sprite.velocityUpdates, velocityUpdates);
+});
+
+test('NORMAL_END espera a que diálogo y evento estén cerrados antes de presentar el resumen', () => {
+  const { scene, getNormalEndShows, getInteractionUpdates } = createScene({
+    outcomeActive: true,
+    dialogueActive: true,
+  });
   scene.runState.completeIntro();
   for (const id of ['sofi', 'mili', 'cami']) {
     scene.gameState.relationships[id] = { resolved: true, outcome: 'instagram' };
   }
 
   scene.update();
+  assert.equal(scene.runState.getPhase(), RUN_PHASES.PARTY_ACTIVE);
+  assert.equal(getNormalEndShows(), 0);
+
+  scene.outcomeEventSystem.setActive(false);
+  scene.dialogueSystem.setOpen(false);
+  scene.update();
 
   assert.equal(scene.runState.getPhase(), RUN_PHASES.NORMAL_END);
+  assert.equal(getNormalEndShows(), 1);
   assert.equal(getInteractionUpdates(), 0);
 });
 
@@ -247,3 +320,4 @@ test('PERFECT_NIGHT bloquea gameplay mientras la UI espera y POST_WIN_FREE_ROAM 
   assert.equal(scene.runState.evaluate(scene.gameState), false);
   assert.equal(scene.runState.getPhase(), RUN_PHASES.POST_WIN_FREE_ROAM);
 });
+

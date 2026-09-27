@@ -12,7 +12,7 @@ import {
   isCharacterResolved,
   settleBathroomResult,
 } from '../state/gameState.js';
-import { createRunState, RUN_PHASES } from '../state/runState.js';
+import { createRunState, getRunSummary, RUN_PHASES } from '../state/runState.js';
 import { createDialogueSystem } from '../systems/dialogueSystem.js';
 import { createInteractionSystem } from '../systems/interactionSystem.js';
 import { createOutcomeEventSystem } from '../systems/outcomeEventSystem.js';
@@ -21,6 +21,7 @@ import { createNightIntro } from '../events/nightIntro.js';
 import { createResolvedCharacterReturnSystem } from '../events/resolvedCharacterReturn.js';
 import { createHud } from '../ui/createHud.js';
 import { createGameOverUi } from '../ui/gameOverUi.js';
+import { createNormalEndUi } from '../ui/normalEndUi.js';
 import { createPerfectNightUi } from '../ui/perfectNightUi.js';
 import { createPatioCollisions } from '../world/createPatioCollisions.js';
 import { createPatioWorld, preloadPatioWorld } from '../world/createPatioWorld.js';
@@ -103,6 +104,10 @@ export class PatioScene extends Phaser.Scene {
       hud,
       onContinue: () => this.runState.continueParty(),
     });
+    this.normalEndUi = createNormalEndUi(this, {
+      hud,
+      onReplay: () => this.scene.restart(),
+    });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.nightIntro.destroy();
       this.outcomeEventSystem.stop();
@@ -110,6 +115,7 @@ export class PatioScene extends Phaser.Scene {
       destroyCharacterSprites(this.interactables);
       this.gameOverUi.destroy();
       this.perfectNightUi.destroy();
+      this.normalEndUi.destroy();
     });
   }
 
@@ -145,7 +151,11 @@ export class PatioScene extends Phaser.Scene {
       this.perfectNightUi.update(this.game.loop.delta);
       return;
     }
-    if (phase === RUN_PHASES.NORMAL_END) return;
+    if (phase === RUN_PHASES.NORMAL_END) {
+      this.interactionSystem.hidePrompt();
+      this.normalEndUi.update(this.game.loop.delta);
+      return;
+    }
 
     this.resolvedCharacterReturnSystem.update(this.game.loop.delta);
 
@@ -158,12 +168,6 @@ export class PatioScene extends Phaser.Scene {
     this.dialogueSystem.update();
     if (this.outcomeEventSystem.isActive()) {
       this.interactionSystem.hidePrompt();
-      return;
-    }
-
-    if (this.dialogueSystem.isOpen()) {
-      this.interactionSystem.hidePrompt();
-      updatePlayer(this.player, { canMove: false });
       return;
     }
 
@@ -192,6 +196,12 @@ export class PatioScene extends Phaser.Scene {
         this.perfectNightUi.show();
         return;
       }
+      if (phaseAfterEvaluation === RUN_PHASES.NORMAL_END) {
+        this.player.sprite.setVelocity(0, 0);
+        this.interactionSystem.hidePrompt();
+        this.normalEndUi.show(getRunSummary(this.gameState));
+        return;
+      }
       if (phaseAfterEvaluation !== RUN_PHASES.PARTY_ACTIVE) return;
     }
 
@@ -205,3 +215,4 @@ export class PatioScene extends Phaser.Scene {
     updatePlayer(this.player);
   }
 }
+

@@ -2,7 +2,7 @@
 
 **Versión:** 1.0
 **Última verificación:** 2026-09-27
-**Base inspeccionada:** `main@95d87de`
+**Base inspeccionada:** `main@d183fbf`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -106,13 +106,14 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 
 - `src/state/runState.js` mantiene las fases `INTRO`, `PARTY_ACTIVE`, `GAME_OVER`, `NORMAL_END`, `PERFECT_NIGHT` y `POST_WIN_FREE_ROAM`, sin duplicar puntos, vidas ni resultados sociales.
 - La intro activa la run una sola vez. `PatioScene` evalúa finales cuando intro, outcome event y diálogo ya terminaron; el retorno de una chica sigue en background y no bloquea la evaluación. La evaluación ocurre antes de habilitar otra interacción en el mismo frame.
-- GAME OVER tiene prioridad con cero vidas y queda aceptado como baseline: congela gameplay, conserva ~900 ms el último frame para timing cómico, luego muestra rojo opaco con `SOS UN HIJO DE PUTA` en glifos pixelados 5×7; el prompt de retry aparece 450 ms después. ENTER o SPACE reinicia `PatioScene` desde una escena/run nueva. PERFECT NIGHT requiere que Sofi, Mili y Cami tengan outcome `bathroom` y resultado `secured`; con las tres resueltas y cualquier otro resultado se alcanza `NORMAL_END`.
-- `PERFECT_NIGHT` está integrado funcionalmente: conserva el HUD durante un beat de 700 ms y luego muestra un overlay oscuro con `3 / 3`, `NOCHE PERFECTA` y `3 BAÑOS ASEGURADOS` en tipografía pixelada; el prompt aparece 500 ms después. ENTER o SPACE llama `continueParty()` y transiciona a `POST_WIN_FREE_ROAM` dentro de la misma run: se oculta la UI, vuelve el HUD y se conservan puntos, relaciones y posiciones. En post-win Tambu puede caminar y usar las reacciones post-outcome existentes; no hay contenido postgame nuevo. `NORMAL_END` sigue bloqueando gameplay pero todavía no tiene presentación.
+- GAME OVER tiene prioridad con cero vidas y queda aceptado como baseline: congela gameplay, conserva ~900 ms el último frame para timing cómico, luego muestra rojo opaco con `SOS UN HIJO DE PUTA` en glifos pixelados 5×7; el prompt de retry aparece 450 ms después. ENTER o SPACE reinicia `PatioScene` desde una escena/run nueva. PERFECT NIGHT requiere que Sofi, Mili y Cami tengan outcome `bathroom` y resultado `secured`; con las tres resueltas, vidas restantes y sin Perfect Night se alcanza `NORMAL_END`.
+- `PERFECT_NIGHT` está integrado funcionalmente: conserva el HUD durante un beat de 700 ms y luego muestra un overlay oscuro con `3 / 3`, `NOCHE PERFECTA` y `3 BAÑOS ASEGURADOS` en tipografía pixelada; el prompt aparece 500 ms después. ENTER o SPACE llama `continueParty()` y transiciona a `POST_WIN_FREE_ROAM` dentro de la misma run: se oculta la UI, vuelve el HUD y se conservan puntos, relaciones y posiciones. En post-win Tambu puede caminar y usar las reacciones post-outcome existentes; no hay contenido postgame nuevo.
+- `NORMAL_END` congela el gameplay y conserva el patio con HUD durante 700 ms; después aparece un resumen pixelado y sobrio y se oculta el HUD. El resumen lee un snapshot de `getRunSummary(gameState)` en orden Sofi/Mili/Cami, distingue Baño asegurado e interrumpido, y muestra los puntos finales sin recalcularlos. Tras 500 ms aparece `ENTER / SPACE · VOLVER A JUGAR`; la entrada reinicia `PatioScene` para iniciar otra run limpia desde la intro. No hay botón de menú principal porque todavía no existe una Start/Menu Scene.
 - El reinicio de Scene detiene primero outcome/retornos y después cancela los timers y listeners de special idles. Intro, UI, diálogo y eventos limpian sus objetos o estado en `SHUTDOWN`.
 
 ### Cobertura automatizada
 
-Hay tests para sistema social, Sofi, Mili, Cami, Consejo, presentación y flujo de diálogo, outcomes, evento del baño, resistencia, césped, lifecycle de la intro, fases de la run, Game Over/retry y presentación/transición de Perfect Night. La suite y el build deben mantenerse verdes en cambios de lógica o documentación estructural.
+Hay tests para sistema social, Sofi, Mili, Cami, Consejo, presentación y flujo de diálogo, outcomes, evento del baño, resistencia, césped, lifecycle de la intro, fases de la run, Game Over/retry, presentación/transición de Perfect Night y resumen/replay de Normal End. La suite y el build deben mantenerse verdes en cambios de lógica o documentación estructural.
 
 ## Provisional / placeholder
 
@@ -170,7 +171,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 - Sistema general de eventos ambientales del patio; hoy existe el evento especial del baño, no una fiesta autónoma completa.
 - Gameplay de alcohol y sus efectos.
 - Audio, música y efectos de sonido integrados al runtime.
-- Presentación de NORMAL_END, resumen final, menú inicial y contenido nuevo de post-win. GAME OVER y Perfect Night con su transición a free roam ya están integrados.
+- Menú inicial y contenido nuevo de post-win. GAME OVER, NORMAL_END con resumen/replay y Perfect Night con su transición a free roam están integrados.
 - UI final y dirección visual definitiva de diálogos/HUD.
 - Controles táctiles/mobile.
 - Guardado o persistencia entre sesiones.
@@ -180,7 +181,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **FIRST COMPLETE NIGHT** — intro, semántica de recompensa del Baño, Run State, GAME OVER y `PERFECT_NIGHT` ya integrados; siguiente bloque: `NORMAL_END` con resumen real de Sofi/Mili/Cami, puntos y replay limpio. El menú principal se conecta cuando exista una Start/Menu Scene real.
+1. **FIRST COMPLETE NIGHT** — intro, semántica de recompensa del Baño, Run State, GAME OVER, `PERFECT_NIGHT` y `NORMAL_END` con resumen/replay limpio están integrados. El menú principal queda para cuando exista una Start/Menu Scene real; sigue pendiente el playtest completo de la noche.
 2. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; necesarios también para dar identidad al Bathroom Resistance.
 3. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
 4. **Audio mínimo** — música, SFX y feedback suficiente para que la noche tenga presencia.
@@ -223,3 +224,4 @@ Actualizarlo en el mismo cambio cuando:
 - aparece una nueva contradicción resuelta.
 
 No hace falta modificarlo por microajustes que no cambian el estado conceptual del proyecto.
+
