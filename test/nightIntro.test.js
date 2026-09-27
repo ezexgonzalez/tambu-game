@@ -34,12 +34,14 @@ function makeCanvasTexture(key, drawCalls) {
   const context = {
     globalCompositeOperation: 'source-over',
     fillStyle: '#000000',
+    globalAlpha: 1,
     translation: { x: 0, y: 0 },
     transformScale: { x: 1, y: 1 },
     save() {
       stateStack.push({
         globalCompositeOperation: this.globalCompositeOperation,
         fillStyle: this.fillStyle,
+        globalAlpha: this.globalAlpha,
         translation: this.translation,
         transformScale: this.transformScale,
       });
@@ -47,7 +49,18 @@ function makeCanvasTexture(key, drawCalls) {
     restore() { Object.assign(this, stateStack.pop()); },
     clearRect() { whiteRects.length = 0; },
     fillRect(x, y, width, height) {
-      drawCalls.push({ key, composite: this.globalCompositeOperation, fillStyle: this.fillStyle });
+      drawCalls.push({
+        key,
+        composite: this.globalCompositeOperation,
+        fillStyle: this.fillStyle,
+        globalAlpha: this.globalAlpha,
+        x,
+        y,
+        width,
+        height,
+        translation: { ...this.translation },
+        scale: { ...this.transformScale },
+      });
       if (this.fillStyle === '#000000' && x === 0 && y === 0) whiteRects.length = 0;
       if (this.fillStyle === '#ffffff') {
         whiteRects.push({
@@ -145,7 +158,7 @@ test('intro usa reloj pixelado alineado con la máscara y hace una transición c
   const clockTexture = textures.get('night-intro-clock-pixels');
 
   assert.deepEqual(Object.keys(NIGHT_INTRO_PHASES), [
-    'BLACKOUT', 'CLOCK_0000', 'CLOCK_0001', 'REVEAL', 'REVEAL_TAIL', 'COMPLETE',
+    'BLACKOUT', 'CLOCK_0000', 'CLOCK_0001', 'REVEAL', 'REVEAL_TAIL', 'COLON_TUNNEL', 'COMPLETE',
   ]);
   assert.deepEqual(NIGHT_INTRO_TIMINGS, {
     blackout: 200,
@@ -153,6 +166,7 @@ test('intro usa reloj pixelado alineado con la máscara y hace una transición c
     clock0001: 450,
     reveal: 1500,
     revealTail: 300,
+    colonTunnel: 700,
   });
   assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.BLACKOUT);
   assert.equal(intro.isComplete(), false);
@@ -247,15 +261,49 @@ test('intro usa reloj pixelado alineado con la máscara y hace una transición c
     translation.x === 640 && translation.y === 360
   )), 'el centro permanece fijo también durante el overshoot');
 
-  intro.update(NIGHT_INTRO_TIMINGS.revealTail - 1);
-  assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.REVEAL_TAIL);
+  intro.update(NIGHT_INTRO_TIMINGS.revealTail - 2);
+  const scaleBeforeTunnel = getSnapshotScale(windowTexture);
+  intro.update(1);
+  assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.COLON_TUNNEL);
   assert.equal(intro.isComplete(), false, 'el frame final del overshoot aún debe renderizarse');
   assert.equal(cover.destroyed, false);
   assert.equal(hud.visible, false);
   assert.deepEqual(removedTextures, []);
-  const finalScale = getSnapshotScale(windowTexture);
-  assert.ok(finalScale >= revealMaxScale * 1.4 - 1e-9,
+  const tunnelStartScale = getSnapshotScale(windowTexture);
+  assert.ok(tunnelStartScale >= revealMaxScale * 1.4 - 1e-9,
     'el reloj supera holgadamente el scale máximo del reveal principal');
+
+  intro.update(1);
+  const firstTunnelScale = getSnapshotScale(windowTexture);
+  const tunnelDot = windowTexture.snapshots.at(-1).find(({ x, y, width, height, translation }) => (
+    x === -5 && y === -5 && width === 10 && height === 10 && translation.x === 640 && translation.y !== 360
+  ));
+  assert.ok(tunnelDot, 'la ventana se centra sobre el punto superior del colon');
+  assert.ok(Math.abs(tunnelDot.translation.y - (360 - 14 * tunnelStartScale)) < 1,
+    'la entrada al punto no salta desde su posición durante el reveal');
+  const finalTailScaleStep = tunnelStartScale - scaleBeforeTunnel;
+  const tunnelScaleStep = firstTunnelScale - tunnelStartScale;
+  assert.ok(tunnelScaleStep > finalTailScaleStep * 0.8 && tunnelScaleStep < finalTailScaleStep * 1.2,
+    'el túnel conserva la velocidad de escala al salir del tail');
+
+  intro.update(NIGHT_INTRO_TIMINGS.colonTunnel - 2);
+  const selectedDotClosures = drawCalls.filter(({ key, fillStyle, globalAlpha, x, y, width, height }) => (
+    key === 'night-intro-clock-window' && fillStyle === '#000000' && globalAlpha === 1
+      && x === -5 && width === 10 && height === 10
+  ));
+  assert.ok(selectedDotClosures.some(({ y }) => y === 9), 'el punto inferior se cierra suavemente');
+  assert.equal(selectedDotClosures.some(({ y }) => y === -19), false,
+    'el punto superior permanece abierto como túnel');
+  assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.COLON_TUNNEL);
+  assert.equal(intro.isComplete(), false);
+  assert.equal(hud.visible, false);
+
+  intro.update(1);
+  assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.COLON_TUNNEL);
+  assert.equal(intro.isComplete(), false, 'el último frame del túnel permanece visible un render');
+  const finalTunnelScale = getSnapshotScale(windowTexture);
+  assert.ok(finalTunnelScale > 128, 'la ventana única supera el ancho y alto del viewport');
+  assert.deepEqual(removedTextures, []);
 
   intro.update(1);
   assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.COMPLETE);

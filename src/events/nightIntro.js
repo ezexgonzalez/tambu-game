@@ -6,6 +6,7 @@ export const NIGHT_INTRO_PHASES = Object.freeze({
   CLOCK_0001: 'clock-0001',
   REVEAL: 'reveal',
   REVEAL_TAIL: 'reveal-tail',
+  COLON_TUNNEL: 'colon-tunnel',
   COMPLETE: 'complete',
 });
 
@@ -15,6 +16,7 @@ export const NIGHT_INTRO_TIMINGS = Object.freeze({
   clock0001: 450,
   reveal: 1500,
   revealTail: 300,
+  colonTunnel: 700,
 });
 
 const INTRO_DEPTH = 10000;
@@ -22,11 +24,14 @@ const WINDOW_TEXTURE_KEY = 'night-intro-clock-window';
 const CLOCK_TEXTURE_KEY = 'night-intro-clock-pixels';
 const CLOCK_TRANSITION_MS = 180;
 const REVEAL_TAIL_OVERSHOOT = 1.4;
+const COLON_TUNNEL_SELECTION_MS = 180;
 const CLOCK_CELL_SIZE = 14;
 const CLOCK_PIXEL_INSET = 2;
 const CLOCK_GLYPH_WIDTH = 5;
 const CLOCK_GLYPH_HEIGHT = 7;
 const CLOCK_GLYPH_GAP = 1;
+const CLOCK_PIXEL_SIZE = CLOCK_CELL_SIZE - CLOCK_PIXEL_INSET * 2;
+const UPPER_COLON_PIXEL = Object.freeze({ charIndex: 2, row: 2, column: 2 });
 
 const CLOCK_GLYPHS = Object.freeze({
   '0': [
@@ -66,14 +71,19 @@ function getClockBounds(text) {
   };
 }
 
-function drawPixelClock(ctx, text, width, height, scale, compositeOperation) {
+function drawPixelClock(ctx, text, width, height, scale, compositeOperation, {
+  fillStyle = '#ffffff',
+  globalAlpha = 1,
+  skipPixel = null,
+} = {}) {
   const { width: clockWidth, height: clockHeight } = getClockBounds(text);
   const left = -clockWidth / 2;
   const top = -clockHeight / 2;
 
   ctx.save();
   ctx.globalCompositeOperation = compositeOperation;
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = fillStyle;
+  ctx.globalAlpha = globalAlpha;
   ctx.translate(width / 2, height / 2);
   ctx.scale(scale, scale);
 
@@ -84,9 +94,10 @@ function drawPixelClock(ctx, text, width, height, scale, compositeOperation) {
     for (let row = 0; row < CLOCK_GLYPH_HEIGHT; row += 1) {
       for (let column = 0; column < CLOCK_GLYPH_WIDTH; column += 1) {
         if (glyph[row][column] !== '1') continue;
+        if (skipPixel?.charIndex === charIndex && skipPixel.row === row && skipPixel.column === column) continue;
         const x = Math.round(left + (glyphOffset + column) * CLOCK_CELL_SIZE + CLOCK_PIXEL_INSET);
         const y = Math.round(top + row * CLOCK_CELL_SIZE + CLOCK_PIXEL_INSET);
-        ctx.fillRect(x, y, CLOCK_CELL_SIZE - CLOCK_PIXEL_INSET * 2, CLOCK_CELL_SIZE - CLOCK_PIXEL_INSET * 2);
+        ctx.fillRect(x, y, CLOCK_PIXEL_SIZE, CLOCK_PIXEL_SIZE);
       }
     }
   }
@@ -115,16 +126,103 @@ function getRevealTailScale(progress, maxScale) {
   const overshootScale = maxScale * REVEAL_TAIL_OVERSHOOT;
   const tailDuration = NIGHT_INTRO_TIMINGS.revealTail;
   const expansionDuration = NIGHT_INTRO_TIMINGS.reveal - CLOCK_TRANSITION_MS;
-  const startTangent = 3 * (maxScale - 1) * tailDuration / expansionDuration;
+  const incomingScaleRate = 3 * (maxScale - 1) / expansionDuration;
+  const tangent = incomingScaleRate * tailDuration;
+  const progressSquared = progress ** 2;
+  const progressCubed = progressSquared * progress;
+  const startWeight = 2 * progressCubed - 3 * progressSquared + 1;
+  const tangentWeight = progressCubed - 2 * progressSquared + progress;
+  const endWeight = -2 * progressCubed + 3 * progressSquared;
+  const endTangentWeight = progressCubed - progressSquared;
+
+  return startWeight * maxScale
+    + tangentWeight * tangent
+    + endWeight * overshootScale
+    + endTangentWeight * tangent;
+}
+
+function getHermiteScale(startScale, endScale, progress, incomingScaleRate, duration) {
   const progressSquared = progress ** 2;
   const progressCubed = progressSquared * progress;
   const startWeight = 2 * progressCubed - 3 * progressSquared + 1;
   const tangentWeight = progressCubed - 2 * progressSquared + progress;
   const endWeight = -2 * progressCubed + 3 * progressSquared;
 
-  return startWeight * maxScale
-    + tangentWeight * startTangent
-    + endWeight * overshootScale;
+  return startWeight * startScale
+    + tangentWeight * incomingScaleRate * duration
+    + endWeight * endScale;
+}
+
+function getClockPixelCenter(text, { charIndex, row, column }) {
+  const { width: clockWidth, height: clockHeight } = getClockBounds(text);
+  const glyphOffset = charIndex * (CLOCK_GLYPH_WIDTH + CLOCK_GLYPH_GAP);
+  return {
+    x: -clockWidth / 2 + (glyphOffset + column) * CLOCK_CELL_SIZE + CLOCK_PIXEL_INSET + CLOCK_PIXEL_SIZE / 2,
+    y: -clockHeight / 2 + row * CLOCK_CELL_SIZE + CLOCK_PIXEL_INSET + CLOCK_PIXEL_SIZE / 2,
+  };
+}
+
+function drawClockPixel(ctx, width, height, scale, centerX, centerY) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fillStyle = '#ffffff';
+  ctx.translate(centerX, centerY);
+  ctx.scale(scale, scale);
+  ctx.fillRect(-CLOCK_PIXEL_SIZE / 2, -CLOCK_PIXEL_SIZE / 2, CLOCK_PIXEL_SIZE, CLOCK_PIXEL_SIZE);
+  ctx.restore();
+}
+
+function getTunnelEndScale(width, height, startScale, incomingScaleRate) {
+  const colonCenter = getClockPixelCenter('00:01', UPPER_COLON_PIXEL);
+  const selectionFocusY = height / 2 + colonCenter.y * startScale
+    + colonCenter.y * incomingScaleRate * COLON_TUNNEL_SELECTION_MS / 2;
+  const farthestViewportEdge = Math.max(
+    width / 2,
+    Math.abs(selectionFocusY),
+    Math.abs(height - selectionFocusY),
+  );
+  return (2 * farthestViewportEdge / CLOCK_PIXEL_SIZE) * 1.25;
+}
+
+function getTunnelFocusY(height, startScale, incomingScaleRate, elapsedMs) {
+  const colonCenter = getClockPixelCenter('00:01', UPPER_COLON_PIXEL);
+  const startY = height / 2 + colonCenter.y * startScale;
+  const startVelocity = colonCenter.y * incomingScaleRate;
+  const endY = startY + startVelocity * COLON_TUNNEL_SELECTION_MS / 2;
+  const progress = Math.min(elapsedMs / COLON_TUNNEL_SELECTION_MS, 1);
+  const progressSquared = progress ** 2;
+  const progressCubed = progressSquared * progress;
+  const startWeight = 2 * progressCubed - 3 * progressSquared + 1;
+  const tangentWeight = progressCubed - 2 * progressSquared + progress;
+  const endWeight = -2 * progressCubed + 3 * progressSquared;
+  const startTangent = startVelocity * COLON_TUNNEL_SELECTION_MS;
+
+  return startWeight * startY + tangentWeight * startTangent + endWeight * endY;
+}
+
+function drawColonTunnelWindow(texture, width, height, clockScale, focusY, closeOtherPixelsProgress) {
+  const ctx = texture.getContext();
+  ctx.save();
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, width, height);
+  drawPixelClock(ctx, '00:01', width, height, clockScale, 'destination-out', {
+    skipPixel: UPPER_COLON_PIXEL,
+  });
+  drawClockPixel(ctx, width, height, clockScale, width / 2, focusY);
+
+  if (closeOtherPixelsProgress > 0) {
+    const easedCloseProgress = closeOtherPixelsProgress ** 2 * (3 - 2 * closeOtherPixelsProgress);
+    drawPixelClock(ctx, '00:01', width, height, clockScale, 'source-over', {
+      fillStyle: '#000000',
+      globalAlpha: easedCloseProgress,
+      skipPixel: UPPER_COLON_PIXEL,
+    });
+  }
+
+  ctx.restore();
+  texture.refresh();
 }
 
 function drawClockWindow(texture, width, height, scale) {
@@ -216,12 +314,14 @@ export function createNightIntro(scene, { player, hud }) {
       phase = NIGHT_INTRO_PHASES.REVEAL;
     } else if (phase === NIGHT_INTRO_PHASES.REVEAL) {
       phase = NIGHT_INTRO_PHASES.REVEAL_TAIL;
+    } else if (phase === NIGHT_INTRO_PHASES.REVEAL_TAIL) {
+      phase = NIGHT_INTRO_PHASES.COLON_TUNNEL;
     }
   }
 
   function update(deltaMs) {
     if (phase === NIGHT_INTRO_PHASES.COMPLETE) return;
-    if (phase === NIGHT_INTRO_PHASES.REVEAL_TAIL && elapsed >= NIGHT_INTRO_TIMINGS.revealTail) {
+    if (phase === NIGHT_INTRO_PHASES.COLON_TUNNEL && elapsed >= NIGHT_INTRO_TIMINGS.colonTunnel) {
       finish();
       return;
     }
@@ -234,6 +334,7 @@ export function createNightIntro(scene, { player, hud }) {
         [NIGHT_INTRO_PHASES.CLOCK_0001]: NIGHT_INTRO_TIMINGS.clock0001,
         [NIGHT_INTRO_PHASES.REVEAL]: NIGHT_INTRO_TIMINGS.reveal,
         [NIGHT_INTRO_PHASES.REVEAL_TAIL]: NIGHT_INTRO_TIMINGS.revealTail,
+        [NIGHT_INTRO_PHASES.COLON_TUNNEL]: NIGHT_INTRO_TIMINGS.colonTunnel,
       }[phase];
       const step = Math.min(remaining, duration - elapsed);
       elapsed += step;
@@ -252,10 +353,20 @@ export function createNightIntro(scene, { player, hud }) {
         const tailProgress = elapsed / duration;
         const scale = getRevealTailScale(tailProgress, revealMaxScale);
         drawClockWindow(windowTexture, width, height, scale);
+      } else if (phase === NIGHT_INTRO_PHASES.COLON_TUNNEL) {
+        const tunnelProgress = elapsed / duration;
+        const incomingScaleRate = 3 * (revealMaxScale - 1) / (NIGHT_INTRO_TIMINGS.reveal - CLOCK_TRANSITION_MS);
+        const tunnelStartScale = revealMaxScale * REVEAL_TAIL_OVERSHOOT;
+        const tunnelEndScale = getTunnelEndScale(width, height, tunnelStartScale, incomingScaleRate);
+        const scale = getHermiteScale(tunnelStartScale, tunnelEndScale, tunnelProgress, incomingScaleRate, duration);
+        const focusY = getTunnelFocusY(height, tunnelStartScale, incomingScaleRate, elapsed);
+        const closeOtherPixelsProgress = Math.min(elapsed / COLON_TUNNEL_SELECTION_MS, 1);
+
+        drawColonTunnelWindow(windowTexture, width, height, scale, focusY, closeOtherPixelsProgress);
       }
 
       if (elapsed >= duration) {
-        if (phase === NIGHT_INTRO_PHASES.REVEAL_TAIL) return;
+        if (phase === NIGHT_INTRO_PHASES.COLON_TUNNEL) return;
         advance();
       }
     }
