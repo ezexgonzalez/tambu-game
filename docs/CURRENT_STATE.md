@@ -174,7 +174,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 - Perímetro actual: comprobar en juego continuidad de laterales, oclusión de pies en el seto inferior y uniones de ambas esquinas.
 - Retorno post-baño: rutas seguras temporales por personaje, retorno a facing down e idles normales/special idles validados manualmente.
 - Balance numérico de rutas sociales y recompensas: la estructura está implementada, pero el playtest puede justificar ajustes.
-- Bathroom Resistance: Balance Pass 1 está integrado, pero el playtest manual de Eze confirmó que los tres niveles siguen demasiado permisivos. También se detectó un desfase en el ordinal runtime: como el outcome social `bathroom` actual ya está persistido cuando se crea BathroomEvent, contar todos los outcomes `bathroom` y sumar 1 selecciona 2/3/3 en la práctica. Balance Pass 2 debe corregir el ordinal a 1/2/3 contando solo intentos anteriores ya liquidados (`secured` o `interrupted`) y aumentar de forma clara la presión de los tres perfiles. SPACE se mantiene en `+4`, duración en 10 s y drenaje progresivo por tramos.
+- Bathroom Resistance: Balance Pass 2 ya corrige el ordinal runtime contando solo resultados previos liquidados (`secured` o `interrupted`), excluyendo el outcome `bathroom` pending del evento actual. Los tres perfiles tienen mayor drenaje y daño, manteniendo SPACE `+4`, 10 s y siete golpes. Falta QA manual de esta baseline para confirmar que el primer baño sea justo y el tercero difícil pero ganable.
 - Composición ambiental general: debe evaluarse después de resolver población visual suficiente, evitando llenar espacios por llenar.
 
 ## No implementado
@@ -194,7 +194,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **BATHROOM RESISTANCE — BALANCE PASS 2** — corregir el ordinal runtime para que sea realmente 1/2/3 y subir sensiblemente la exigencia de los tres perfiles; Pass 1 ya fue probado y sigue demasiado fácil.
+1. **BATHROOM RESISTANCE — QA MANUAL PASS 2** — probar cada perfil en juego y reportar dificultad percibida y en qué segundo empieza a exigir ritmo rápido; ajustar solo con esos resultados.
 2. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; serán la base visual de Bathroom Resistance 2.0 y de callbacks de la fiesta.
 3. **BATHROOM RESISTANCE — IDENTIDAD NARRATIVA** — con amigos visuales disponibles, integrar voces, retratos/intervenciones y memoria de run sobre el balance 1/2/3 ya validado.
 4. **Audio mínimo** — música/ambiente y pocos SFX con controles básicos; debe entrar antes del QA final de ritmo.

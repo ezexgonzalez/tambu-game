@@ -489,9 +489,9 @@ Estos valores **no quedan congelados como balance final**. Son una baseline deli
 - el último tercio de cada intento se siente más peligroso que el primero;
 - ninguna dificultad depende de FPS ni de mantener SPACE presionado.
 
-## Balance Pass 2 — después de playtest manual
+## Balance Pass 2 — baseline integrada; QA manual pendiente
 
-Eze probó los tres intentos del Pass 1 y confirmó que la progresión se siente más difícil que antes, pero **todavía no alcanza**. La segunda pasada debe subir claramente la presión en todos los niveles.
+La corrección del ordinal y los números del Pass 2 ya están integrados. Falta probar los tres intentos en juego y registrar la dificultad percibida y el segundo en que empieza a exigir ritmo rápido.
 
 Antes de ajustar números se corrige un bug de ordinal: el outcome social `bathroom` actual ya está guardado cuando se crea BathroomEvent, por lo que contar todos los relationships con outcome `bathroom` y sumar 1 produce en runtime `2 / 3 / 3`. El ordinal correcto debe contar únicamente **intentos anteriores ya liquidados** (`bathroomResult: secured|interrupted`) y sumar el intento actual:
 

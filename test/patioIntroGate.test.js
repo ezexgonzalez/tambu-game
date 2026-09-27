@@ -137,10 +137,12 @@ test('PatioScene no ejecuta systems de gameplay mientras la intro está activa',
   assert.equal(scene.runState.getPhase(), RUN_PHASES.INTRO);
 });
 
-test('PatioScene selecciona la dificultad por ordinal y cuenta también un bathroom interrupted', () => {
+test('PatioScene selecciona perfil 1/2/3 desde los resultados liquidados y excluye el baño pending', () => {
   const gameState = createGameState();
+  gameState.relationships.sofi = { outcome: 'bathroom', bathroomResult: null, rewardSettled: false };
   assert.equal(getBathroomResistanceConfigForRun(gameState).startResistance, 55);
-  gameState.relationships.sofi = { outcome: 'bathroom', bathroomResult: 'interrupted' };
+  gameState.relationships.sofi.bathroomResult = 'interrupted';
+  gameState.relationships.mili = { outcome: 'bathroom', bathroomResult: null, rewardSettled: false };
   assert.equal(getBathroomResistanceConfigForRun(gameState).startResistance, 52);
   gameState.relationships.cami = { outcome: 'bathroom', bathroomResult: 'secured' };
   assert.equal(getBathroomResistanceConfigForRun(gameState).startResistance, 50);

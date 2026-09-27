@@ -36,9 +36,9 @@ function createProfile(startResistance, drainRates, hitDamages) {
 }
 
 export const BATHROOM_RESISTANCE_PROFILES = Object.freeze({
-  1: createProfile(55, [12, 15, 18], [3, 4, 4, 5, 5, 6, 7]),
-  2: createProfile(52, [14, 18, 22], [4, 5, 6, 6, 7, 8, 9]),
-  3: createProfile(50, [16, 21, 26], [5, 6, 7, 8, 9, 10, 12]),
+  1: createProfile(55, [16, 20, 25], [5, 6, 7, 8, 9, 10, 10]),
+  2: createProfile(52, [18, 23, 29], [6, 7, 8, 9, 10, 12, 14]),
+  3: createProfile(50, [20, 26, 33], [7, 8, 10, 11, 13, 15, 16]),
 });
 
 export function getBathroomResistanceConfig(attemptNumber = 1) {

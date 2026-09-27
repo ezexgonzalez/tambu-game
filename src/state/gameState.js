@@ -33,7 +33,10 @@ export function getSecuredBathroomCount(gameState) {
 
 export function getBathroomAttemptNumber(gameState) {
   const completedAttempts = Object.values(gameState?.relationships ?? {})
-    .filter((relationship) => relationship.outcome === 'bathroom')
+    .filter((relationship) => (
+      relationship.outcome === 'bathroom'
+      && ['secured', 'interrupted'].includes(relationship.bathroomResult)
+    ))
     .length;
   return Math.min(3, completedAttempts + 1);
 }

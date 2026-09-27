@@ -19,19 +19,32 @@ import { SOFI_CONVERSATION } from '../src/data/conversations/sofiConversation.js
 
 const NO_HITS_PROFILE = (profile) => ({ ...profile, hits: [] });
 
-test('el ordinal deriva de los outcomes bathroom y cuenta secured e interrupted', () => {
+test('el ordinal cuenta solo baños liquidados y excluye el evento actual pendiente', () => {
   const gameState = createGameState();
+  gameState.relationships.sofi = {
+    outcome: 'bathroom', bathroomResult: null, rewardSettled: false,
+  };
   assert.equal(getBathroomAttemptNumber(gameState), 1);
 
-  gameState.relationships.sofi = { outcome: 'bathroom', bathroomResult: 'secured' };
+  gameState.relationships.sofi.bathroomResult = 'secured';
+  gameState.relationships.mili = {
+    outcome: 'bathroom', bathroomResult: null, rewardSettled: false,
+  };
   assert.equal(getBathroomAttemptNumber(gameState), 2);
 
-  gameState.relationships.mili = { outcome: 'bathroom', bathroomResult: 'interrupted' };
+  gameState.relationships.sofi.bathroomResult = 'interrupted';
+  assert.equal(getBathroomAttemptNumber(gameState), 2,
+    'un intento interrumpido también cuenta como previo liquidado');
+
+  gameState.relationships.sofi.bathroomResult = 'secured';
+  gameState.relationships.cami = { outcome: 'bathroom', bathroomResult: 'interrupted' };
+  gameState.relationships.tobi = {
+    outcome: 'bathroom', bathroomResult: null, rewardSettled: false,
+  };
   assert.equal(getBathroomAttemptNumber(gameState), 3);
 
-  gameState.relationships.cami = { outcome: 'instagram' };
-  assert.equal(getBathroomAttemptNumber(gameState), 3);
-  gameState.relationships.tobi = { outcome: 'bathroom', bathroomResult: null };
+  gameState.relationships.older1 = { outcome: 'bathroom', bathroomResult: 'secured' };
+  gameState.relationships.older2 = { outcome: 'bathroom', bathroomResult: 'interrupted' };
   assert.equal(getBathroomAttemptNumber(gameState), 3, 'el ordinal queda limitado a tres');
 });
 
@@ -42,9 +55,9 @@ test('los perfiles comparten contrato y aumentan la presión de 1 a 3', () => {
   assert.deepEqual(profiles.map(({ maxResistance }) => maxResistance), [100, 100, 100]);
   assert.deepEqual(profiles.map(({ startResistance }) => startResistance), [55, 52, 50]);
   assert.deepEqual(profiles.map(({ drainPhases }) => drainPhases.map(({ perSecond }) => perSecond)), [
-    [12, 15, 18], [14, 18, 22], [16, 21, 26],
+    [16, 20, 25], [18, 23, 29], [20, 26, 33],
   ]);
-  assert.deepEqual(profiles.map(({ hits }) => hits.reduce((sum, hit) => sum + hit.damage, 0)), [34, 45, 57]);
+  assert.deepEqual(profiles.map(({ hits }) => hits.reduce((sum, hit) => sum + hit.damage, 0)), [55, 66, 80]);
   assert.deepEqual(profiles.map(({ hits }) => hits.map(({ at }) => at)), [
     [800, 1900, 3100, 4400, 6100, 7900, 9200],
     [800, 1900, 3100, 4400, 6100, 7900, 9200],
@@ -54,6 +67,12 @@ test('los perfiles comparten contrato y aumentan la presión de 1 a 3', () => {
     'PUM', 'PUM PUM', 'TAMBU.', 'ABRÍ.', 'PUM PUM PUM',
     'DALE BOLUDO, TENGO QUE MEAR.', 'PUM PUM PUM',
   ]);
+  const pressure = profiles.map(({ startResistance, drainPhases, hits }) => (
+    100 - startResistance
+      + calculateBathroomDrain(0, 10000, drainPhases)
+      + hits.reduce((sum, hit) => sum + hit.damage, 0)
+  ));
+  assert.ok(pressure[0] < pressure[1] && pressure[1] < pressure[2]);
   assert.equal(getBathroomResistanceConfig(0), BATHROOM_RESISTANCE_PROFILES[1]);
   assert.equal(getBathroomResistanceConfig(99), BATHROOM_RESISTANCE_PROFILES[3]);
 });
@@ -71,8 +90,8 @@ test('cada perfil escala el drenaje durante el intento', () => {
 
 test('el drenaje integra correctamente deltas que cruzan las fronteras de fase', () => {
   const phases = getBathroomResistanceConfig(1).drainPhases;
-  assert.equal(calculateBathroomDrain(3400, 3700, phases), 4.2);
-  assert.equal(calculateBathroomDrain(6900, 7200, phases), 5.1);
+  assert.equal(calculateBathroomDrain(3400, 3700, phases), 5.6);
+  assert.equal(calculateBathroomDrain(6900, 7200, phases), 7);
 });
 
 test('diez segundos de drenaje son independientes del tamaño de frame', () => {
