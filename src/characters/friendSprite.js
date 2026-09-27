@@ -1,5 +1,25 @@
 const FRIENDS = {
-  tobi: { name: 'Tobi', asset: 'friend_tobi', idleDown: 'friend_tobi_idle_down' },
+  tobi: {
+    name: 'Tobi',
+    asset: 'friend_tobi',
+    idleDown: 'friend_tobi_idle_down',
+    specials: [
+      {
+        id: 'drink',
+        asset: 'friend_tobi_drink',
+        path: '/assets/characters/friends/friend_tobi_drink_down_atlas_v1.png',
+        frames: 8,
+        frameRate: 6,
+      },
+      {
+        id: 'arms-crossed',
+        asset: 'friend_tobi_arms_crossed',
+        path: '/assets/characters/friends/friend_tobi_arms_crossed_down_atlas_v1.png',
+        frames: 8,
+        frameRate: 6,
+      },
+    ],
+  },
   pitity: { name: 'Pitity', asset: 'friend_pitity', idleDown: 'friend_pitity_idle_down' },
   eze: { name: 'Eze', asset: 'friend_eze', idleDown: 'friend_eze_idle_down' },
   santy: { name: 'Santy', asset: 'friend_santy', idleDown: 'friend_santy_idle_down' },
@@ -22,6 +42,23 @@ export const FRIEND_SPRITE_CONFIG = Object.freeze({
   walkFrameRate: 8,
 });
 
+export const FRIEND_STATES = Object.freeze({
+  IDLE: 'idle',
+  SPECIAL_IDLE: 'special-idle',
+  WALK: 'walk',
+});
+
+export const FRIEND_IDLE_DELAY_RANGE_MS = Object.freeze({ min: 5000, max: 10000 });
+
+export function getFriendIdleDelay(random = Math.random) {
+  const { min, max } = FRIEND_IDLE_DELAY_RANGE_MS;
+  return Math.round(min + Math.max(0, Math.min(1, random())) * (max - min));
+}
+
+export function chooseTobiIdleVariation(random = Math.random) {
+  return random() < 0.5 ? 'drink' : 'arms-crossed';
+}
+
 export function preloadFriends(scene) {
   for (const friend of Object.values(FRIENDS)) {
     scene.load.spritesheet(friend.asset, `/assets/characters/friends/${friend.asset}_atlas_v1.png`, {
@@ -32,14 +69,20 @@ export function preloadFriends(scene) {
       frameWidth: FRIEND_SPRITE_CONFIG.frameWidth,
       frameHeight: FRIEND_SPRITE_CONFIG.frameHeight,
     });
+    friend.specials?.forEach((special) => {
+      scene.load.spritesheet(special.asset, special.path, {
+        frameWidth: FRIEND_SPRITE_CONFIG.frameWidth,
+        frameHeight: FRIEND_SPRITE_CONFIG.frameHeight,
+      });
+    });
   }
 }
 
 export function createFriendAnimations(scene) {
-  for (const friend of Object.values(FRIENDS)) {
+  for (const [id, friend] of Object.entries(FRIENDS)) {
     for (const direction of DIRECTIONS) {
-      const idleKey = `${friend.name.toLowerCase()}-idle-${direction}`;
-      const walkKey = `${friend.name.toLowerCase()}-walk-${direction}`;
+      const idleKey = `${id}-idle-${direction}`;
+      const walkKey = `${id}-walk-${direction}`;
       createAnimation(scene, {
         key: idleKey,
         frames: [{ key: direction === 'down' ? friend.idleDown : friend.asset, frame: direction === 'down' ? 0 : IDLE_FRAMES[direction] }],
@@ -53,6 +96,16 @@ export function createFriendAnimations(scene) {
         repeat: -1,
       });
     }
+
+    friend.specials?.forEach((special) => {
+      const key = `${id}-${special.id}-down`;
+      createAnimation(scene, {
+        key,
+        frames: Array.from({ length: special.frames }, (_, frame) => ({ key: special.asset, frame })),
+        frameRate: special.frameRate,
+        repeat: 0,
+      });
+    });
   }
 }
 
@@ -64,8 +117,99 @@ export function createFriendSprite(scene, friendData) {
     .setOrigin(0.5, 0.5)
     .setScale(FRIEND_SPRITE_CONFIG.scale)
     .setDepth(friendData.y + FRIEND_SPRITE_CONFIG.footDepthOffset);
-  sprite.play(`${config.name.toLowerCase()}-idle-down`);
+
+  sprite.friendId = friendData.id;
+  if (!config.specials) {
+    sprite.play(`${friendData.id}-idle-down`);
+    return sprite;
+  }
+
+  sprite.friendState = FRIEND_STATES.IDLE;
+  sprite.friendFacing = 'down';
+  sprite.friendScene = scene;
+  playFriendIdle(sprite, 'down');
+  scene.events?.once?.('shutdown', () => destroyFriendSprite(sprite));
   return sprite;
+}
+
+export function playFriendIdle(sprite, direction = sprite.friendFacing ?? 'down') {
+  cancelFriendIdleTimer(sprite);
+  clearFriendSpecialCompletion(sprite);
+  sprite.friendState = FRIEND_STATES.IDLE;
+  sprite.friendFacing = direction;
+  const key = `${sprite.friendId}-idle-${direction}`;
+  if (sprite.anims?.currentAnim?.key !== key) sprite.play(key, true);
+  scheduleFriendIdleVariation(sprite);
+}
+
+export function playFriendWalk(sprite, destination) {
+  const dx = destination.x - sprite.x;
+  const dy = destination.y - sprite.y;
+  const direction = Math.abs(dx) > Math.abs(dy)
+    ? (dx >= 0 ? 'right' : 'left')
+    : (dy >= 0 ? 'down' : 'up');
+  cancelFriendIdleTimer(sprite);
+  clearFriendSpecialCompletion(sprite);
+  sprite.friendState = FRIEND_STATES.WALK;
+  sprite.friendFacing = direction;
+  sprite.play(`${sprite.friendId}-walk-${direction}`, true);
+}
+
+export function playTobiIdleSpecial(sprite, variation) {
+  if (sprite.friendId !== 'tobi' || sprite.friendState !== FRIEND_STATES.IDLE || sprite.friendFacing !== 'down') return false;
+  const key = `tobi-${variation}-down`;
+  if (!FRIENDS.tobi.specials.some((special) => key === `tobi-${special.id}-down`)) return false;
+
+  cancelFriendIdleTimer(sprite);
+  clearFriendSpecialCompletion(sprite);
+  sprite.friendState = FRIEND_STATES.SPECIAL_IDLE;
+  const event = `animationcomplete-${key}`;
+  const handler = () => {
+    if (sprite.friendSpecialCompletion?.handler !== handler) return;
+    sprite.friendSpecialCompletion = null;
+    if (sprite.friendState === FRIEND_STATES.SPECIAL_IDLE && sprite.friendFacing === 'down') {
+      playFriendIdle(sprite, 'down');
+    }
+  };
+  sprite.once?.(event, handler);
+  sprite.friendSpecialCompletion = { event, handler };
+  sprite.play(key, true);
+  return true;
+}
+
+export function setFriendDepth(sprite) {
+  sprite.setDepth(sprite.y + FRIEND_SPRITE_CONFIG.footDepthOffset);
+}
+
+export function destroyFriendSprite(sprite) {
+  cancelFriendIdleTimer(sprite);
+  clearFriendSpecialCompletion(sprite);
+  sprite.friendScene = null;
+}
+
+function scheduleFriendIdleVariation(sprite) {
+  if (sprite.friendId !== 'tobi' || sprite.friendState !== FRIEND_STATES.IDLE
+    || sprite.friendFacing !== 'down' || !sprite.friendScene?.time?.delayedCall) return;
+  cancelFriendIdleTimer(sprite);
+  const random = sprite.friendIdleRandom ?? Math.random;
+  sprite.friendIdleTimer = sprite.friendScene.time.delayedCall(getFriendIdleDelay(random), () => {
+    sprite.friendIdleTimer = null;
+    if (sprite.friendState !== FRIEND_STATES.IDLE || sprite.friendFacing !== 'down') return;
+    playTobiIdleSpecial(sprite, chooseTobiIdleVariation(random));
+  });
+}
+
+function cancelFriendIdleTimer(sprite) {
+  sprite.friendIdleTimer?.remove?.();
+  sprite.friendIdleTimer = null;
+}
+
+function clearFriendSpecialCompletion(sprite) {
+  const completion = sprite.friendSpecialCompletion;
+  if (!completion) return;
+  sprite.off?.(completion.event, completion.handler);
+  sprite.removeListener?.(completion.event, completion.handler);
+  sprite.friendSpecialCompletion = null;
 }
 
 function createAnimation(scene, config) {

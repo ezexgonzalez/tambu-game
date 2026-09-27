@@ -129,7 +129,7 @@ Hay tests para sistema social, Sofi, Mili, Cami, Consejo, presentación y flujo 
 
 ### Personajes del patio
 
-- Eze, Pitity, Santy y Tobi tienen atlas walk de cuatro direcciones e idle down estático bajo integración experimental; pendiente QA visual. Uriel y Thiago conservan el sistema procedural.
+- Eze, Pitity, Santy y Tobi tienen atlas walk de cuatro direcciones e idle down estable bajo integración experimental; Tobi también ejecuta drink y arms-crossed down ocasionales. El blink de Tobi todavía no está integrado. Los cuatro siguen pendientes de QA visual. Uriel y Thiago conservan el sistema procedural.
 - Los NPCs de relleno también son placeholders; solo algunos tienen tween de baile o un indicador simple de actividad.
 - Eze, Pitity, Santy y Tobi ya están integrados con sprites runtime experimentales; queda su QA visual. Uriel, Thiago y los NPCs de relleno siguen pendientes de arte final.
 
