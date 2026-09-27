@@ -248,6 +248,16 @@ test('intro usa reloj pixelado alineado con la máscara y hace una transición c
   )), 'el centro permanece fijo también durante el overshoot');
 
   intro.update(NIGHT_INTRO_TIMINGS.revealTail - 1);
+  assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.REVEAL_TAIL);
+  assert.equal(intro.isComplete(), false, 'el frame final del overshoot aún debe renderizarse');
+  assert.equal(cover.destroyed, false);
+  assert.equal(hud.visible, false);
+  assert.deepEqual(removedTextures, []);
+  const finalScale = getSnapshotScale(windowTexture);
+  assert.ok(finalScale >= revealMaxScale * 1.4 - 1e-9,
+    'el reloj supera holgadamente el scale máximo del reveal principal');
+
+  intro.update(1);
   assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.COMPLETE);
   assert.equal(intro.isComplete(), true);
   assert.equal(player.facing, 'down');
@@ -257,9 +267,6 @@ test('intro usa reloj pixelado alineado con la máscara y hace una transición c
   assert.equal(player.label.visible, true);
   assert.equal(hud.visible, true);
   assert.deepEqual(camera.calls, []);
-  const finalScale = getSnapshotScale(windowTexture);
-  assert.ok(finalScale >= revealMaxScale * 1.4 - 1e-9,
-    'el reloj supera holgadamente el scale máximo del reveal principal');
   assert.ok(objects.every(({ destroyed }) => destroyed));
   assert.deepEqual(removedTextures, ['night-intro-clock-window', 'night-intro-clock-pixels']);
 });

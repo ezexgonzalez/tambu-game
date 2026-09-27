@@ -216,13 +216,15 @@ export function createNightIntro(scene, { player, hud }) {
       phase = NIGHT_INTRO_PHASES.REVEAL;
     } else if (phase === NIGHT_INTRO_PHASES.REVEAL) {
       phase = NIGHT_INTRO_PHASES.REVEAL_TAIL;
-    } else if (phase === NIGHT_INTRO_PHASES.REVEAL_TAIL) {
-      finish();
     }
   }
 
   function update(deltaMs) {
     if (phase === NIGHT_INTRO_PHASES.COMPLETE) return;
+    if (phase === NIGHT_INTRO_PHASES.REVEAL_TAIL && elapsed >= NIGHT_INTRO_TIMINGS.revealTail) {
+      finish();
+      return;
+    }
     let remaining = Math.max(0, deltaMs);
 
     while (remaining > 0 && phase !== NIGHT_INTRO_PHASES.COMPLETE) {
@@ -252,7 +254,10 @@ export function createNightIntro(scene, { player, hud }) {
         drawClockWindow(windowTexture, width, height, scale);
       }
 
-      if (elapsed >= duration) advance();
+      if (elapsed >= duration) {
+        if (phase === NIGHT_INTRO_PHASES.REVEAL_TAIL) return;
+        advance();
+      }
     }
   }
 
