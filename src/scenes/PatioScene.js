@@ -8,6 +8,7 @@ import {
   isCharacterResolved,
   settleBathroomResult,
 } from '../state/gameState.js';
+import { createRunState, RUN_PHASES } from '../state/runState.js';
 import { createDialogueSystem } from '../systems/dialogueSystem.js';
 import { createInteractionSystem } from '../systems/interactionSystem.js';
 import { createOutcomeEventSystem } from '../systems/outcomeEventSystem.js';
@@ -32,6 +33,7 @@ export class PatioScene extends Phaser.Scene {
 
   create() {
     this.gameState = createGameState();
+    this.runState = createRunState();
     this.configureWorld();
 
     createPatioWorld(this);
@@ -103,9 +105,12 @@ export class PatioScene extends Phaser.Scene {
   update() {
     if (!this.player?.sprite) return;
 
-    if (!this.nightIntro.isComplete()) {
-      this.nightIntro.update(this.game.loop.delta);
-      if (!this.nightIntro.isComplete()) return;
+    if (this.runState.getPhase() === RUN_PHASES.INTRO) {
+      if (!this.nightIntro.isComplete()) {
+        this.nightIntro.update(this.game.loop.delta);
+        if (!this.nightIntro.isComplete()) return;
+      }
+      this.runState.completeIntro();
     }
 
     this.resolvedCharacterReturnSystem.update(this.game.loop.delta);
@@ -127,6 +132,11 @@ export class PatioScene extends Phaser.Scene {
       updatePlayer(this.player, { canMove: false });
       return;
     }
+
+    if (!this.outcomeEventSystem.isActive() && !this.dialogueSystem.isOpen()) {
+      this.runState.evaluate(this.gameState);
+    }
+
     updatePlayer(this.player);
   }
 }
