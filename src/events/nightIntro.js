@@ -5,6 +5,7 @@ export const NIGHT_INTRO_PHASES = Object.freeze({
   CLOCK_0000: 'clock-0000',
   CLOCK_0001: 'clock-0001',
   REVEAL: 'reveal',
+  REVEAL_TAIL: 'reveal-tail',
   COMPLETE: 'complete',
 });
 
@@ -13,12 +14,14 @@ export const NIGHT_INTRO_TIMINGS = Object.freeze({
   clock0000: 1500,
   clock0001: 450,
   reveal: 1500,
+  revealTail: 300,
 });
 
 const INTRO_DEPTH = 10000;
 const WINDOW_TEXTURE_KEY = 'night-intro-clock-window';
 const CLOCK_TEXTURE_KEY = 'night-intro-clock-pixels';
 const CLOCK_TRANSITION_MS = 180;
+const REVEAL_TAIL_OVERSHOOT = 1.4;
 const CLOCK_CELL_SIZE = 14;
 const CLOCK_PIXEL_INSET = 2;
 const CLOCK_GLYPH_WIDTH = 5;
@@ -108,9 +111,24 @@ function drawClockText(texture, text, width, height) {
   texture.refresh();
 }
 
-function drawClockWindow(texture, width, height, progress, maxScale) {
+function getRevealTailScale(progress, maxScale) {
+  const overshootScale = maxScale * REVEAL_TAIL_OVERSHOOT;
+  const tailDuration = NIGHT_INTRO_TIMINGS.revealTail;
+  const expansionDuration = NIGHT_INTRO_TIMINGS.reveal - CLOCK_TRANSITION_MS;
+  const startTangent = 3 * (maxScale - 1) * tailDuration / expansionDuration;
+  const progressSquared = progress ** 2;
+  const progressCubed = progressSquared * progress;
+  const startWeight = 2 * progressCubed - 3 * progressSquared + 1;
+  const tangentWeight = progressCubed - 2 * progressSquared + progress;
+  const endWeight = -2 * progressCubed + 3 * progressSquared;
+
+  return startWeight * maxScale
+    + tangentWeight * startTangent
+    + endWeight * overshootScale;
+}
+
+function drawClockWindow(texture, width, height, scale) {
   const ctx = texture.getContext();
-  const scale = 1 + (maxScale - 1) * progress ** 3;
 
   ctx.save();
   ctx.globalCompositeOperation = 'source-over';
@@ -193,10 +211,12 @@ export function createNightIntro(scene, { player, hud }) {
       drawClockText(clockTexture, '00:01', width, height);
       phase = NIGHT_INTRO_PHASES.CLOCK_0001;
     } else if (phase === NIGHT_INTRO_PHASES.CLOCK_0001) {
-      drawClockWindow(windowTexture, width, height, 0, revealMaxScale);
+      drawClockWindow(windowTexture, width, height, 1);
       clock.setAlpha(1);
       phase = NIGHT_INTRO_PHASES.REVEAL;
     } else if (phase === NIGHT_INTRO_PHASES.REVEAL) {
+      phase = NIGHT_INTRO_PHASES.REVEAL_TAIL;
+    } else if (phase === NIGHT_INTRO_PHASES.REVEAL_TAIL) {
       finish();
     }
   }
@@ -211,6 +231,7 @@ export function createNightIntro(scene, { player, hud }) {
         [NIGHT_INTRO_PHASES.CLOCK_0000]: NIGHT_INTRO_TIMINGS.clock0000,
         [NIGHT_INTRO_PHASES.CLOCK_0001]: NIGHT_INTRO_TIMINGS.clock0001,
         [NIGHT_INTRO_PHASES.REVEAL]: NIGHT_INTRO_TIMINGS.reveal,
+        [NIGHT_INTRO_PHASES.REVEAL_TAIL]: NIGHT_INTRO_TIMINGS.revealTail,
       }[phase];
       const step = Math.min(remaining, duration - elapsed);
       elapsed += step;
@@ -223,7 +244,12 @@ export function createNightIntro(scene, { player, hud }) {
         const expansionProgress = expansionElapsed / expansionDuration;
 
         clock.setAlpha(1 - transitionProgress);
-        drawClockWindow(windowTexture, width, height, expansionProgress, revealMaxScale);
+        const scale = 1 + (revealMaxScale - 1) * expansionProgress ** 3;
+        drawClockWindow(windowTexture, width, height, scale);
+      } else if (phase === NIGHT_INTRO_PHASES.REVEAL_TAIL) {
+        const tailProgress = elapsed / duration;
+        const scale = getRevealTailScale(tailProgress, revealMaxScale);
+        drawClockWindow(windowTexture, width, height, scale);
       }
 
       if (elapsed >= duration) advance();
