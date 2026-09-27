@@ -37,20 +37,26 @@ function getBathroomRoute(layout, interactable) {
   return [...entryPath, ...layout.commonPath];
 }
 
-function moveToward(target, destination, distance) {
-  const dx = destination.x - target.x;
-  const dy = destination.y - target.y;
-  const remaining = Math.hypot(dx, dy);
-  if (remaining <= distance || remaining === 0) {
-    setPosition(target, destination.x, destination.y);
-    return true;
+export function getBathroomFormationOffset(path, index, spacing) {
+  if (path[index].formation === 'lateral') return { x: spacing, y: 0 };
+  const from = path[index];
+  const to = path[index + 1] ?? path[index - 1];
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const length = Math.hypot(dx, dy);
+  if (!length) return { x: spacing, y: 0 };
+  return { x: (-dy / length) * spacing, y: (dx / length) * spacing };
+}
+
+function moveTogether(playerSprite, npcSprite, playerTarget, npcTarget, distance) {
+  const playerRemaining = Math.hypot(playerTarget.x - playerSprite.x, playerTarget.y - playerSprite.y);
+  const npcRemaining = Math.hypot(npcTarget.x - npcSprite.x, npcTarget.y - npcSprite.y);
+  const fraction = Math.min(1, distance / Math.max(playerRemaining, npcRemaining, 0.001));
+  for (const [sprite, target] of [[playerSprite, playerTarget], [npcSprite, npcTarget]]) {
+    setPosition(sprite, sprite.x + (target.x - sprite.x) * fraction,
+      sprite.y + (target.y - sprite.y) * fraction);
   }
-  setPosition(
-    target,
-    target.x + (dx / remaining) * distance,
-    target.y + (dy / remaining) * distance,
-  );
-  return false;
+  return fraction === 1;
 }
 
 function updatePlayerAnimation(player, destination) {
@@ -184,18 +190,18 @@ export function createBathroomEvent(scene, {
 
   function updateWalking() {
     const point = path[pathIndex];
-    const playerTarget = { x: point.x - layout.actorSpacing, y: point.y };
-    const npcTarget = { x: point.x + layout.actorSpacing, y: point.y };
+    const offset = getBathroomFormationOffset(path, pathIndex, layout.actorSpacing);
+    const playerTarget = { x: point.x - offset.x, y: point.y - offset.y };
+    const npcTarget = { x: point.x + offset.x, y: point.y + offset.y };
     const distance = layout.speed * Math.max(0, Math.min(scene.game.loop.delta, 50)) / 1000;
 
     updatePlayerAnimation(player, playerTarget);
     updateNpcVisual(interactable, npcTarget);
-    const playerArrived = moveToward(player.sprite, playerTarget, distance);
-    const npcArrived = moveToward(npc, npcTarget, distance);
+    const bothArrived = moveTogether(player.sprite, npc, playerTarget, npcTarget, distance);
     updateNpcVisual(interactable, npcTarget);
     updateLabels();
 
-    if (!playerArrived || !npcArrived) return true;
+    if (!bothArrived) return true;
     pathIndex += 1;
     if (pathIndex >= path.length) enterBathroom();
     return true;

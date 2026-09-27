@@ -69,32 +69,33 @@ const DJ = {
 };
 
 const BATHROOM_EVENT = {
-  speed: 460,
+  speed: 160,
   actorSpacing: 14,
   entryPaths: {
     sofi: [
       { x: 400, y: 690 },
-      { x: 440, y: 780 },
-      { x: 1560, y: 780 },
-      { x: 1560, y: 450 },
-      { x: 1560, y: 155 },
+      { x: 470, y: 775 },
+      { x: 1160, y: 775 },
+      { x: 1250, y: 660 },
+      { x: 1250, y: 470 },
+      { x: 1216, y: 440 },
+      { x: 1216, y: 155, formation: 'lateral' },
     ],
     mili: [
       { x: 930, y: 330 },
-      { x: 1216, y: 330 },
-      { x: 1216, y: 155 },
+      { x: 1216, y: 155, formation: 'lateral' },
     ],
     cami: [
       { x: 1270, y: 635 },
-      { x: 1270, y: 660 },
-      { x: 1560, y: 660 },
-      { x: 1560, y: 450 },
-      { x: 1560, y: 155 },
+      { x: 1265, y: 460 },
+      { x: 1216, y: 440 },
+      { x: 1216, y: 155, formation: 'lateral' },
     ],
   },
+  // The gap between house and bar needs horizontal spacing even on the final eastbound segment.
   commonPath: [
-    { x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2, y: 155 },
-    { x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2, y: HOUSE.height - 8 },
+    { x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2, y: 155, formation: 'lateral' },
+    { x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2, y: HOUSE.height - 8, formation: 'lateral' },
   ],
   safeExit: {
     x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2,

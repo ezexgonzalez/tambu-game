@@ -24,7 +24,7 @@ const hooks = registerHooks({
       : nextResolve(specifier, context);
   },
 });
-const { createBathroomEvent } = await import('../src/events/bathroomEvent.js');
+const { createBathroomEvent, getBathroomFormationOffset } = await import('../src/events/bathroomEvent.js');
 hooks.deregister();
 
 function actor(x, y) {
@@ -110,14 +110,18 @@ function assertBathroomPathClear(characterId) {
   const doorway = PATIO_LAYOUT.house.bathroom;
   const spawn = patioWomen.find(({ id }) => id === characterId);
   const lanes = [
-    { name: 'Tambu', x: -bathroom.actorSpacing, footprint: playerFootprint() },
-    { name: characterId, x: bathroom.actorSpacing, footprint: GIRL_FOOTPRINT },
+    { name: 'Tambu', sign: -1, footprint: playerFootprint() },
+    { name: characterId, sign: 1, footprint: GIRL_FOOTPRINT },
   ];
+  const target = (point, index, sign) => {
+    const offset = getBathroomFormationOffset(route, index, bathroom.actorSpacing);
+    return { x: point.x + sign * offset.x, y: point.y + sign * offset.y };
+  };
   const initialMoves = [
     { name: 'Tambu', start: { x: spawn.x - bathroom.actorSpacing, y: spawn.y },
-      end: { x: route[0].x - bathroom.actorSpacing, y: route[0].y }, footprint: playerFootprint() },
+      end: target(route[0], 0, -1), footprint: playerFootprint() },
     { name: characterId, start: { x: spawn.x, y: spawn.y },
-      end: { x: route[0].x + bathroom.actorSpacing, y: route[0].y }, footprint: GIRL_FOOTPRINT },
+      end: target(route[0], 0, 1), footprint: GIRL_FOOTPRINT },
   ];
   for (const move of initialMoves) {
     for (const zone of zones) {
@@ -128,25 +132,21 @@ function assertBathroomPathClear(characterId) {
 
   for (const lane of lanes) {
     for (let index = 0; index < route.length - 1; index += 1) {
-      const start = route[index];
-      const end = route[index + 1];
+      const start = target(route[index], index, lane.sign);
+      const end = target(route[index + 1], index + 1, lane.sign);
       for (const zone of zones) {
         if (zone.id === 'house' && index === route.length - 2) {
-          assert.ok(start.y >= PATIO_LAYOUT.house.height);
+          assert.ok(route[index].y >= PATIO_LAYOUT.house.height);
           assert.ok(end.y >= PATIO_LAYOUT.house.height - 12,
             'the scripted house entry only crosses the wall at the bathroom threshold');
-          const minX = Math.min(start.x, end.x) + lane.x + lane.footprint.offsetX - lane.footprint.halfWidth;
-          const maxX = Math.max(start.x, end.x) + lane.x + lane.footprint.offsetX + lane.footprint.halfWidth;
+          const minX = Math.min(start.x, end.x) + lane.footprint.offsetX - lane.footprint.halfWidth;
+          const maxX = Math.max(start.x, end.x) + lane.footprint.offsetX + lane.footprint.halfWidth;
           assert.ok(minX >= doorway.x && maxX <= doorway.x + doorway.width,
             `${characterId}/${lane.name} enters the house outside the bathroom doorway`);
           continue;
         }
-        assert.equal(segmentIntersectsZone(
-          { x: start.x + lane.x, y: start.y },
-          { x: end.x + lane.x, y: end.y },
-          zone,
-          lane.footprint,
-        ), false, `${characterId}/${lane.name} crosses ${zone.id}`);
+        assert.equal(segmentIntersectsZone(start, end, zone, lane.footprint), false,
+          `${characterId}/${lane.name} crosses ${zone.id} on segment ${index}`);
       }
     }
   }
@@ -194,7 +194,7 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
 
   let frames = 0;
   const playerDepths = new Set();
-  while (event.getMode() === 'walking' && frames < 200) {
+  while (event.getMode() === 'walking' && frames < 400) {
     assert.equal(event.update(), true);
     assert.equal(player.sprite.depth, player.sprite.y + 27);
     assert.equal(player.label.depth, player.sprite.depth + 1);
@@ -203,7 +203,7 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
     frames += 1;
   }
 
-  assert.ok(frames < 200);
+  assert.ok(frames < 400);
   assert.ok(playerDepths.size > 1, 'Tambu depth follows vertical movement');
   assert.equal(event.getMode(), 'bathroom-achieved');
   assert.equal(player.sprite.visible, false);
@@ -447,9 +447,9 @@ test('Mili sube por la izquierda de la barra y los recorridos convergen frente a
     'Mili should not descend to reach a bathroom above her');
   assert.ok(bathroom.entryPaths.mili.every(({ x }) => x < barLeft),
     'Mili should approach the house along the left side of the bar');
-  assert.ok(bathroom.entryPaths.sofi.some(({ x }) => x > barRight));
-  assert.ok(bathroom.entryPaths.cami.some(({ x }) => x > barRight));
-  assert.notDeepEqual(bathroom.entryPaths.mili.at(-1), bathroom.entryPaths.sofi.at(-1));
+  assert.ok(bathroom.entryPaths.sofi.every(({ x }) => x < barRight));
+  assert.ok(bathroom.entryPaths.cami.every(({ x }) => x < barRight));
+  assert.notDeepEqual(bathroom.entryPaths.mili.at(-2), bathroom.entryPaths.sofi.at(-2));
   assert.ok(Object.values(bathroom.entryPaths).every((path) => path.at(-1).y <= PATIO_LAYOUT.house.height + 10),
     'the routes should reach the house before sharing the final doorway segment');
   assert.equal(bathroom.commonPath[0].x, doorCenter);
@@ -472,4 +472,62 @@ test('el regreso queda inmediatamente frente a la puerta sin invadir casa ni bar
 
 test('los dos carriles evitan todos los colliders salvo la entrada por la puerta', () => {
   for (const id of ['sofi', 'mili', 'cami']) assertBathroomPathClear(id);
+});
+
+test('la caminata es más lenta que Tambu y las rutas evitan rodeos largos', () => {
+  const bathroom = PATIO_LAYOUT.events.bathroom;
+  const routeLength = (id) => {
+    const points = [...bathroom.entryPaths[id], ...bathroom.commonPath];
+    return points.slice(1).reduce((length, point, index) =>
+      length + Math.hypot(point.x - points[index].x, point.y - points[index].y), 0);
+  };
+  assert.equal(bathroom.speed, 160);
+  assert.ok(bathroom.speed < PLAYER_CONFIG.speed);
+  assert.ok(routeLength('mili') < 550);
+  assert.ok(routeLength('cami') < 800);
+  assert.ok(routeLength('sofi') < 1750);
+  assert.ok(routeLength('mili') < routeLength('cami'));
+  assert.ok(routeLength('cami') < routeLength('sofi'));
+});
+
+test('la formación gira con el trayecto y ambos avanzan juntos sin pausas en waypoints', () => {
+  const bathroom = PATIO_LAYOUT.events.bathroom;
+  const sofiRoute = [...bathroom.entryPaths.sofi, ...bathroom.commonPath];
+  const horizontal = getBathroomFormationOffset(sofiRoute, 1, bathroom.actorSpacing);
+  assert.ok(Math.abs(horizontal.x) < 0.01);
+  assert.ok(Math.abs(horizontal.y) >= 10);
+  const finalCorridor = getBathroomFormationOffset(sofiRoute, sofiRoute.length - 2, bathroom.actorSpacing);
+  assert.deepEqual(finalCorridor, { x: bathroom.actorSpacing, y: 0 });
+
+  const outcomes = {
+    sofi: SOFI_CONVERSATION.outcomes.bathroom,
+    mili: MILI_CONVERSATION.outcomes.bathroom,
+    cami: CAMI_CONVERSATION.outcomes.bathroom,
+  };
+  for (const { id, x, y } of patioWomen) {
+    const scene = {
+      input: { keyboard: { addKey() { return { edge: false }; } } },
+      add: { rectangle: display, text: display },
+      game: { loop: { delta: 50 } },
+    };
+    const player = { sprite: actor(x - bathroom.actorSpacing, y), label: display(x, y), facing: 'down' };
+    const interactable = { sprite: actor(x, y), visual: `${id}-sprite`, character: { id } };
+    const event = createBathroomEvent(scene, { player, interactable, outcome: outcomes[id], layout: bathroom });
+    let frames = 0;
+    while (event.getMode() === 'walking' && frames < 400) {
+      const beforePlayer = { x: player.sprite.x, y: player.sprite.y };
+      const beforeNpc = { x: interactable.sprite.x, y: interactable.sprite.y };
+      event.update();
+      for (const [name, before, after] of [
+        ['Tambu', beforePlayer, player.sprite],
+        [id, beforeNpc, interactable.sprite],
+      ]) {
+        const step = Math.hypot(after.x - before.x, after.y - before.y);
+        assert.ok(step > 0.001, `${id}/${name} stopped while walking`);
+        assert.ok(step <= bathroom.speed * 0.05 + 0.001, `${id}/${name} moved too fast`);
+      }
+      frames += 1;
+    }
+    assert.equal(event.getMode(), 'bathroom-achieved');
+  }
 });
