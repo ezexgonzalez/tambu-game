@@ -6,7 +6,12 @@ import {
   createBathroomResistanceState,
   recoverBathroomResistance,
 } from '../src/events/bathroomResistance.js';
-import { commitConversationOutcome, createGameState } from '../src/state/gameState.js';
+import {
+  commitConversationOutcome,
+  createGameState,
+  getBathroomResult,
+  settleBathroomResult,
+} from '../src/state/gameState.js';
 import { SOFI_CONVERSATION } from '../src/data/conversations/sofiConversation.js';
 
 const NO_HITS_CONFIG = { ...BATHROOM_RESISTANCE_CONFIG, hits: [] };
@@ -58,7 +63,7 @@ test('sobrevivir la duración completa produce éxito y no puede producir fracas
   assert.equal(advanceBathroomResistance(state, 1000, config).state.status, 'success');
 });
 
-test('el resultado del minijuego no modifica el baño, puntos ni resolución social', () => {
+test('el baño queda pendiente hasta Resistance y una falla liquida recompensa parcial', () => {
   const gameState = createGameState();
   const session = {
     characterId: 'sofi',
@@ -75,8 +80,15 @@ test('el resultado del minijuego no modifica el baño, puntos ni resolución soc
   ).state;
 
   assert.equal(failure.status, 'failure');
-  assert.deepEqual(gameState, snapshot);
+  assert.equal(gameState.player.points, snapshot.player.points);
+  assert.equal(gameState.player.lives, snapshot.player.lives);
   assert.equal(gameState.relationships.sofi.outcome, 'bathroom');
-  assert.equal(gameState.player.points, 500);
   assert.equal(gameState.relationships.sofi.resolved, true);
+  assert.equal(getBathroomResult(gameState, 'sofi'), null);
+  assert.equal(gameState.relationships.sofi.rewardSettled, false);
+
+  assert.equal(settleBathroomResult(gameState, 'sofi', failure.status), true);
+  assert.equal(getBathroomResult(gameState, 'sofi'), 'interrupted');
+  assert.equal(gameState.player.points, 250);
+  assert.equal(gameState.player.lives, 3);
 });

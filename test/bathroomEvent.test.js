@@ -7,6 +7,12 @@ import { SOFI_CONVERSATION } from '../src/data/conversations/sofiConversation.js
 import { patioWomen } from '../src/data/patioCharacters.js';
 import { PLAYER_CONFIG } from '../src/player/playerConfig.js';
 import { createResolvedCharacterReturnSystem } from '../src/events/resolvedCharacterReturn.js';
+import {
+  commitConversationOutcome,
+  createGameState,
+  getBathroomResult,
+  settleBathroomResult,
+} from '../src/state/gameState.js';
 import { getPatioCollisionZones } from '../src/world/createPatioCollisions.js';
 import { PATIO_LAYOUT } from '../src/world/patioLayout.js';
 
@@ -191,6 +197,14 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
     visual: 'sofi-sprite',
   };
   const outcome = SOFI_CONVERSATION.outcomes.bathroom;
+  const gameState = createGameState();
+  commitConversationOutcome(gameState, {
+    characterId: 'sofi',
+    stats: { attraction: 10, trust: 10, intensity: 4 },
+    history: [],
+    signals: [],
+  }, outcome);
+  const bathroomResolutions = [];
   const returnSystem = createResolvedCharacterReturnSystem(PATIO_LAYOUT.events.bathroom);
   const sofiAnchor = patioWomen.find(({ id }) => id === 'sofi');
   const event = createBathroomEvent(scene, {
@@ -199,6 +213,11 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
     outcome,
     layout: PATIO_LAYOUT.events.bathroom,
     onCompanionReturn: returnSystem.start,
+    onBathroomResolved(resolution) {
+      bathroomResolutions.push(resolution);
+      const settled = settleBathroomResult(gameState, resolution.characterId, resolution.result);
+      return settled;
+    },
   });
 
   assert.equal(player.sprite.body.enable, false);
@@ -221,9 +240,12 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
   assert.equal(event.getMode(), 'bathroom-achieved');
   assert.equal(player.sprite.visible, false);
   assert.equal(interactable.sprite.visible, false);
+  assert.equal(gameState.player.points, 0);
+  assert.equal(getBathroomResult(gameState, 'sofi'), null);
   assert.match(interactable.sprite.anims.currentAnim.key, /^sofi-idle-(down|left|right|up)$/);
   assert.equal(interactable.sprite.depth, interactable.sprite.y + 30);
-  assert.ok(objects.some(({ text }) => text.includes('BAÑO CONSEGUIDO')));
+  assert.ok(objects.some(({ text }) => text.includes('ENTRARON AL BAÑO')));
+  assert.ok(objects.every(({ text }) => !String(text).includes('+500')));
 
   keys.ENTER.edge = true;
   assert.equal(event.update(), true);
@@ -238,6 +260,12 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
   while (event.getMode() === 'resistance') event.update();
   assert.equal(event.getMode(), 'failure');
   assert.ok(objects.some(({ text }) => text.includes('LA PUERTA CEDIÓ')));
+  assert.ok(objects.some(({ text, destroyed }) => text === '+250 ★' && !destroyed));
+  assert.deepEqual(bathroomResolutions, [{ characterId: 'sofi', result: 'failure' }]);
+  assert.equal(gameState.player.points, 250);
+  assert.equal(gameState.player.lives, 3);
+  assert.equal(getBathroomResult(gameState, 'sofi'), 'interrupted');
+  assert.equal(gameState.relationships.sofi.outcome, 'bathroom');
   assert.ok(objects.some(({ text }) => text.includes('ENTER · VOLVER AL PATIO')));
 
   keys.SPACE.edge = true;
@@ -340,7 +368,7 @@ test('Mili usa walk real, depth por pies y vuelve a idle durante BathroomEvent',
   assert.equal(event.getMode(), 'bathroom-achieved');
   assert.match(interactable.sprite.anims.currentAnim.key, /^mili-idle-(down|left|right|up)$/);
   assert.equal(interactable.sprite.depth, interactable.sprite.y + 30);
-  assert.ok(objects.some(({ text }) => text.includes('BAÑO CONSEGUIDO')));
+  assert.ok(objects.some(({ text }) => text.includes('ENTRARON AL BAÑO')));
 });
 
 test('Cami usa walk real, depth por pies y vuelve a idle durante BathroomEvent', () => {
@@ -385,7 +413,7 @@ test('Cami usa walk real, depth por pies y vuelve a idle durante BathroomEvent',
   assert.equal(event.getMode(), 'bathroom-achieved');
   assert.match(interactable.sprite.anims.currentAnim.key, /^cami-idle-(down|left|right|up)$/);
   assert.equal(interactable.sprite.depth, interactable.sprite.y + 30);
-  assert.ok(objects.some(({ text }) => text.includes('BAÑO CONSEGUIDO')));
+  assert.ok(objects.some(({ text }) => text.includes('ENTRARON AL BAÑO')));
 });
 
 test('SPACE sostenido mediante pulsaciones físicas permite asegurar la puerta', () => {
@@ -406,11 +434,16 @@ test('SPACE sostenido mediante pulsaciones físicas permite asegurar la puerta',
     marker: display(400, 635),
     visual: 'sofi-sprite',
   };
+  const bathroomResolutions = [];
   const event = createBathroomEvent(scene, {
     player,
     interactable,
     outcome: SOFI_CONVERSATION.outcomes.bathroom,
     layout: PATIO_LAYOUT.events.bathroom,
+    onBathroomResolved(resolution) {
+      bathroomResolutions.push(resolution);
+      return true;
+    },
   });
 
   while (event.getMode() === 'walking') event.update();
@@ -436,10 +469,13 @@ test('SPACE sostenido mediante pulsaciones físicas permite asegurar la puerta',
 
   assert.equal(event.getMode(), 'success');
   assert.ok(objects.some(({ text }) => text.includes('PUERTA ASEGURADA')));
+  assert.ok(objects.some(({ text, destroyed }) => text === '+500 ★' && !destroyed));
+  assert.deepEqual(bathroomResolutions, [{ characterId: 'sofi', result: 'success' }]);
 
   keys.SPACE.edge = true;
   assert.equal(event.update(), true);
   assert.equal(event.getMode(), 'success');
+  assert.equal(bathroomResolutions.length, 1, 'la liquidación ocurre solo al resolver Resistance');
 
   keys.ENTER.edge = true;
   assert.equal(event.update(), false);

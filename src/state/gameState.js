@@ -1,3 +1,5 @@
+import { BATHROOM_RESULT_CONFIG } from '../data/bathroomResultConfig.js';
+
 export function createGameState() {
   return {
     player: {
@@ -17,6 +19,18 @@ export function getCharacterOutcome(gameState, characterId) {
   return gameState.relationships[characterId]?.outcome ?? null;
 }
 
+export function getBathroomResult(gameState, characterId) {
+  return gameState.relationships[characterId]?.bathroomResult ?? null;
+}
+
+export function getSecuredBathroomCount(gameState) {
+  return Object.values(gameState.relationships)
+    .filter((relationship) => (
+      relationship.outcome === 'bathroom' && relationship.bathroomResult === 'secured'
+    ))
+    .length;
+}
+
 export function canStartMainConversation(gameState, characterId) {
   return Boolean(characterId) && !isCharacterResolved(gameState, characterId);
 }
@@ -34,6 +48,7 @@ export function canInteractWithCharacter(gameState, characterId) {
 export function commitConversationOutcome(gameState, session, outcome) {
   if (!canStartMainConversation(gameState, session.characterId)) return false;
 
+  const isBathroom = outcome.id === 'bathroom';
   gameState.relationships[session.characterId] = {
     ...session.stats,
     history: session.history.map((entry) => ({
@@ -46,9 +61,27 @@ export function commitConversationOutcome(gameState, session, outcome) {
     signals: [...session.signals],
     resolved: true,
     outcome: outcome.id,
+    ...(isBathroom ? { bathroomResult: null, rewardSettled: false } : {}),
   };
 
-  gameState.player.points += outcome.reward.points;
-  gameState.player.lives = Math.max(0, gameState.player.lives + outcome.reward.lives);
+  if (!isBathroom) {
+    gameState.player.points += outcome.reward.points;
+    gameState.player.lives = Math.max(0, gameState.player.lives + outcome.reward.lives);
+  }
+  return true;
+}
+
+export function settleBathroomResult(gameState, characterId, result) {
+  const relationship = gameState.relationships[characterId];
+  const resultConfig = BATHROOM_RESULT_CONFIG[result];
+  if (
+    relationship?.outcome !== 'bathroom'
+    || relationship.rewardSettled === true
+    || !resultConfig
+  ) return false;
+
+  relationship.bathroomResult = resultConfig.bathroomResult;
+  relationship.rewardSettled = true;
+  gameState.player.points += resultConfig.points;
   return true;
 }

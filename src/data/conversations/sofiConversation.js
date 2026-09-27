@@ -400,7 +400,7 @@ export const SOFI_CONVERSATION = {
       ],
       event: {
         type: 'bathroom',
-        resultLabel: 'BAÑO CONSEGUIDO',
+        resultLabel: 'ENTRARON AL BAÑO',
         resultText: 'Sofi y Tambu entraron juntos al baño.',
       },
       reward: { points: 500, lives: 0 },

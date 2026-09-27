@@ -1,3 +1,5 @@
+import { BATHROOM_RESULT_CONFIG } from '../data/bathroomResultConfig.js';
+
 const PANEL_DEPTH = 6100;
 
 function createText(scene, x, y, text, style) {
@@ -24,17 +26,12 @@ export function createOutcomeEventUi(scene, outcome) {
     fontSize: '16px',
     color: '#f4f4ef',
   }).setOrigin(0.5);
-  const reward = createText(scene, 640, 394, `+${outcome.reward.points} ★`, {
-    fontSize: '18px',
-    color: '#f4cd63',
-    fontStyle: 'bold',
-  }).setOrigin(0.5);
   const help = createText(scene, 960, 438, 'ENTER / SPACE · CONTINUAR', {
     fontSize: '12px',
     color: '#8e95a2',
   }).setOrigin(1, 0.5);
 
-  return [panel, title, narrative, reward, help];
+  return [panel, title, narrative, help];
 }
 
 export function createBathroomAnticipationUi(scene) {
@@ -104,8 +101,9 @@ export function createBathroomResistanceUi(scene, config) {
   };
 }
 
-export function createBathroomResolutionUi(scene, result) {
+export function createBathroomResolutionUi(scene, result, { rewardSettled = false } = {}) {
   const isSuccess = result === 'success';
+  const resultConfig = BATHROOM_RESULT_CONFIG[result];
   const panel = scene.add.rectangle(640, 360, 720, 210, 0x090b10, 0.97)
     .setScrollFactor(0)
     .setDepth(PANEL_DEPTH);
@@ -120,11 +118,18 @@ export function createBathroomResolutionUi(scene, result) {
     isSuccess ? 'Afuera finalmente se rinden.' : 'La puerta se abre de golpe.\n\nTAMBU: ¿Qué?',
     { fontSize: '16px', color: '#f4f4ef', align: 'center', lineSpacing: 5 },
   ).setOrigin(0.5);
-  const help = createText(scene, 640, 438, 'ENTER · VOLVER AL PATIO', {
+  const reward = createText(
+    scene,
+    640,
+    408,
+    rewardSettled && resultConfig ? `+${resultConfig.points} ★` : '',
+    { fontSize: '18px', color: '#f4cd63', fontStyle: 'bold' },
+  ).setOrigin(0.5);
+  const help = createText(scene, 640, 454, 'ENTER · VOLVER AL PATIO', {
     fontSize: '12px', color: '#8e95a2',
   }).setOrigin(0.5);
 
-  return [panel, title, narrative, help];
+  return [panel, title, narrative, reward, help];
 }
 
 export function destroyEventUi(elements) {

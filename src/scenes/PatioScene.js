@@ -6,6 +6,7 @@ import {
   canInteractWithCharacter,
   createGameState,
   isCharacterResolved,
+  settleBathroomResult,
 } from '../state/gameState.js';
 import { createDialogueSystem } from '../systems/dialogueSystem.js';
 import { createInteractionSystem } from '../systems/interactionSystem.js';
@@ -39,6 +40,13 @@ export class PatioScene extends Phaser.Scene {
     this.obstacles = createPatioCollisions(this, this.player.sprite);
 
     const hud = createHud(this, this.gameState);
+    let interactionSystem = null;
+    const onGameStateChange = (gameState) => {
+      hud.update(gameState);
+      interactionSystem?.syncMarkers((characterId) => (
+        isCharacterResolved(gameState, characterId)
+      ));
+    };
     this.resolvedCharacterReturnSystem = createResolvedCharacterReturnSystem(
       PATIO_LAYOUT.events.bathroom,
     );
@@ -49,18 +57,17 @@ export class PatioScene extends Phaser.Scene {
           player: this.player,
           layout: PATIO_LAYOUT.events.bathroom,
           onCompanionReturn: this.resolvedCharacterReturnSystem.start,
+          onBathroomResolved: ({ characterId, result }) => {
+            const settled = settleBathroomResult(this.gameState, characterId, result);
+            if (settled) onGameStateChange(this.gameState);
+            return settled;
+          },
         }),
       },
     });
-    let interactionSystem = null;
     this.dialogueSystem = createDialogueSystem(this, {
       gameState: this.gameState,
-      onGameStateChange: (gameState) => {
-        hud.update(gameState);
-        interactionSystem?.syncMarkers((characterId) => (
-          isCharacterResolved(gameState, characterId)
-        ));
-      },
+      onGameStateChange,
       onOutcomeEvent: this.outcomeEventSystem.start,
     });
     interactionSystem = createInteractionSystem({

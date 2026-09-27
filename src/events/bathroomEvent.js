@@ -114,6 +114,7 @@ export function createBathroomEvent(scene, {
   outcome,
   layout,
   onCompanionReturn = () => {},
+  onBathroomResolved = () => false,
   resistanceConfig = BATHROOM_RESISTANCE_CONFIG,
 }) {
   if (!player?.sprite || !interactable?.sprite || !outcome || !layout) return null;
@@ -123,6 +124,8 @@ export function createBathroomEvent(scene, {
   const enterKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
   const spaceKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
   const npc = interactable.sprite;
+  const characterId = interactable.character?.id
+    ?? interactable.visual?.replace(/-sprite$/, '');
   const bodyWasEnabled = player.sprite.body?.enable ?? true;
   // Physics is disabled during this scripted walk, so carry its real bottom offset with sprite.y.
   const playerFootDepthOffset = Number.isFinite(player.sprite.body?.bottom)
@@ -254,7 +257,8 @@ export function createBathroomEvent(scene, {
 
   function showResistanceResolution(result) {
     destroyEventUi(uiElements);
-    uiElements = createBathroomResolutionUi(scene, result);
+    const rewardSettled = onBathroomResolved({ characterId, result }) === true;
+    uiElements = createBathroomResolutionUi(scene, result, { rewardSettled });
     mode = result;
   }
 

@@ -185,9 +185,11 @@ export function createOutcomeUi(scene, outcome) {
     wordWrap: { width: 820 },
     lineSpacing: 7,
   });
-  const rewardText = outcome.reward.lives < 0
-    ? `${outcome.reward.lives} ♥`
-    : `+${outcome.reward.points} ★`;
+  const rewardText = outcome.id === 'bathroom'
+    ? 'RECOMPENSA PENDIENTE'
+    : outcome.reward.lives < 0
+      ? `${outcome.reward.lives} ♥`
+      : `+${outcome.reward.points} ★`;
   const reward = createText(scene, 220, 632, rewardText, {
     fontSize: '18px',
     color: outcome.reward.lives < 0 ? '#ff6b74' : '#f4cd63',

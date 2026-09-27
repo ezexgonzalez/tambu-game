@@ -108,7 +108,9 @@ test('bathroom de Cami exige evidencia narrativa y los outcomes conservan recomp
   const bathroom = playCami([1, 2, 0, 3]);
   assert.equal(commitConversationOutcome(gameState, bathroom.session, CAMI_CONVERSATION.outcomes[bathroom.outcome]), true);
   assert.equal(gameState.relationships.cami.outcome, 'bathroom');
-  assert.equal(gameState.player.points, 500);
+  assert.equal(gameState.player.points, 0);
+  assert.equal(gameState.relationships.cami.bathroomResult, null);
+  assert.equal(gameState.relationships.cami.rewardSettled, false);
 });
 
 test('el Consejo de Cami prioriza la última señal, tiene reacción y permanece one-use', () => {

@@ -290,7 +290,9 @@ test('bathroom agrega cierre secuencial y recién después dispara el evento', (
 
   assert.equal(h.system.getMode(), 'outcome-closing');
   assert.equal(h.state.relationships.sofi.outcome, 'bathroom');
-  assert.equal(h.state.player.points, 500);
+  assert.equal(h.state.relationships.sofi.bathroomResult, null);
+  assert.equal(h.state.relationships.sofi.rewardSettled, false);
+  assert.equal(h.state.player.points, 0);
   assert.equal(h.eventRequests.length, 0);
   h.press('ESC');
   assert.equal(h.system.getMode(), 'outcome-closing');
@@ -303,6 +305,22 @@ test('bathroom agrega cierre secuencial y recién después dispara el evento', (
   assert.strictEqual(h.eventRequests[0].interactable, h.interactable);
   assert.equal(h.system.isOpen(), false);
   assert.ok(h.objects.every(({ text }) => !String(text).includes('CITA')));
+});
+
+test('si el evento no puede iniciar, el outcome baño no presenta puntos prematuros', () => {
+  const h = harness(patioWomen[0]);
+  playDialogueRoute(h, [0, 0, 1, 0]);
+  assert.equal(h.state.player.points, 0);
+
+  completeSequence(h, patioWomen[0].conversation.outcomes.bathroom.closingSequence);
+
+  assert.equal(h.system.getMode(), 'outcome');
+  const visibleText = h.objects
+    .filter((object) => !object.destroyed && object.visible)
+    .map((object) => String(object.text));
+  assert.ok(visibleText.includes('RECOMPENSA PENDIENTE'));
+  assert.ok(visibleText.every((text) => !text.includes('+500')));
+  assert.equal(h.state.player.points, 0);
 });
 
 test('ESC y shutdown descartan presentación; reabrir comienza vacío sin recompensa', () => {

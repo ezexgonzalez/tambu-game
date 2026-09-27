@@ -27,7 +27,10 @@ import {
   commitConversationOutcome,
   createGameState,
   getCharacterOutcome,
+  getBathroomResult,
+  getSecuredBathroomCount,
   isCharacterResolved,
+  settleBathroomResult,
 } from '../src/state/gameState.js';
 
 function playRoute(route) {
@@ -353,10 +356,12 @@ test('el outcome persiste stats, historia y señales una sola vez', () => {
 
   assert.equal(commitConversationOutcome(gameState, result.session, outcome), true);
   assert.equal(commitConversationOutcome(gameState, result.session, outcome), false);
-  assert.equal(gameState.player.points, 500);
+  assert.equal(gameState.player.points, 0);
   assert.equal(gameState.relationships.sofi.history.length, 4);
   assert.ok(gameState.relationships.sofi.signals.includes('tambu_showed_romantic_intent'));
   assert.equal(gameState.relationships.sofi.outcome, 'bathroom');
+  assert.equal(getBathroomResult(gameState, 'sofi'), null);
+  assert.equal(gameState.relationships.sofi.rewardSettled, false);
   assert.equal(isCharacterResolved(gameState, 'sofi'), true);
   assert.equal(getCharacterOutcome(gameState, 'sofi'), 'bathroom');
   assert.equal(canStartMainConversation(gameState, 'sofi'), false);
@@ -366,6 +371,81 @@ test('el outcome persiste stats, historia y señales una sola vez', () => {
   const stateAfterFirstCommit = structuredClone(gameState);
   assert.equal(commitConversationOutcome(gameState, result.session, outcome), false);
   assert.deepEqual(gameState, stateAfterFirstCommit);
+});
+
+test('baño asegurado liquida 500 puntos una sola vez y no cambia vidas', () => {
+  const gameState = createGameState();
+  gameState.player.points = 40;
+  gameState.player.lives = 2;
+  const result = playRoute([0, 0, 1, 0]);
+  commitConversationOutcome(gameState, result.session, SOFI_CONVERSATION.outcomes.bathroom);
+
+  assert.equal(settleBathroomResult(gameState, 'sofi', 'success'), true);
+  assert.equal(getBathroomResult(gameState, 'sofi'), 'secured');
+  assert.equal(gameState.relationships.sofi.rewardSettled, true);
+  assert.equal(gameState.player.points, 540);
+  assert.equal(gameState.player.lives, 2);
+  assert.equal(settleBathroomResult(gameState, 'sofi', 'success'), false);
+  assert.equal(gameState.player.points, 540);
+});
+
+test('baño interrumpido liquida 250 puntos sin perder una vida ni cambiar el outcome', () => {
+  const gameState = createGameState();
+  gameState.player.points = 35;
+  gameState.player.lives = 3;
+  const result = playRoute([0, 0, 1, 0]);
+  commitConversationOutcome(gameState, result.session, SOFI_CONVERSATION.outcomes.bathroom);
+
+  assert.equal(settleBathroomResult(gameState, 'sofi', 'failure'), true);
+  assert.equal(getBathroomResult(gameState, 'sofi'), 'interrupted');
+  assert.equal(gameState.relationships.sofi.outcome, 'bathroom');
+  assert.equal(gameState.player.points, 285);
+  assert.equal(gameState.player.lives, 3);
+  assert.equal(settleBathroomResult(gameState, 'sofi', 'failure'), false);
+  assert.equal(gameState.player.points, 285);
+});
+
+test('los outcomes no relacionados con baño conservan sus recompensas inmediatas', () => {
+  const cases = [
+    { route: [0, 0, 1, 2], outcome: 'instagram', points: 250, lives: 3 },
+    { route: [0, 0, 0, 2], outcome: 'friendzone', points: 75, lives: 3 },
+    { route: [0, 0, 0, 0], outcome: 'rejection', points: 0, lives: 2 },
+  ];
+
+  for (const item of cases) {
+    const gameState = createGameState();
+    const result = playRoute(item.route);
+    assert.equal(result.outcome, item.outcome);
+    assert.equal(commitConversationOutcome(
+      gameState,
+      result.session,
+      SOFI_CONVERSATION.outcomes[result.outcome],
+    ), true);
+    assert.equal(gameState.player.points, item.points);
+    assert.equal(gameState.player.lives, item.lives);
+  }
+});
+
+test('el contador deriva solo baños asegurados, no outcomes sociales aceptados', () => {
+  const gameState = createGameState();
+  const bathroom = playRoute([0, 0, 1, 0]);
+
+  for (const characterId of ['sofi', 'mili', 'cami']) {
+    const session = { ...bathroom.session, characterId };
+    assert.equal(commitConversationOutcome(
+      gameState,
+      session,
+      SOFI_CONVERSATION.outcomes.bathroom,
+    ), true);
+  }
+  assert.equal(getSecuredBathroomCount(gameState), 0);
+  assert.equal(settleBathroomResult(gameState, 'sofi', 'success'), true);
+  assert.equal(settleBathroomResult(gameState, 'mili', 'failure'), true);
+  assert.equal(settleBathroomResult(gameState, 'cami', 'success'), true);
+  assert.equal(getSecuredBathroomCount(gameState), 2);
+  assert.equal(['sofi', 'mili', 'cami'].filter((id) => (
+    getCharacterOutcome(gameState, id) === 'bathroom'
+  )).length, 3);
 });
 
 test('las vidas nunca bajan de cero', () => {

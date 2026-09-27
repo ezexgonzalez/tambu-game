@@ -192,7 +192,9 @@ test('Mili conserva sus recompensas y puede resolverse junto a Sofi sin estado c
 
   assert.equal(gameState.relationships.mili.outcome, 'bathroom');
   assert.equal(gameState.relationships.sofi.outcome, 'bathroom');
-  assert.equal(gameState.player.points, 1000);
+  assert.equal(gameState.player.points, 0);
+  assert.equal(gameState.relationships.mili.rewardSettled, false);
+  assert.equal(gameState.relationships.sofi.rewardSettled, false);
 });
 
 test('el Consejo de Mili interpreta sus señales sin callbacks narrativos de Sofi', () => {

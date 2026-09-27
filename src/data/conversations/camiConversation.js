@@ -341,7 +341,7 @@ export const CAMI_CONVERSATION = {
         { speaker: 'Cami', text: 'No me hagas explicarte otro chiste. Vení.' },
       ],
       event: {
-        type: 'bathroom', resultLabel: 'BAÑO CONSEGUIDO',
+        type: 'bathroom', resultLabel: 'ENTRARON AL BAÑO',
         resultText: 'Cami y Tambu entraron juntos al baño.',
       },
       reward: { points: 500, lives: 0 },
