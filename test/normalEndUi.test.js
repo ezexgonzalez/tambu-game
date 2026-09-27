@@ -32,13 +32,14 @@ function displayObject(type, args = []) {
     visible: true,
     destroyed: false,
     rectangles: [],
+    fills: [],
     setOrigin(...value) { this.origin = value; return this; },
     setPosition(...value) { this.position = value; return this; },
     setScrollFactor(value) { this.scrollFactor = value; return this; },
     setDepth(value) { this.depth = value; return this; },
     setVisible(value) { this.visible = value; return this; },
-    fillStyle(...value) { this.fill = value; return this; },
-    fillRect(...value) { this.rectangles.push(value); return this; },
+    fillStyle(...value) { this.fill = value; this.fills.push(value); return this; },
+    fillRect(...value) { this.rectangles.push({ rect: value, fill: this.fill }); return this; },
     destroy() { this.destroyed = true; },
   };
 }
@@ -79,7 +80,9 @@ const mixedSummary = {
 test('el resumen usa orden fijo y etiquetas explícitas desde el snapshot', () => {
   assert.deepEqual(NORMAL_END_COPY, {
     title: 'LA NOCHE DE TAMBU',
-    pointsLabel: 'PUNTOS',
+    charactersHeader: 'CHICAS',
+    resultsHeader: 'RESULTADOS',
+    pointsLabel: 'PUNTAJE',
     replayPrompt: 'ENTER / SPACE · VOLVER A JUGAR',
   });
   assert.deepEqual(formatNormalEndSummary(mixedSummary), {
@@ -89,7 +92,7 @@ test('el resumen usa orden fijo y etiquetas explícitas desde el snapshot', () =
       { characterId: 'mili', characterName: 'MILI', outcomeLabel: 'BAÑO ASEGURADO' },
       { characterId: 'cami', characterName: 'CAMI', outcomeLabel: 'FRIENDZONE' },
     ],
-    pointsLabel: 'PUNTOS',
+    pointsLabel: 'PUNTAJE',
     points: '825',
     replayPrompt: 'ENTER / SPACE · VOLVER A JUGAR',
   });
@@ -114,6 +117,42 @@ test('baño interrumpido y rechazo se muestran con su resultado real y puntos ex
     ['CAMI', 'INSTAGRAM'],
   ]);
   assert.equal(presentation.points, '1075');
+});
+
+test('la presentación usa un tablero enmarcado, columnas alineadas y score separado', () => {
+  const { scene, objects } = createScene();
+  const ui = createNormalEndUi(scene, { hud: { setVisible() {} } });
+
+  ui.show(mixedSummary);
+
+  const [overlay, outerFrame, title, boardFrame, boardRules] = objects;
+  assert.equal(overlay.args[4], 0x060b14);
+  assert.equal(overlay.args[5], 0.94);
+  assert.equal(outerFrame.type, 'graphics');
+  assert.equal(title.type, 'graphics');
+  assert.equal(boardFrame.type, 'graphics');
+  assert.equal(boardRules.type, 'graphics');
+  assert.ok(outerFrame.rectangles.length >= 4);
+  assert.ok(boardFrame.rectangles.length >= 5);
+  assert.ok(boardRules.rectangles.length >= 3);
+
+  const textPositions = objects
+    .filter(({ type, position }) => type === 'graphics' && position)
+    .map(({ position }) => position);
+  const rowCenters = [
+    scene.scale.height * (0.25 + 0.40 * (0.19 + (0.81 / 3) * 0.5)),
+    scene.scale.height * (0.25 + 0.40 * (0.19 + (0.81 / 3) * 1.5)),
+    scene.scale.height * (0.25 + 0.40 * (0.19 + (0.81 / 3) * 2.5)),
+  ];
+  for (const rowY of rowCenters) {
+    assert.equal(textPositions.filter(([, y]) => Math.abs(y - rowY) < 0.01).length, 2);
+  }
+
+  const scorePanel = objects.find(({ type, rectangles }) => type === 'graphics'
+    && rectangles.some(({ rect }) => rect[0] === scene.scale.width * 0.29
+      && rect[1] === scene.scale.height * 0.685));
+  assert.ok(scorePanel, 'score has its own framed block');
+  ui.destroy();
 });
 
 test('el beat de patio conserva el HUD, el resumen aparece a 700 ms y el replay se desbloquea 500 ms después', () => {
@@ -141,9 +180,13 @@ test('el beat de patio conserva el HUD, el resumen aparece a 700 ms y el replay 
   assert.equal(ui.getPhase(), 'summary');
   assert.deepEqual(hudVisibility, [false]);
   assert.ok(objects.every(({ type }) => type === 'rectangle' || type === 'graphics'));
-  assert.ok(objects[0].visible && objects[1].visible);
-  assert.equal(objects[2].visible, false);
-  assert.ok(objects.slice(3).every(({ visible }) => visible));
+  assert.ok(objects[0].visible, 'the dark overlay is shown with the summary');
+  assert.ok(objects.filter(({ type }) => type === 'rectangle').every(({ visible }) => visible));
+  const prompt = objects.find(({ type, position }) => type === 'graphics'
+    && Math.abs(position?.[1] - scene.scale.height * 0.92) < 0.01);
+  assert.ok(prompt);
+  assert.equal(prompt.visible, false);
+  assert.ok(objects.filter((object) => object !== prompt).every(({ visible }) => visible));
   assert.equal(ui.isReplayReady(), false);
 
   keys.get(32).justDown = true;
@@ -153,7 +196,7 @@ test('el beat de patio conserva el HUD, el resumen aparece a 700 ms y el replay 
   assert.equal(ui.update(1), false);
   assert.equal(ui.isReplayReady(), true);
   assert.equal(ui.getPhase(), 'ready');
-  assert.equal(objects[2].visible, true);
+  assert.equal(prompt.visible, true);
   assert.equal(replayCount, 0);
 
   keys.get(13).justDown = true;
