@@ -77,28 +77,28 @@ const BATHROOM_EVENT = {
       { x: 440, y: 780 },
       { x: 1560, y: 780 },
       { x: 1560, y: 450 },
+      { x: 1560, y: 155 },
     ],
     mili: [
       { x: 930, y: 330 },
       { x: 1216, y: 330 },
-      { x: 1216, y: 450 },
-      { x: 1560, y: 450 },
+      { x: 1216, y: 155 },
     ],
     cami: [
       { x: 1270, y: 635 },
       { x: 1270, y: 660 },
       { x: 1560, y: 660 },
       { x: 1560, y: 450 },
+      { x: 1560, y: 155 },
     ],
   },
   commonPath: [
-    { x: 1560, y: 155 },
     { x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2, y: 155 },
     { x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2, y: HOUSE.height - 8 },
   ],
   safeExit: {
-    x: 1560,
-    y: 470,
+    x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2,
+    y: HOUSE.height + 12,
   },
 };
 

@@ -95,7 +95,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 ### Evento del baño
 
 - `OutcomeEventSystem` desacopla el resultado social del evento especial.
-- Caminata de Tambu y la chica hasta el baño con entrada específica por sector para Sofi, Mili y Cami, y tramo común junto a la barra.
+- Caminata de Tambu y la chica hasta el baño con entrada específica por sector para Sofi, Mili y Cami, y tramo común frente a la puerta.
 - Depth por body/pies durante el recorrido y retorno de Tambu a un punto fuera de los colliders.
 - Ocultamiento y restauración de personajes.
 - Anticipación, golpes, barra de resistencia, input con `SPACE`, éxito o fracaso y regreso al patio.

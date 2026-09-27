@@ -242,6 +242,7 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
   assert.equal(player.sprite.velocity.x, 0);
   assert.equal(player.sprite.velocity.y, 0);
   assert.equal(player.sprite.anims.currentAnim.key, 'tambu-idle-down');
+  assert.equal(player.facing, 'down');
   assert.equal(player.sprite.depth, player.sprite.y + 27);
   assert.equal(player.label.depth, player.sprite.depth + 1);
   assert.equal(player.label.x, player.sprite.x);
@@ -428,10 +429,13 @@ test('interrumpir la pantalla de resultado nunca deja a Tambu invisible', () => 
   assertSafePlayerPosition(player.sprite, PATIO_LAYOUT.events.bathroom.safeExit);
 });
 
-test('cada chica usa una entrada desde su sector y converge antes del recorrido común', () => {
+test('Mili sube por la izquierda de la barra y los recorridos convergen frente al baño', () => {
   const bathroom = PATIO_LAYOUT.events.bathroom;
   const spawnById = Object.fromEntries(patioWomen.map(({ id, x, y }) => [id, { x, y }]));
   const poolRight = PATIO_LAYOUT.pool.x + PATIO_LAYOUT.pool.width;
+  const barLeft = PATIO_LAYOUT.bar.x;
+  const barRight = PATIO_LAYOUT.bar.x + PATIO_LAYOUT.bar.width;
+  const doorCenter = PATIO_LAYOUT.house.bathroom.x + PATIO_LAYOUT.house.bathroom.width / 2;
 
   for (const id of ['sofi', 'mili', 'cami']) {
     const spawn = spawnById[id];
@@ -439,12 +443,31 @@ test('cada chica usa una entrada desde su sector y converge antes del recorrido 
     assert.ok(Math.hypot(first.x - spawn.x, first.y - spawn.y) <= 50,
       `${id} joins from the sector where the character actually stands`);
   }
-  assert.deepEqual(bathroom.entryPaths.sofi.at(-1), bathroom.entryPaths.mili.at(-1));
-  assert.deepEqual(bathroom.entryPaths.sofi.at(-1), bathroom.entryPaths.cami.at(-1));
+  assert.ok(bathroom.entryPaths.mili.every(({ y }) => y <= spawnById.mili.y),
+    'Mili should not descend to reach a bathroom above her');
+  assert.ok(bathroom.entryPaths.mili.every(({ x }) => x < barLeft),
+    'Mili should approach the house along the left side of the bar');
+  assert.ok(bathroom.entryPaths.sofi.some(({ x }) => x > barRight));
+  assert.ok(bathroom.entryPaths.cami.some(({ x }) => x > barRight));
+  assert.notDeepEqual(bathroom.entryPaths.mili.at(-1), bathroom.entryPaths.sofi.at(-1));
+  assert.ok(Object.values(bathroom.entryPaths).every((path) => path.at(-1).y <= PATIO_LAYOUT.house.height + 10),
+    'the routes should reach the house before sharing the final doorway segment');
+  assert.equal(bathroom.commonPath[0].x, doorCenter);
+  assert.ok(bathroom.commonPath[0].y <= PATIO_LAYOUT.house.height + 10);
   assert.ok(bathroom.entryPaths.mili[0].y < PATIO_LAYOUT.pool.y);
   assert.ok(bathroom.entryPaths.cami[0].x > poolRight);
   assert.notDeepEqual(bathroom.entryPaths.mili[0], bathroom.entryPaths.sofi[0]);
   assert.notDeepEqual(bathroom.entryPaths.cami[0], bathroom.entryPaths.sofi[0]);
+});
+
+test('el regreso queda inmediatamente frente a la puerta sin invadir casa ni barra', () => {
+  const { safeExit } = PATIO_LAYOUT.events.bathroom;
+  const { house } = PATIO_LAYOUT;
+  const doorCenter = house.bathroom.x + house.bathroom.width / 2;
+  assert.ok(Math.abs(safeExit.x - doorCenter) <= house.bathroom.width / 4);
+  assert.ok(safeExit.y > house.height);
+  assert.ok(Math.hypot(safeExit.x - doorCenter, safeExit.y - house.height) < 30);
+  assertSafePlayerPosition(safeExit, safeExit);
 });
 
 test('los dos carriles evitan todos los colliders salvo la entrada por la puerta', () => {
