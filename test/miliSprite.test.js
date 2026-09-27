@@ -501,6 +501,8 @@ test('createCharacters usa sprites reales para las tres chicas y reemplaza los c
     'friend_tobi_arms_crossed',
     'friend_pitity',
     'friend_pitity_idle_down',
+    'friend_pitity_blink',
+    'friend_pitity_phone_check',
     'friend_eze',
     'friend_eze_idle_down',
     'friend_santy',
@@ -523,7 +525,7 @@ test('el shutdown de la Scene cancela timers y completion listeners de los idles
   const mili = interactables.find(({ character }) => character.id === 'mili');
   playMiliDrink(mili.sprite);
 
-  assert.equal(scene.testTimers.length, 4);
+  assert.equal(scene.testTimers.length, 5);
   assert.ok(mili.sprite.miliSpecialCompletion);
   assert.equal(mili.sprite.listeners.size, 1);
 

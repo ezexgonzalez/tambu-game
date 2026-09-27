@@ -10,6 +10,7 @@ const FRIENDS = {
         path: '/assets/characters/friends/friend_tobi_drink_down_atlas_v1.png',
         frames: 8,
         frameRate: 6,
+        weight: 0.5,
       },
       {
         id: 'arms-crossed',
@@ -17,10 +18,33 @@ const FRIENDS = {
         path: '/assets/characters/friends/friend_tobi_arms_crossed_down_atlas_v1.png',
         frames: 8,
         frameRate: 6,
+        weight: 0.5,
       },
     ],
   },
-  pitity: { name: 'Pitity', asset: 'friend_pitity', idleDown: 'friend_pitity_idle_down' },
+  pitity: {
+    name: 'Pitity',
+    asset: 'friend_pitity',
+    idleDown: 'friend_pitity_idle_down',
+    specials: [
+      {
+        id: 'blink',
+        asset: 'friend_pitity_blink',
+        path: '/assets/characters/friends/friend_pitity_blink_down_atlas_v1.png',
+        frames: 5,
+        frameRate: 10,
+        weight: 0.75,
+      },
+      {
+        id: 'phone-check',
+        asset: 'friend_pitity_phone_check',
+        path: '/assets/characters/friends/friend_pitity_phone_check_down_atlas_v1.png',
+        frames: 8,
+        frameRate: 6,
+        weight: 0.25,
+      },
+    ],
+  },
   eze: { name: 'Eze', asset: 'friend_eze', idleDown: 'friend_eze_idle_down' },
   santy: { name: 'Santy', asset: 'friend_santy', idleDown: 'friend_santy_idle_down' },
 };
@@ -56,7 +80,20 @@ export function getFriendIdleDelay(random = Math.random) {
 }
 
 export function chooseTobiIdleVariation(random = Math.random) {
-  return random() < 0.5 ? 'drink' : 'arms-crossed';
+  return chooseFriendIdleVariation('tobi', random);
+}
+
+export function chooseFriendIdleVariation(friendId, random = Math.random) {
+  const specials = FRIENDS[friendId]?.specials;
+  if (!specials?.length) return null;
+
+  const roll = Math.max(0, Math.min(1, random()));
+  let cumulativeWeight = 0;
+  for (const special of specials) {
+    cumulativeWeight += special.weight ?? 1 / specials.length;
+    if (roll < cumulativeWeight) return special.id;
+  }
+  return specials[specials.length - 1].id;
 }
 
 export function preloadFriends(scene) {
@@ -155,10 +192,12 @@ export function playFriendWalk(sprite, destination) {
   sprite.play(`${sprite.friendId}-walk-${direction}`, true);
 }
 
-export function playTobiIdleSpecial(sprite, variation) {
-  if (sprite.friendId !== 'tobi' || sprite.friendState !== FRIEND_STATES.IDLE || sprite.friendFacing !== 'down') return false;
-  const key = `tobi-${variation}-down`;
-  if (!FRIENDS.tobi.specials.some((special) => key === `tobi-${special.id}-down`)) return false;
+export function playFriendIdleSpecial(sprite, variation) {
+  const friend = FRIENDS[sprite.friendId];
+  if (!friend?.specials || sprite.friendState !== FRIEND_STATES.IDLE || sprite.friendFacing !== 'down') return false;
+  const special = friend.specials.find(({ id }) => id === variation);
+  if (!special) return false;
+  const key = `${sprite.friendId}-${special.id}-down`;
 
   cancelFriendIdleTimer(sprite);
   clearFriendSpecialCompletion(sprite);
@@ -177,6 +216,10 @@ export function playTobiIdleSpecial(sprite, variation) {
   return true;
 }
 
+export function playTobiIdleSpecial(sprite, variation) {
+  return sprite.friendId === 'tobi' && playFriendIdleSpecial(sprite, variation);
+}
+
 export function setFriendDepth(sprite) {
   sprite.setDepth(sprite.y + FRIEND_SPRITE_CONFIG.footDepthOffset);
 }
@@ -188,14 +231,14 @@ export function destroyFriendSprite(sprite) {
 }
 
 function scheduleFriendIdleVariation(sprite) {
-  if (sprite.friendId !== 'tobi' || sprite.friendState !== FRIEND_STATES.IDLE
+  if (!FRIENDS[sprite.friendId]?.specials || sprite.friendState !== FRIEND_STATES.IDLE
     || sprite.friendFacing !== 'down' || !sprite.friendScene?.time?.delayedCall) return;
   cancelFriendIdleTimer(sprite);
   const random = sprite.friendIdleRandom ?? Math.random;
   sprite.friendIdleTimer = sprite.friendScene.time.delayedCall(getFriendIdleDelay(random), () => {
     sprite.friendIdleTimer = null;
     if (sprite.friendState !== FRIEND_STATES.IDLE || sprite.friendFacing !== 'down') return;
-    playTobiIdleSpecial(sprite, chooseTobiIdleVariation(random));
+    playFriendIdleSpecial(sprite, chooseFriendIdleVariation(sprite.friendId, random));
   });
 }
 
