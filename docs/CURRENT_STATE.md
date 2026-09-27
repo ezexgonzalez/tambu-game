@@ -2,7 +2,7 @@
 
 **Versión:** 1.0
 **Última verificación:** 2026-09-26
-**Base inspeccionada:** `main@c02ca8c`
+**Base inspeccionada:** `main@35500e7`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -95,8 +95,8 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 ### Evento del baño
 
 - `OutcomeEventSystem` desacopla el resultado social del evento especial.
-- Caminata de Tambu y la chica hasta el baño con entrada específica por sector para Sofi, Mili y Cami, y tramo común frente a la puerta.
-- Depth por body/pies durante el recorrido y retorno de Tambu a un punto fuera de los colliders.
+- Caminata de Tambu y la chica hasta el baño con rutas específicas por sector, diagonales/formation naturales, ritmo relajado y tramo común recién cerca de la puerta.
+- Depth por body/pies durante el recorrido y retorno de Tambu alineado frente a la puerta del baño, fuera de colliders.
 - Ocultamiento y restauración de personajes.
 - Anticipación, golpes, barra de resistencia, input con `SPACE`, éxito o fracaso y regreso al patio.
 - Conseguir Baño y sus puntos se persiste antes del minijuego; perder no revierte el outcome.
@@ -169,7 +169,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **Coherencia crítica** — corregir BathroomEvent y contradicciones sociales ya detectadas antes de ampliar contenido.
+1. **Coherencia crítica social** — corregir las contradicciones narrativas/semánticas ya detectadas en Mili, Consejo y callbacks; el trayecto base del BathroomEvent queda estabilizado.
 2. **FIRST COMPLETE NIGHT** — intro `00:00 → 00:01`, estado de run, derrota por 0 vidas, victoria máxima por 3 Baños, final normal, resumen y restart limpio.
 3. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; necesarios también para dar identidad al Bathroom Resistance.
 4. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
