@@ -205,6 +205,12 @@ export function setMiliDepth(sprite) {
   sprite.setDepth(sprite.y + MILI_SPRITE.footDepthOffset);
 }
 
+export function destroyMiliSprite(sprite) {
+  cancelMiliIdleTimer(sprite);
+  clearMiliSpecialCompletion(sprite);
+  sprite.miliScene = null;
+}
+
 export function playMiliWalk(sprite, destination) {
   const dx = destination.x - sprite.x;
   const dy = destination.y - sprite.y;

@@ -155,6 +155,12 @@ export function setCamiDepth(sprite) {
   sprite.setDepth(sprite.y + CAMI_SPRITE.footDepthOffset);
 }
 
+export function destroyCamiSprite(sprite) {
+  cancelCamiIdleTimer(sprite);
+  clearCamiSpecialCompletion(sprite);
+  sprite.camiScene = null;
+}
+
 export function playCamiWalk(sprite, destination) {
   const dx = destination.x - sprite.x;
   const dy = destination.y - sprite.y;

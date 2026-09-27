@@ -25,8 +25,11 @@ function resolve(gameState, characterId, outcome, bathroomResult) {
 
 test('una run nueva inicia en INTRO y la intro solo se completa una vez', () => {
   const run = createRunState();
+  const gameState = createGameState();
 
   assert.equal(run.getPhase(), RUN_PHASES.INTRO);
+  assert.deepEqual(gameState.player, { lives: 3, alcohol: 0, points: 0 });
+  assert.deepEqual(gameState.relationships, {});
   assert.equal(run.completeIntro(), true);
   assert.equal(run.getPhase(), RUN_PHASES.PARTY_ACTIVE);
   assert.equal(run.completeIntro(), false);

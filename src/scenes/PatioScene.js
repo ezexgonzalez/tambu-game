@@ -1,5 +1,9 @@
 import Phaser from 'phaser';
-import { createCharacters, preloadCharacters } from '../characters/createCharacters.js';
+import {
+  createCharacters,
+  destroyCharacterSprites,
+  preloadCharacters,
+} from '../characters/createCharacters.js';
 import { createPlayer, preloadPlayer } from '../player/createPlayer.js';
 import { updatePlayer } from '../player/updatePlayer.js';
 import {
@@ -16,6 +20,7 @@ import { createBathroomEvent } from '../events/bathroomEvent.js';
 import { createNightIntro } from '../events/nightIntro.js';
 import { createResolvedCharacterReturnSystem } from '../events/resolvedCharacterReturn.js';
 import { createHud } from '../ui/createHud.js';
+import { createGameOverUi } from '../ui/gameOverUi.js';
 import { createPatioCollisions } from '../world/createPatioCollisions.js';
 import { createPatioWorld, preloadPatioWorld } from '../world/createPatioWorld.js';
 import { PATIO_LAYOUT } from '../world/patioLayout.js';
@@ -42,6 +47,7 @@ export class PatioScene extends Phaser.Scene {
     this.obstacles = createPatioCollisions(this, this.player.sprite);
 
     const hud = createHud(this, this.gameState);
+    this.hud = hud;
     let interactionSystem = null;
     const onGameStateChange = (gameState) => {
       hud.update(gameState);
@@ -88,10 +94,16 @@ export class PatioScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
     this.cameras.main.setZoom(1);
     this.nightIntro = createNightIntro(this, { player: this.player, hud });
+    this.gameOverUi = createGameOverUi(this, {
+      hud,
+      onRetry: () => this.scene.restart(),
+    });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.nightIntro.destroy();
       this.outcomeEventSystem.stop();
       this.resolvedCharacterReturnSystem.destroy();
+      destroyCharacterSprites(this.interactables);
+      this.gameOverUi.destroy();
     });
   }
 
@@ -113,17 +125,51 @@ export class PatioScene extends Phaser.Scene {
       this.runState.completeIntro();
     }
 
+    const phase = this.runState.getPhase();
+    if (phase === RUN_PHASES.GAME_OVER) {
+      this.gameOverUi.update();
+      return;
+    }
+    if (phase === RUN_PHASES.NORMAL_END || phase === RUN_PHASES.PERFECT_NIGHT) return;
+
     this.resolvedCharacterReturnSystem.update(this.game.loop.delta);
 
-    if (this.outcomeEventSystem.update()) {
+    this.outcomeEventSystem.update();
+    if (this.outcomeEventSystem.isActive()) {
       this.interactionSystem.hidePrompt();
       return;
     }
 
-    if (this.dialogueSystem.update()) {
+    this.dialogueSystem.update();
+    if (this.outcomeEventSystem.isActive()) {
+      this.interactionSystem.hidePrompt();
+      return;
+    }
+
+    if (this.dialogueSystem.isOpen()) {
       this.interactionSystem.hidePrompt();
       updatePlayer(this.player, { canMove: false });
       return;
+    }
+
+    if (this.dialogueSystem.isOpen()) {
+      this.interactionSystem.hidePrompt();
+      updatePlayer(this.player, { canMove: false });
+      return;
+    }
+
+    if (
+      this.runState.getPhase() === RUN_PHASES.PARTY_ACTIVE
+      && !this.outcomeEventSystem.isActive()
+      && !this.dialogueSystem.isOpen()
+    ) {
+      this.runState.evaluate(this.gameState);
+      const phaseAfterEvaluation = this.runState.getPhase();
+      if (phaseAfterEvaluation === RUN_PHASES.GAME_OVER) {
+        this.gameOverUi.show();
+        return;
+      }
+      if (phaseAfterEvaluation !== RUN_PHASES.PARTY_ACTIVE) return;
     }
 
     this.interactionSystem.update();
@@ -131,10 +177,6 @@ export class PatioScene extends Phaser.Scene {
       this.interactionSystem.hidePrompt();
       updatePlayer(this.player, { canMove: false });
       return;
-    }
-
-    if (!this.outcomeEventSystem.isActive() && !this.dialogueSystem.isOpen()) {
-      this.runState.evaluate(this.gameState);
     }
 
     updatePlayer(this.player);

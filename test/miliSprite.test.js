@@ -1,6 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createCharacters, preloadCharacters } from '../src/characters/createCharacters.js';
+import {
+  createCharacters,
+  destroyCharacterSprites,
+  preloadCharacters,
+} from '../src/characters/createCharacters.js';
 import {
   createMiliAnimations,
   createMiliSprite,
@@ -28,20 +32,43 @@ import {
 } from '../src/characters/miliSprite.js';
 
 function object(x = 0, y = 0) {
+  const listeners = new Map();
   return {
     x,
     y,
+    listeners,
     anims: { currentAnim: null },
     add() { return this; },
     setOrigin() { return this; },
     setScale(value) { this.scale = value; return this; },
     setDepth(value) { this.depth = value; return this; },
     play(key) { this.anims.currentAnim = { key }; return this; },
+    once(event, handler) { listeners.set(event, handler); return this; },
+    off(event, handler) {
+      if (listeners.get(event) === handler) listeners.delete(event);
+      return this;
+    },
   };
 }
 
 function characterScene(sheets = []) {
+  const timers = [];
+  const shutdownHandlers = [];
   return {
+    testTimers: timers,
+    emitShutdown() { shutdownHandlers.forEach((handler) => handler()); },
+    events: {
+      once(event, handler) {
+        if (event === 'shutdown') shutdownHandlers.push(handler);
+      },
+    },
+    time: {
+      delayedCall(delay, callback) {
+        const timer = { delay, callback, removed: false, remove() { this.removed = true; } };
+        timers.push(timer);
+        return timer;
+      },
+    },
     load: { spritesheet: (key, path, config) => sheets.push({ key, path, config }) },
     anims: {
       exists: () => false,
@@ -478,4 +505,24 @@ test('createCharacters usa sprites reales para Sofi, Mili y Cami', () => {
   assert.equal(cami.visual, 'cami-sprite');
   assert.equal(cami.sprite.key, 'cami');
   assert.equal(cami.sprite.anims.currentAnim.key, 'cami-idle-down');
+});
+
+test('el shutdown de la Scene cancela timers y completion listeners de los idles', () => {
+  const scene = characterScene();
+  const interactables = createCharacters(scene);
+  const mili = interactables.find(({ character }) => character.id === 'mili');
+  playMiliDrink(mili.sprite);
+
+  assert.equal(scene.testTimers.length, 3);
+  assert.ok(mili.sprite.miliSpecialCompletion);
+  assert.equal(mili.sprite.listeners.size, 1);
+
+  destroyCharacterSprites(interactables);
+
+  assert.ok(scene.testTimers.every(({ removed }) => removed));
+  assert.equal(mili.sprite.miliSpecialCompletion, null);
+  assert.equal(mili.sprite.listeners.size, 0);
+  for (const { sprite, character } of interactables) {
+    assert.equal(sprite[`${character.id}Scene`], null);
+  }
 });

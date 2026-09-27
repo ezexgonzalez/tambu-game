@@ -1,7 +1,7 @@
 import { fillerGroups, patioFriends, patioWomen } from '../data/patioCharacters.js';
-import { createCamiSprite, preloadCami } from './camiSprite.js';
-import { createMiliSprite, preloadMili } from './miliSprite.js';
-import { createSofiSprite, preloadSofi } from './sofiSprite.js';
+import { createCamiSprite, destroyCamiSprite, preloadCami } from './camiSprite.js';
+import { createMiliSprite, destroyMiliSprite, preloadMili } from './miliSprite.js';
+import { createSofiSprite, destroySofiSprite, preloadSofi } from './sofiSprite.js';
 
 const SHIRT_COLORS = [0xe8edf2, 0xd44f65, 0x6571c8, 0x3f9a74, 0xc4944c, 0x8965ad, 0x20242d, 0xd99caa];
 const SKIN_COLORS = [0xe8b990, 0xd79c73, 0xc5835f, 0xf0c8a7];
@@ -75,6 +75,14 @@ export function createCharacters(scene) {
             ? 'cami-sprite'
             : 'procedural',
     };
+  });
+}
+
+export function destroyCharacterSprites(interactables) {
+  interactables.forEach(({ sprite, visual }) => {
+    if (visual === 'sofi-sprite') destroySofiSprite(sprite);
+    else if (visual === 'mili-sprite') destroyMiliSprite(sprite);
+    else if (visual === 'cami-sprite') destroyCamiSprite(sprite);
   });
 }
 

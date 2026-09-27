@@ -207,6 +207,12 @@ export function setSofiDepth(sprite) {
   sprite.setDepth(sprite.y + SOFI_SPRITE.footDepthOffset);
 }
 
+export function destroySofiSprite(sprite) {
+  cancelSofiIdleTimer(sprite);
+  clearSofiSpecialCompletion(sprite);
+  sprite.sofiScene = null;
+}
+
 export function playSofiWalk(sprite, destination) {
   const dx = destination.x - sprite.x;
   const dy = destination.y - sprite.y;

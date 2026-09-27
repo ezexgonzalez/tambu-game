@@ -30,8 +30,12 @@ function createScene({ completeOnUpdate = false, outcomeActive = false, dialogue
   let introComplete = false;
   let introUpdates = 0;
   let returnUpdates = 0;
+  let interactionUpdates = 0;
+  let gameOverShows = 0;
+  let gameOverUpdates = 0;
   let outcomeActiveNow = outcomeActive;
   let dialogueActiveNow = dialogueActive;
+  let closeDialogueOnNextUpdate = false;
   scene.gameState = createGameState();
   scene.runState = createRunState();
   scene.player = {
@@ -46,7 +50,10 @@ function createScene({ completeOnUpdate = false, outcomeActive = false, dialogue
       body: { bottom: 48, velocity: { x: 0, y: 0 } },
       anims: { currentAnim: null },
       setDepth() {},
-      setVelocity(x, y) { this.body.velocity = { x, y }; },
+      setVelocity(x, y) {
+        this.body.velocity = { x, y };
+        this.velocityUpdates = (this.velocityUpdates ?? 0) + 1;
+      },
       play(key) { this.anims.currentAnim = { key }; },
     },
   };
@@ -68,15 +75,30 @@ function createScene({ completeOnUpdate = false, outcomeActive = false, dialogue
     setActive(value) { outcomeActiveNow = value; },
   };
   scene.dialogueSystem = {
-    update: () => dialogueActiveNow,
+    update() {
+      if (closeDialogueOnNextUpdate) {
+        closeDialogueOnNextUpdate = false;
+        dialogueActiveNow = false;
+        return true;
+      }
+      return dialogueActiveNow;
+    },
     isOpen: () => dialogueActiveNow,
     setOpen(value) { dialogueActiveNow = value; },
+    closeOnNextUpdate() { closeDialogueOnNextUpdate = true; },
   };
-  scene.interactionSystem = { update() {}, hidePrompt() {} };
+  scene.interactionSystem = { update() { interactionUpdates += 1; }, hidePrompt() {} };
+  scene.gameOverUi = {
+    show() { gameOverShows += 1; },
+    update() { gameOverUpdates += 1; },
+  };
   return {
     scene,
     getIntroUpdates: () => introUpdates,
     getReturnUpdates: () => returnUpdates,
+    getInteractionUpdates: () => interactionUpdates,
+    getGameOverShows: () => gameOverShows,
+    getGameOverUpdates: () => gameOverUpdates,
   };
 }
 
@@ -100,23 +122,64 @@ test('PatioScene pasa a PARTY_ACTIVE al terminar la intro y actualiza el patio',
 });
 
 test('PatioScene evalúa finales cuando acaban evento y diálogo, sin esperar el retorno de la chica', () => {
-  const { scene, getReturnUpdates } = createScene({ outcomeActive: true });
+  const {
+    scene,
+    getReturnUpdates,
+    getInteractionUpdates,
+    getGameOverShows,
+    getGameOverUpdates,
+  } = createScene({ outcomeActive: true });
   scene.runState.completeIntro();
-  scene.gameState.player.lives = 0;
-  for (const id of ['sofi', 'mili', 'cami']) {
-    scene.gameState.relationships[id] = { resolved: true, outcome: 'rejection' };
-  }
+  scene.gameState.player.lives = 1;
+  scene.gameState.relationships.sofi = { resolved: true, outcome: 'rejection' };
 
   scene.update();
   assert.equal(scene.runState.getPhase(), RUN_PHASES.PARTY_ACTIVE);
 
   scene.outcomeEventSystem.setActive(false);
   scene.dialogueSystem.setOpen(true);
+  scene.gameState.player.lives = 0;
   scene.update();
   assert.equal(scene.runState.getPhase(), RUN_PHASES.PARTY_ACTIVE);
 
   scene.dialogueSystem.setOpen(false);
   scene.update();
   assert.equal(scene.runState.getPhase(), RUN_PHASES.GAME_OVER);
+  assert.equal(getGameOverShows(), 1);
+  assert.equal(getInteractionUpdates(), 0);
+  const stoppedVelocityUpdates = scene.player.sprite.velocityUpdates;
+
+  scene.update();
   assert.equal(getReturnUpdates(), 3);
+  assert.equal(getInteractionUpdates(), 0);
+  assert.equal(scene.player.sprite.velocityUpdates, stoppedVelocityUpdates);
+  assert.equal(getGameOverUpdates(), 1);
+});
+
+test('PatioScene no abre otra interacción en el frame que alcanza NORMAL_END', () => {
+  const { scene, getInteractionUpdates } = createScene();
+  scene.runState.completeIntro();
+  for (const id of ['sofi', 'mili', 'cami']) {
+    scene.gameState.relationships[id] = { resolved: true, outcome: 'instagram' };
+  }
+
+  scene.update();
+
+  assert.equal(scene.runState.getPhase(), RUN_PHASES.NORMAL_END);
+  assert.equal(getInteractionUpdates(), 0);
+});
+
+test('GAME_OVER se muestra en el mismo frame en que la última conversación se cierra', () => {
+  const { scene, getGameOverShows, getInteractionUpdates } = createScene({ dialogueActive: true });
+  scene.runState.completeIntro();
+  scene.gameState.player.lives = 0;
+  scene.gameState.relationships.cami = { resolved: true, outcome: 'rejection' };
+  scene.dialogueSystem.closeOnNextUpdate();
+
+  scene.update();
+
+  assert.equal(scene.dialogueSystem.isOpen(), false);
+  assert.equal(scene.runState.getPhase(), RUN_PHASES.GAME_OVER);
+  assert.equal(getGameOverShows(), 1);
+  assert.equal(getInteractionUpdates(), 0);
 });
