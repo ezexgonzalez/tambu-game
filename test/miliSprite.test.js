@@ -476,7 +476,7 @@ test('Mili caminar interrumpe drink y elimina su listener de finalización', () 
   assert.equal(listeners['animationcomplete-mili-drink-down'], undefined);
 });
 
-test('createCharacters usa sprites reales para Sofi, Mili y Cami', () => {
+test('createCharacters usa sprites reales para las tres chicas y reemplaza los cuatro amigos del scope', () => {
   const sheets = [];
   const scene = characterScene(sheets);
   preloadCharacters(scene);
@@ -495,6 +495,14 @@ test('createCharacters usa sprites reales para Sofi, Mili y Cami', () => {
     'cami-blink',
     'cami-hair-touch',
     'cami-hand-on-hip',
+    'friend_tobi',
+    'friend_tobi_idle_down',
+    'friend_pitity',
+    'friend_pitity_idle_down',
+    'friend_eze',
+    'friend_eze_idle_down',
+    'friend_santy',
+    'friend_santy_idle_down',
   ]);
   assert.equal(interactables.find(({ character }) => character.id === 'sofi').visual, 'sofi-sprite');
   const mili = interactables.find(({ character }) => character.id === 'mili');

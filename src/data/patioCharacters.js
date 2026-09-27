@@ -30,12 +30,12 @@ export const patioWomen = [
 ];
 
 export const patioFriends = [
-  { name: 'Eze', x: 1215, y: 470, palette: 1 },
-  { name: 'Pitity', x: 1270, y: 500, palette: 2 },
+  { id: 'eze', name: 'Eze', x: 1215, y: 470, palette: 1 },
+  { id: 'pitity', name: 'Pitity', x: 1270, y: 500, palette: 2 },
   { name: 'Uriel', x: 320, y: 355, palette: 3 },
-  { name: 'Santy', x: 380, y: 390, palette: 4 },
+  { id: 'santy', name: 'Santy', x: 380, y: 390, palette: 4 },
   { name: 'Thiago', x: 420, y: 800, palette: 5 },
-  { name: 'Tobi', x: 470, y: 835, palette: 6 },
+  { id: 'tobi', name: 'Tobi', x: 470, y: 835, palette: 6 },
 ];
 
 export const fillerGroups = [

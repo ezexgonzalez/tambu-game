@@ -129,9 +129,9 @@ Hay tests para sistema social, Sofi, Mili, Cami, Consejo, presentación y flujo 
 
 ### Personajes del patio
 
-- Eze, Pitity, Uriel, Santy, Thiago y Tobi todavía usan el mismo sistema procedural.
+- Eze, Pitity, Santy y Tobi tienen atlas walk de cuatro direcciones e idle down estático bajo integración experimental; pendiente QA visual. Uriel y Thiago conservan el sistema procedural.
 - Los NPCs de relleno también son placeholders; solo algunos tienen tween de baile o un indicador simple de actividad.
-- No existen todavía sprites finales de la población principal fuera de Tambu, Sofi, Mili, Cami, bartender y DJ residente.
+- Eze, Pitity, Santy y Tobi ya están integrados con sprites runtime experimentales; queda su QA visual. Uriel, Thiago y los NPCs de relleno siguen pendientes de arte final.
 
 ### Props y ambientación activa
 
@@ -179,7 +179,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 ## No implementado
 
-- Sprites finales de amigos y NPCs de relleno.
+- QA visual y cierre de los sprites experimentales de Eze, Pitity, Santy y Tobi; sprites runtime finales de Uriel, Thiago y NPCs de relleno.
 - Sistema modular de población/NPCs con outfits, peinados y acciones reutilizables.
 - Sistema general de eventos ambientales del patio; hoy existe el evento especial del baño, no una fiesta autónoma completa.
 - Gameplay de alcohol y sus efectos.

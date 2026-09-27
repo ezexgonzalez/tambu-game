@@ -2,6 +2,7 @@ import { fillerGroups, patioFriends, patioWomen } from '../data/patioCharacters.
 import { createCamiSprite, destroyCamiSprite, preloadCami } from './camiSprite.js';
 import { createMiliSprite, destroyMiliSprite, preloadMili } from './miliSprite.js';
 import { createSofiSprite, destroySofiSprite, preloadSofi } from './sofiSprite.js';
+import { createFriendSprite, preloadFriends } from './friendSprite.js';
 
 const SHIRT_COLORS = [0xe8edf2, 0xd44f65, 0x6571c8, 0x3f9a74, 0xc4944c, 0x8965ad, 0x20242d, 0xd99caa];
 const SKIN_COLORS = [0xe8b990, 0xd79c73, 0xc5835f, 0xf0c8a7];
@@ -29,7 +30,9 @@ export function createCharacters(scene) {
   });
 
   patioFriends.forEach((friend) => {
-    const sprite = drawPerson(scene, friend.x, friend.y, friend.palette);
+    const sprite = friend.id
+      ? createFriendSprite(scene, friend)
+      : drawPerson(scene, friend.x, friend.y, friend.palette);
     scene.add.text(friend.x, friend.y + 34, friend.name, {
       fontFamily: 'monospace',
       fontSize: '11px',
@@ -90,6 +93,7 @@ export function preloadCharacters(scene) {
   preloadSofi(scene);
   preloadMili(scene);
   preloadCami(scene);
+  preloadFriends(scene);
 }
 
 function drawPerson(scene, x, y, index, interactive = false) {
