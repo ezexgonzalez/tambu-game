@@ -27,42 +27,59 @@ function makeObject() {
   };
 }
 
+function makeCanvasTexture(key, drawCalls) {
+  const snapshots = [];
+  const whiteRects = [];
+  const stateStack = [];
+  const context = {
+    globalCompositeOperation: 'source-over',
+    fillStyle: '#000000',
+    translation: { x: 0, y: 0 },
+    transformScale: { x: 1, y: 1 },
+    save() {
+      stateStack.push({
+        globalCompositeOperation: this.globalCompositeOperation,
+        fillStyle: this.fillStyle,
+        translation: this.translation,
+        transformScale: this.transformScale,
+      });
+    },
+    restore() { Object.assign(this, stateStack.pop()); },
+    clearRect() { whiteRects.length = 0; },
+    fillRect(x, y, width, height) {
+      drawCalls.push({ key, composite: this.globalCompositeOperation, fillStyle: this.fillStyle });
+      if (this.fillStyle === '#000000' && x === 0 && y === 0) whiteRects.length = 0;
+      if (this.fillStyle === '#ffffff') {
+        whiteRects.push({
+          x,
+          y,
+          width,
+          height,
+          composite: this.globalCompositeOperation,
+          translation: { ...this.translation },
+          scale: { ...this.transformScale },
+        });
+      }
+    },
+    translate(x, y) { this.translation = { x, y }; },
+    scale(x, y) { this.transformScale = { x, y }; },
+  };
+  const texture = {
+    key,
+    snapshots,
+    getContext: () => context,
+    refresh() {
+      snapshots.push(whiteRects.map((rect) => structuredClone(rect)));
+    },
+  };
+  return texture;
+}
+
 function makeScene() {
   const objects = [];
   const drawCalls = [];
   const removedTextures = [];
-  const clockWindows = [];
-  const context = {
-    globalCompositeOperation: 'source-over',
-    textAlign: 'start',
-    textBaseline: 'alphabetic',
-    save() {},
-    restore() {},
-    fillRect() { drawCalls.push(['fillRect', this.globalCompositeOperation]); },
-    translate(x, y) { this.translation = { x, y }; },
-    scale(x, y) { this.transformScale = { x, y }; },
-    measureText(text) {
-      return {
-        width: text.length * 85,
-        actualBoundingBoxAscent: 110,
-        actualBoundingBoxDescent: 25,
-      };
-    },
-    fillText(text, x, y) {
-      drawCalls.push([text, this.globalCompositeOperation]);
-      clockWindows.push({
-        text,
-        x,
-        y,
-        composite: this.globalCompositeOperation,
-        align: this.textAlign,
-        baseline: this.textBaseline,
-        translation: this.translation,
-        scale: this.transformScale,
-      });
-    },
-  };
-  const texture = { getContext: () => context, refresh() {} };
+  const textures = new Map();
   const add = Object.fromEntries(['image', 'text', 'rectangle', 'graphics'].map((type) => [
     type, () => {
       const object = makeObject();
@@ -82,11 +99,15 @@ function makeScene() {
     add,
     cameras: { main: camera },
     textures: {
-      createCanvas: () => texture,
+      createCanvas(key) {
+        const texture = makeCanvasTexture(key, drawCalls);
+        textures.set(key, texture);
+        return texture;
+      },
       remove(key) { removedTextures.push(key); },
     },
   };
-  return { scene, objects, drawCalls, clockWindows, removedTextures, camera };
+  return { scene, objects, drawCalls, textures, removedTextures, camera };
 }
 
 function makePlayer() {
@@ -100,12 +121,22 @@ function makePlayer() {
   return { sprite, label: makeObject(), facing: 'down' };
 }
 
-test('intro empieza en negro, mantiene el reloj centrado y bloquea gameplay hasta completar', () => {
-  const { scene, objects, drawCalls, clockWindows, removedTextures, camera } = makeScene();
+function rectGeometry(rects) {
+  return rects.map(({ x, y, width, height, translation, scale }) => ({
+    x, y, width, height, translation, scale,
+  }));
+}
+
+test('intro usa reloj pixelado alineado con la máscara y hace una transición continua', () => {
+  const { scene, objects, drawCalls, textures, removedTextures, camera } = makeScene();
   const player = makePlayer();
   const initialPosition = { x: player.sprite.x, y: player.sprite.y };
   const hud = { visible: true, setVisible(value) { this.visible = value; } };
   const intro = createNightIntro(scene, { player, hud });
+  const cover = objects[0];
+  const clock = objects[1];
+  const windowTexture = textures.get('night-intro-clock-window');
+  const clockTexture = textures.get('night-intro-clock-pixels');
 
   assert.deepEqual(Object.keys(NIGHT_INTRO_PHASES), [
     'BLACKOUT', 'CLOCK_0000', 'CLOCK_0001', 'REVEAL', 'COMPLETE',
@@ -118,9 +149,9 @@ test('intro empieza en negro, mantiene el reloj centrado y bloquea gameplay hast
   });
   assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.BLACKOUT);
   assert.equal(intro.isComplete(), false);
-  assert.equal(objects[0].alpha, 1);
-  assert.equal(objects[0].visible, true);
-  assert.equal(objects[1].visible, false);
+  assert.equal(cover.alpha, 1);
+  assert.equal(cover.visible, true);
+  assert.equal(clock.visible, false);
   assert.deepEqual(player.sprite.velocity, { x: 0, y: 0 });
   assert.equal(player.sprite.animation, 'tambu-idle-down');
   assert.equal(player.facing, 'down');
@@ -129,51 +160,62 @@ test('intro empieza en negro, mantiene el reloj centrado y bloquea gameplay hast
 
   intro.update(NIGHT_INTRO_TIMINGS.blackout - 1);
   assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.BLACKOUT);
-  assert.equal(objects[1].visible, false);
+  assert.equal(clock.visible, false);
   intro.update(1);
   assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.CLOCK_0000);
-  assert.equal(objects[1].text, '00:00');
-  assert.equal(objects[1].visible, true);
-  assert.equal(drawCalls.some(([, composite]) => composite === 'destination-out'), false);
+  assert.equal(clock.visible, true);
+  assert.equal(clock.alpha, 1);
+  const zeroClockRects = clockTexture.snapshots.at(-1);
+  assert.ok(zeroClockRects.length > 0);
+  assert.ok(zeroClockRects.every(({ composite }) => composite === 'source-over'));
+  assert.equal(drawCalls.some(({ composite }) => composite === 'destination-out'), false);
 
-  assert.ok(NIGHT_INTRO_TIMINGS.clock0000 > NIGHT_INTRO_TIMINGS.clock0001);
   intro.update(NIGHT_INTRO_TIMINGS.clock0000 - 1);
   assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.CLOCK_0000);
-  assert.equal(objects[1].text, '00:00');
+  assert.deepEqual(clockTexture.snapshots.at(-1), zeroClockRects);
   intro.update(1);
   assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.CLOCK_0001);
-  assert.equal(objects[1].text, '00:01');
-  intro.update(NIGHT_INTRO_TIMINGS.clock0001 - 1);
-  assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.CLOCK_0001);
-  assert.equal(objects[1].text, '00:01');
-  intro.update(1);
+  assert.equal(clock.alpha, 1);
+  const oneClockRects = clockTexture.snapshots.at(-1);
+  assert.notDeepEqual(oneClockRects, zeroClockRects, 'cambia solamente el glyph necesario del reloj');
+
+  intro.update(NIGHT_INTRO_TIMINGS.clock0001);
   assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.REVEAL);
-  assert.equal(objects[1].visible, false);
+  assert.equal(clock.visible, true);
+  assert.equal(clock.alpha, 1);
   assert.equal(hud.visible, false);
 
-  intro.update(NIGHT_INTRO_TIMINGS.reveal / 2);
+  const initialWindowRects = windowTexture.snapshots.at(-1);
+  assert.deepEqual(rectGeometry(initialWindowRects), rectGeometry(oneClockRects),
+    'los píxeles del texto y la primera ventana tienen geometría idéntica');
+  assert.ok(initialWindowRects.every(({ composite }) => composite === 'destination-out'));
+  assert.ok(initialWindowRects.every(({ translation, scale }) => (
+    translation.x === 640 && translation.y === 360 && scale.x === 1 && scale.y === 1
+  )), 'la forma inicial está anclada al centro exacto del viewport');
+
+  intro.update(90);
+  assert.equal(clock.visible, true);
+  assert.ok(clock.alpha > 0 && clock.alpha < 1, 'el texto se funde durante la transición');
+  assert.deepEqual(rectGeometry(windowTexture.snapshots.at(-1)), rectGeometry(oneClockRects),
+    'la máscara mantiene la misma escala mientras el texto se funde');
+  intro.update(90);
+  assert.equal(clock.alpha, 0);
+  assert.deepEqual(rectGeometry(windowTexture.snapshots.at(-1)), rectGeometry(oneClockRects));
+
+  intro.update((NIGHT_INTRO_TIMINGS.reveal - 180) / 2);
   assert.equal(intro.isComplete(), false);
   assert.equal(hud.visible, false);
-  assert.ok(clockWindows.length >= 2);
-  assert.ok(clockWindows.every(({ text, composite, align, baseline }) => (
-    text === '00:01'
-    && composite === 'destination-out'
-    && align === 'center'
-    && baseline === 'middle'
-  )));
-  assert.ok(clockWindows.every(({ x, y, translation }) => (
-    x === 0 && y === 0 && translation.x === 640 && translation.y === 360
-  )), 'el centro del string permanece en el centro del viewport');
-  assert.ok(clockWindows.every(({ scale }) => scale.x === scale.y));
-  const scales = clockWindows.map(({ scale }) => scale.x);
-  assert.ok(scales.every((scale, index) => index === 0 || scale >= scales[index - 1]));
-  const finalScale = Math.max(1280 / 425, 720 / 135) * 1.35;
-  assert.ok(scales.at(-1) < 1 + (finalScale - 1) * 0.5,
-    'la curva empieza más despacio que una expansión lineal');
-  assert.deepEqual(camera.calls, [], 'el reveal no modifica la cámara');
+  assert.equal(clock.alpha, 0);
+  const expandedWindowRects = windowTexture.snapshots.at(-1);
+  assert.ok(expandedWindowRects.every(({ translation }) => (
+    translation.x === 640 && translation.y === 360
+  )), 'el centro no deriva durante la expansión');
+  const scales = [...new Set(expandedWindowRects.map(({ scale }) => scale.x))];
+  assert.ok(scales.length === 1 && scales[0] > 1, 'el reloj empieza a crecer después del fundido');
+  assert.deepEqual(camera.calls, [], 'la intro no modifica la cámara');
   assert.deepEqual({ x: player.sprite.x, y: player.sprite.y }, initialPosition);
 
-  intro.update(NIGHT_INTRO_TIMINGS.reveal / 2);
+  intro.update((NIGHT_INTRO_TIMINGS.reveal - 180) / 2);
   assert.equal(intro.getPhase(), NIGHT_INTRO_PHASES.COMPLETE);
   assert.equal(intro.isComplete(), true);
   assert.equal(player.facing, 'down');
@@ -184,10 +226,10 @@ test('intro empieza en negro, mantiene el reloj centrado y bloquea gameplay hast
   assert.equal(hud.visible, true);
   assert.deepEqual(camera.calls, []);
   assert.ok(objects.every(({ destroyed }) => destroyed));
-  assert.deepEqual(removedTextures, ['night-intro-clock-window']);
+  assert.deepEqual(removedTextures, ['night-intro-clock-window', 'night-intro-clock-pixels']);
 });
 
-test('destroy en plena intro libera el control y limpia la máscara una sola vez', () => {
+test('destroy en plena intro libera el control y limpia ambas texturas una sola vez', () => {
   const { scene, removedTextures } = makeScene();
   const player = makePlayer();
   const hud = { visible: true, setVisible(value) { this.visible = value; } };
@@ -199,7 +241,7 @@ test('destroy en plena intro libera el control y limpia la máscara una sola vez
   assert.equal(hud.visible, true);
   assert.equal(player.label.visible, true);
   assert.deepEqual(player.sprite.velocity, { x: 0, y: 0 });
-  assert.equal(removedTextures.length, 1);
+  assert.equal(removedTextures.length, 2);
 });
 
 test('HUD oculta todas sus piezas y conserva el prompt oculto al restaurarse', () => {
