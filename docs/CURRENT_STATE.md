@@ -2,7 +2,7 @@
 
 **Versión:** 1.0
 **Última verificación:** 2026-09-26
-**Base inspeccionada:** `main@1c3a070`
+**Base inspeccionada:** `main@c02ca8c`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -95,8 +95,9 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 ### Evento del baño
 
 - `OutcomeEventSystem` desacopla el resultado social del evento especial.
-- Caminata de Tambu y la chica hasta el baño.
-- Ocultamiento y restauración segura de personajes.
+- Caminata de Tambu y la chica hasta el baño con entrada específica por sector para Sofi, Mili y Cami, y tramo común junto a la barra.
+- Depth por body/pies durante el recorrido y retorno de Tambu a un punto fuera de los colliders.
+- Ocultamiento y restauración de personajes.
 - Anticipación, golpes, barra de resistencia, input con `SPACE`, éxito o fracaso y regreso al patio.
 - Conseguir Baño y sus puntos se persiste antes del minijuego; perder no revierte el outcome.
 

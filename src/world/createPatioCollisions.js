@@ -1,7 +1,8 @@
 import { PATIO_LAYOUT } from './patioLayout.js';
 
-function centeredZone({ x, y, width, height }) {
+function centeredZone({ x, y, width, height }, id) {
   return {
+    id,
     x: x + width / 2,
     y: y + height / 2,
     width,
@@ -23,17 +24,19 @@ export function getPatioCollisionZones() {
   const { house, pool, bar, dj, partyTables, cooler } = PATIO_LAYOUT;
 
   return [
-    centeredZone(house),
-    centeredZone(pool),
+    centeredZone(house, 'house'),
+    centeredZone(pool, 'pool'),
     ...bar.collisionRects.map((rect) => localRectZone(bar, rect, 'bar')),
     ...dj.collisionRects.map((rect) => localRectZone(dj, rect, 'dj')),
-    ...partyTables.map((table) => ({
+    ...partyTables.map((table, index) => ({
+      id: `party-table-${index}`,
       x: table.x,
       y: table.y + table.colliderCenterOffsetY,
       width: table.colliderWidth,
       height: table.colliderHeight,
     })),
     {
+      id: 'cooler',
       x: cooler.x + cooler.colliderCenterOffsetX,
       y: cooler.y + cooler.colliderCenterOffsetY,
       width: cooler.colliderWidth,

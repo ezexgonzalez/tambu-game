@@ -29,6 +29,14 @@ function setVisible(target, visible) {
   target?.setVisible?.(visible);
 }
 
+function getBathroomRoute(layout, interactable) {
+  const characterId = interactable.character?.id
+    ?? interactable.visual?.replace(/-sprite$/, '');
+  const entryPath = layout.entryPaths?.[characterId];
+  if (!entryPath?.length || !layout.commonPath?.length) return null;
+  return [...entryPath, ...layout.commonPath];
+}
+
 function moveToward(target, destination, distance) {
   const dx = destination.x - target.x;
   const dy = destination.y - target.y;
@@ -100,12 +108,18 @@ export function createBathroomEvent(scene, {
   layout,
   resistanceConfig = BATHROOM_RESISTANCE_CONFIG,
 }) {
-  if (!player?.sprite || !interactable?.sprite || !outcome || !layout?.path?.length) return null;
+  if (!player?.sprite || !interactable?.sprite || !outcome || !layout) return null;
+  const path = getBathroomRoute(layout, interactable);
+  if (!path) return null;
 
   const enterKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
   const spaceKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
   const npc = interactable.sprite;
   const bodyWasEnabled = player.sprite.body?.enable ?? true;
+  // Physics is disabled during this scripted walk, so carry its real bottom offset with sprite.y.
+  const playerFootDepthOffset = Number.isFinite(player.sprite.body?.bottom)
+    ? player.sprite.body.bottom - player.sprite.y
+    : 0;
   const originalPlayerPosition = { x: player.sprite.x, y: player.sprite.y };
   const originalNpc = {
     x: npc.x,
@@ -129,10 +143,13 @@ export function createBathroomEvent(scene, {
   setVisible(interactable.marker, false);
 
   function updateLabels() {
+    const footDepth = player.sprite.y + playerFootDepthOffset;
+    player.sprite.setDepth?.(footDepth);
     player.label?.setPosition?.(
       player.sprite.x,
       player.sprite.y + PLAYER_CONFIG.label.offsetY,
     );
+    player.label?.setDepth?.(footDepth + 1);
   }
 
   function enterBathroom() {
@@ -145,7 +162,7 @@ export function createBathroomEvent(scene, {
     uiElements = createOutcomeEventUi(scene, outcome);
   }
 
-  function restorePlayer(position = layout.exit) {
+  function restorePlayer(position = layout.safeExit) {
     setPosition(player.sprite, position.x, position.y);
     player.sprite.body?.reset?.(position.x, position.y);
     if (player.sprite.body) player.sprite.body.enable = bodyWasEnabled;
@@ -166,7 +183,7 @@ export function createBathroomEvent(scene, {
   }
 
   function updateWalking() {
-    const point = layout.path[pathIndex];
+    const point = path[pathIndex];
     const playerTarget = { x: point.x - layout.actorSpacing, y: point.y };
     const npcTarget = { x: point.x + layout.actorSpacing, y: point.y };
     const distance = layout.speed * Math.max(0, Math.min(scene.game.loop.delta, 50)) / 1000;
@@ -180,7 +197,7 @@ export function createBathroomEvent(scene, {
 
     if (!playerArrived || !npcArrived) return true;
     pathIndex += 1;
-    if (pathIndex >= layout.path.length) enterBathroom();
+    if (pathIndex >= path.length) enterBathroom();
     return true;
   }
 

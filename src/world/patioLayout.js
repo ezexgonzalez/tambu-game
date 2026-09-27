@@ -71,24 +71,34 @@ const DJ = {
 const BATHROOM_EVENT = {
   speed: 460,
   actorSpacing: 14,
-  path: [
-    { x: POOL.x - 48, y: POOL.y + POOL.height + 60 },
-    { x: POOL.x + POOL.width + 112, y: POOL.y + POOL.height + 60 },
-    { x: POOL.x + POOL.width + 112, y: POOL.y - 48 },
-    { x: POOL.x + POOL.width + 52, y: POOL.y - 48 },
-    { x: POOL.x + POOL.width + 52, y: HOUSE.height + 20 },
-    {
-      x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2,
-      y: HOUSE.height + 20,
-    },
-    {
-      x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2,
-      y: HOUSE.height - 8,
-    },
+  entryPaths: {
+    sofi: [
+      { x: 400, y: 690 },
+      { x: 440, y: 780 },
+      { x: 1560, y: 780 },
+      { x: 1560, y: 450 },
+    ],
+    mili: [
+      { x: 930, y: 330 },
+      { x: 1216, y: 330 },
+      { x: 1216, y: 450 },
+      { x: 1560, y: 450 },
+    ],
+    cami: [
+      { x: 1270, y: 635 },
+      { x: 1270, y: 660 },
+      { x: 1560, y: 660 },
+      { x: 1560, y: 450 },
+    ],
+  },
+  commonPath: [
+    { x: 1560, y: 155 },
+    { x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2, y: 155 },
+    { x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2, y: HOUSE.height - 8 },
   ],
-  exit: {
-    x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2,
-    y: HOUSE.height + 32,
+  safeExit: {
+    x: 1560,
+    y: 470,
   },
 };
 
