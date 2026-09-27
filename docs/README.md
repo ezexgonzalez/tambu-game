@@ -10,13 +10,16 @@ Este directorio contiene decisiones de producto, arte, narrativa y producción. 
 
 Ningún agente debe reconstruir el estado del proyecto a partir de prompts antiguos, commits aislados o documentos de fase sin consultar primero `CURRENT_STATE.md`.
 
+Para cualquier tarea de HUD, diálogo, pantallas de estado, resultados, prompts o menú, `UI_DIRECTION.md` es lectura especializada obligatoria.
+
 ## Autoridad por dominio
 
 | Documento | Decide | No decide |
 |---|---|---|
 | [`CURRENT_STATE.md`](./CURRENT_STATE.md) | Estado, vigencia, prioridades y límites actuales | Detalle técnico completo de cada sistema |
 | [`GAME_DESIGN.md`](./GAME_DESIGN.md) | Alcance y loop de la V1 | Estado de implementación |
-| [`ART_DIRECTION.md`](./ART_DIRECTION.md) | Intención, jerarquía y atmósfera visual | Paletas técnicas estrictas ni backlog |
+| [`ART_DIRECTION.md`](./ART_DIRECTION.md) | Intención, jerarquía y atmósfera visual del mundo | Sistema específico de UI |
+| [`UI_DIRECTION.md`](./UI_DIRECTION.md) | Lenguaje visual, jerarquía, layout, tipografía y timing de UI | Estado de implementación o lógica de gameplay |
 | [`PIXEL_ART_STYLE_GUIDE.md`](./PIXEL_ART_STYLE_GUIDE.md) | Reglas técnicas de pixel art y paletas vigentes | Prioridad de producción |
 | [`HUMAN_SCALE.md`](./HUMAN_SCALE.md) | Escala humana y proporciones | Diseño narrativo |
 | [`ASSET_PRODUCTION.md`](./ASSET_PRODUCTION.md) | Roadmap y contrato de producción visual | Estado global del juego |
