@@ -127,7 +127,9 @@ export class PatioScene extends Phaser.Scene {
 
     const phase = this.runState.getPhase();
     if (phase === RUN_PHASES.GAME_OVER) {
-      this.gameOverUi.update();
+      this.interactionSystem.hidePrompt();
+      this.gameOverUi.show();
+      this.gameOverUi.update(this.game.loop.delta);
       return;
     }
     if (phase === RUN_PHASES.NORMAL_END || phase === RUN_PHASES.PERFECT_NIGHT) return;
@@ -166,6 +168,8 @@ export class PatioScene extends Phaser.Scene {
       this.runState.evaluate(this.gameState);
       const phaseAfterEvaluation = this.runState.getPhase();
       if (phaseAfterEvaluation === RUN_PHASES.GAME_OVER) {
+        this.player.sprite.setVelocity(0, 0);
+        this.interactionSystem.hidePrompt();
         this.gameOverUi.show();
         return;
       }

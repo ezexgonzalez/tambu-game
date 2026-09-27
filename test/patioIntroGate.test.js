@@ -172,6 +172,7 @@ test('PatioScene no abre otra interacción en el frame que alcanza NORMAL_END', 
 test('GAME_OVER se muestra en el mismo frame en que la última conversación se cierra', () => {
   const { scene, getGameOverShows, getInteractionUpdates } = createScene({ dialogueActive: true });
   scene.runState.completeIntro();
+  scene.player.input.cursors.right.isDown = true;
   scene.gameState.player.lives = 0;
   scene.gameState.relationships.cami = { resolved: true, outcome: 'rejection' };
   scene.dialogueSystem.closeOnNextUpdate();
@@ -182,4 +183,5 @@ test('GAME_OVER se muestra en el mismo frame en que la última conversación se 
   assert.equal(scene.runState.getPhase(), RUN_PHASES.GAME_OVER);
   assert.equal(getGameOverShows(), 1);
   assert.equal(getInteractionUpdates(), 0);
+  assert.deepEqual(scene.player.sprite.body.velocity, { x: 0, y: 0 });
 });
