@@ -2,7 +2,7 @@
 
 **Versión:** 1.0
 **Última verificación:** 2026-09-27
-**Base inspeccionada:** `main@d183fbf`
+**Base inspeccionada:** `main@e2885a5`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -56,6 +56,15 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 - **Baño** es el outcome máximo actual y se resuelve fuera de la lógica social mediante la capa de eventos.
 - El Consejo tiene un uso por conversación y conserva su regla anti-repetición.
 - Las bases narrativas aprobadas de Sofi, Mili y Cami no se reescriben durante tareas visuales o técnicas.
+
+### Lenguaje de UI
+
+- `docs/UI_DIRECTION.md` es la autoridad especializada para HUD, diálogos, prompts, pantallas de estado, resultados y menús.
+- La baseline global queda definida por la intro, GAME OVER, PERFECT NIGHT y NORMAL END: display pixel 5×7, fondos nocturnos profundos, frames/dividers azul grisáceo, blanco jerarquizado, geometría ortogonal, composición con aire y prompts secundarios.
+- `src/ui/pixelText.js` es la fuente runtime de tipografía display. Los textos largos no están obligados a usar 5×7 si perjudica legibilidad.
+- GAME OVER conserva su rojo opaco como excepción semántica; no habilita a usar colores fuertes como decoración general.
+- El timing forma parte de la UI: primero se comunica el momento, después se habilita el input; ENTER/SPACE residual debe consumirse durante transiciones.
+- Nuevas pantallas no pueden inventar una identidad aislada: deben partir de `UI_DIRECTION.md` y de las baselines integradas.
 
 ## Integrado y estable
 
@@ -137,8 +146,10 @@ Cumplen función espacial, pero no son arte final.
 
 ### UI
 
-- HUD de vidas, alcohol y puntos funcional, pero visualmente provisional.
-- Prompt de interacción, diálogo, Consejo, outcomes y evento funcionan; su presentación no está congelada como UI final.
+- El lenguaje visual global ya está definido y documentado en `docs/UI_DIRECTION.md`.
+- Intro, GAME OVER, PERFECT NIGHT y NORMAL END son las referencias runtime principales de ese lenguaje.
+- HUD de vidas, alcohol y puntos sigue funcional pero su layout específico es provisional.
+- Prompt de interacción, diálogo, Consejo, outcomes y Bathroom Resistance siguen funcionales/provisionales y deben converger al sistema global mediante tareas dedicadas, no mediante rediseños silenciosos.
 - `alcohol` existe en estado y HUD, pero permanece en `0`: todavía no hay gameplay de alcohol.
 
 ## Disponible en el repo, no aprobado para runtime
@@ -172,7 +183,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 - Gameplay de alcohol y sus efectos.
 - Audio, música y efectos de sonido integrados al runtime.
 - Menú inicial y contenido nuevo de post-win. GAME OVER, NORMAL_END con resumen/replay y Perfect Night con su transición a free roam están integrados.
-- UI final y dirección visual definitiva de diálogos/HUD.
+- Aplicación completa del nuevo lenguaje de UI a HUD, diálogo, Consejo, outcomes y Bathroom Resistance; la dirección global ya está definida, pero esas superficies todavía no tienen layout final.
 - Controles táctiles/mobile.
 - Guardado o persistencia entre sesiones.
 - Otros mapas, días o campaña posterior a la fiesta.
