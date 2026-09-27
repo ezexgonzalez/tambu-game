@@ -174,7 +174,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 - Perímetro actual: comprobar en juego continuidad de laterales, oclusión de pies en el seto inferior y uniones de ambas esquinas.
 - Retorno post-baño: rutas seguras temporales por personaje, retorno a facing down e idles normales/special idles validados manualmente.
 - Balance numérico de rutas sociales y recompensas: la estructura está implementada, pero el playtest puede justificar ajustes.
-- Bathroom Resistance: la semántica success/failure y rewards ya está integrada, pero la dificultad actual `65 / +6 / 15 s⁻¹ / 10 s` queda reabierta para rebalance. La siguiente baseline debe escalar por 1.er/2.º/3.er intento de Baño y exigir más ritmo hacia el final; los valores se validarán manualmente antes de agregar la capa narrativa de amigos.
+- Bathroom Resistance: la semántica de rewards permanece intacta y ya hay tres perfiles por ordinal de intento (1.º/2.º/3.º), con SPACE `+4`, drenaje progresivo y golpes escalados. La selección deriva de los outcomes `bathroom` de la run y cuenta tanto `secured` como `interrupted`. La baseline técnica está integrada; queda pendiente el playtest manual de balance antes de sumar la capa narrativa de amigos.
 - Composición ambiental general: debe evaluarse después de resolver población visual suficiente, evitando llenar espacios por llenar.
 
 ## No implementado
@@ -194,7 +194,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **BATHROOM RESISTANCE — REBALANCE** — FIRST COMPLETE NIGHT ya pasó validación manual en sus tres cierres; el siguiente trabajo funcional es convertir Resistance en una progresión real 1/2/3 por intento antes de sumar caras/voces de amigos.
+1. **BATHROOM RESISTANCE — QA DE BALANCE** — la progresión mecánica 1/2/3 por intento ya está integrada; validar manualmente la sensación de cada perfil antes de sumar caras/voces de amigos.
 2. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; serán la base visual de Bathroom Resistance 2.0 y de callbacks de la fiesta.
 3. **BATHROOM RESISTANCE — IDENTIDAD NARRATIVA** — con amigos visuales disponibles, integrar voces, retratos/intervenciones y memoria de run sobre el balance 1/2/3 ya validado.
 4. **Audio mínimo** — música/ambiente y pocos SFX con controles básicos; debe entrar antes del QA final de ritmo.

@@ -20,7 +20,7 @@ const hooks = registerHooks({
       : nextResolve(specifier, context);
   },
 });
-const { PatioScene } = await import('../src/scenes/PatioScene.js');
+const { PatioScene, getBathroomResistanceConfigForRun } = await import('../src/scenes/PatioScene.js');
 hooks.deregister();
 import { createGameState } from '../src/state/gameState.js';
 import { createRunState, RUN_PHASES } from '../src/state/runState.js';
@@ -135,6 +135,15 @@ test('PatioScene no ejecuta systems de gameplay mientras la intro está activa',
   assert.equal(getIntroUpdates(), 1);
   assert.equal(getReturnUpdates(), 0);
   assert.equal(scene.runState.getPhase(), RUN_PHASES.INTRO);
+});
+
+test('PatioScene selecciona la dificultad por ordinal y cuenta también un bathroom interrupted', () => {
+  const gameState = createGameState();
+  assert.equal(getBathroomResistanceConfigForRun(gameState).startResistance, 55);
+  gameState.relationships.sofi = { outcome: 'bathroom', bathroomResult: 'interrupted' };
+  assert.equal(getBathroomResistanceConfigForRun(gameState).startResistance, 52);
+  gameState.relationships.cami = { outcome: 'bathroom', bathroomResult: 'secured' };
+  assert.equal(getBathroomResistanceConfigForRun(gameState).startResistance, 50);
 });
 
 test('PatioScene pasa a PARTY_ACTIVE al terminar la intro y actualiza el patio', () => {
@@ -320,4 +329,3 @@ test('PERFECT_NIGHT bloquea gameplay mientras la UI espera y POST_WIN_FREE_ROAM 
   assert.equal(scene.runState.evaluate(scene.gameState), false);
   assert.equal(scene.runState.getPhase(), RUN_PHASES.POST_WIN_FREE_ROAM);
 });
-

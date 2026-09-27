@@ -435,9 +435,9 @@ La experiencia debe ser:
 
 El jugador debería sentir que hacia el final necesita realmente presionar rápido.
 
-## Balance Pass 1 — baseline a implementar
+## Balance Pass 1 — baseline integrada; playtest manual pendiente
 
-FIRST COMPLETE NIGHT ya pasó QA manual, por lo que esta sección deja de ser una referencia abstracta y se abre como siguiente tarea funcional.
+La baseline descrita abajo ya está implementada en código. El siguiente paso es validar manualmente la sensación de dificultad y ajustar los valores si el playtest lo justifica.
 
 La dificultad se define por **ordinal de intento de Baño en la run**, contando el outcome social `bathroom` actual y los anteriores, independientemente de si una puerta previa terminó `secured` o `interrupted`. El grupo ya vivió ese intento y la presión siguiente debe crecer igual.
 

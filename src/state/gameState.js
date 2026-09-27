@@ -31,6 +31,13 @@ export function getSecuredBathroomCount(gameState) {
     .length;
 }
 
+export function getBathroomAttemptNumber(gameState) {
+  const completedAttempts = Object.values(gameState?.relationships ?? {})
+    .filter((relationship) => relationship.outcome === 'bathroom')
+    .length;
+  return Math.min(3, completedAttempts + 1);
+}
+
 export function canStartMainConversation(gameState, characterId) {
   return Boolean(characterId) && !isCharacterResolved(gameState, characterId);
 }

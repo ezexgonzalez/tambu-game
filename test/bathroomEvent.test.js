@@ -33,6 +33,7 @@ const hooks = registerHooks({
 });
 const { createBathroomEvent, getBathroomFormationOffset } = await import('../src/events/bathroomEvent.js');
 hooks.deregister();
+import { getBathroomResistanceConfig } from '../src/events/bathroomResistance.js';
 
 function actor(x, y) {
   const sprite = {
@@ -253,7 +254,7 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
   scene.game.loop.delta = 3000;
   event.update();
   assert.equal(event.getMode(), 'resistance');
-  assert.equal(event.getResistanceState().resistance, 65);
+  assert.equal(event.getResistanceState().resistance, 55);
   assert.ok(objects.some(({ text }) => text.includes('RESISTENCIA DEL BAÑO')));
 
   scene.game.loop.delta = 1000;
@@ -324,6 +325,52 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
     'Tambu and the companion have separate footprints at the doorway',
   );
   assert.ok(objects.filter(({ text }) => text).every(({ destroyed }) => destroyed));
+});
+
+test('BathroomEvent recibe el perfil del intento y SPACE solo recupera con JustDown', () => {
+  const keys = {};
+  const scene = {
+    input: { keyboard: { addKey(code) { keys[code] = { edge: false }; return keys[code]; } } },
+    add: {
+      rectangle(x, y) { return display(x, y); },
+      text(x, y, text) { return display(x, y, text); },
+    },
+    game: { loop: { delta: 50 } },
+  };
+  const player = { sprite: actor(400, 690), label: display(400, 724), facing: 'up' };
+  const interactable = {
+    sprite: actor(400, 690), label: display(400, 726), marker: display(400, 635),
+    visual: 'sofi-sprite', character: { id: 'sofi' },
+  };
+  const resistanceConfig = getBathroomResistanceConfig(3);
+  const event = createBathroomEvent(scene, {
+    player,
+    interactable,
+    outcome: SOFI_CONVERSATION.outcomes.bathroom,
+    layout: PATIO_LAYOUT.events.bathroom,
+    resistanceConfig,
+  });
+
+  let frames = 0;
+  while (event.getMode() === 'walking' && frames < 400) {
+    event.update();
+    frames += 1;
+  }
+  assert.ok(frames < 400);
+  keys.ENTER.edge = true;
+  event.update();
+  scene.game.loop.delta = 3000;
+  event.update();
+  assert.equal(event.getMode(), 'resistance');
+  assert.equal(event.getResistanceState().resistance, 50);
+
+  scene.game.loop.delta = 0;
+  keys.SPACE.edge = true;
+  event.update();
+  assert.equal(event.getResistanceState().resistance, 54);
+  event.update();
+  assert.equal(event.getResistanceState().resistance, 54, 'mantener SPACE no repite la recuperación');
+  event.destroy();
 });
 
 test('Mili usa walk real, depth por pies y vuelve a idle durante BathroomEvent', () => {

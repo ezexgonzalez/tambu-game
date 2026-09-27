@@ -4,9 +4,9 @@ import { playMiliIdle, playMiliWalk, setMiliDepth } from '../characters/miliSpri
 import { PLAYER_CONFIG } from '../player/playerConfig.js';
 import { playSofiIdle, playSofiWalk, setSofiDepth } from '../characters/sofiSprite.js';
 import {
-  BATHROOM_RESISTANCE_CONFIG,
   advanceBathroomResistance,
   createBathroomResistanceState,
+  getBathroomResistanceConfig,
   recoverBathroomResistance,
 } from './bathroomResistance.js';
 import {
@@ -115,7 +115,7 @@ export function createBathroomEvent(scene, {
   layout,
   onCompanionReturn = () => {},
   onBathroomResolved = () => false,
-  resistanceConfig = BATHROOM_RESISTANCE_CONFIG,
+  resistanceConfig = getBathroomResistanceConfig(1),
 }) {
   if (!player?.sprite || !interactable?.sprite || !outcome || !layout) return null;
   const path = getBathroomRoute(layout, interactable);

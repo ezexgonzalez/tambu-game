@@ -9,6 +9,7 @@ import { updatePlayer } from '../player/updatePlayer.js';
 import {
   canInteractWithCharacter,
   createGameState,
+  getBathroomAttemptNumber,
   isCharacterResolved,
   settleBathroomResult,
 } from '../state/gameState.js';
@@ -17,6 +18,7 @@ import { createDialogueSystem } from '../systems/dialogueSystem.js';
 import { createInteractionSystem } from '../systems/interactionSystem.js';
 import { createOutcomeEventSystem } from '../systems/outcomeEventSystem.js';
 import { createBathroomEvent } from '../events/bathroomEvent.js';
+import { getBathroomResistanceConfig } from '../events/bathroomResistance.js';
 import { createNightIntro } from '../events/nightIntro.js';
 import { createResolvedCharacterReturnSystem } from '../events/resolvedCharacterReturn.js';
 import { createHud } from '../ui/createHud.js';
@@ -26,6 +28,10 @@ import { createPerfectNightUi } from '../ui/perfectNightUi.js';
 import { createPatioCollisions } from '../world/createPatioCollisions.js';
 import { createPatioWorld, preloadPatioWorld } from '../world/createPatioWorld.js';
 import { PATIO_LAYOUT } from '../world/patioLayout.js';
+
+export function getBathroomResistanceConfigForRun(gameState) {
+  return getBathroomResistanceConfig(getBathroomAttemptNumber(gameState));
+}
 
 export class PatioScene extends Phaser.Scene {
   constructor() {
@@ -66,6 +72,7 @@ export class PatioScene extends Phaser.Scene {
           ...request,
           player: this.player,
           layout: PATIO_LAYOUT.events.bathroom,
+          resistanceConfig: getBathroomResistanceConfigForRun(this.gameState),
           onCompanionReturn: this.resolvedCharacterReturnSystem.start,
           onBathroomResolved: ({ characterId, result }) => {
             const settled = settleBathroomResult(this.gameState, characterId, result);
@@ -215,4 +222,3 @@ export class PatioScene extends Phaser.Scene {
     updatePlayer(this.player);
   }
 }
-

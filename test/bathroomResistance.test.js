@@ -1,69 +1,139 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  BATHROOM_RESISTANCE_CONFIG,
+  BATHROOM_RESISTANCE_PROFILES,
   advanceBathroomResistance,
+  calculateBathroomDrain,
   createBathroomResistanceState,
+  getBathroomResistanceConfig,
   recoverBathroomResistance,
 } from '../src/events/bathroomResistance.js';
 import {
   commitConversationOutcome,
   createGameState,
+  getBathroomAttemptNumber,
   getBathroomResult,
   settleBathroomResult,
 } from '../src/state/gameState.js';
 import { SOFI_CONVERSATION } from '../src/data/conversations/sofiConversation.js';
 
-const NO_HITS_CONFIG = { ...BATHROOM_RESISTANCE_CONFIG, hits: [] };
+const NO_HITS_PROFILE = (profile) => ({ ...profile, hits: [] });
 
-test('la resistencia comienza configurada y el tiempo la drena', () => {
-  const state = createBathroomResistanceState(NO_HITS_CONFIG);
-  const { state: advanced } = advanceBathroomResistance(state, 1000, NO_HITS_CONFIG);
+test('el ordinal deriva de los outcomes bathroom y cuenta secured e interrupted', () => {
+  const gameState = createGameState();
+  assert.equal(getBathroomAttemptNumber(gameState), 1);
 
-  assert.equal(state.resistance, 65);
-  assert.equal(advanced.resistance, 50);
-  assert.equal(advanced.status, 'active');
+  gameState.relationships.sofi = { outcome: 'bathroom', bathroomResult: 'secured' };
+  assert.equal(getBathroomAttemptNumber(gameState), 2);
+
+  gameState.relationships.mili = { outcome: 'bathroom', bathroomResult: 'interrupted' };
+  assert.equal(getBathroomAttemptNumber(gameState), 3);
+
+  gameState.relationships.cami = { outcome: 'instagram' };
+  assert.equal(getBathroomAttemptNumber(gameState), 3);
+  gameState.relationships.tobi = { outcome: 'bathroom', bathroomResult: null };
+  assert.equal(getBathroomAttemptNumber(gameState), 3, 'el ordinal queda limitado a tres');
 });
 
-test('SPACE recupera resistencia y respeta el máximo de 100', () => {
-  const state = { ...createBathroomResistanceState(NO_HITS_CONFIG), resistance: 97 };
-  const recovered = recoverBathroomResistance(state, NO_HITS_CONFIG);
-  const finished = { ...recovered, status: 'success' };
-
-  assert.equal(recovered.resistance, 100);
-  assert.strictEqual(recoverBathroomResistance(finished, NO_HITS_CONFIG), finished);
+test('los perfiles comparten contrato y aumentan la presión de 1 a 3', () => {
+  const profiles = [1, 2, 3].map(getBathroomResistanceConfig);
+  assert.deepEqual(profiles.map(({ durationMs }) => durationMs), [10000, 10000, 10000]);
+  assert.deepEqual(profiles.map(({ spaceGain }) => spaceGain), [4, 4, 4]);
+  assert.deepEqual(profiles.map(({ maxResistance }) => maxResistance), [100, 100, 100]);
+  assert.deepEqual(profiles.map(({ startResistance }) => startResistance), [55, 52, 50]);
+  assert.deepEqual(profiles.map(({ drainPhases }) => drainPhases.map(({ perSecond }) => perSecond)), [
+    [12, 15, 18], [14, 18, 22], [16, 21, 26],
+  ]);
+  assert.deepEqual(profiles.map(({ hits }) => hits.reduce((sum, hit) => sum + hit.damage, 0)), [34, 45, 57]);
+  assert.deepEqual(profiles.map(({ hits }) => hits.map(({ at }) => at)), [
+    [800, 1900, 3100, 4400, 6100, 7900, 9200],
+    [800, 1900, 3100, 4400, 6100, 7900, 9200],
+    [800, 1900, 3100, 4400, 6100, 7900, 9200],
+  ]);
+  assert.deepEqual(profiles[0].hits.map(({ text }) => text), [
+    'PUM', 'PUM PUM', 'TAMBU.', 'ABRÍ.', 'PUM PUM PUM',
+    'DALE BOLUDO, TENGO QUE MEAR.', 'PUM PUM PUM',
+  ]);
+  assert.equal(getBathroomResistanceConfig(0), BATHROOM_RESISTANCE_PROFILES[1]);
+  assert.equal(getBathroomResistanceConfig(99), BATHROOM_RESISTANCE_PROFILES[3]);
 });
 
-test('los golpes aplican daño determinístico y la resistencia nunca baja de cero', () => {
+test('cada perfil escala el drenaje durante el intento', () => {
+  for (const profile of Object.values(BATHROOM_RESISTANCE_PROFILES)) {
+    const rates = profile.drainPhases.map(({ perSecond }) => perSecond);
+    assert.ok(rates[0] < rates[1] && rates[1] < rates[2]);
+    assert.ok(calculateBathroomDrain(7000, 8000, profile.drainPhases)
+      > calculateBathroomDrain(3500, 4500, profile.drainPhases));
+    assert.ok(calculateBathroomDrain(3500, 4500, profile.drainPhases)
+      > calculateBathroomDrain(0, 1000, profile.drainPhases));
+  }
+});
+
+test('el drenaje integra correctamente deltas que cruzan las fronteras de fase', () => {
+  const phases = getBathroomResistanceConfig(1).drainPhases;
+  assert.equal(calculateBathroomDrain(3400, 3700, phases), 4.2);
+  assert.equal(calculateBathroomDrain(6900, 7200, phases), 5.1);
+});
+
+test('diez segundos de drenaje son independientes del tamaño de frame', () => {
+  const profile = getBathroomResistanceConfig(1);
   const config = {
-    ...NO_HITS_CONFIG,
+    ...NO_HITS_PROFILE(profile),
+    startResistance: 100,
+    drainPhases: [
+      { untilMs: 3500, perSecond: 1 },
+      { untilMs: 7000, perSecond: 2 },
+      { untilMs: 10000, perSecond: 3 },
+    ],
+  };
+  const singleStep = advanceBathroomResistance(createBathroomResistanceState(config), 10000, config).state;
+  let smallSteps = createBathroomResistanceState(config);
+  for (let index = 0; index < 200; index += 1) {
+    smallSteps = advanceBathroomResistance(smallSteps, 50, config).state;
+  }
+  assert.ok(Math.abs(singleStep.resistance - smallSteps.resistance) < 1e-9);
+  assert.equal(singleStep.elapsedMs, smallSteps.elapsedMs);
+  assert.equal(singleStep.resistance, 80.5);
+  assert.equal(singleStep.status, 'success');
+});
+
+test('el ordinal 1 comienza en 55 y SPACE recupera exactamente 4 hasta el máximo', () => {
+  const profile = getBathroomResistanceConfig(1);
+  const state = createBathroomResistanceState(profile);
+  assert.equal(state.resistance, 55);
+  assert.equal(recoverBathroomResistance(state, profile).resistance, 59);
+  assert.equal(recoverBathroomResistance({ ...state, resistance: 98 }, profile).resistance, 100);
+  const finished = { ...state, status: 'success' };
+  assert.strictEqual(recoverBathroomResistance(finished, profile), finished);
+});
+
+test('los golpes mantienen el contenido y el daño determinístico y la resistencia no baja de cero', () => {
+  const config = {
+    ...NO_HITS_PROFILE(getBathroomResistanceConfig(1)),
     hits: [{ at: 500, damage: 80, text: 'PUM' }],
   };
-  const { state, hits } = advanceBathroomResistance(
-    createBathroomResistanceState(config),
-    1000,
-    config,
-  );
-
+  const { state, hits } = advanceBathroomResistance(createBathroomResistanceState(config), 1000, config);
   assert.deepEqual(hits, config.hits);
   assert.equal(state.resistance, 0);
   assert.equal(state.status, 'failure');
 });
 
-test('sobrevivir la duración completa produce éxito y no puede producir fracaso a la vez', () => {
-  const config = { ...NO_HITS_CONFIG, baseDrainPerSecond: 0 };
-  const { state } = advanceBathroomResistance(
-    createBathroomResistanceState(config),
-    config.durationMs,
-    config,
-  );
-
+test('sobrevivir los diez segundos produce éxito sin alterar la liquidación de recompensas', () => {
+  const config = {
+    ...NO_HITS_PROFILE(getBathroomResistanceConfig(1)),
+    startResistance: 100,
+    drainPhases: [
+      { untilMs: 3500, perSecond: 0 },
+      { untilMs: 7000, perSecond: 0 },
+      { untilMs: 10000, perSecond: 0 },
+    ],
+  };
+  const { state } = advanceBathroomResistance(createBathroomResistanceState(config), 10000, config);
   assert.equal(state.status, 'success');
-  assert.notEqual(state.status, 'failure');
   assert.equal(advanceBathroomResistance(state, 1000, config).state.status, 'success');
 });
 
-test('el baño queda pendiente hasta Resistance y una falla liquida recompensa parcial', () => {
+test('el baño sigue pendiente hasta Resistance y el fallo conserva la recompensa parcial sin quitar vidas', () => {
   const gameState = createGameState();
   const session = {
     characterId: 'sofi',
@@ -74,9 +144,9 @@ test('el baño queda pendiente hasta Resistance y una falla liquida recompensa p
   commitConversationOutcome(gameState, session, SOFI_CONVERSATION.outcomes.bathroom);
   const snapshot = structuredClone(gameState);
   const failure = advanceBathroomResistance(
-    { ...createBathroomResistanceState(NO_HITS_CONFIG), resistance: 0 },
+    { ...createBathroomResistanceState(getBathroomResistanceConfig(1)), resistance: 0 },
     0,
-    NO_HITS_CONFIG,
+    getBathroomResistanceConfig(1),
   ).state;
 
   assert.equal(failure.status, 'failure');
