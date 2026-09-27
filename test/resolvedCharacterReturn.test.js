@@ -1,5 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { CAMI_STATES } from '../src/characters/camiSprite.js';
+import { MILI_STATES } from '../src/characters/miliSprite.js';
+import { SOFI_STATES } from '../src/characters/sofiSprite.js';
 import { patioWomen } from '../src/data/patioCharacters.js';
 import { createResolvedCharacterReturnSystem } from '../src/events/resolvedCharacterReturn.js';
 import { getPatioCollisionZones } from '../src/world/createPatioCollisions.js';
@@ -45,6 +48,13 @@ function makeInteractable(character) {
     setPosition(x, y) { this.x = x; this.y = y; return this; },
     setDepth(value) { this.depth = value; return this; },
     play(key) { this.anims.currentAnim = { key }; return this; },
+  };
+  sprite[`${character.id}Scene`] = {
+    time: {
+      delayedCall(delay, callback) {
+        return { delay, callback, remove() {} };
+      },
+    },
   };
   const label = {
     x: sprite.x,
@@ -103,7 +113,14 @@ test('cada retorno es propio, seguro y termina en el anchor temporal de su chica
     assert.ok(walkKeys.size > 0, `${id} uses its real walk animation`);
     assert.equal(interactable.isRelocating, false);
     assert.equal(interactable.sprite.visible, true);
-    assert.ok(interactable.sprite.anims.currentAnim.key.startsWith(`${id}-idle-`));
+    assert.equal(interactable.sprite.anims.currentAnim.key, `${id}-idle-down`);
+    assert.equal(interactable.sprite[`${id}Facing`], 'down');
+    const expectedState = id === 'sofi'
+      ? SOFI_STATES.IDLE
+      : id === 'mili' ? MILI_STATES.IDLE : CAMI_STATES.IDLE;
+    assert.equal(interactable.sprite[`${id}State`], expectedState);
+    assert.equal(interactable.sprite.anims.currentAnim.key.includes('-walk-'), false);
+    assert.ok(interactable.sprite[`${id}IdleTimer`], `${id} resumes its idle variation timer`);
     assert.equal(interactable.sprite.x, character.x);
     assert.equal(interactable.sprite.y, character.y);
     assert.equal(interactable.sprite.depth, interactable.sprite.y + 30);

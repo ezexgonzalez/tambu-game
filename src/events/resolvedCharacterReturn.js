@@ -23,15 +23,15 @@ function updateWalk(interactable, destination) {
   }
 }
 
-function updateIdle(interactable) {
+function updateIdle(interactable, direction = 'down') {
   if (interactable.visual === 'sofi-sprite') {
-    playSofiIdle(interactable.sprite);
+    playSofiIdle(interactable.sprite, direction);
     setSofiDepth(interactable.sprite);
   } else if (interactable.visual === 'mili-sprite') {
-    playMiliIdle(interactable.sprite);
+    playMiliIdle(interactable.sprite, direction);
     setMiliDepth(interactable.sprite);
   } else if (interactable.visual === 'cami-sprite') {
-    playCamiIdle(interactable.sprite);
+    playCamiIdle(interactable.sprite, direction);
     setCamiDepth(interactable.sprite);
   }
 }
@@ -41,7 +41,7 @@ export function createResolvedCharacterReturnSystem(layout) {
 
   function finishReturn(characterId, task) {
     const { sprite, label, marker } = task.interactable;
-    updateIdle(task.interactable);
+    updateIdle(task.interactable, 'down');
     task.interactable.isRelocating = false;
     label?.setPosition?.(sprite.x, sprite.y + 36);
     label?.setDepth?.((sprite.depth ?? sprite.y) + 1);
