@@ -2,7 +2,7 @@
 
 **Versión:** 1.0
 **Última verificación:** 2026-09-27
-**Base inspeccionada:** `main@c00dd36`
+**Base inspeccionada:** `main@25068d1`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -106,7 +106,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 
 - `src/state/runState.js` mantiene las fases `INTRO`, `PARTY_ACTIVE`, `GAME_OVER`, `NORMAL_END`, `PERFECT_NIGHT` y `POST_WIN_FREE_ROAM`, sin duplicar puntos, vidas ni resultados sociales.
 - La intro activa la run una sola vez. `PatioScene` evalúa finales cuando intro, outcome event y diálogo ya terminaron; el retorno de una chica sigue en background y no bloquea la evaluación. La evaluación ocurre antes de habilitar otra interacción en el mismo frame.
-- GAME OVER tiene prioridad con cero vidas. Mantiene inmóviles el patio y el HUD durante un beat de 900 ms, luego muestra una pantalla roja opaca con `SOS UN HIJO DE PUTA` en glifos pixelados 5×7; el prompt de retry aparece 450 ms después. ENTER o SPACE reinicia `PatioScene` desde una escena/run nueva. PERFECT NIGHT requiere que Sofi, Mili y Cami tengan outcome `bathroom` y resultado `secured`; con las tres resueltas y cualquier otro resultado se alcanza `NORMAL_END`.
+- GAME OVER tiene prioridad con cero vidas y queda aceptado como baseline: congela gameplay, conserva ~900 ms el último frame para timing cómico, luego muestra rojo opaco con `SOS UN HIJO DE PUTA` en glifos pixelados 5×7; el prompt de retry aparece 450 ms después. ENTER o SPACE reinicia `PatioScene` desde una escena/run nueva. PERFECT NIGHT requiere que Sofi, Mili y Cami tengan outcome `bathroom` y resultado `secured`; con las tres resueltas y cualquier otro resultado se alcanza `NORMAL_END`.
 - `NORMAL_END` y `PERFECT_NIGHT` cortan el gameplay, pero todavía no tienen presentación. `continueParty()` permite únicamente `PERFECT_NIGHT → POST_WIN_FREE_ROAM`; sigue siendo una transición lógica sin gameplay de post-win.
 - El reinicio de Scene detiene primero outcome/retornos y después cancela los timers y listeners de special idles. Intro, UI, diálogo y eventos limpian sus objetos o estado en `SHUTDOWN`.
 
@@ -180,7 +180,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **FIRST COMPLETE NIGHT** — intro `00:00 → 00:01`, semántica de recompensa del Baño, Run State y GAME OVER con retry limpio integrados; siguiente: victoria máxima, final normal y resumen.
+1. **FIRST COMPLETE NIGHT** — intro, semántica de recompensa del Baño, Run State y GAME OVER con retry limpio ya integrados; siguiente bloque: presentación de `PERFECT_NIGHT` + transición funcional a `POST_WIN_FREE_ROAM`, luego final normal y resumen.
 2. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; necesarios también para dar identidad al Bathroom Resistance.
 3. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
 4. **Audio mínimo** — música, SFX y feedback suficiente para que la noche tenga presencia.
