@@ -1,8 +1,8 @@
 # Tambu Game — Estado actual
 
 **Versión:** 1.0
-**Última verificación:** 2026-09-21
-**Base inspeccionada:** `main@073c041`
+**Última verificación:** 2026-09-26
+**Base inspeccionada:** `main@1c3a070`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -80,7 +80,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 | Tambu | Spritesheet 4 direcciones, idle y walk | Integrado / estable |
 | Sofi | Walk 4 direcciones, idle estable con blink ocasional, special idles de teléfono/bebida en down y caminata del evento del baño | Integrado / estable |
 | Mili | Atlas 4 direcciones, idle estático, blink down ocasional, hair adjust y drink down esporádicos, y caminata del evento del baño | Congelado |
-| Cami | Atlas 4 direcciones, idle estático, blink/hair touch/hand-on-hip ocasionales en down, walk y caminata del evento del baño | En validación visual |
+| Cami | Atlas 4 direcciones, idle estático, blink/hair touch/hand-on-hip ocasionales en down, walk y caminata del evento del baño; polish fino diferido | Integrado / estable |
 
 “Estable” significa que estos sectores son la base vigente. Una tarea nueva no puede reemplazarlos o reinterpretarlos si su scope no lo autoriza de forma explícita.
 
@@ -168,13 +168,13 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **Personajes interactuables** — Sofi, Mili y Cami quedan como baselines visuales y técnicas; completar los amigos principales con el mismo estándar.
-2. **Amigos principales** — siluetas y rasgos reconocibles dentro de la misma escala.
-3. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
-4. **Props ambientales activos** — reemplazar primitives solo con kits validados en contexto.
-5. **Vida del patio** — idles, cambios de posición, gags y eventos pequeños.
-6. **Audio y presentación** — música, SFX, feedback y UI.
-7. **Fin de noche y polish** — resumen, balance, accesibilidad y cierre de la V1.
+1. **Coherencia crítica** — corregir BathroomEvent y contradicciones sociales ya detectadas antes de ampliar contenido.
+2. **FIRST COMPLETE NIGHT** — intro `00:00 → 00:01`, estado de run, derrota por 0 vidas, victoria máxima por 3 Baños, final normal, resumen y restart limpio.
+3. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; necesarios también para dar identidad al Bathroom Resistance.
+4. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
+5. **Audio mínimo** — música, SFX y feedback suficiente para que la noche tenga presencia.
+6. **Vida del patio** — post-outcome, roaming controlado y una selección pequeña de microeventos/callbacks.
+7. **UI, balance y polish** — Bathroom Resistance, claridad de estados, resumen, accesibilidad y cierre de la V1.
 
 Las correcciones puntuales a sectores ya integrados siguen siendo válidas cuando existe un defecto concreto. No deben desplazar indefinidamente las prioridades anteriores.
 
