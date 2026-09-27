@@ -2,7 +2,7 @@
 
 **Versión:** 1.0
 **Última verificación:** 2026-09-26
-**Base inspeccionada:** `main@e3d2c6f`
+**Base inspeccionada:** `main@f5ac997`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -98,7 +98,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 - `OutcomeEventSystem` desacopla el resultado social del evento especial.
 - Caminata de Tambu y la chica hasta el baño con rutas específicas por sector, diagonales/formation naturales, ritmo relajado y tramo común recién cerca de la puerta.
 - Depth por body/pies durante el recorrido y retorno de Tambu alineado frente a la puerta del baño, fuera de colliders.
-- Al cerrar el resultado, Tambu recupera control frente a la puerta; la chica vuelve visible junto a él e inicia en background un camino seguro hasta su anchor social temporal, donde queda en idle e interactuable, con label visible y marker oculto.
+- Al cerrar el resultado, Tambu recupera control frente a la puerta; la chica vuelve visible junto a él e inicia en background un camino seguro hasta su anchor social temporal, donde queda mirando down, retoma sus idles normales/special idles, permanece interactuable, con label visible y marker oculto.
 - Anticipación, golpes, barra de resistencia, input con `SPACE`, éxito o fracaso y regreso al patio.
 - Conseguir Baño y sus puntos se persiste antes del minijuego; perder no revierte el outcome.
 
@@ -150,7 +150,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 ## En validación o ajuste
 
 - Perímetro actual: comprobar en juego continuidad de laterales, oclusión de pies en el seto inferior y uniones de ambas esquinas.
-- Retorno post-baño: rutas seguras temporales por personaje están integradas; pendiente QA visual manual para confirmar los tres recorridos y legibilidad al salir.
+- Retorno post-baño: rutas seguras temporales por personaje, retorno a facing down e idles normales/special idles validados manualmente.
 - Balance numérico de rutas sociales y recompensas: la estructura está implementada, pero el playtest puede justificar ajustes.
 - Composición ambiental general: debe evaluarse después de resolver población visual suficiente, evitando llenar espacios por llenar.
 
@@ -171,13 +171,12 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **Coherencia crítica** — retorno post-baño integrado; confirmar visualmente las rutas temporales y cerrar esta pasada.
-2. **FIRST COMPLETE NIGHT** — intro `00:00 → 00:01`, estado de run, derrota por 0 vidas, victoria máxima por 3 Baños, final normal, resumen y restart limpio.
-3. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; necesarios también para dar identidad al Bathroom Resistance.
-4. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
-5. **Audio mínimo** — música, SFX y feedback suficiente para que la noche tenga presencia.
-6. **Vida del patio** — roaming controlado y una selección pequeña de microeventos/callbacks; las reacciones post-outcome ya están integradas.
-7. **UI, balance y polish** — Bathroom Resistance, claridad de estados, resumen, accesibilidad y cierre de la V1.
+1. **FIRST COMPLETE NIGHT** — intro `00:00 → 00:01`, estado de run, derrota por 0 vidas, victoria máxima por 3 Baños, final normal, resumen y restart limpio.
+2. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; necesarios también para dar identidad al Bathroom Resistance.
+3. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
+4. **Audio mínimo** — música, SFX y feedback suficiente para que la noche tenga presencia.
+5. **Vida del patio** — roaming controlado y una selección pequeña de microeventos/callbacks; las reacciones post-outcome ya están integradas.
+6. **UI, balance y polish** — Bathroom Resistance, claridad de estados, resumen, accesibilidad y cierre de la V1.
 
 Las correcciones puntuales a sectores ya integrados siguen siendo válidas cuando existe un defecto concreto. No deben desplazar indefinidamente las prioridades anteriores.
 
