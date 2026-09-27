@@ -21,6 +21,7 @@ import { createNightIntro } from '../events/nightIntro.js';
 import { createResolvedCharacterReturnSystem } from '../events/resolvedCharacterReturn.js';
 import { createHud } from '../ui/createHud.js';
 import { createGameOverUi } from '../ui/gameOverUi.js';
+import { createPerfectNightUi } from '../ui/perfectNightUi.js';
 import { createPatioCollisions } from '../world/createPatioCollisions.js';
 import { createPatioWorld, preloadPatioWorld } from '../world/createPatioWorld.js';
 import { PATIO_LAYOUT } from '../world/patioLayout.js';
@@ -98,12 +99,17 @@ export class PatioScene extends Phaser.Scene {
       hud,
       onRetry: () => this.scene.restart(),
     });
+    this.perfectNightUi = createPerfectNightUi(this, {
+      hud,
+      onContinue: () => this.runState.continueParty(),
+    });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.nightIntro.destroy();
       this.outcomeEventSystem.stop();
       this.resolvedCharacterReturnSystem.destroy();
       destroyCharacterSprites(this.interactables);
       this.gameOverUi.destroy();
+      this.perfectNightUi.destroy();
     });
   }
 
@@ -132,7 +138,14 @@ export class PatioScene extends Phaser.Scene {
       this.gameOverUi.update(this.game.loop.delta);
       return;
     }
-    if (phase === RUN_PHASES.NORMAL_END || phase === RUN_PHASES.PERFECT_NIGHT) return;
+    if (phase === RUN_PHASES.PERFECT_NIGHT) {
+      this.resolvedCharacterReturnSystem.update(this.game.loop.delta);
+      this.interactionSystem.hidePrompt();
+      this.perfectNightUi.show();
+      this.perfectNightUi.update(this.game.loop.delta);
+      return;
+    }
+    if (phase === RUN_PHASES.NORMAL_END) return;
 
     this.resolvedCharacterReturnSystem.update(this.game.loop.delta);
 
@@ -171,6 +184,12 @@ export class PatioScene extends Phaser.Scene {
         this.player.sprite.setVelocity(0, 0);
         this.interactionSystem.hidePrompt();
         this.gameOverUi.show();
+        return;
+      }
+      if (phaseAfterEvaluation === RUN_PHASES.PERFECT_NIGHT) {
+        this.player.sprite.setVelocity(0, 0);
+        this.interactionSystem.hidePrompt();
+        this.perfectNightUi.show();
         return;
       }
       if (phaseAfterEvaluation !== RUN_PHASES.PARTY_ACTIVE) return;

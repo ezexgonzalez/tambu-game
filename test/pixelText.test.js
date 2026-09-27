@@ -3,11 +3,13 @@ import assert from 'node:assert/strict';
 import { createPixelText, measurePixelText, PIXEL_GLYPHS } from '../src/ui/pixelText.js';
 
 test('pixel alphabet uses complete 5×7 binary glyphs', () => {
-  assert.equal(Object.keys(PIXEL_GLYPHS).length, 26);
+  assert.equal(Object.keys(PIXEL_GLYPHS).length, 40);
   for (const [letter, rows] of Object.entries(PIXEL_GLYPHS)) {
     assert.equal(rows.length, 7, `${letter} row count`);
     for (const row of rows) assert.match(row, /^[01]{5}$/, `${letter} glyph row`);
   }
+  assert.deepEqual(PIXEL_GLYPHS['0'], ['01110', '11011', '11011', '11011', '11011', '11011', '01110']);
+  assert.deepEqual(PIXEL_GLYPHS['1'], ['00110', '01110', '00110', '00110', '00110', '00110', '01111']);
 });
 
 test('pixel text uses centered square blocks on the same 14 px clock grid', () => {

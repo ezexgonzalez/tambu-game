@@ -33,6 +33,9 @@ function createScene({ completeOnUpdate = false, outcomeActive = false, dialogue
   let interactionUpdates = 0;
   let gameOverShows = 0;
   let gameOverUpdates = 0;
+  let perfectNightShows = 0;
+  let perfectNightUpdates = 0;
+  let interactionHides = 0;
   let outcomeActiveNow = outcomeActive;
   let dialogueActiveNow = dialogueActive;
   let closeDialogueOnNextUpdate = false;
@@ -87,10 +90,19 @@ function createScene({ completeOnUpdate = false, outcomeActive = false, dialogue
     setOpen(value) { dialogueActiveNow = value; },
     closeOnNextUpdate() { closeDialogueOnNextUpdate = true; },
   };
-  scene.interactionSystem = { update() { interactionUpdates += 1; }, hidePrompt() {} };
+  scene.interactionSystem = {
+    update() { interactionUpdates += 1; },
+    hidePrompt() { interactionHides += 1; },
+  };
   scene.gameOverUi = {
     show() { gameOverShows += 1; },
     update() { gameOverUpdates += 1; },
+  };
+  scene.perfectNightUi = {
+    show() { perfectNightShows += 1; },
+    update() { perfectNightUpdates += 1; },
+    continue() { return scene.runState.continueParty(); },
+    destroy() {},
   };
   return {
     scene,
@@ -99,6 +111,9 @@ function createScene({ completeOnUpdate = false, outcomeActive = false, dialogue
     getInteractionUpdates: () => interactionUpdates,
     getGameOverShows: () => gameOverShows,
     getGameOverUpdates: () => gameOverUpdates,
+    getPerfectNightShows: () => perfectNightShows,
+    getPerfectNightUpdates: () => perfectNightUpdates,
+    getInteractionHides: () => interactionHides,
   };
 }
 
@@ -184,4 +199,51 @@ test('GAME_OVER se muestra en el mismo frame en que la última conversación se 
   assert.equal(getGameOverShows(), 1);
   assert.equal(getInteractionUpdates(), 0);
   assert.deepEqual(scene.player.sprite.body.velocity, { x: 0, y: 0 });
+});
+
+test('PERFECT_NIGHT bloquea gameplay mientras la UI espera y POST_WIN_FREE_ROAM devuelve control sin reset', () => {
+  const {
+    scene,
+    getInteractionUpdates,
+    getInteractionHides,
+    getPerfectNightShows,
+    getPerfectNightUpdates,
+  } = createScene();
+  scene.runState.completeIntro();
+  scene.gameState.player.points = 1500;
+  for (const characterId of ['sofi', 'mili', 'cami']) {
+    scene.gameState.relationships[characterId] = {
+      resolved: true,
+      outcome: 'bathroom',
+      bathroomResult: 'secured',
+      rewardSettled: true,
+    };
+  }
+  scene.player.input.cursors.right.isDown = true;
+  scene.player.sprite.body.velocity = { x: 160, y: 0 };
+  const savedRelationships = structuredClone(scene.gameState.relationships);
+
+  scene.update();
+  assert.equal(scene.runState.getPhase(), RUN_PHASES.PERFECT_NIGHT);
+  assert.equal(getPerfectNightShows(), 1);
+  assert.equal(getPerfectNightUpdates(), 0);
+  assert.equal(getInteractionUpdates(), 0);
+  assert.equal(scene.player.sprite.body.velocity.x, 0);
+
+  const savedPosition = { x: scene.player.sprite.x, y: scene.player.sprite.y };
+  scene.update();
+  assert.equal(getPerfectNightUpdates(), 1);
+  assert.equal(getInteractionUpdates(), 0);
+  assert.ok(getInteractionHides() > 0);
+  assert.deepEqual(scene.player.sprite.body.velocity, { x: 0, y: 0 });
+
+  assert.equal(scene.perfectNightUi.continue(), true);
+  scene.update();
+  assert.equal(scene.runState.getPhase(), RUN_PHASES.POST_WIN_FREE_ROAM);
+  assert.equal(getInteractionUpdates(), 1);
+  assert.deepEqual({ x: scene.player.sprite.x, y: scene.player.sprite.y }, savedPosition);
+  assert.deepEqual(scene.gameState.relationships, savedRelationships);
+  assert.equal(scene.gameState.player.points, 1500);
+  assert.equal(scene.runState.evaluate(scene.gameState), false);
+  assert.equal(scene.runState.getPhase(), RUN_PHASES.POST_WIN_FREE_ROAM);
 });
