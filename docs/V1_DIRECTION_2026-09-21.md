@@ -857,19 +857,39 @@ RESISTENCIA DEL BAÑO
 
 ## Regla
 
-Una vez que llegaron físicamente al baño:
+La conversación puede resolver el **outcome social Baño**, pero la recompensa mecánica queda pendiente hasta terminar Bathroom Resistance.
 
-> Baño está conseguido.
+La secuencia conceptual pasa a ser:
 
-El resultado de Bathroom Resistance no debe borrar ese logro.
+```
+CONVERSACIÓN
+      ↓
+BATHROOM INTENT / outcome social Baño
+      ↓
+TRAYECTO
+      ↓
+LLEGAN AL BAÑO
+      ↓
+BATHROOM RESISTANCE
+      ↓
+SUCCESS → BAÑO ASEGURADO / recompensa completa
+FAILURE → BAÑO INTERRUMPIDO / recompensa parcial
+```
 
-Eso mantiene la decisión anterior:
+El fracaso del minijuego **no convierte la interacción en rechazo** ni quita una vida: la chica aceptó y ambos llegaron al baño. Sin embargo, Bathroom Resistance debe tener consecuencias reales.
 
-- éxito del minijuego → desenlace legendario;
-- fracaso → desenlace caótico/humillante;
-- ambos conservan el outcome social Baño.
+Baseline de diseño para V1:
 
-La modificación exacta del contrato actual debe diseñarse antes de implementar Santy.
+- success → +500 puntos;
+- failure → +250 puntos provisionalmente;
+- ambos conservan `relationship.outcome = 'bathroom'`;
+- guardar además el resultado del evento (`secured` / `interrupted` o equivalente);
+- la recompensa de Baño NO se acredita antes del minijuego;
+- la futura **Perfect Night** requiere tres Baños asegurados, no solo tres intents sociales.
+
+Los valores de puntos pueden rebalancearse por playtest, pero la distinción success/failure queda congelada conceptualmente.
+
+La modificación exacta del contrato actual debe mantener una sola acreditación de recompensa y evitar dobles puntos.
 
 ---
 
