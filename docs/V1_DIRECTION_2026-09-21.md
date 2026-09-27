@@ -148,7 +148,7 @@ Este será el próximo gran milestone funcional.
 Una run debe poder:
 
 1. iniciar;
-2. presentar la llegada;
+2. presentar el comienzo de la noche;
 3. permitir jugar toda la noche;
 4. resolver las tres chicas;
 5. terminar en derrota, victoria máxima o final normal;
@@ -262,7 +262,7 @@ La partida debe tener una entrada breve y memorable.
 
 ## Concepto
 
-Tambu entra caminando brevemente por el acceso actual; después, un fundido a negro cubre el patio real.
+La secuencia comienza con negro opaco y el patio ya preparado debajo. No hay llegada visible ni movimiento de Tambu: permanece en su posición inicial, en idle down.
 
 La pantalla presenta:
 
@@ -272,7 +272,7 @@ Luego cambia a:
 
 `00:01`
 
-y el patio aparece a través de los números convertidos en una ventana transparente. Los números crecen hasta revelar todo el viewport; la cámara conserva el zoom del mapa en `1`.
+Tras 200 ms de negro aparece `00:00` estático durante 1500 ms; luego cambia a `00:01`, que permanece estable durante 450 ms. El patio aparece únicamente a través de los glyphs de `00:01`, que se expanden desde el centro exacto del viewport durante 1500 ms hasta revelar el mapa completo. La cámara conserva el zoom del mapa en `1` y no se mueve durante el reveal.
 
 La intención es comunicar sin explicación:
 
@@ -1556,7 +1556,7 @@ Valida:
 Tambu V1 puede considerarse completa cuando:
 
 - existe menú inicial;
-- existe intro de llegada;
+- existe intro de comienzo de noche `00:00 → 00:01`;
 - la noche puede jugarse de principio a fin;
 - las tres chicas tienen presentación visual final suficiente;
 - sus conversaciones son coherentes;
