@@ -39,6 +39,7 @@ No se vuelve a producir un sector estable salvo que exista un problema concreto 
 - Tambu: `public/assets/characters/tambu/tambu.png`.
 - Sofi: walk, idle y special idles aprobados en `public/assets/characters/women/`, integrados desde `src/characters/sofiSprite.js`.
 - Mili: walk 4 direcciones, idle estático, blink down, hair adjust y drink down aprobados en `public/assets/characters/women/`, integrados desde `src/characters/miliSprite.js`; baseline congelada.
+- Cami: walk 4 direcciones, idle estático, blink down, hair touch y hand-on-hip aprobados e integrados desde `src/characters/camiSprite.js`; baseline funcional cerrada para avanzar, con polish visual fino diferido.
 - Césped: dos tilesets aprobados en `public/assets/tiles/grass/`.
 - Deck y props seleccionados: `public/assets/tiles/deck/` y `public/assets/props/deck/`.
 - Casa: `public/assets/tiles/house/`.
@@ -55,7 +56,6 @@ Estos elementos son contexto de producción y referencia de coherencia. No son i
 
 ### Placeholders que sí deben reemplazarse
 
-- Cami.
 - Eze, Pitity, Uriel, Santy, Thiago y Tobi.
 - NPCs de relleno.
 - Mesas, cooler, faroles, guirnaldas y clutter creados en `createPatioWorld.js` con Phaser Graphics.
@@ -137,7 +137,7 @@ Ningún Tier A/B se aprueba aislado sobre un fondo vacío.
 
 # FASE A — Mujeres interactuables
 
-Sofi y Mili ya están resueltas e integradas como baselines de calidad. Completar la primera familia con Cami sin romper la escala ni el lenguaje visual establecido por Tambu, Sofi y Mili.
+**Estado: cerrada para avanzar.** Sofi, Mili y Cami ya están resueltas e integradas como baselines funcionales de la V1. Cami conserva margen de polish manual futuro, pero ese refinamiento no bloquea el siguiente milestone.
 
 ## Entrega mínima por personaje
 
@@ -170,9 +170,15 @@ La entrega exacta debe decidirse con el módulo de integración. No generar anim
 
 ### Cami
 
+- baseline visual y técnica integrada;
+- walk 4 direcciones e idle estático;
+- blink down ocasional;
+- hair touch down ocasional;
+- hand-on-hip down ocasional;
 - segura, filosa y con presencia;
 - distinguirla mediante outfit, pelo y postura;
-- mantenerla dentro de la misma familia visual.
+- mantenerla dentro de la misma familia visual;
+- el polish manual pendiente es mejora futura, no blocker de V1 ni motivo para reabrir producción automática ahora.
 
 ## Gate de aprobación de la familia
 
@@ -184,7 +190,7 @@ La entrega exacta debe decidirse con el módulo de integración. No generar anim
 
 # FASE B — Amigos principales
 
-Producir una familia común para:
+Esta es la **siguiente fase visual**, pero no desplaza el milestone de coherencia crítica / FIRST COMPLETE NIGHT definido por Dirección. Cuando vuelva a abrirse producción de personajes, producir una familia común para:
 
 1. Pitity;
 2. Uriel;
