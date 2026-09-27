@@ -1,5 +1,5 @@
 export function createHud(scene, gameState) {
-  scene.add.rectangle(1090, 44, 356, 64, 0x020409, 0.38)
+  const hudShadow = scene.add.rectangle(1090, 44, 356, 64, 0x020409, 0.38)
     .setOrigin(0.5)
     .setScrollFactor(0)
     .setDepth(4999);
@@ -65,6 +65,17 @@ export function createHud(scene, gameState) {
   }).setOrigin(0.5).setScrollFactor(0).setDepth(5002).setVisible(false);
   interactionPrompt.setShadow(2, 2, '#000000', 3, true, true);
 
+  const elements = [hudShadow, hudBg, hudDecor, hearts, alcohol, points];
+  let visible = true;
+  let alcoholWidth = 0;
+
+  function setVisible(nextVisible) {
+    visible = nextVisible;
+    elements.forEach((element) => element.setVisible(visible));
+    alcoholFill.setVisible(visible && alcoholWidth > 0);
+    if (!visible) interactionPrompt.setVisible(false);
+  }
+
   function update(nextState) {
     const playerState = nextState.player;
     hearts.setText(Array(playerState.lives).fill('♥').join(' '));
@@ -73,9 +84,10 @@ export function createHud(scene, gameState) {
 
     const alcoholPercent = Math.max(0, Math.min(playerState.alcohol, 100));
     const fillWidth = Math.round(110 * alcoholPercent / 100);
-    alcoholFill.setDisplaySize(Math.max(fillWidth, 1), 6).setVisible(fillWidth > 0);
+    alcoholWidth = fillWidth;
+    alcoholFill.setDisplaySize(Math.max(fillWidth, 1), 6).setVisible(visible && fillWidth > 0);
   }
 
   update(gameState);
-  return { interactionPrompt, update };
+  return { interactionPrompt, update, setVisible };
 }

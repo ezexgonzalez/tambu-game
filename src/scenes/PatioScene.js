@@ -11,6 +11,7 @@ import { createDialogueSystem } from '../systems/dialogueSystem.js';
 import { createInteractionSystem } from '../systems/interactionSystem.js';
 import { createOutcomeEventSystem } from '../systems/outcomeEventSystem.js';
 import { createBathroomEvent } from '../events/bathroomEvent.js';
+import { createNightIntro } from '../events/nightIntro.js';
 import { createResolvedCharacterReturnSystem } from '../events/resolvedCharacterReturn.js';
 import { createHud } from '../ui/createHud.js';
 import { createPatioCollisions } from '../world/createPatioCollisions.js';
@@ -77,7 +78,9 @@ export class PatioScene extends Phaser.Scene {
 
     this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
     this.cameras.main.setZoom(1);
+    this.nightIntro = createNightIntro(this, { player: this.player, hud });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.nightIntro.destroy();
       this.outcomeEventSystem.stop();
       this.resolvedCharacterReturnSystem.destroy();
     });
@@ -92,6 +95,11 @@ export class PatioScene extends Phaser.Scene {
 
   update() {
     if (!this.player?.sprite) return;
+
+    if (!this.nightIntro.isComplete()) {
+      this.nightIntro.update(this.game.loop.delta);
+      if (!this.nightIntro.isComplete()) return;
+    }
 
     this.resolvedCharacterReturnSystem.update(this.game.loop.delta);
 

@@ -262,7 +262,7 @@ La partida debe tener una entrada breve y memorable.
 
 ## Concepto
 
-Tambu entra al lugar.
+Tambu entra caminando brevemente por el acceso actual; después, un fundido a negro cubre el patio real.
 
 La pantalla presenta:
 
@@ -272,7 +272,7 @@ Luego cambia a:
 
 `00:01`
 
-y se desvanece mientras aparece el patio.
+y el patio aparece a través de los números convertidos en una ventana transparente. Los números crecen hasta revelar todo el viewport; la cámara conserva el zoom del mapa en `1`.
 
 La intención es comunicar sin explicación:
 
