@@ -113,6 +113,7 @@ export function createBathroomEvent(scene, {
   interactable,
   outcome,
   layout,
+  onCompanionReturn = () => {},
   resistanceConfig = BATHROOM_RESISTANCE_CONFIG,
 }) {
   if (!player?.sprite || !interactable?.sprite || !outcome || !layout) return null;
@@ -193,6 +194,7 @@ export function createBathroomEvent(scene, {
   function finish() {
     restorePlayer();
     restoreCompanion();
+    onCompanionReturn(interactable);
     destroyEventUi(uiElements);
     uiElements = null;
     mode = 'complete';

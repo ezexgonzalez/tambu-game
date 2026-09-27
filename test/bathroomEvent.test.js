@@ -6,6 +6,7 @@ import { MILI_CONVERSATION } from '../src/data/conversations/miliConversation.js
 import { SOFI_CONVERSATION } from '../src/data/conversations/sofiConversation.js';
 import { patioWomen } from '../src/data/patioCharacters.js';
 import { PLAYER_CONFIG } from '../src/player/playerConfig.js';
+import { createResolvedCharacterReturnSystem } from '../src/events/resolvedCharacterReturn.js';
 import { getPatioCollisionZones } from '../src/world/createPatioCollisions.js';
 import { PATIO_LAYOUT } from '../src/world/patioLayout.js';
 
@@ -190,11 +191,14 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
     visual: 'sofi-sprite',
   };
   const outcome = SOFI_CONVERSATION.outcomes.bathroom;
+  const returnSystem = createResolvedCharacterReturnSystem(PATIO_LAYOUT.events.bathroom);
+  const sofiAnchor = patioWomen.find(({ id }) => id === 'sofi');
   const event = createBathroomEvent(scene, {
     player,
     interactable,
     outcome,
     layout: PATIO_LAYOUT.events.bathroom,
+    onCompanionReturn: returnSystem.start,
   });
 
   assert.equal(player.sprite.body.enable, false);
@@ -243,6 +247,7 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
   keys.ENTER.edge = true;
   assert.equal(event.update(), false);
   assert.equal(event.getMode(), 'complete');
+  assert.equal(event.update(), false);
   assert.equal(player.sprite.visible, true);
   assert.equal(player.label.visible, true);
   assert.equal(player.sprite.body.enable, true);
@@ -260,13 +265,28 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
   assert.equal(interactable.sprite.visible, true);
   assert.equal(interactable.label.visible, true);
   assert.equal(interactable.marker.visible, false);
-  assert.match(interactable.sprite.anims.currentAnim.key, /^sofi-idle-down$/);
+  assert.equal(interactable.isRelocating, true);
+  assert.equal(returnSystem.isReturning('sofi'), true);
+  assert.equal(interactable.sprite.x, PATIO_LAYOUT.events.bathroom.companionSafeExit.x);
+  assert.equal(interactable.sprite.y, PATIO_LAYOUT.events.bathroom.companionSafeExit.y);
+  returnSystem.update(50);
+  assert.equal(interactable.sprite.anims.currentAnim.key, 'sofi-walk-left');
+
+  let returnFrames = 0;
+  while (returnSystem.isReturning('sofi') && returnFrames < 1000) {
+    returnSystem.update(50);
+    returnFrames += 1;
+  }
+  assert.ok(returnFrames < 1000);
+  assert.equal(interactable.isRelocating, false);
+  assert.equal(returnSystem.isReturning('sofi'), false);
+  assert.match(interactable.sprite.anims.currentAnim.key, /^sofi-idle-(down|left|right|up)$/);
   assert.equal(interactable.label.x, interactable.sprite.x);
   assert.equal(interactable.label.y, interactable.sprite.y + 36);
   assert.equal(interactable.label.depth, interactable.sprite.depth + 1);
   assertSafeCompanionPosition(
     interactable.sprite,
-    PATIO_LAYOUT.events.bathroom.companionSafeExit,
+    sofiAnchor,
   );
   assert.ok(
     Math.hypot(

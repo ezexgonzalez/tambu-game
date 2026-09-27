@@ -38,6 +38,7 @@ test('personaje resuelto conserva prompt e interacción E, pero pierde el marker
     character: { id: 'sofi', name: 'Sofi' },
     sprite: { x: 20, y: 20 },
     marker,
+    isRelocating: true,
   };
   const state = createGameState();
   state.relationships.sofi = { resolved: true, outcome: 'instagram' };
@@ -53,6 +54,11 @@ test('personaje resuelto conserva prompt e interacción E, pero pierde el marker
 
   system.syncMarkers((id) => isCharacterResolved(state, id));
   assert.equal(marker.visible, false);
+  system.update();
+  assert.equal(prompt.visible, false);
+  assert.equal(opened, null);
+
+  interactable.isRelocating = false;
   system.update();
   assert.equal(prompt.visible, true);
   assert.equal(prompt.text, 'E · HABLAR CON SOFI');

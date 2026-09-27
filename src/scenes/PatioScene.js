@@ -11,6 +11,7 @@ import { createDialogueSystem } from '../systems/dialogueSystem.js';
 import { createInteractionSystem } from '../systems/interactionSystem.js';
 import { createOutcomeEventSystem } from '../systems/outcomeEventSystem.js';
 import { createBathroomEvent } from '../events/bathroomEvent.js';
+import { createResolvedCharacterReturnSystem } from '../events/resolvedCharacterReturn.js';
 import { createHud } from '../ui/createHud.js';
 import { createPatioCollisions } from '../world/createPatioCollisions.js';
 import { createPatioWorld, preloadPatioWorld } from '../world/createPatioWorld.js';
@@ -37,12 +38,16 @@ export class PatioScene extends Phaser.Scene {
     this.obstacles = createPatioCollisions(this, this.player.sprite);
 
     const hud = createHud(this, this.gameState);
+    this.resolvedCharacterReturnSystem = createResolvedCharacterReturnSystem(
+      PATIO_LAYOUT.events.bathroom,
+    );
     this.outcomeEventSystem = createOutcomeEventSystem({
       handlers: {
         bathroom: (request) => createBathroomEvent(this, {
           ...request,
           player: this.player,
           layout: PATIO_LAYOUT.events.bathroom,
+          onCompanionReturn: this.resolvedCharacterReturnSystem.start,
         }),
       },
     });
@@ -72,7 +77,10 @@ export class PatioScene extends Phaser.Scene {
 
     this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
     this.cameras.main.setZoom(1);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.outcomeEventSystem.stop);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.outcomeEventSystem.stop();
+      this.resolvedCharacterReturnSystem.destroy();
+    });
   }
 
   configureWorld() {
@@ -84,6 +92,8 @@ export class PatioScene extends Phaser.Scene {
 
   update() {
     if (!this.player?.sprite) return;
+
+    this.resolvedCharacterReturnSystem.update(this.game.loop.delta);
 
     if (this.outcomeEventSystem.update()) {
       this.interactionSystem.hidePrompt();

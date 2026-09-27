@@ -97,6 +97,32 @@ const BATHROOM_EVENT = {
     { x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2, y: 155, formation: 'lateral' },
     { x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2, y: HOUSE.height - 8, formation: 'lateral' },
   ],
+  // Temporary return anchors are the current social spawns, not a roaming design.
+  returnPaths: {
+    sofi: [
+      { x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2, y: 155 },
+      { x: 1216, y: 155 },
+      { x: 1216, y: 440 },
+      { x: 1250, y: 470 },
+      { x: 1250, y: 660 },
+      { x: 1160, y: 775 },
+      { x: 470, y: 775 },
+      { x: 400, y: 690 },
+    ],
+    mili: [
+      { x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2, y: 155 },
+      { x: 1216, y: 155 },
+      { x: 930, y: 330 },
+    ],
+    cami: [
+      { x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2, y: 155 },
+      { x: 1216, y: 155 },
+      { x: 1216, y: 440 },
+      { x: 1265, y: 460 },
+      { x: 1270, y: 635 },
+      { x: 1235, y: 635 },
+    ],
+  },
   safeExit: {
     x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2 - 18,
     y: HOUSE.height + 12,

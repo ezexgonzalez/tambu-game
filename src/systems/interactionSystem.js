@@ -17,6 +17,7 @@ export function createInteractionSystem({
     let bestDistance = Infinity;
 
     interactables.forEach((interactable) => {
+      if (interactable.isRelocating) return;
       if (!canInteract(interactable)) return;
       const distance = Phaser.Math.Distance.Between(
         player.x,
