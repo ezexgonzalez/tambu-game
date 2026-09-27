@@ -2,7 +2,7 @@
 
 **Versión:** 1.0
 **Última verificación:** 2026-09-27
-**Base inspeccionada:** `main@d51b92a`
+**Base inspeccionada:** `main@dce39fc`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -105,7 +105,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 ### Ciclo de la run
 
 - `src/state/runState.js` mantiene las fases `INTRO`, `PARTY_ACTIVE`, `GAME_OVER`, `NORMAL_END`, `PERFECT_NIGHT` y `POST_WIN_FREE_ROAM`, sin duplicar puntos, vidas ni resultados sociales.
-- La intro activa la run una sola vez. `PatioScene` evalúa finales en un punto estable cuando intro, outcome event y diálogo ya terminaron; el retorno de una chica sigue en background y no bloquea la evaluación.
+- La intro activa la run una sola vez. `PatioScene` evalúa finales cuando intro, outcome event y diálogo ya terminaron; el retorno de una chica sigue en background y no bloquea la evaluación. Antes de integrar las pantallas terminales, la evaluación debe ejecutarse antes de abrir una nueva interacción en ese frame para evitar que un `E` simultáneo retrase el final.
 - GAME OVER tiene prioridad con cero vidas. PERFECT NIGHT requiere que Sofi, Mili y Cami tengan outcome `bathroom` y resultado `secured`; con las tres resueltas y cualquier otro resultado se alcanza `NORMAL_END`.
 - `continueParty()` permite únicamente `PERFECT_NIGHT → POST_WIN_FREE_ROAM`. Es una transición lógica; todavía no hay UI ni gameplay de post-win.
 
@@ -179,7 +179,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **FIRST COMPLETE NIGHT** — intro `00:00 → 00:01`, semántica de recompensa del Baño y base lógica de Run State integradas; siguiente: derrota por 0 vidas, victoria máxima por 3 Baños asegurados, final normal, resumen y restart limpio.
+1. **FIRST COMPLETE NIGHT** — intro `00:00 → 00:01`, semántica de recompensa del Baño y Run State integrados; siguiente: GAME OVER por 0 vidas, incluyendo bloqueo terminal y restart limpio; después victoria máxima, final normal y resumen.
 2. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; necesarios también para dar identidad al Bathroom Resistance.
 3. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
 4. **Audio mínimo** — música, SFX y feedback suficiente para que la noche tenga presencia.
