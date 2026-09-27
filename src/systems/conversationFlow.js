@@ -35,7 +35,11 @@ export function applyConversationChoice(session, beat, choice) {
   const effects = combineSocialEffects(choice.effects, variant?.effects);
   const statsBefore = { ...session.stats };
   const statsAfter = applySocialEffects(session.stats, effects);
-  const emittedSignals = unique([...(choice.emits ?? []), ...(variant?.emits ?? [])]);
+  const suppressedSignals = new Set(variant?.suppressEmits ?? []);
+  const emittedSignals = unique([
+    ...(choice.emits ?? []).filter((signal) => !suppressedSignals.has(signal)),
+    ...(variant?.emits ?? []),
+  ]);
   const historyEntry = {
     beatId: beat.id,
     choiceId: choice.id,

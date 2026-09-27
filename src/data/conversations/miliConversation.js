@@ -136,6 +136,7 @@ export const MILI_CONVERSATION = {
               id: 'already-accelerated',
               when: { allChoices: ['beat-1:claim-drink'] },
               effects: { attraction: -2, trust: -1, intensity: 2 },
+              suppressEmits: ['mili_enjoyed_tambu_boldness', 'mili_played_along_with_chaos'],
               emits: ['mili_warned_tambu_to_slow_down'],
               reaction: [
                 { speaker: 'Mili', text: 'Pará, vos viniste acelerado de fábrica.' },
@@ -277,6 +278,12 @@ export const MILI_CONVERSATION = {
           prompt: 'Igual... cuando no estás bardeando, sos bastante entretenido.',
         },
         {
+          when: {
+            allChoices: ['beat-1:claim-drink', 'beat-3:you-cant-dance'],
+          },
+          prompt: 'Primero me robás el vaso y ahora me bardeás cómo bailo.\n\nBastante confianza agarraste.',
+        },
+        {
           when: { allChoices: ['beat-3:never-dance'] },
           prompt: 'Bueno... bailar claramente no es lo tuyo.\n\nIgual, para ser un tipo al que le encajé un vaso porque sí, resultaste bastante entretenido.',
         },
@@ -286,7 +293,7 @@ export const MILI_CONVERSATION = {
         },
         {
           when: { allChoices: ['beat-3:you-cant-dance'] },
-          prompt: 'Primero me robás el vaso y ahora me bardeás cómo bailo.\n\nBastante confianza agarraste.',
+          prompt: 'Ahora también me bardeás cómo bailo.\n\nBastante confianza agarraste.',
         },
       ],
       choices: [

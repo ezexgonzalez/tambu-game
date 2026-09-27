@@ -38,6 +38,13 @@ function playMili(route) {
   return playConversation(MILI_CONVERSATION, 'mili', route);
 }
 
+function routeByChoiceIds(ids) {
+  return ids.map((id, index) => {
+    const beat = MILI_CONVERSATION.beats[index];
+    return beat.choices.findIndex((choice) => choice.id === id);
+  });
+}
+
 function routes(length) {
   if (length === 0) return [[]];
   return routes(length - 1).flatMap((prefix) => [0, 1, 2, 3].map((choice) => [...prefix, choice]));
@@ -64,10 +71,32 @@ test('Mili aplica efectos y guarda señales de su primer intercambio', () => {
 
 test('dos opciones Tambu seguidas activan la advertencia contextual de Mili', () => {
   const result = playMili([3, 3]);
+  const lastEntry = result.session.history.at(-1);
 
   assert.equal(result.presentation.variantId, 'already-accelerated');
-  assert.ok(result.session.signals.includes('mili_warned_tambu_to_slow_down'));
+  assert.ok(lastEntry.emittedSignals.includes('mili_warned_tambu_to_slow_down'));
+  assert.ok(lastEntry.emittedSignals.includes('tambu_showed_initiative'));
+  assert.ok(!lastEntry.emittedSignals.includes('mili_played_along_with_chaos'));
+  assert.ok(!lastEntry.emittedSignals.includes('mili_enjoyed_tambu_boldness'));
+  assert.ok(result.session.signals.includes('mili_enjoyed_tambu_boldness'),
+    'a legitimate signal from the earlier drink exchange stays in session history');
+  assert.ok(!result.session.signals.includes('mili_played_along_with_chaos'));
   assert.deepEqual(result.session.stats, { attraction: 10, trust: 3, intensity: 12 });
+});
+
+test('El Consejo entiende la última advertencia de Mili y descarta la regla positiva de caos', () => {
+  const session = playMili([3, 3]).session;
+  const expectedRules = {
+    pitity: 'pitity-mili-warning',
+    eze: 'eze-mili-warning',
+    tobi: 'tobi-mili-warning',
+  };
+
+  for (const member of MILI_CONVERSATION.council.members) {
+    const advice = resolveCouncilAdvice(session, member);
+    assert.equal(advice.ruleId, expectedRules[member.id]);
+    assert.doesNotMatch(advice.ruleId, /mili-chaos/);
+  }
 });
 
 test('los prompts de Mili reconocen las elecciones inmediatamente anteriores', () => {
@@ -78,6 +107,19 @@ test('los prompts de Mili reconocen las elecciones inmediatamente anteriores', (
   assert.match(resolveBeatPrompt(beat2, playMili([2]).session), /no soy tu mozo/);
   assert.match(resolveBeatPrompt(beat3, playMili([0, 1]).session), /mientras decidís si te escapás/);
   assert.match(resolveBeatPrompt(beat4, playMili([0, 0, 0]).session), /bailar claramente no es lo tuyo/);
+});
+
+test('Mili solo recuerda el vaso robado si Tambu eligió claim-drink', () => {
+  const beat4 = getConversationBeat(MILI_CONVERSATION, 'beat-4');
+  const drinkClaim = playMili(routeByChoiceIds(['claim-drink', 'thinking-of-leaving', 'you-cant-dance'])).session;
+  assert.match(resolveBeatPrompt(beat4, drinkClaim), /Primero me robás el vaso/);
+
+  for (const firstChoice of ['drink-trust', 'help-friendly', 'not-your-waiter']) {
+    const session = playMili(routeByChoiceIds([firstChoice, 'both-can-happen', 'you-cant-dance'])).session;
+    const prompt = resolveBeatPrompt(beat4, session);
+    assert.match(prompt, /Ahora también me bardeás cómo bailo/);
+    assert.doesNotMatch(prompt, /robás el vaso|ladrón de vasos/i);
+  }
 });
 
 test('los prompts distinguen el caos y la burla de Mili según su variante contextual', () => {
