@@ -2,7 +2,7 @@
 
 **Versión:** 1.0
 **Última verificación:** 2026-09-27
-**Base inspeccionada:** `main@e2885a5`
+**Base inspeccionada:** `main@fe8d22b`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -119,6 +119,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 - `PERFECT_NIGHT` está integrado funcionalmente: conserva el HUD durante un beat de 700 ms y luego muestra un overlay oscuro con `3 / 3`, `NOCHE PERFECTA` y `3 BAÑOS ASEGURADOS` en tipografía pixelada; el prompt aparece 500 ms después. ENTER o SPACE llama `continueParty()` y transiciona a `POST_WIN_FREE_ROAM` dentro de la misma run: se oculta la UI, vuelve el HUD y se conservan puntos, relaciones y posiciones. En post-win Tambu puede caminar y usar las reacciones post-outcome existentes; no hay contenido postgame nuevo.
 - `NORMAL_END` congela el gameplay y conserva el patio con HUD durante 700 ms; después aparece un tablero arcade pixelado con filas alineadas para Sofi/Mili/Cami, resultados explícitos y el puntaje en un marco separado, y se oculta el HUD. El resumen lee un snapshot de `getRunSummary(gameState)`, distingue Baño asegurado e interrumpido y muestra los puntos finales sin recalcularlos. Tras 500 ms aparece `ENTER / SPACE · VOLVER A JUGAR`; la entrada reinicia `PatioScene` para iniciar otra run limpia desde la intro. No hay botón de menú principal porque todavía no existe una Start/Menu Scene.
 - El reinicio de Scene detiene primero outcome/retornos y después cancela los timers y listeners de special idles. Intro, UI, diálogo y eventos limpian sus objetos o estado en `SHUTDOWN`.
+- **FIRST COMPLETE NIGHT — CLOSED / BASELINE (QA manual 2026-09-27):** Eze validó las tres rutas completas: GAME OVER → retry → nueva intro limpia; NORMAL END con outcomes mixtos → summary/replay → nueva intro limpia; y 3 Baños secured → PERFECT NIGHT → POST_WIN_FREE_ROAM. El loop de principio a fin deja de ser un blocker funcional y pasa a baseline protegida para las siguientes capas de contenido/polish.
 
 ### Cobertura automatizada
 
@@ -173,6 +174,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 - Perímetro actual: comprobar en juego continuidad de laterales, oclusión de pies en el seto inferior y uniones de ambas esquinas.
 - Retorno post-baño: rutas seguras temporales por personaje, retorno a facing down e idles normales/special idles validados manualmente.
 - Balance numérico de rutas sociales y recompensas: la estructura está implementada, pero el playtest puede justificar ajustes.
+- Bathroom Resistance: la semántica success/failure y rewards ya está integrada, pero la dificultad actual `65 / +6 / 15 s⁻¹ / 10 s` queda reabierta para rebalance. La siguiente baseline debe escalar por 1.er/2.º/3.er intento de Baño y exigir más ritmo hacia el final; los valores se validarán manualmente antes de agregar la capa narrativa de amigos.
 - Composición ambiental general: debe evaluarse después de resolver población visual suficiente, evitando llenar espacios por llenar.
 
 ## No implementado
@@ -192,12 +194,13 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **FIRST COMPLETE NIGHT** — intro, semántica de recompensa del Baño, Run State, GAME OVER, `PERFECT_NIGHT` y `NORMAL_END` con resumen/replay limpio están integrados. El menú principal queda para cuando exista una Start/Menu Scene real; sigue pendiente el playtest completo de la noche.
-2. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; necesarios también para dar identidad al Bathroom Resistance.
-3. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
-4. **Audio mínimo** — música, SFX y feedback suficiente para que la noche tenga presencia.
-5. **Vida del patio** — roaming controlado y una selección pequeña de microeventos/callbacks; las reacciones post-outcome ya están integradas.
-6. **UI, balance y polish** — Bathroom Resistance, claridad de estados, resumen, accesibilidad y cierre de la V1.
+1. **BATHROOM RESISTANCE — REBALANCE** — FIRST COMPLETE NIGHT ya pasó validación manual en sus tres cierres; el siguiente trabajo funcional es convertir Resistance en una progresión real 1/2/3 por intento antes de sumar caras/voces de amigos.
+2. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; serán la base visual de Bathroom Resistance 2.0 y de callbacks de la fiesta.
+3. **BATHROOM RESISTANCE — IDENTIDAD NARRATIVA** — con amigos visuales disponibles, integrar voces, retratos/intervenciones y memoria de run sobre el balance 1/2/3 ya validado.
+4. **Audio mínimo** — música/ambiente y pocos SFX con controles básicos; debe entrar antes del QA final de ritmo.
+5. **Población / fillers en lote pequeño** — reemplazar contraste procedural sin abrir una fábrica combinatoria grande.
+6. **Vida del patio** — seleccionar 2–3 microeventos/callbacks por run y consecuencias visibles de lo ocurrido.
+7. **UI, balance y polish** — aplicar el lenguaje global a HUD, diálogo, Consejo, outcomes y Bathroom Resistance; cerrar accesibilidad y balance final.
 
 Las correcciones puntuales a sectores ya integrados siguen siendo válidas cuando existe un defecto concreto. No deben desplazar indefinidamente las prioridades anteriores.
 
