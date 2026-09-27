@@ -489,6 +489,54 @@ Estos valores **no quedan congelados como balance final**. Son una baseline deli
 - el último tercio de cada intento se siente más peligroso que el primero;
 - ninguna dificultad depende de FPS ni de mantener SPACE presionado.
 
+## Balance Pass 2 — después de playtest manual
+
+Eze probó los tres intentos del Pass 1 y confirmó que la progresión se siente más difícil que antes, pero **todavía no alcanza**. La segunda pasada debe subir claramente la presión en todos los niveles.
+
+Antes de ajustar números se corrige un bug de ordinal: el outcome social `bathroom` actual ya está guardado cuando se crea BathroomEvent, por lo que contar todos los relationships con outcome `bathroom` y sumar 1 produce en runtime `2 / 3 / 3`. El ordinal correcto debe contar únicamente **intentos anteriores ya liquidados** (`bathroomResult: secured|interrupted`) y sumar el intento actual:
+
+```
+0 previos liquidados + current pending → attempt 1
+1 previo liquidado  + current pending → attempt 2
+2 previos liquidados + current pending → attempt 3
+```
+
+Nueva baseline de playtest:
+
+### Attempt 1 — exigencia real
+
+- `startResistance: 55`;
+- `spaceGain: 4`;
+- drains: `16 / 20 / 25` por segundo;
+- hit damages: `[5, 6, 7, 8, 9, 10, 10]`;
+- presión teórica mínima aproximada: ~50 pulsaciones útiles / 10 s.
+
+Debe sentirse claramente más difícil que el primer intento observado en Pass 1.
+
+### Attempt 2 — difícil
+
+- `startResistance: 52`;
+- `spaceGain: 4`;
+- drains: `18 / 23 / 29` por segundo;
+- hit damages: `[6, 7, 8, 9, 10, 12, 14]`;
+- presión teórica mínima aproximada: ~61 pulsaciones útiles / 10 s.
+
+Debe requerir un ritmo sostenido y dejar margen pequeño para errores.
+
+### Attempt 3 — boss cómico
+
+- `startResistance: 50`;
+- `spaceGain: 4`;
+- drains: `20 / 26 / 33` por segundo;
+- hit damages: `[7, 8, 10, 11, 13, 15, 16]`;
+- presión teórica mínima aproximada: ~72–73 pulsaciones útiles / 10 s.
+
+Debe ser duro de forma intencional: una Perfect Night tiene que sentirse ganada. El último tercio debe obligar a mantener un ritmo alto, pero seguir siendo humanamente posible.
+
+Conservar inicialmente duración, fases `0–3.5 / 3.5–7 / 7–10` y timings de los siete golpes. No sumar todavía más golpes ni reducir `spaceGain`; primero validar esta subida limpia de presión.
+
+La aceptación del Pass 2 sigue siendo manual. Si attempt 3 se vuelve físicamente absurdo o attempt 1 sigue trivial, se ajustan números una vez más antes de congelar balance.
+
 ---
 
 # 9.5. Bathroom Resistance — identidad narrativa por intento
