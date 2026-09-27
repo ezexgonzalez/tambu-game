@@ -2,7 +2,7 @@
 
 **Versión:** 1.0
 **Última verificación:** 2026-09-27
-**Base inspeccionada:** `main@3a7c61e`
+**Base inspeccionada:** `main@a7c6053`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -149,7 +149,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 ## En validación o ajuste
 
-- Intro de la noche `00:00 → 00:01`: blackout desde el primer frame, espera de 200 ms, `00:00` estable durante 1500 ms, cambio a `00:01` durante 450 ms y reveal centrado durante 1500 ms; integrada y pendiente QA visual manual de legibilidad y cobertura completa del viewport.
+- Intro de la noche `00:00 → 00:01`: blackout desde el primer frame, reloj pixelado, transición blanco → ventana, reveal centrado y túnel final a través del `:` integrados. Baseline visual aprobada para avanzar; quedan microdetalles de polish diferidos para una pasada posterior.
 - Perímetro actual: comprobar en juego continuidad de laterales, oclusión de pies en el seto inferior y uniones de ambas esquinas.
 - Retorno post-baño: rutas seguras temporales por personaje, retorno a facing down e idles normales/special idles validados manualmente.
 - Balance numérico de rutas sociales y recompensas: la estructura está implementada, pero el playtest puede justificar ajustes.
@@ -172,7 +172,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **FIRST COMPLETE NIGHT** — intro `00:00 → 00:01` integrada y pendiente QA visual; después, estado de run, derrota por 0 vidas, victoria máxima por 3 Baños, final normal, resumen y restart limpio.
+1. **FIRST COMPLETE NIGHT** — intro `00:00 → 00:01` aceptada como baseline con micro-polish diferido; siguiente bloque: estado de run, derrota por 0 vidas, victoria máxima por 3 Baños, final normal, resumen y restart limpio.
 2. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; necesarios también para dar identidad al Bathroom Resistance.
 3. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
 4. **Audio mínimo** — música, SFX y feedback suficiente para que la noche tenga presencia.
