@@ -11,6 +11,7 @@ Documentos complementarios y precedencia:
 - `docs/CURRENT_STATE.md` → estado, vigencia y sectores protegidos.
 - `docs/HUMAN_SCALE.md` → escala humana y proporciones.
 - `docs/PIXEL_ART_STYLE_GUIDE.md` → reglas técnicas estrictas de producción, paletas, pixel density, IA y validación.
+- `docs/UI_DIRECTION.md` → sistema visual específico de UI: pixel display, overlays, frames, jerarquía, prompts y timing.
 - `docs/ASSET_PRODUCTION.md` → qué assets producir y en qué orden.
 - `docs/PHASE_1_GRASS.md` → implementación vigente del césped.
 - `docs/PHASE_1_CALIBRATION.md` → registro histórico; no autoriza producción nueva.
@@ -440,16 +441,24 @@ Evitar que todo se anime al mismo tiempo. El movimiento también necesita jerarq
 
 # 12. UI vs mundo
 
-La UI puede ser más limpia y contrastada que el escenario, pero debe compartir lenguaje pixel-art.
+La UI comparte la identidad nocturna y pixel-art del mundo, pero tiene su propio sistema especializado en `docs/UI_DIRECTION.md`.
 
-- HUD legible por encima de la escena.
-- Marcos oscuros.
-- Iconografía simple.
-- Acentos cálidos para puntos/recursos y rojos para vidas.
-- Evitar glows grandes detrás de paneles.
-- La UI nunca debe competir con NPCs o fuentes de interacción.
+Baseline activa:
 
-La UI final no queda congelada en esta fase; solo queda fijada su relación estética con el mundo.
+- display pixel 5×7 para títulos, scores, labels y prompts de alto nivel;
+- overlays azul-negro que dejan insinuar el patio cuando la pantalla no necesita cortar el mundo;
+- blanco jerarquizado: primary, main text y secondary, evitando que todo tenga el mismo brillo;
+- frames y dividers finos azul grisáceo;
+- geometría ortogonal y esquinas duras;
+- composición con aire, columnas claras y asociación fuerte entre datos relacionados;
+- prompts pequeños y secundarios;
+- timing deliberado antes de habilitar input.
+
+GAME OVER es una excepción semántica válida: puede usar un fondo rojo opaco y romper la paleta nocturna para producir impacto.
+
+HUD, diálogo, Consejo y Bathroom Resistance siguen siendo superficies funcionales/provisionales y deben migrar gradualmente hacia este lenguaje mediante tareas dedicadas. No se autoriza un rediseño global silencioso.
+
+Para decisiones de UI, prevalece `docs/UI_DIRECTION.md`.
 
 ---
 
