@@ -2,7 +2,7 @@
 
 **Versión:** 1.0
 **Última verificación:** 2026-09-26
-**Base inspeccionada:** `main@35500e7`
+**Base inspeccionada:** `main@41e542f`
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -88,6 +88,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 
 - Sofi, Mili y Cami tienen conversaciones data-driven de cuatro beats.
 - Las tres conversaciones usan stats, historial, señales, Consejo y outcomes.
+- Mili ya tiene coherencia entre variantes, señales y Consejo: una advertencia puede suprimir señales base contradictorias, y sus callbacks de vaso respetan el historial real.
 - Presentación secuencial de intervenciones, respuestas y cierre de outcome.
 - Persistencia de outcome por personaje durante la run; un personaje resuelto deja de ser interactuable.
 - Puntos y vidas se actualizan según el outcome.
@@ -169,13 +170,12 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **Coherencia crítica social** — corregir las contradicciones narrativas/semánticas ya detectadas en Mili, Consejo y callbacks; el trayecto base del BathroomEvent queda estabilizado.
-2. **FIRST COMPLETE NIGHT** — intro `00:00 → 00:01`, estado de run, derrota por 0 vidas, victoria máxima por 3 Baños, final normal, resumen y restart limpio.
-3. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; necesarios también para dar identidad al Bathroom Resistance.
-4. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
-5. **Audio mínimo** — música, SFX y feedback suficiente para que la noche tenga presencia.
-6. **Vida del patio** — post-outcome, roaming controlado y una selección pequeña de microeventos/callbacks.
-7. **UI, balance y polish** — Bathroom Resistance, claridad de estados, resumen, accesibilidad y cierre de la V1.
+1. **FIRST COMPLETE NIGHT** — intro `00:00 → 00:01`, estado de run, derrota por 0 vidas, victoria máxima por 3 Baños, final normal, resumen y restart limpio.
+2. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; necesarios también para dar identidad al Bathroom Resistance.
+3. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
+4. **Audio mínimo** — música, SFX y feedback suficiente para que la noche tenga presencia.
+5. **Vida del patio** — post-outcome, roaming controlado y una selección pequeña de microeventos/callbacks.
+6. **UI, balance y polish** — Bathroom Resistance, claridad de estados, resumen, accesibilidad y cierre de la V1.
 
 Las correcciones puntuales a sectores ya integrados siguen siendo válidas cuando existe un defecto concreto. No deben desplazar indefinidamente las prioridades anteriores.
 
