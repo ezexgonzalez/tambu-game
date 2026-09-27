@@ -427,4 +427,22 @@ export const SOFI_CONVERSATION = {
       reward: { points: 0, lives: -1 },
     },
   },
+  postOutcomeReactions: {
+    bathroom: [
+      { speaker: 'Sofi', text: '¿Siempre hacen tanto quilombo tus amigos?' },
+      { speaker: 'Tambu', text: 'Hoy están tranquilos.' },
+    ],
+    instagram: [
+      { speaker: 'Sofi', text: 'Después me mandás algo.' },
+      { speaker: 'Tambu', text: 'Primero consigo señal.' },
+    ],
+    friendzone: [
+      { speaker: 'Sofi', text: 'Me caíste bien, Tambu.' },
+      { speaker: 'Tambu', text: 'Vos también. Sin dramatizar.' },
+    ],
+    rejection: [
+      { speaker: 'Sofi', text: 'Bueno… que tengas buena noche.' },
+      { speaker: 'Tambu', text: 'Igualmente.' },
+    ],
+  },
 };

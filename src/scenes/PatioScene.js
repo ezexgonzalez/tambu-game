@@ -2,7 +2,11 @@ import Phaser from 'phaser';
 import { createCharacters, preloadCharacters } from '../characters/createCharacters.js';
 import { createPlayer, preloadPlayer } from '../player/createPlayer.js';
 import { updatePlayer } from '../player/updatePlayer.js';
-import { canInteractWithCharacter, createGameState } from '../state/gameState.js';
+import {
+  canInteractWithCharacter,
+  createGameState,
+  isCharacterResolved,
+} from '../state/gameState.js';
 import { createDialogueSystem } from '../systems/dialogueSystem.js';
 import { createInteractionSystem } from '../systems/interactionSystem.js';
 import { createOutcomeEventSystem } from '../systems/outcomeEventSystem.js';
@@ -42,12 +46,18 @@ export class PatioScene extends Phaser.Scene {
         }),
       },
     });
+    let interactionSystem = null;
     this.dialogueSystem = createDialogueSystem(this, {
       gameState: this.gameState,
-      onGameStateChange: hud.update,
+      onGameStateChange: (gameState) => {
+        hud.update(gameState);
+        interactionSystem?.syncMarkers((characterId) => (
+          isCharacterResolved(gameState, characterId)
+        ));
+      },
       onOutcomeEvent: this.outcomeEventSystem.start,
     });
-    this.interactionSystem = createInteractionSystem({
+    interactionSystem = createInteractionSystem({
       scene: this,
       player: this.player.sprite,
       interactables: this.interactables,
@@ -55,6 +65,10 @@ export class PatioScene extends Phaser.Scene {
       onInteract: this.dialogueSystem.open,
       canInteract: ({ character }) => canInteractWithCharacter(this.gameState, character.id),
     });
+    interactionSystem.syncMarkers((characterId) => (
+      isCharacterResolved(this.gameState, characterId)
+    ));
+    this.interactionSystem = interactionSystem;
 
     this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
     this.cameras.main.setZoom(1);

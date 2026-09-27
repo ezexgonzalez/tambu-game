@@ -472,4 +472,22 @@ export const MILI_CONVERSATION = {
       lines: ['"Bueno... voy a buscar a mis amigas."'], reward: { points: 0, lives: -1 },
     },
   },
+  postOutcomeReactions: {
+    bathroom: [
+      { speaker: 'Mili', text: '¿Siempre son así?' },
+      { speaker: 'Tambu', text: 'Peor.' },
+    ],
+    instagram: [
+      { speaker: 'Mili', text: 'Después te acepto.' },
+      { speaker: 'Tambu', text: 'No te apuro.' },
+    ],
+    friendzone: [
+      { speaker: 'Mili', text: 'Me caíste bien, igual.' },
+      { speaker: 'Tambu', text: 'Lo tomo.' },
+    ],
+    rejection: [
+      { speaker: 'Mili', text: 'Bueno, quedó medio raro.' },
+      { speaker: 'Tambu', text: 'Pasa.' },
+    ],
+  },
 };

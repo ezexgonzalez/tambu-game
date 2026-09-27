@@ -211,6 +211,11 @@ test('reaction + bridge completo, Consejo, outcome/HUD y bloqueo siguen funciona
   h.press('ENTER');
   assert.equal(h.frame(), false);
   h.open();
+  assert.equal(h.system.getMode(), 'post-outcome');
+  completeSequence(
+    h,
+    patioWomen[0].conversation.postOutcomeReactions[result.relationships.sofi.outcome],
+  );
   assert.equal(h.system.isOpen(), false);
   assert.deepEqual(h.state, result);
 });
@@ -334,4 +339,47 @@ test('Mili inicia su intercambio secuencial y ESC todavía descarta la sesión',
   h.press('ESC');
   assert.equal(h.frame(), false);
   assert.deepEqual(h.state.relationships, {});
+});
+
+test('las 12 combinaciones de personaje/outcome tienen una reacción breve', async () => {
+  const { CAMI_CONVERSATION } = await import('../src/data/conversations/camiConversation.js');
+  const { MILI_CONVERSATION } = await import('../src/data/conversations/miliConversation.js');
+  const { SOFI_CONVERSATION } = await import('../src/data/conversations/sofiConversation.js');
+  for (const conversation of [SOFI_CONVERSATION, MILI_CONVERSATION, CAMI_CONVERSATION]) {
+    assert.deepEqual(Object.keys(conversation.postOutcomeReactions).sort(), [
+      'bathroom', 'friendzone', 'instagram', 'rejection',
+    ]);
+    for (const sequence of Object.values(conversation.postOutcomeReactions)) {
+      assert.ok(sequence.length > 0);
+      assert.ok(sequence.every(({ speaker, text }) => speaker && text));
+    }
+  }
+});
+
+test('personaje resuelto abre post-outcome sin opciones, Consejo ni mutación social', () => {
+  const character = patioWomen[0];
+  const h = harness(character);
+  h.state.relationships.sofi = {
+    attraction: 12,
+    trust: 14,
+    intensity: 5,
+    history: [{ beatId: 'beat-1', choiceId: 'test', emittedSignals: ['test'] }],
+    signals: ['test'],
+    resolved: true,
+    outcome: 'friendzone',
+  };
+  const before = structuredClone(h.state);
+  h.open();
+  assert.equal(h.system.getMode(), 'post-outcome');
+  assert.equal(h.textAt(510), undefined);
+  assert.equal(h.objects.some(({ text, destroyed }) => !destroyed && /1\. |EL CONSEJO/.test(text)), false);
+
+  h.press('C', 'ONE', 'TWO', 'THREE', 'FOUR');
+  assert.equal(h.system.getMode(), 'post-outcome');
+  assert.deepEqual(h.state, before);
+  completeSequence(h, character.conversation.postOutcomeReactions.friendzone);
+  assert.equal(h.system.getMode(), 'idle');
+  assert.deepEqual(h.state, before);
+  assert.equal(h.eventRequests.length, 0);
+  assert.equal(h.hudUpdates(), 0);
 });

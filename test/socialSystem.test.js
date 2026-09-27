@@ -21,9 +21,13 @@ import {
 } from '../src/systems/socialSystem.js';
 import { resolveSocialSituation } from '../src/systems/socialSituation.js';
 import {
+  canStartMainConversation,
+  canStartPostOutcomeInteraction,
   canInteractWithCharacter,
   commitConversationOutcome,
   createGameState,
+  getCharacterOutcome,
+  isCharacterResolved,
 } from '../src/state/gameState.js';
 
 function playRoute(route) {
@@ -353,7 +357,15 @@ test('el outcome persiste stats, historia y señales una sola vez', () => {
   assert.equal(gameState.relationships.sofi.history.length, 4);
   assert.ok(gameState.relationships.sofi.signals.includes('tambu_showed_romantic_intent'));
   assert.equal(gameState.relationships.sofi.outcome, 'bathroom');
-  assert.equal(canInteractWithCharacter(gameState, 'sofi'), false);
+  assert.equal(isCharacterResolved(gameState, 'sofi'), true);
+  assert.equal(getCharacterOutcome(gameState, 'sofi'), 'bathroom');
+  assert.equal(canStartMainConversation(gameState, 'sofi'), false);
+  assert.equal(canStartPostOutcomeInteraction(gameState, 'sofi'), true);
+  assert.equal(canInteractWithCharacter(gameState, 'sofi'), true);
+
+  const stateAfterFirstCommit = structuredClone(gameState);
+  assert.equal(commitConversationOutcome(gameState, result.session, outcome), false);
+  assert.deepEqual(gameState, stateAfterFirstCommit);
 });
 
 test('las vidas nunca bajan de cero', () => {

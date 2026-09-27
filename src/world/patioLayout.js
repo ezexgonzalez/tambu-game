@@ -98,8 +98,12 @@ const BATHROOM_EVENT = {
     { x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2, y: HOUSE.height - 8, formation: 'lateral' },
   ],
   safeExit: {
-    x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2,
+    x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2 - 18,
     y: HOUSE.height + 12,
+  },
+  companionSafeExit: {
+    x: HOUSE.bathroom.x + HOUSE.bathroom.width / 2 + 18,
+    y: HOUSE.height + 8,
   },
 };
 

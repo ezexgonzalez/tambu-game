@@ -47,8 +47,15 @@ export function createInteractionSystem({
     if (Phaser.Input.Keyboard.JustDown(interactKey)) onInteract(nearest);
   }
 
+  function syncMarkers(isResolved) {
+    interactables.forEach(({ character, marker }) => {
+      marker?.setVisible?.(!isResolved(character.id));
+    });
+  }
+
   return {
     update,
     hidePrompt: () => prompt.setVisible(false),
+    syncMarkers,
   };
 }

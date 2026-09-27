@@ -90,7 +90,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 - Las tres conversaciones usan stats, historial, señales, Consejo y outcomes.
 - Mili ya tiene coherencia entre variantes, señales y Consejo: una advertencia puede suprimir señales base contradictorias, y sus callbacks de vaso respetan el historial real.
 - Presentación secuencial de intervenciones, respuestas y cierre de outcome.
-- Persistencia de outcome por personaje durante la run. La semántica actual todavía trata `resolved` como no interactuable; esto queda reabierto como corrección pendiente antes de FIRST COMPLETE NIGHT.
+- Persistencia de outcome por personaje durante la run: el arco principal queda cerrado y sin recompensas repetidas; la chica sigue interactuable con una reacción breve según outcome, sin `!`.
 - Puntos y vidas se actualizan según el outcome.
 
 ### Evento del baño
@@ -98,7 +98,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 - `OutcomeEventSystem` desacopla el resultado social del evento especial.
 - Caminata de Tambu y la chica hasta el baño con rutas específicas por sector, diagonales/formation naturales, ritmo relajado y tramo común recién cerca de la puerta.
 - Depth por body/pies durante el recorrido y retorno de Tambu alineado frente a la puerta del baño, fuera de colliders.
-- Ocultamiento y restauración de personajes.
+- Ocultamiento durante el evento y retorno de Tambu y la chica a posiciones seguras frente al baño; la chica vuelve en idle, con label visible y marker principal oculto.
 - Anticipación, golpes, barra de resistencia, input con `SPACE`, éxito o fracaso y regreso al patio.
 - Conseguir Baño y sus puntos se persiste antes del minijuego; perder no revierte el outcome.
 
@@ -170,12 +170,12 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 Orden de dirección recomendado:
 
-1. **Coherencia crítica restante — resolved characters** — separar conversación principal cerrada de interactuabilidad post-outcome, corregir marker/prompt y dejar la base lista para reacciones breves sin reabrir stats/outcomes.
+1. **Coherencia crítica** — las rutas del baño, señales sociales y semántica `resolved` están integradas; queda validación visual manual de la salida conjunta.
 2. **FIRST COMPLETE NIGHT** — intro `00:00 → 00:01`, estado de run, derrota por 0 vidas, victoria máxima por 3 Baños, final normal, resumen y restart limpio.
 3. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; necesarios también para dar identidad al Bathroom Resistance.
 4. **Población modular** — reemplazar los NPCs rectangulares sin diseñar decenas de personas aisladas.
 5. **Audio mínimo** — música, SFX y feedback suficiente para que la noche tenga presencia.
-6. **Vida del patio** — post-outcome, roaming controlado y una selección pequeña de microeventos/callbacks.
+6. **Vida del patio** — roaming controlado y una selección pequeña de microeventos/callbacks; las reacciones post-outcome ya están integradas.
 7. **UI, balance y polish** — Bathroom Resistance, claridad de estados, resumen, accesibilidad y cierre de la V1.
 
 Las correcciones puntuales a sectores ya integrados siguen siendo válidas cuando existe un defecto concreto. No deben desplazar indefinidamente las prioridades anteriores.

@@ -9,12 +9,30 @@ export function createGameState() {
   };
 }
 
+export function isCharacterResolved(gameState, characterId) {
+  return gameState.relationships[characterId]?.resolved === true;
+}
+
+export function getCharacterOutcome(gameState, characterId) {
+  return gameState.relationships[characterId]?.outcome ?? null;
+}
+
+export function canStartMainConversation(gameState, characterId) {
+  return Boolean(characterId) && !isCharacterResolved(gameState, characterId);
+}
+
+export function canStartPostOutcomeInteraction(gameState, characterId) {
+  return isCharacterResolved(gameState, characterId)
+    && Boolean(getCharacterOutcome(gameState, characterId));
+}
+
+// Resolved characters remain physically present and available for short reactions.
 export function canInteractWithCharacter(gameState, characterId) {
-  return gameState.relationships[characterId]?.resolved !== true;
+  return Boolean(gameState && characterId);
 }
 
 export function commitConversationOutcome(gameState, session, outcome) {
-  if (!canInteractWithCharacter(gameState, session.characterId)) return false;
+  if (!canStartMainConversation(gameState, session.characterId)) return false;
 
   gameState.relationships[session.characterId] = {
     ...session.stats,

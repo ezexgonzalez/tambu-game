@@ -362,4 +362,22 @@ export const CAMI_CONVERSATION = {
       reward: { points: 0, lives: -1 },
     },
   },
+  postOutcomeReactions: {
+    bathroom: [
+      { speaker: 'Cami', text: 'Tus amigos son un caso clínico.' },
+      { speaker: 'Tambu', text: 'No los diagnostiques.' },
+    ],
+    instagram: [
+      { speaker: 'Cami', text: 'Mandame algo después.' },
+      { speaker: 'Tambu', text: 'Si encuentro algo decente.' },
+    ],
+    friendzone: [
+      { speaker: 'Cami', text: 'Sos copado, Tambu.' },
+      { speaker: 'Tambu', text: 'Vos también.' },
+    ],
+    rejection: [
+      { speaker: 'Cami', text: 'Bueno, que sigas bien.' },
+      { speaker: 'Tambu', text: 'Igualmente.' },
+    ],
+  },
 };

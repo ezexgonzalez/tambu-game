@@ -18,6 +18,7 @@ import {
 } from '../ui/eventUi.js';
 
 function setPosition(target, x, y) {
+  if (!target) return;
   if (target.setPosition) target.setPosition(x, y);
   else {
     target.x = x;
@@ -132,7 +133,6 @@ export function createBathroomEvent(scene, {
     y: npc.y,
     visible: npc.visible,
     labelVisible: interactable.label?.visible,
-    markerVisible: interactable.marker?.visible,
   };
   let pathIndex = 0;
   let mode = 'walking';
@@ -180,8 +180,19 @@ export function createBathroomEvent(scene, {
     updateLabels();
   }
 
+  function restoreCompanion(position = layout.companionSafeExit) {
+    setPosition(npc, position.x, position.y);
+    idleNpcVisual(interactable);
+    setVisible(npc, true);
+    setPosition(interactable.label, npc.x, npc.y + 36);
+    interactable.label?.setDepth?.((npc.depth ?? npc.y) + 1);
+    setVisible(interactable.label, true);
+    setVisible(interactable.marker, false);
+  }
+
   function finish() {
     restorePlayer();
+    restoreCompanion();
     destroyEventUi(uiElements);
     uiElements = null;
     mode = 'complete';
@@ -303,10 +314,12 @@ export function createBathroomEvent(scene, {
       setPosition(npc, originalNpc.x, originalNpc.y);
       idleNpcVisual(interactable);
       setVisible(npc, originalNpc.visible);
+      setPosition(interactable.label, originalNpc.x, originalNpc.y + 36);
       setVisible(interactable.label, originalNpc.labelVisible);
-      setVisible(interactable.marker, originalNpc.markerVisible);
+      setVisible(interactable.marker, false);
     } else if (mode !== 'complete') {
       restorePlayer();
+      restoreCompanion();
     }
   }
 

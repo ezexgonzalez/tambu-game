@@ -1,5 +1,11 @@
 import Phaser from 'phaser';
-import { canInteractWithCharacter, commitConversationOutcome } from '../state/gameState.js';
+import {
+  canInteractWithCharacter,
+  canStartMainConversation,
+  canStartPostOutcomeInteraction,
+  commitConversationOutcome,
+  getCharacterOutcome,
+} from '../state/gameState.js';
 import {
   createConversationSession,
   resolveOutcome,
@@ -36,6 +42,7 @@ const DIALOGUE_MODE = {
   COUNCIL: 'council',
   OUTCOME_CLOSING: 'outcome-closing',
   OUTCOME: 'outcome',
+  POST_OUTCOME: 'post-outcome',
 };
 
 export function createDialogueSystem(scene, {
@@ -69,10 +76,30 @@ export function createDialogueSystem(scene, {
 
   function open(interactable) {
     const character = interactable?.character;
+    if (mode !== DIALOGUE_MODE.IDLE || !character?.id) return;
+
+    if (canStartPostOutcomeInteraction(gameState, character.id)) {
+      const reaction = character.conversation?.postOutcomeReactions?.[
+        getCharacterOutcome(gameState, character.id)
+      ];
+      if (!reaction?.length) return;
+
+      currentInteractable = interactable;
+      currentCharacter = character;
+      conversation = character.conversation;
+      mode = DIALOGUE_MODE.POST_OUTCOME;
+      replaceUi(createDialogueReactionUi(scene, false, {
+        completionInstruction: 'ENTER / SPACE · CERRAR',
+      }));
+      presentation = createDialoguePresentation(reaction);
+      uiElements.update(presentation.current());
+      return;
+    }
+
     if (
-      mode !== DIALOGUE_MODE.IDLE
-      || !character?.conversation?.beats?.length
-      || !canInteractWithCharacter(gameState, character.id)
+      !canInteractWithCharacter(gameState, character.id)
+      || !canStartMainConversation(gameState, character.id)
+      || !character.conversation?.beats?.length
     ) return;
 
     currentInteractable = interactable;
@@ -299,6 +326,14 @@ export function createDialogueSystem(scene, {
     if (input.advance) resetDialogue();
   }
 
+  function updatePostOutcome(input) {
+    if (input.escape) {
+      resetDialogue();
+      return;
+    }
+    if (input.advance && presentation.advance() === 'finished') resetDialogue();
+  }
+
   function updateOutcomeClosing(input) {
     if (input.advance && presentation.advance() === 'finished') startOutcomeEvent();
   }
@@ -313,6 +348,7 @@ export function createDialogueSystem(scene, {
     else if (mode === DIALOGUE_MODE.COUNCIL) updateCouncil(input);
     else if (mode === DIALOGUE_MODE.OUTCOME_CLOSING) updateOutcomeClosing(input);
     else if (mode === DIALOGUE_MODE.OUTCOME) updateOutcome(input);
+    else if (mode === DIALOGUE_MODE.POST_OUTCOME) updatePostOutcome(input);
 
     if (presentation) {
       // New lines start empty; input always acts on what was visible last frame.

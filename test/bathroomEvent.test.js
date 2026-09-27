@@ -162,6 +162,15 @@ function assertSafePlayerPosition(sprite, position) {
   assert.equal(sprite.y, position.y);
 }
 
+function assertSafeCompanionPosition(sprite, position) {
+  for (const zone of getPatioCollisionZones()) {
+    assert.equal(segmentIntersectsZone(position, position, zone, GIRL_FOOTPRINT), false,
+      `companion safe return overlaps ${zone.id}`);
+  }
+  assert.equal(sprite.x, position.x);
+  assert.equal(sprite.y, position.y);
+}
+
 test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', () => {
   const keys = {};
   const objects = [];
@@ -248,7 +257,24 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
   assert.equal(player.label.x, player.sprite.x);
   assert.equal(player.label.y, player.sprite.y + PLAYER_CONFIG.label.offsetY);
   assertSafePlayerPosition(player.sprite, PATIO_LAYOUT.events.bathroom.safeExit);
-  assert.equal(interactable.sprite.visible, false);
+  assert.equal(interactable.sprite.visible, true);
+  assert.equal(interactable.label.visible, true);
+  assert.equal(interactable.marker.visible, false);
+  assert.match(interactable.sprite.anims.currentAnim.key, /^sofi-idle-down$/);
+  assert.equal(interactable.label.x, interactable.sprite.x);
+  assert.equal(interactable.label.y, interactable.sprite.y + 36);
+  assert.equal(interactable.label.depth, interactable.sprite.depth + 1);
+  assertSafeCompanionPosition(
+    interactable.sprite,
+    PATIO_LAYOUT.events.bathroom.companionSafeExit,
+  );
+  assert.ok(
+    Math.hypot(
+      player.sprite.x - interactable.sprite.x,
+      player.sprite.y - interactable.sprite.y,
+    ) > playerFootprint().halfWidth + GIRL_FOOTPRINT.halfWidth,
+    'Tambu and the companion have separate footprints at the doorway',
+  );
   assert.ok(objects.filter(({ text }) => text).every(({ destroyed }) => destroyed));
 });
 
@@ -427,6 +453,13 @@ test('interrumpir la pantalla de resultado nunca deja a Tambu invisible', () => 
   assert.equal(player.sprite.visible, true);
   assert.equal(player.sprite.body.enable, true);
   assertSafePlayerPosition(player.sprite, PATIO_LAYOUT.events.bathroom.safeExit);
+  assert.equal(interactable.sprite.visible, true);
+  assert.equal(interactable.label.visible, true);
+  assert.equal(interactable.marker.visible, false);
+  assertSafeCompanionPosition(
+    interactable.sprite,
+    PATIO_LAYOUT.events.bathroom.companionSafeExit,
+  );
 });
 
 test('Mili sube por la izquierda de la barra y los recorridos convergen frente al baño', () => {
