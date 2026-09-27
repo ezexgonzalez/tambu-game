@@ -134,7 +134,13 @@ test('la presentación usa un tablero enmarcado, columnas alineadas y score sepa
   assert.equal(boardRules.type, 'graphics');
   assert.ok(outerFrame.rectangles.length >= 4);
   assert.ok(boardFrame.rectangles.length >= 5);
-  assert.ok(boardRules.rectangles.length >= 3);
+  const dividerX = Math.round(scene.scale.width * (0.12 + 0.76 * 0.405));
+  const dividerSegments = boardRules.rectangles
+    .filter(({ rect }) => rect[0] === dividerX && rect[2] === 3)
+    .map(({ rect }) => rect);
+  assert.equal(dividerSegments.length, 4, 'header and each character row get a divider segment');
+  assert.ok(dividerSegments.every((segment, index) => index === 0
+    || dividerSegments[index - 1][1] + dividerSegments[index - 1][3] === segment[1]));
 
   const textPositions = objects
     .filter(({ type, position }) => type === 'graphics' && position)
@@ -147,10 +153,12 @@ test('la presentación usa un tablero enmarcado, columnas alineadas y score sepa
   for (const rowY of rowCenters) {
     assert.equal(textPositions.filter(([, y]) => Math.abs(y - rowY) < 0.01).length, 2);
   }
+  const headerY = scene.scale.height * (0.25 + 0.40 * 0.19 * 0.53);
+  assert.equal(textPositions.filter(([, y]) => Math.abs(y - headerY) < 0.01).length, 2);
 
   const scorePanel = objects.find(({ type, rectangles }) => type === 'graphics'
     && rectangles.some(({ rect }) => rect[0] === scene.scale.width * 0.29
-      && rect[1] === scene.scale.height * 0.685));
+      && rect[1] === scene.scale.height * 0.67));
   assert.ok(scorePanel, 'score has its own framed block');
   ui.destroy();
 });
@@ -183,7 +191,7 @@ test('el beat de patio conserva el HUD, el resumen aparece a 700 ms y el replay 
   assert.ok(objects[0].visible, 'the dark overlay is shown with the summary');
   assert.ok(objects.filter(({ type }) => type === 'rectangle').every(({ visible }) => visible));
   const prompt = objects.find(({ type, position }) => type === 'graphics'
-    && Math.abs(position?.[1] - scene.scale.height * 0.92) < 0.01);
+    && Math.abs(position?.[1] - scene.scale.height * 0.91) < 0.01);
   assert.ok(prompt);
   assert.equal(prompt.visible, false);
   assert.ok(objects.filter((object) => object !== prompt).every(({ visible }) => visible));

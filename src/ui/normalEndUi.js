@@ -205,7 +205,6 @@ export function createNormalEndUi(scene, { hud, onReplay = () => {} }) {
     .setDepth(NORMAL_END_DEPTH + 2)
     .setVisible(false);
   boardRules.fillStyle(COLORS.frame, 0.78);
-  boardRules.fillRect(Math.round(dividerX), Math.round(board.y), boardLineWidth, Math.round(board.height));
   for (let row = 0; row < CHARACTER_ORDER.length; row += 1) {
     const ruleY = board.y + headerHeight + row * rowHeight;
     if (row < CHARACTER_ORDER.length - 1) {
@@ -218,9 +217,26 @@ export function createNormalEndUi(scene, { hud, onReplay = () => {} }) {
     }
   }
 
-  const headerCenterY = board.y + headerHeight / 2;
+  const dividerWidth = Math.max(3, boardLineWidth);
+  const dividerTop = Math.round(board.y + boardLineWidth);
+  const headerBottom = Math.round(board.y + headerHeight);
+  const dividerRows = Array.from({ length: CHARACTER_ORDER.length }, (_, index) => ({
+    top: Math.round(board.y + headerHeight + index * rowHeight),
+    bottom: index === CHARACTER_ORDER.length - 1
+      ? Math.round(board.y + board.height - boardLineWidth)
+      : Math.round(board.y + headerHeight + (index + 1) * rowHeight),
+  }));
+  [
+    { top: dividerTop, bottom: headerBottom },
+    ...dividerRows,
+  ].forEach(({ top, bottom }) => {
+    boardRules.fillRect(Math.round(dividerX), top, dividerWidth, bottom - top);
+  });
+
+  const headerCenterY = board.y + headerHeight * 0.53;
   const leftColumnCenter = board.x + (dividerX - board.x) / 2;
-  const rightColumnCenter = dividerX + (board.x + board.width - dividerX) / 2;
+  const resultColumnWidth = board.x + board.width - dividerX;
+  const resultTextCenter = dividerX + resultColumnWidth * 0.53;
   const headerCellSize = (text, columnWidth) => fitCellSize(text, {
     maxCellSize: 5,
     maxWidth: columnWidth * 0.82,
@@ -234,7 +250,7 @@ export function createNormalEndUi(scene, { hud, onReplay = () => {} }) {
     depth: NORMAL_END_DEPTH + 3,
   });
   const resultsHeader = makePixelLine(scene, NORMAL_END_COPY.resultsHeader, {
-    x: rightColumnCenter,
+    x: dividerX + resultColumnWidth / 2,
     y: headerCenterY,
     cellSize: headerCellSize(NORMAL_END_COPY.resultsHeader, board.x + board.width - dividerX),
     color: COLORS.secondary,
@@ -243,7 +259,7 @@ export function createNormalEndUi(scene, { hud, onReplay = () => {} }) {
 
   const scorePanel = createPanel(scene, {
     x: width * 0.29,
-    y: height * 0.685,
+    y: height * 0.67,
     width: width * 0.42,
     height: height * 0.155,
     depth: NORMAL_END_DEPTH + 1,
@@ -264,9 +280,9 @@ export function createNormalEndUi(scene, { hud, onReplay = () => {} }) {
 
   const replayPrompt = makePixelLine(scene, NORMAL_END_COPY.replayPrompt, {
     x: width / 2,
-    y: height * 0.92,
+    y: height * 0.91,
     cellSize: fitCellSize(NORMAL_END_COPY.replayPrompt, {
-      maxCellSize: 3,
+      maxCellSize: 4,
       maxWidth: width * 0.82,
       maxHeight: height * 0.055,
     }),
@@ -292,8 +308,7 @@ export function createNormalEndUi(scene, { hud, onReplay = () => {} }) {
   function show(summary) {
     if (destroyed || active) return false;
     const presentation = formatNormalEndSummary(summary);
-    const rowTextStartX = board.x + (dividerX - board.x) * 0.13;
-    const resultColumnWidth = board.x + board.width - dividerX;
+    const rowTextStartX = board.x + (dividerX - board.x) * 0.16;
     const resultCellMaxWidth = resultColumnWidth * 0.91;
     const innerPadding = Math.max(8, lineWidth * 4);
 
@@ -319,7 +334,7 @@ export function createNormalEndUi(scene, { hud, onReplay = () => {} }) {
         maxHeight: rowHeight * 0.48,
       });
       const outcome = makePixelLine(scene, row.outcomeLabel, {
-        x: rightColumnCenter,
+        x: resultTextCenter,
         y: rowY,
         cellSize: outcomeCellSize,
         color: COLORS.text,
@@ -328,10 +343,11 @@ export function createNormalEndUi(scene, { hud, onReplay = () => {} }) {
       return { characterName: name, outcomeLabel: outcome };
     });
 
+    const scorePanelY = height * 0.67;
     const scorePanelHeight = height * 0.155;
     pointsLabel = makePixelLine(scene, presentation.pointsLabel, {
       x: width / 2,
-      y: height * 0.685 + scorePanelHeight * 0.29,
+      y: scorePanelY + scorePanelHeight * 0.29,
       cellSize: fitCellSize(presentation.pointsLabel, {
         maxCellSize: 4,
         maxWidth: width * 0.34,
@@ -342,7 +358,7 @@ export function createNormalEndUi(scene, { hud, onReplay = () => {} }) {
     });
     points = makePixelLine(scene, presentation.points, {
       x: width / 2,
-      y: height * 0.685 + scorePanelHeight * 0.69,
+      y: scorePanelY + scorePanelHeight * 0.69,
       cellSize: fitCellSize(presentation.points, {
         maxCellSize: 8,
         maxWidth: width * 0.36,
