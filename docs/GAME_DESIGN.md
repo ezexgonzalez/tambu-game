@@ -31,7 +31,7 @@ Si no ayuda a esta experiencia, queda para una versión futura.
 
 La noche completa ya funciona de principio a fin y fue validada manualmente en sus tres salidas: GAME OVER, NORMAL END y PERFECT NIGHT con continuación post-win. La V1 no necesita nuevos sistemas grandes para demostrar su loop.
 
-El trabajo activo es cerrar **balance, elenco, identidad narrativa del Bathroom Resistance, presencia audiovisual, onboarding/UI y QA de release**. El criterio es terminar, no expandir.
+El trabajo activo es cerrar **elenco, identidad narrativa del Bathroom Resistance, presencia audiovisual, onboarding/UI y QA de release**. El balance numérico de Bathroom Resistance Pass 2 ya fue corregido y playtesteado; no es un bloque abierto. El criterio es terminar, no expandir.
 
 ## Loop de la V1
 
@@ -271,7 +271,7 @@ El outcome social `bathroom` se conserva cuando la chica acepta y ambos llegan a
 - la acreditación es idempotente;
 - PERFECT NIGHT requiere tres resultados `secured`.
 
-La dificultad vigente es Balance Pass 2: tres perfiles por ordinal de intento, contando solo Baños anteriores ya liquidados. Sigue pendiente QA manual antes de congelar números.
+La dificultad vigente es **Balance Pass 2, ya playtesteada y aceptada como baseline**: tres perfiles por ordinal de intento, contando solo Baños anteriores ya liquidados. No se reabre el balance numérico salvo evidencia nueva.
 
 La próxima evolución V1 del evento es narrativa: **Baño 1 sorpresa → Baño 2 incredulidad → Baño 3 caos**, usando amigos reconocibles y memoria real de run sin cambiar este contrato de rewards.
 
