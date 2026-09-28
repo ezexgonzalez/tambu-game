@@ -21,7 +21,7 @@ Este es el punto de entrada obligatorio antes de diseñar, producir assets o mod
 
 Tambu ya tiene una **primera noche funcional completa**: intro, exploración, tres conversaciones, outcomes persistidos, Bathroom Event, Bathroom Resistance, regreso al patio, GAME OVER, NORMAL END, PERFECT NIGHT, retry limpio y continuación post-win. La primera auditoría describía un vertical slice sin cierre; ese bloqueo ya está resuelto y la QA manual del 27 de septiembre validó las tres rutas terminales.
 
-La segunda auditoría integral del 28 de septiembre no encontró una deuda arquitectónica general ni un crash estructural que obligue a frenar la V1. El trabajo restante es de **cierre de producto**: corregir contratos locales comprobados, congelar el balance real mediante playtest, cerrar el elenco focal, reducir el contraste de población procedural, dar identidad narrativa a los tres Baños, integrar audio mínimo y llevar onboarding/HUD/UI central al lenguaje ya aprobado.
+La segunda auditoría integral del 28 de septiembre no encontró una deuda arquitectónica general ni un crash estructural que obligue a frenar la V1. El trabajo restante es de **cierre de producto**: corregir contratos locales comprobados, cerrar el elenco focal, reducir el contraste de población procedural, dar identidad narrativa a los tres Baños, integrar audio mínimo y llevar onboarding/HUD/UI central al lenguaje ya aprobado. **Bathroom Resistance Pass 2 ya fue corregido, playtesteado manualmente y aceptado como baseline de balance.**
 
 La regla de dirección pasa a ser: **dejar de demostrar que el juego puede crecer y empezar a terminar esta única noche**. No se reabren sectores estables ni se agregan animaciones, sistemas o personajes por volumen; cada pieza nueva debe justificar impacto visible en la V1.
 
@@ -178,7 +178,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 - Perímetro actual: comprobar en juego continuidad de laterales, oclusión de pies en el seto inferior y uniones de ambas esquinas.
 - Retorno post-baño: rutas seguras temporales por personaje, retorno a facing down e idles normales/special idles validados manualmente.
 - Balance numérico de rutas sociales y recompensas: la estructura está implementada, pero el playtest puede justificar ajustes.
-- Bathroom Resistance: Balance Pass 2 ya corrige el ordinal runtime contando solo resultados previos liquidados (`secured` o `interrupted`), excluyendo el outcome `bathroom` pending del evento actual. Los tres perfiles tienen mayor drenaje y daño, manteniendo SPACE `+4`, 10 s y siete golpes. Falta QA manual de esta baseline para confirmar que el primer baño sea justo y el tercero difícil pero ganable.
+- **Bathroom Resistance — BALANCE PASS 2 CLOSED / BASELINE:** el ordinal runtime cuenta solo resultados previos liquidados (`secured` o `interrupted`), excluyendo el outcome `bathroom` pending del evento actual. Los tres perfiles mantienen SPACE `+4`, 10 s y siete golpes con dificultad progresiva 1/2/3. Eze ya realizó el playtest manual posterior al rebalance y la baseline actual queda aceptada. No ajustar números nuevamente salvo evidencia nueva de playtest.
 - **Contrato de input pendiente:** la UI actual dice `SPACE · MANTENÉ LA PUERTA CERRADA`, pero el runtime usa `JustDown`; el jugador debe pulsar repetidamente. Corregir el copy, no la mecánica, antes de congelar onboarding.
 - **Depth de amigos pendiente:** `createFriendSprite()` aplica `y + 30`, pero `createCharacters()` vuelve a ejecutar `sprite.setDepth(friend.y)` y pisa ese offset. Requiere fix local + QA visual, no refactor.
 - **History de Mili pendiente:** las variantes `too-much-teasing-*` deben suprimir emits positivos incompatibles de la elección base antes de agregar más callbacks sociales.
@@ -201,7 +201,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 La segunda auditoría del 28/09 confirma que el loop funcional ya está cerrado. El roadmap activo de Dirección es:
 
-1. **STABILIZATION PASS + BALANCE GATE** — corregir copy de SPACE, overwrite de depth de amigos y emits falsos de Mili; actualizar documentación; probar manualmente Bathroom Resistance 1/2/3 y congelar números solo con evidencia de playtest.
+1. **STABILIZATION PASS** — corregir copy de SPACE, overwrite de depth de amigos y emits falsos de Mili. Bathroom Resistance Pass 2 ya está playtesteado y no forma parte de esta pasada salvo el copy de input engañoso.
 2. **CAST CLOSURE** — aprobar visualmente Eze/Pitity/Santy/Tobi, completar bases de Uriel/Thiago y cerrar la producción individual intensiva de amigos. No todos necesitan special idles: cada animación nueva debe habilitar una escena, gag o función visible.
 3. **BATHROOM RESISTANCE 2.0 — IDENTIDAD NARRATIVA** — convertir los tres intentos en sorpresa → incredulidad → caos usando amigos reconocibles, memoria real de run y pocas intervenciones claras, sin alterar el contrato secured/interrupted ya estable.
 4. **PARTY PRESENCE** — audio mínimo con mute/volumen + lote pequeño de fillers/actividades + 2–3 callbacks o beats ambientales de alto impacto. No construir simulación social.
