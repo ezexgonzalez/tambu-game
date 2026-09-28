@@ -1,7 +1,7 @@
 # Tambu Game — Producción de assets del Patio
 
-**Versión:** 1.0
-**Estado:** roadmap activo
+**Versión:** 1.1
+**Estado:** roadmap activo · actualizado 2026-09-28
 **Scope:** V1 · La fiesta
 
 Este documento define qué arte conviene producir a partir del estado actual y bajo qué contrato debe entregarse. No describe el estado global del juego: para eso prevalece [`CURRENT_STATE.md`](./CURRENT_STATE.md).
@@ -22,13 +22,15 @@ Si una especificación antigua contradice esta cadena, no se elige una versión 
 
 El entorno principal ya tiene una base de producción en césped, deck, casa, piscina, barra, DJ y perímetro. El mayor déficit visual es la población del patio y, en segundo lugar, la capa de props que todavía se dibuja con primitives.
 
-La producción se mueve de “construir el escenario base” hacia:
+La producción se mueve de “construir el escenario base” hacia el **cierre de población y experiencia**:
 
-1. personajes interactuables;
-2. amigos;
-3. población modular;
-4. props ambientales activos;
-5. UI, feedback y polish.
+1. cerrar QA de los cuatro amigos ya integrados;
+2. producir bases de Uriel y Thiago;
+3. reducir el contraste procedural con una población reutilizable pequeña;
+4. producir únicamente animaciones con función visible;
+5. dejar props/UI para pasadas dirigidas por impacto y QA.
+
+La segunda auditoría confirma que la V1 ya tiene loop completo. El riesgo actual es transformar la producción de personajes en un pozo infinito de atlas. **Identidad clara y función > cantidad de animaciones.**
 
 No se vuelve a producir un sector estable salvo que exista un problema concreto y una tarea explícita.
 
@@ -47,6 +49,7 @@ No se vuelve a producir un sector estable salvo que exista un problema concreto 
 - Barra y bartender: `src/world/bar/barStructure.js`.
 - DJ, estructura, consola y residente: `src/world/dj/djBooth.js`.
 - Perímetro: `src/world/patioPerimeter.js`, todavía en validación visual.
+- Amigos en runtime: **Eze, Pitity, Santy y Tobi** ya tienen walk 4 direcciones + idle down y siguen en QA visual. Pitity tiene blink/phone-check; Tobi tiene drink/arms-crossed corregidos. Uriel y Thiago siguen procedurales.
 
 Estos elementos son contexto de producción y referencia de coherencia. No son invitación a regenerarlos.
 
@@ -54,24 +57,34 @@ Estos elementos son contexto de producción y referencia de coherencia. No son i
 
 `public/assets/props/patio/` conserva piezas de una pasada ambiental revertida. Pueden evaluarse y rescatarse individualmente, pero no forman un kit aprobado por el solo hecho de existir.
 
-### Placeholders que sí deben reemplazarse
+### Placeholders / capas todavía abiertas
 
-- Eze, Pitity, Uriel, Santy, Thiago y Tobi.
-- NPCs de relleno.
-- Mesas, cooler, faroles, guirnaldas y clutter creados en `createPatioWorld.js` con Phaser Graphics.
-- UI funcional actual, en una etapa posterior.
+- **Uriel y Thiago** como amigos principales procedurales.
+- NPCs de relleno, mediante una solución finita/reutilizable; no 37 personajes únicos.
+- Mesas, cooler, faroles, guirnaldas y clutter creados en `createPatioWorld.js` con Phaser Graphics, solo donde QA justifique el reemplazo.
+- UI funcional anterior a `UI_DIRECTION.md`, en una pasada dedicada.
+
+Eze, Pitity, Santy y Tobi **ya no se consideran placeholders**, sino assets runtime en validación.
 
 ## Política de referencias visuales
 
-Para producción visual asistida por IA, la fuente principal debe ser un **visual master grande, claro y literal** del personaje u objeto aprobado.
+Para personajes humanos se usan **dos fuentes de verdad complementarias**, con responsabilidades distintas:
 
-- No usar sprites runtime pequeños (por ejemplo frames de `32x48`) como referencia visual principal para crear o extender arte: al perder detalle, el agente tiende a reinterpretar rostro, pelo, silueta, manos o sombreado.
-- Los assets runtime pequeños sirven como referencia **técnica secundaria**: dimensiones, grid, orden de frames, naming, escala y contrato de integración.
-- Si todavía no existe una referencia literal suficientemente clara de la animación o variante buscada, primero se produce y aprueba ese visual master; recién después se normaliza al tamaño runtime.
-- El Art Director / Asset Studio trabaja sobre referencias literales aprobadas: puede limpiar, alinear y normalizar, pero no debe inventar un Tier A desde un asset runtime diminuto.
-- Cuando los visual masters se versionen en el repo, deben vivir fuera de `public/assets/` para no formar parte del runtime.
+1. **Visual master grande aprobado** → identidad general, outfit, silueta, anatomía, intención de pose/animación y detalles que un frame pequeño no puede expresar.
+2. **Idle runtime manualmente corregido y aprobado** → resolución pixel-art exacta del personaje a `32x48`: cara, pelo, paleta, outlines, alineación de pies, densidad y geometría neutral.
 
-Esta regla aplica especialmente a personajes Tier A/B y a animaciones donde ojos, manos, accesorios o microexpresiones puedan degradarse al reducir tamaño.
+Reglas:
+
+- No reconstruir la identidad completa de un personaje nuevo usando solamente un sprite runtime pequeño.
+- Una vez que el idle runtime fue corregido manualmente y aprobado, **sí pasa a ser referencia obligatoria para continuidad de todos los special idles y frames derivados**. Una animación no puede volver a la cara/píxeles de una reducción antigua.
+- El master grande define principalmente **quién es y cómo se mueve** el personaje; el idle runtime aprobado define **cómo se resuelve exactamente en píxeles dentro del juego**.
+- Si todavía no existe un master claro de una pose compleja, producir/aprobar ese master antes de normalizar.
+- En una animación, toda región que no participa del movimiento debe conservar el idle runtime aprobado siempre que sea posible.
+- Primer/último neutral y frames cercanos al neutral deben ser compatibles con el idle integrado, evitando saltos al entrar/salir.
+- Los masters versionados deben vivir fuera de `public/assets/`; los assets runtime viven en `public/assets/`.
+- Ninguna herramienta nueva (IA, SpriteCook u otra) se adopta como pipeline estable por novedad: primero debe superar una prueba de **un único asset**, comparando fidelidad, tiempo y retrabajo.
+
+Esta política aplica especialmente a caras, manos, brazos, pies y microexpresiones, que fueron los principales puntos de deriva observados durante la producción de amigos.
 
 ## Contrato obligatorio para producir assets
 
@@ -119,6 +132,16 @@ Ningún Tier A/B se aprueba aislado sobre un fondo vacío.
 - asegurar transparencia real;
 - corregir perspectiva, escala, bordes, pixel density y paleta;
 - exportar PNGs finales con nombres semánticos.
+
+### 4.5. Gate de baseline humana
+
+Para personajes y animaciones:
+
+- cerrar primero un idle down runtime que Dirección pueda describir como “este sprite ya es el personaje”;
+- si hace falta, corregir manualmente sus píxeles antes de producir specials;
+- registrar ese idle como baseline de continuidad;
+- producir **una animación por vez** cuando la anatomía/identidad sea difícil; evitar batches que propaguen errores;
+- no integrar una animación cuyo rostro, brazos o neutral todavía difieran de la baseline.
 
 ### 5. Prueba contextual
 
@@ -190,47 +213,41 @@ La entrega exacta debe decidirse con el módulo de integración. No generar anim
 
 # FASE B — Amigos principales
 
-Esta es la **siguiente fase visual**, pero no desplaza el milestone de coherencia crítica / FIRST COMPLETE NIGHT definido por Dirección. Cuando vuelva a abrirse producción de personajes, producir una familia común para:
+**Estado: activa / cierre de cast.**
 
-1. Pitity;
-2. Uriel;
-3. Thiago;
-4. Tobi;
-5. Santy;
-6. Eze.
+La primera noche ya está cerrada funcionalmente. En runtime existen Eze, Pitity, Santy y Tobi; Uriel y Thiago siguen procedurales.
 
-El orden puede cambiar por necesidad narrativa o disponibilidad de referencia, pero no se deben generar como seis estilos aislados.
+Objetivo de esta fase:
+
+1. aprobar visualmente las bases de Eze, Pitity, Santy y Tobi;
+2. producir walk/idle base de Uriel y Thiago;
+3. cerrar una baseline pixelada versionada por amigo;
+4. detener la producción intensiva de specials cuando cada personaje ya tenga identidad y función suficientes.
 
 ## Reglas
 
 - misma base proporcional y densidad que Tambu;
 - rasgos reconocibles mediante pelo, outfit, silueta y uno o dos detalles;
-- expresividad reservada para estados que tengan uso en gameplay;
-- evitar retratos o animaciones complejas antes de validar el cuerpo base.
+- **no todos los amigos necesitan special idles**;
+- un special nuevo debe justificar una escena, gag o función ambiental concreta;
+- Santy puede usar baile como firma contextual por su ubicación en DJ si el asset pasa QA; no implica que todos los amigos necesiten una animación equivalente;
+- priorizar una animación bien cerrada sobre tres atlas mediocres;
+- no producir en batch varios personajes/animaciones cuando la fidelidad frame a frame esté fallando.
 
 # FASE C — Población modular
 
-No diseñar treinta personas únicas. Construir un sistema reutilizable compatible con los estados ambientales previstos.
+No diseñar treinta personas únicas ni construir una factory combinatoria antes de medir necesidad.
 
-## Familia mínima
+La V1 necesita **romper la sensación de cuerpos procedurales repetidos**, no individualizar a cada invitado.
 
-- cuerpos/base de proporciones compatibles;
-- 4–6 peinados por familia necesaria;
-- 4 tonos de piel;
-- 6–8 outfits combinables;
-- variantes de piernas/calzado;
-- accesorios separados: vaso, celular, gorra, bolso y anteojos;
-- paleta controlada para evitar clones demasiado obvios.
+## Lote inicial
 
-## Estados prioritarios
+- una familia pequeña de cuerpos/outfits reutilizables;
+- suficiente variación de pelo, piel y ropa para evitar clones evidentes;
+- acciones visibles prioritarias: **baile, tomar, celular y charla**;
+- pareja/beso solo si reutiliza infraestructura simple.
 
-- idle/charla;
-- baile;
-- tomar;
-- mirar celular;
-- beso o pareja, solo si se resuelve sin crear un sistema desproporcionado.
-
-El sistema debe probar diversidad sin perder coherencia, performance ni claridad social.
+Primero integrar un lote reducido en sectores focales (DJ/barra/social), evaluar a zoom 1 y recién después decidir si hace falta ampliar. Diversidad perceptible > cantidad de combinaciones.
 
 # FASE D — Props ambientales activos
 
@@ -263,7 +280,7 @@ Se aborda después de estabilizar la población visual y el loop completo de la 
 
 Alcance previsto:
 
-- HUD de vidas, alcohol y puntos;
+- HUD de vidas y puntos; el indicador de alcohol vacío debe ocultarse para V1;
 - prompt de interacción;
 - diálogo y opciones;
 - El Consejo;
@@ -271,7 +288,7 @@ Alcance previsto:
 - evento del baño;
 - resumen final de la noche.
 
-La UI debe compartir lenguaje pixel-art, pero priorizar lectura y jerarquía. No congelar un HUD final antes de definir gameplay de alcohol y cierre de run.
+La UI debe compartir el lenguaje definido en `UI_DIRECTION.md`, priorizando lectura y jerarquía. El cierre de run ya existe; alcohol no se implementará antes de V1 y por eso no debe condicionar el HUD final.
 
 ## Reglas técnicas comunes
 
@@ -279,7 +296,7 @@ La UI debe compartir lenguaje pixel-art, pero priorizar lectura y jerarquía. No
 
 - Tambu sigue siendo la unidad oficial.
 - Para pixel art manual, autorar cerca del tamaño final cuando sea posible.
-- Para generación asistida por IA, partir de un visual master grande y normalizar después al tamaño runtime; no usar un frame runtime pequeño como referencia visual principal.
+- Para generación asistida por IA, partir de un visual master grande para identidad/movimiento; cuando exista un idle runtime manualmente aprobado, usarlo también como referencia exacta de continuidad pixelada para specials.
 - Evitar escalados no uniformes durante integración.
 - Un asset grande se mide por masa visible, no solo por su canvas transparente.
 
