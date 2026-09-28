@@ -81,7 +81,7 @@ export function createBathroomResistanceUi(scene, config) {
   const outside = createText(scene, 640, 449, '', {
     fontSize: '17px', color: '#ffcf72', fontStyle: 'bold',
   }).setOrigin(0.5);
-  const help = createText(scene, 640, 516, 'SPACE · MANTENÉ LA PUERTA CERRADA', {
+  const help = createText(scene, 640, 516, 'SPACE · APRETÁ REPETIDAMENTE', {
     fontSize: '12px', color: '#8fd7ff', fontStyle: 'bold',
   }).setOrigin(0.5);
 

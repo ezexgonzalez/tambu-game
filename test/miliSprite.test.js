@@ -30,6 +30,7 @@ import {
   preloadMili,
   setMiliDepth,
 } from '../src/characters/miliSprite.js';
+import { patioFriends } from '../src/data/patioCharacters.js';
 
 function object(x = 0, y = 0) {
   const listeners = new Map();
@@ -479,6 +480,28 @@ test('Mili caminar interrumpe drink y elimina su listener de finalización', () 
 test('createCharacters usa sprites reales para las tres chicas y reemplaza los cuatro amigos del scope', () => {
   const sheets = [];
   const scene = characterScene(sheets);
+  const runtimeFriendSprites = [];
+  const friendLabels = [];
+  const proceduralFriends = [];
+  const addSprite = scene.add.sprite;
+  const addText = scene.add.text;
+  const addContainer = scene.add.container;
+  scene.add.sprite = (...args) => {
+    const sprite = addSprite(...args);
+    runtimeFriendSprites.push(sprite);
+    return sprite;
+  };
+  scene.add.text = (x, y, text, ...args) => {
+    const label = addText(x, y, ...args);
+    label.text = text;
+    friendLabels.push(label);
+    return label;
+  };
+  scene.add.container = (x, y, ...args) => {
+    const container = addContainer(x, y, ...args);
+    proceduralFriends.push(container);
+    return container;
+  };
   preloadCharacters(scene);
   const interactables = createCharacters(scene);
 
@@ -517,6 +540,22 @@ test('createCharacters usa sprites reales para las tres chicas y reemplaza los c
   assert.equal(cami.visual, 'cami-sprite');
   assert.equal(cami.sprite.key, 'cami');
   assert.equal(cami.sprite.anims.currentAnim.key, 'cami-idle-down');
+
+  const runtimeFriends = runtimeFriendSprites.filter(({ friendId }) => friendId);
+  assert.equal(runtimeFriends.length, 4);
+  for (const sprite of runtimeFriends) {
+    const friend = patioFriends.find(({ id }) => id === sprite.friendId);
+    const label = friendLabels.find(({ text }) => text === friend.name);
+    assert.equal(sprite.depth, friend.y + 30);
+    assert.equal(label.depth, sprite.depth + 1);
+  }
+  for (const name of ['Uriel', 'Thiago']) {
+    const friend = patioFriends.find((entry) => entry.name === name);
+    const sprite = proceduralFriends.find(({ x, y }) => x === friend.x && y === friend.y);
+    assert.ok(sprite, `${name} remains a procedural container`);
+    assert.equal(sprite.depth, friend.y);
+    assert.equal(sprite.friendId, undefined);
+  }
 });
 
 test('el shutdown de la Scene cancela timers y completion listeners de los idles', () => {

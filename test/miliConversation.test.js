@@ -136,6 +136,19 @@ test('la burla del Beat 3 responde al contexto intenso o a una advertencia previ
   const intense = playMili([3, 3, 3]);
   assert.equal(intense.presentation.variantId, 'too-much-teasing-intensity');
   assert.ok(intense.session.signals.includes('mili_disliked_overplay'));
+  const incompatibleSignals = [
+    'mili_enjoyed_playful_pushback',
+    'mili_returned_challenge',
+    'npc_returned_flirt',
+    'mili_played_along_with_dance_tease',
+  ];
+  const assertNegativeHistory = (entry) => {
+    assert.ok(entry.emittedSignals.includes('mili_disliked_overplay'));
+    assert.ok(entry.emittedSignals.includes('mili_warned_tambu_to_slow_down'));
+    for (const signal of incompatibleSignals) assert.ok(!entry.emittedSignals.includes(signal), signal);
+    assert.ok(entry.emittedSignals.includes('tambu_showed_romantic_intent'));
+  };
+  assertNegativeHistory(intense.session.history.at(-1));
 
   let session = createConversationSession('mili', 'beat-3');
   session = {
@@ -146,6 +159,7 @@ test('la burla del Beat 3 responde al contexto intenso o a una advertencia previ
   const beat = getConversationBeat(MILI_CONVERSATION, 'beat-3');
   const warning = applyConversationChoice(session, beat, beat.choices[3]);
   assert.equal(warning.presentation.variantId, 'too-much-teasing-warning');
+  assertNegativeHistory(warning.session.history.at(-1));
 });
 
 test('la opción final Tambu distingue química, amistad y overplay', () => {

@@ -244,6 +244,12 @@ export const MILI_CONVERSATION = {
               id: 'too-much-teasing-intensity',
               when: { stats: { intensity: { gte: 12 } } },
               effects: { attraction: -6, trust: -3, intensity: 2 },
+              suppressEmits: [
+                'mili_enjoyed_playful_pushback',
+                'mili_returned_challenge',
+                'npc_returned_flirt',
+                'mili_played_along_with_dance_tease',
+              ],
               emits: ['mili_disliked_overplay', 'mili_warned_tambu_to_slow_down'],
               reaction: [
                 { speaker: 'Mili', text: 'Che, ¿vos solamente sabés bardear?' },
@@ -255,6 +261,12 @@ export const MILI_CONVERSATION = {
               id: 'too-much-teasing-warning',
               when: { allSignals: ['mili_warned_tambu_to_slow_down'] },
               effects: { attraction: -6, trust: -3, intensity: 2 },
+              suppressEmits: [
+                'mili_enjoyed_playful_pushback',
+                'mili_returned_challenge',
+                'npc_returned_flirt',
+                'mili_played_along_with_dance_tease',
+              ],
               emits: ['mili_disliked_overplay', 'mili_warned_tambu_to_slow_down'],
               reaction: [
                 { speaker: 'Mili', text: 'Che, ¿vos solamente sabés bardear?' },

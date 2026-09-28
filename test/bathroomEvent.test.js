@@ -15,6 +15,7 @@ import {
 } from '../src/state/gameState.js';
 import { getPatioCollisionZones } from '../src/world/createPatioCollisions.js';
 import { PATIO_LAYOUT } from '../src/world/patioLayout.js';
+import { createBathroomResistanceUi } from '../src/ui/eventUi.js';
 
 const phaserMock = 'data:text/javascript,' + encodeURIComponent(`
 export default {
@@ -371,6 +372,20 @@ test('BathroomEvent recibe el perfil del intento y SPACE solo recupera con JustD
   event.update();
   assert.equal(event.getResistanceState().resistance, 54, 'mantener SPACE no repite la recuperación');
   event.destroy();
+});
+
+test('Bathroom Resistance instruye pulsaciones repetidas', () => {
+  const scene = {
+    add: {
+      rectangle(x, y, width, height) { return display(x, y); },
+      text(x, y, text) { return display(x, y, text); },
+    },
+  };
+  const ui = createBathroomResistanceUi(scene, getBathroomResistanceConfig(1));
+  const help = ui.elements.find(({ text }) => text.includes('SPACE'));
+
+  assert.equal(help.text, 'SPACE · APRETÁ REPETIDAMENTE');
+  assert.doesNotMatch(help.text, /MANTENÉ|MANTENER/i);
 });
 
 test('Mili usa walk real, depth por pies y vuelve a idle durante BathroomEvent', () => {
