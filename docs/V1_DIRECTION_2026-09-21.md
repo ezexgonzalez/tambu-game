@@ -17,7 +17,7 @@ La prioridad ya no es “construir el loop completo”, sino **cerrar la percepc
 
 Roadmap activo, que reemplaza cualquier orden histórico incompatible de este documento:
 
-1. **Stabilization Pass + Balance Gate:** copy real de SPACE, depth de amigos, emits inconsistentes de Mili, documentación y QA manual de Bathroom Resistance 1/2/3.
+1. **Stabilization Pass:** copy real de SPACE, depth de amigos y emits inconsistentes de Mili. El balance Pass 2 de Bathroom Resistance ya fue corregido, playtesteado y aceptado.
 2. **Cast Closure:** cerrar QA de Eze/Pitity/Santy/Tobi, producir base de Uriel/Thiago y después detener la producción intensiva de specials salvo función concreta.
 3. **Bathroom Resistance 2.0:** sorpresa → incredulidad → caos con amigos reconocibles y memoria real de run.
 4. **Party Presence:** audio mínimo + fillers/actividades en lote pequeño + 2–3 callbacks ambientales.
@@ -523,9 +523,9 @@ Estos valores **no quedan congelados como balance final**. Son una baseline deli
 - el último tercio de cada intento se siente más peligroso que el primero;
 - ninguna dificultad depende de FPS ni de mantener SPACE presionado.
 
-## Balance Pass 2 — baseline activa; QA manual pendiente
+## Balance Pass 2 — CLOSED / BASELINE ACEPTADA
 
-La corrección del ordinal y los números del Pass 2 ya están integrados. Falta probar los tres intentos en juego y registrar la dificultad percibida y el segundo en que empieza a exigir ritmo rápido.
+La corrección del ordinal y los números del Pass 2 están integrados y **ya fueron playtesteados manualmente por Eze**. La dificultad actual queda aceptada como baseline de V1. No abrir un Pass 3 numérico salvo que un playtest posterior aporte evidencia concreta de un problema.
 
 Antes de ajustar números se corrige un bug de ordinal: el outcome social `bathroom` actual ya está guardado cuando se crea BathroomEvent, por lo que contar todos los relationships con outcome `bathroom` y sumar 1 produce en runtime `2 / 3 / 3`. El ordinal correcto debe contar únicamente **intentos anteriores ya liquidados** (`bathroomResult: secured|interrupted`) y sumar el intento actual:
 
@@ -569,7 +569,7 @@ Debe ser duro de forma intencional: una Perfect Night tiene que sentirse ganada.
 
 Conservar inicialmente duración, fases `0–3.5 / 3.5–7 / 7–10` y timings de los siete golpes. No sumar todavía más golpes ni reducir `spaceGain`; primero validar esta subida limpia de presión.
 
-La aceptación del Pass 2 sigue siendo manual. Si attempt 3 se vuelve físicamente absurdo o attempt 1 sigue trivial, se ajustan números una vez más antes de congelar balance.
+La aceptación manual ya fue realizada. **Pass 2 queda congelado como balance base**; futuros ajustes requieren evidencia nueva y una reapertura explícita de Dirección.
 
 ---
 
@@ -1764,7 +1764,7 @@ Estas decisiones todavía no quedan congeladas:
 - outcome exacto si Santy arruina el trayecto;
 - si el primer Baño de la primera run queda protegido de Santy;
 - regla exacta de vidas si se agregan futuros outcomes;
-- balance final de Bathroom Resistance;
+- balance final de Bathroom Resistance queda cerrado en Pass 2 salvo nueva evidencia de playtest;
 - cantidad exacta de eventos por run;
 - qué callbacks aparecen en post-win;
 - diseño visual del menú;
