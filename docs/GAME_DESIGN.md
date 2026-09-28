@@ -27,6 +27,12 @@ Todo lo que se agregue durante esta etapa debe responder al menos a una de estas
 
 Si no ayuda a esta experiencia, queda para una versión futura.
 
+### Estado de producto — 28/09/2026
+
+La noche completa ya funciona de principio a fin y fue validada manualmente en sus tres salidas: GAME OVER, NORMAL END y PERFECT NIGHT con continuación post-win. La V1 no necesita nuevos sistemas grandes para demostrar su loop.
+
+El trabajo activo es cerrar **balance, elenco, identidad narrativa del Bathroom Resistance, presencia audiovisual, onboarding/UI y QA de release**. El criterio es terminar, no expandir.
+
 ## Loop de la V1
 
 1. Llegada de Tambu a la fiesta.
@@ -256,29 +262,31 @@ Evitar meter movimiento de sprites, cámara o lógica específica del baño dent
 
 `BathroomEvent` ya cubre el flujo completo de la primera versión: cierre narrativo, caminata al baño real, confirmación de BAÑO CONSEGUIDO, pausa cómica, golpes, **RESISTENCIA DEL BAÑO**, resultado y regreso seguro al patio.
 
-BAÑO se consigue antes del minijuego: éxito y fracaso no modifican el outcome persistido, los +500 puntos ni la resolución de Sofi. La dificultad inicial —duración, resistencia, drenaje, ganancia por SPACE y secuencia de golpes— está centralizada para playtestearla y ajustarla sin tocar la lógica social.
+El outcome social `bathroom` se conserva cuando la chica acepta y ambos llegan al evento, pero **la recompensa mecánica se liquida después de Bathroom Resistance**:
 
-Una pasada futura de polish podrá agregar audio, amigos específicos, animación real de la puerta y variantes, sin alterar este contrato de gameplay.
+- `secured` → +500 puntos;
+- `interrupted` → +250 puntos;
+- ambos conservan `relationship.outcome = 'bathroom'`;
+- fracaso no quita vida ni se transforma en rechazo;
+- la acreditación es idempotente;
+- PERFECT NIGHT requiere tres resultados `secured`.
+
+La dificultad vigente es Balance Pass 2: tres perfiles por ordinal de intento, contando solo Baños anteriores ya liquidados. Sigue pendiente QA manual antes de congelar números.
+
+La próxima evolución V1 del evento es narrativa: **Baño 1 sorpresa → Baño 2 incredulidad → Baño 3 caos**, usando amigos reconocibles y memoria real de run sin cambiar este contrato de rewards.
 
 ## Fin de la noche
 
-La V1 debería tener principio y final.
+La V1 ya tiene principio y final funcionales.
 
-Al terminar la run puede existir un resumen de resultados, por ejemplo:
+Estados actuales:
 
-```text
-LA NOCHE DE TAMBU
+- **GAME OVER:** prioridad cuando vidas llega a 0; presenta cierre y permite retry limpio.
+- **NORMAL END:** cuando las tres relaciones están resueltas sin cumplir Perfect Night; muestra resumen/scoreboard y permite iniciar una nueva run.
+- **PERFECT NIGHT:** requiere las tres relaciones con outcome `bathroom` y `bathroomResult: secured`; permite continuar a `POST_WIN_FREE_ROAM` conservando la misma run.
+- **POST_WIN_FREE_ROAM:** extensión ligera para caminar y consultar reacciones existentes; no es una segunda campaña.
 
-🚻 BAÑOS: 2
-❤️ CITAS: 1
-📱 INSTAGRAMS: 1
-💀 FRIENDZONES: 1
-👋 RECHAZOS: 2
-
-⭐ PUNTOS: 2850
-```
-
-El formato definitivo se diseñará más adelante, pero la intención es que toda la fiesta se perciba como una **run social completa**.
+El objetivo de V1 ya no es crear otro ending, sino asegurar que estos cierres sean claros, audiovisualmente coherentes y comprendidos por jugadores nuevos.
 
 ## Sistemas de la V1
 
@@ -286,7 +294,7 @@ Sistemas confirmados o previstos dentro del alcance del patio:
 
 - vidas;
 - puntos;
-- alcohol;
+- alcohol queda **fuera del scope activo de V1**; el campo puede permanecer internamente, pero el HUD vacío debe ocultarse antes del release;
 - Attraction;
 - Trust;
 - Intensity;
