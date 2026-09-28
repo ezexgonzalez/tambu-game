@@ -1,8 +1,9 @@
 # Tambu Game — Estado actual
 
-**Versión:** 1.0
-**Última verificación:** 2026-09-27
-**Base inspeccionada:** `main@55eecb0`
+**Versión:** 1.1
+**Última verificación:** 2026-09-28
+**Base runtime inspeccionada:** `main@4101516`
+**Auditoría vigente:** [`PROJECT_AUDIT_2026-09-28.md`](./PROJECT_AUDIT_2026-09-28.md)
 **Autoridad:** estado, vigencia, prioridades y límites del proyecto
 
 Este es el punto de entrada obligatorio antes de diseñar, producir assets o modificar el juego. Su función es evitar que un agente confunda una especificación histórica, un objetivo futuro o un archivo disponible con algo aprobado en runtime.
@@ -18,9 +19,11 @@ Este es el punto de entrada obligatorio antes de diseñar, producir assets o mod
 
 ## Resumen ejecutivo
 
-Tambu ya es un vertical slice jugable de la fiesta en el patio. La arquitectura, el loop social, las tres conversaciones principales y el evento del baño tienen implementación real y tests. El escenario combina sectores de producción con una capa todavía provisional: la mayoría de las personas y varios props ambientales continúan dibujados con primitives de Phaser.
+Tambu ya tiene una **primera noche funcional completa**: intro, exploración, tres conversaciones, outcomes persistidos, Bathroom Event, Bathroom Resistance, regreso al patio, GAME OVER, NORMAL END, PERFECT NIGHT, retry limpio y continuación post-win. La primera auditoría describía un vertical slice sin cierre; ese bloqueo ya está resuelto y la QA manual del 27 de septiembre validó las tres rutas terminales.
 
-La estructura del juego está más avanzada que su presentación. El próximo salto de calidad no consiste en rediseñar el mapa ni volver a producir sectores estabilizados, sino en crear la población visual, dar vida ambiental al patio y completar el loop de la noche.
+La segunda auditoría integral del 28 de septiembre no encontró una deuda arquitectónica general ni un crash estructural que obligue a frenar la V1. El trabajo restante es de **cierre de producto**: corregir contratos locales comprobados, congelar el balance real mediante playtest, cerrar el elenco focal, reducir el contraste de población procedural, dar identidad narrativa a los tres Baños, integrar audio mínimo y llevar onboarding/HUD/UI central al lenguaje ya aprobado.
+
+La regla de dirección pasa a ser: **dejar de demostrar que el juego puede crecer y empezar a terminar esta única noche**. No se reabren sectores estables ni se agregan animaciones, sistemas o personajes por volumen; cada pieza nueva debe justificar impacto visible en la V1.
 
 ## Baselines congeladas
 
@@ -97,7 +100,7 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 
 - Sofi, Mili y Cami tienen conversaciones data-driven de cuatro beats.
 - Las tres conversaciones usan stats, historial, señales, Consejo y outcomes.
-- Mili ya tiene coherencia entre variantes, señales y Consejo: una advertencia puede suprimir señales base contradictorias, y sus callbacks de vaso respetan el historial real.
+- Mili ya corrigió incoherencias previas entre variantes, señales, Consejo y callbacks de vaso. La auditoría del 28/09 detectó una segunda inconsistencia acotada en las variantes `too-much-teasing-*`: la reacción negativa todavía puede conservar emits positivos de la choice base en el history. Queda pendiente un fix dirigido con `suppressEmits`; no implica reabrir el balance social completo.
 - Presentación secuencial de intervenciones, respuestas y cierre de outcome.
 - Persistencia de outcome por personaje durante la run: el arco principal queda cerrado y sin recompensas repetidas; la chica sigue interactuable con una reacción breve según outcome, sin `!`.
 - Puntos y vidas se actualizan según el outcome.
@@ -123,15 +126,16 @@ La estructura del juego está más avanzada que su presentación. El próximo sa
 
 ### Cobertura automatizada
 
-Hay tests para sistema social, Sofi, Mili, Cami, Consejo, presentación y flujo de diálogo, outcomes, evento del baño, resistencia, césped, lifecycle de la intro, fases de la run, Game Over/retry, presentación/transición de Perfect Night y resumen/replay de Normal End. La suite y el build deben mantenerse verdes en cambios de lógica o documentación estructural.
+Hay tests para sistema social, Sofi, Mili, Cami, Consejo, presentación y flujo de diálogo, outcomes, evento del baño, resistencia, césped, lifecycle de la intro, fases de la run, Game Over/retry, presentación/transición de Perfect Night y resumen/replay de Normal End. La segunda auditoría ejecutó **193/193 tests aprobados, 0 fallos, 0 omitidos**, y `npm run build` correcto sobre `main@4101516`. Los tests no sustituyen QA visual, renderer real ni playtest de dificultad.
 
 ## Provisional / placeholder
 
 ### Personajes del patio
 
-- Eze, Pitity, Santy y Tobi tienen atlas walk de cuatro direcciones e idle down estable bajo integración experimental; Tobi también ejecuta drink y arms-crossed down ocasionales. El blink de Tobi todavía no está integrado. Los cuatro siguen pendientes de QA visual. Uriel y Thiago conservan el sistema procedural.
-- Los NPCs de relleno también son placeholders; solo algunos tienen tween de baile o un indicador simple de actividad.
-- Eze, Pitity, Santy y Tobi ya están integrados con sprites runtime experimentales; queda su QA visual. Uriel, Thiago y los NPCs de relleno siguen pendientes de arte final.
+- **Eze, Pitity, Santy y Tobi** ya tienen walk 4 direcciones + idle down runtime y siguen **en validación visual**, no congelados. Pitity ejecuta blink/phone-check; Tobi ejecuta drink/arms-crossed con atlas corregidos. **Tobi blink no está integrado** y no debe darse por existente.
+- Los idles down de varios amigos recibieron corrección manual de píxeles. Desde ahora, el **visual master grande conserva identidad/outfit/silueta** y el **idle runtime manualmente aprobado fija la geometría pixelada, cara, pies y color exactos que deben conservar los special idles**.
+- **Uriel y Thiago** continúan procedurales y son los dos amigos principales pendientes de base visual.
+- Los **37 fillers** siguen siendo provisionales; ocho tienen tween de baile y varias etiquetas de actividad todavía no producen una acción visible. La V1 no exige 37 diseños únicos: se resolverá con una familia pequeña/reutilizable y pocas actividades legibles.
 
 ### Props y ambientación activa
 
@@ -151,7 +155,7 @@ Cumplen función espacial, pero no son arte final.
 - Intro, GAME OVER, PERFECT NIGHT y NORMAL END son las referencias runtime principales de ese lenguaje.
 - HUD de vidas, alcohol y puntos sigue funcional pero su layout específico es provisional.
 - Prompt de interacción, diálogo, Consejo, outcomes y Bathroom Resistance siguen funcionales/provisionales y deben converger al sistema global mediante tareas dedicadas, no mediante rediseños silenciosos.
-- `alcohol` existe en estado y HUD, pero permanece en `0`: todavía no hay gameplay de alcohol.
+- `alcohol` existe en state y todavía se muestra como `0%` en el HUD, pero no tiene gameplay. **Dirección decide no implementar un sistema de alcohol antes de V1**: el indicador debe ocultarse en la pasada de UX salvo que una decisión posterior reabra explícitamente esa mecánica.
 
 ## Disponible en el repo, no aprobado para runtime
 
@@ -175,6 +179,9 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 - Retorno post-baño: rutas seguras temporales por personaje, retorno a facing down e idles normales/special idles validados manualmente.
 - Balance numérico de rutas sociales y recompensas: la estructura está implementada, pero el playtest puede justificar ajustes.
 - Bathroom Resistance: Balance Pass 2 ya corrige el ordinal runtime contando solo resultados previos liquidados (`secured` o `interrupted`), excluyendo el outcome `bathroom` pending del evento actual. Los tres perfiles tienen mayor drenaje y daño, manteniendo SPACE `+4`, 10 s y siete golpes. Falta QA manual de esta baseline para confirmar que el primer baño sea justo y el tercero difícil pero ganable.
+- **Contrato de input pendiente:** la UI actual dice `SPACE · MANTENÉ LA PUERTA CERRADA`, pero el runtime usa `JustDown`; el jugador debe pulsar repetidamente. Corregir el copy, no la mecánica, antes de congelar onboarding.
+- **Depth de amigos pendiente:** `createFriendSprite()` aplica `y + 30`, pero `createCharacters()` vuelve a ejecutar `sprite.setDepth(friend.y)` y pisa ese offset. Requiere fix local + QA visual, no refactor.
+- **History de Mili pendiente:** las variantes `too-much-teasing-*` deben suprimir emits positivos incompatibles de la elección base antes de agregar más callbacks sociales.
 - Composición ambiental general: debe evaluarse después de resolver población visual suficiente, evitando llenar espacios por llenar.
 
 ## No implementado
@@ -192,17 +199,32 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 
 ## Prioridad vigente
 
-Orden de dirección recomendado:
+La segunda auditoría del 28/09 confirma que el loop funcional ya está cerrado. El roadmap activo de Dirección es:
 
-1. **BATHROOM RESISTANCE — QA MANUAL PASS 2** — probar cada perfil en juego y reportar dificultad percibida y en qué segundo empieza a exigir ritmo rápido; ajustar solo con esos resultados.
-2. **Amigos principales** — producir siluetas y rasgos reconocibles con el mismo estándar humano; serán la base visual de Bathroom Resistance 2.0 y de callbacks de la fiesta.
-3. **BATHROOM RESISTANCE — IDENTIDAD NARRATIVA** — con amigos visuales disponibles, integrar voces, retratos/intervenciones y memoria de run sobre el balance 1/2/3 ya validado.
-4. **Audio mínimo** — música/ambiente y pocos SFX con controles básicos; debe entrar antes del QA final de ritmo.
-5. **Población / fillers en lote pequeño** — reemplazar contraste procedural sin abrir una fábrica combinatoria grande.
-6. **Vida del patio** — seleccionar 2–3 microeventos/callbacks por run y consecuencias visibles de lo ocurrido.
-7. **UI, balance y polish** — aplicar el lenguaje global a HUD, diálogo, Consejo, outcomes y Bathroom Resistance; cerrar accesibilidad y balance final.
+1. **STABILIZATION PASS + BALANCE GATE** — corregir copy de SPACE, overwrite de depth de amigos y emits falsos de Mili; actualizar documentación; probar manualmente Bathroom Resistance 1/2/3 y congelar números solo con evidencia de playtest.
+2. **CAST CLOSURE** — aprobar visualmente Eze/Pitity/Santy/Tobi, completar bases de Uriel/Thiago y cerrar la producción individual intensiva de amigos. No todos necesitan special idles: cada animación nueva debe habilitar una escena, gag o función visible.
+3. **BATHROOM RESISTANCE 2.0 — IDENTIDAD NARRATIVA** — convertir los tres intentos en sorpresa → incredulidad → caos usando amigos reconocibles, memoria real de run y pocas intervenciones claras, sin alterar el contrato secured/interrupted ya estable.
+4. **PARTY PRESENCE** — audio mínimo con mute/volumen + lote pequeño de fillers/actividades + 2–3 callbacks o beats ambientales de alto impacto. No construir simulación social.
+5. **V1 UX CLOSURE** — menú/onboarding mínimo, ocultar alcohol vacío, alinear HUD/diálogo/Consejo/outcomes/Resistance a `UI_DIRECTION.md` y asegurar que todos los prompts describan el input real.
+6. **FEATURE FREEZE** — una vez cerrados los bloques anteriores no se agregan mecánicas, personajes o specials por impulso; solo fixes surgidos de QA.
+7. **RELEASE CANDIDATE / PLAYTEST** — tests + build verdes, smoke manual de las tres terminaciones y reintentos, QA visual del elenco/UI y playtest con personas que completen una noche sin explicación oral del creador.
 
-Las correcciones puntuales a sectores ya integrados siguen siendo válidas cuando existe un defecto concreto. No deben desplazar indefinidamente las prioridades anteriores.
+Audio puede prepararse en paralelo al cierre del cast cuando no dependa de assets visuales. Los sectores estables solo se tocan ante un defecto concreto.
+
+### Regla de recorte V1
+
+Quedan fuera antes de V1 salvo reapertura explícita de Dirección:
+
+- segundo mapa/campaña/progresión entre días;
+- más chicas por volumen;
+- alcohol profundo;
+- social roaming/schedules;
+- pathfinding general;
+- gran factory de outfits/fillers;
+- specials únicos para todos los amigos;
+- touch/save slots;
+- migración arquitectónica o UI/audio managers universales;
+- optimización de bundle sin un problema medido.
 
 ## Límites para agentes
 
