@@ -88,8 +88,8 @@ Estas cifras describen los footprints actuales de `PATIO_LAYOUT`. Sirven para sa
 | Elemento | Medida actual | Relación aprox. con Tambu |
 | --- | --- | --- |
 | Piscina | `624x304` | `10.48H x 5.11H` |
-| Barra | `320x156` | `5.38H x 2.62H` |
-| DJ | `322x126` | `5.41H x 2.12H` |
+| Barra | `264x246` visual; collider principal `264x220` | `4.44H x 4.13H` visual |
+| DJ | `302x120` | `5.07H x 2.02H` |
 | Puerta secundaria | `72x102` | `1.21H x 1.71H` |
 | Sector puerta baño | `110x122` | `1.85H x 2.05H` |
 | Collider mesa social | `72x80` | `1.21H x 1.34H` |
