@@ -1,13 +1,43 @@
 # Tambu Game — Dirección V1, prioridades e ideas
 
-**Fecha:** 2026-09-21  
-**Estado:** documento de dirección / planificación  
-**Relacionado con:** `docs/PROJECT_AUDIT_2026-09-21.md`  
+**Fecha:** 2026-09-21 · **actualizado:** 2026-09-28  
+**Estado:** documento de dirección / planificación activa  
+**Relacionado con:** `docs/PROJECT_AUDIT_2026-09-21.md` + `docs/PROJECT_AUDIT_2026-09-28.md`  
 **Autoridad del runtime actual:** `docs/CURRENT_STATE.md`
 
 Este documento consolida las decisiones tomadas después de la auditoría completa de Astra y de la revisión posterior con Eze.
 
 No reemplaza `CURRENT_STATE.md`. Su función es conservar prioridades, decisiones de producto, ideas aprobadas conceptualmente y preguntas abiertas para la V1.
+
+## Actualización de Dirección — 28/09/2026
+
+La segunda auditoría integral confirma un cambio de etapa: **la primera noche funcional ya existe**. Intro, tres conversaciones, Bathroom Event/Resistance, regreso al patio, GAME OVER, NORMAL END, PERFECT NIGHT, retry y post-win están implementados; no existe hoy una deuda arquitectónica general que justifique una reescritura.
+
+La prioridad ya no es “construir el loop completo”, sino **cerrar la percepción de producto** sin expandir scope.
+
+Roadmap activo, que reemplaza cualquier orden histórico incompatible de este documento:
+
+1. **Stabilization Pass + Balance Gate:** copy real de SPACE, depth de amigos, emits inconsistentes de Mili, documentación y QA manual de Bathroom Resistance 1/2/3.
+2. **Cast Closure:** cerrar QA de Eze/Pitity/Santy/Tobi, producir base de Uriel/Thiago y después detener la producción intensiva de specials salvo función concreta.
+3. **Bathroom Resistance 2.0:** sorpresa → incredulidad → caos con amigos reconocibles y memoria real de run.
+4. **Party Presence:** audio mínimo + fillers/actividades en lote pequeño + 2–3 callbacks ambientales.
+5. **V1 UX Closure:** menú/onboarding, ocultar alcohol sin gameplay, unificar HUD/diálogo/Consejo/outcomes/Resistance con `UI_DIRECTION.md`.
+6. **Feature Freeze.**
+7. **Release Candidate + playtest externo sin explicación del creador.**
+
+### Decisiones congeladas de esta actualización
+
+- **Alcohol no se implementa como sistema antes de V1.** El indicador vacío debe ocultarse en la pasada UX.
+- Los seis amigos deben ser reconocibles, pero **no todos necesitan paquetes de special idles**.
+- Una animación nueva solo se produce si habilita una escena, gag, ambientación o función concreta.
+- El audio mínimo entra antes del QA final de V1.
+- No se requieren 37 fillers únicos; se busca una familia pequeña/reutilizable con pocas actividades legibles.
+- La V1 no necesita campaña, segundo mapa, más chicas, roaming social, pathfinding general, guardado ni touch.
+- Cuando el cast quede cerrado, el foco pasa a Bathroom Resistance narrativo, presencia de fiesta y UX; no se sigue puliendo amigos por impulso.
+
+### Regla de lectura histórica
+
+Las secciones anteriores de este archivo registran decisiones y evolución del proyecto. Cuando una sección antigua describa como pendiente algo ya resuelto, o contradiga `CURRENT_STATE.md`, el estado vigente y esta actualización tienen prioridad. En particular, **FIRST COMPLETE NIGHT ya está cerrado** y **Balance Pass 1 está reemplazado por Pass 2**.
 
 ---
 
@@ -111,7 +141,9 @@ La disponibilidad visual debe coincidir con la disponibilidad real.
 
 ---
 
-# 4. Prioridad de producción acordada
+# 4. Prioridad histórica de producción — SUPERSEDED 2026-09-28
+
+> Esta lista conserva el orden acordado después de la primera auditoría. Ya no es el roadmap activo. Usar la actualización del 28/09 y `CURRENT_STATE.md`.
 
 ## 1 — Cami visual
 
@@ -435,7 +467,9 @@ La experiencia debe ser:
 
 El jugador debería sentir que hacia el final necesita realmente presionar rápido.
 
-## Balance Pass 1 — baseline integrada; playtest manual pendiente
+## Balance Pass 1 — HISTÓRICO / SUPERSEDED BY PASS 2
+
+> Esta configuración ya no es la baseline activa. Se conserva para trazabilidad. No usar su ordinal ni sus números para nuevas tareas.
 
 La baseline descrita abajo ya está implementada en código. El siguiente paso es validar manualmente la sensación de dificultad y ajustar los valores si el playtest lo justifica.
 
@@ -489,7 +523,7 @@ Estos valores **no quedan congelados como balance final**. Son una baseline deli
 - el último tercio de cada intento se siente más peligroso que el primero;
 - ninguna dificultad depende de FPS ni de mantener SPACE presionado.
 
-## Balance Pass 2 — baseline integrada; QA manual pendiente
+## Balance Pass 2 — baseline activa; QA manual pendiente
 
 La corrección del ordinal y los números del Pass 2 ya están integrados. Falta probar los tres intentos en juego y registrar la dificultad percibida y el segundo en que empieza a exigir ritmo rápido.
 
