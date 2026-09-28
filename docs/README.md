@@ -27,6 +27,14 @@ Para cualquier tarea de HUD, diálogo, pantallas de estado, resultados, prompts 
 | [`CHARACTERS.md`](./CHARACTERS.md) | Canon de personajes | Estado técnico de sus sprites |
 | [`PHASE_1_GRASS.md`](./PHASE_1_GRASS.md) | Implementación vigente del césped aprobado | Dirección general del resto del patio |
 | [`TAMBU_SPRITE_V011.md`](./TAMBU_SPRITE_V011.md) | Especificación del spritesheet actual de Tambu | Escala general de objetos |
+| [`PROJECT_AUDIT_2026-09-28.md`](./PROJECT_AUDIT_2026-09-28.md) | Evidencia de la segunda auditoría integral, riesgos y recomendación de camino a V1 | Estado runtime por encima de `CURRENT_STATE.md` ni autorización automática de sus recomendaciones |
+
+## Auditorías
+
+- [`PROJECT_AUDIT_2026-09-28.md`](./PROJECT_AUDIT_2026-09-28.md) es la auditoría estratégica más reciente y debe usarse como evidencia para priorización junto con `CURRENT_STATE.md`.
+- [`PROJECT_AUDIT_2026-09-21.md`](./PROJECT_AUDIT_2026-09-21.md) es baseline histórica. Sus hallazgos no deben tratarse como pendientes si la auditoría del 28/09 o `CURRENT_STATE.md` los marcan resueltos.
+
+Las auditorías analizan y recomiendan; **no cambian por sí solas el estado o el scope**. Dirección debe convertir hallazgos aprobados en documentación activa/briefs.
 
 ## Documentos históricos
 
