@@ -477,7 +477,7 @@ test('Mili caminar interrumpe drink y elimina su listener de finalización', () 
   assert.equal(listeners['animationcomplete-mili-drink-down'], undefined);
 });
 
-test('createCharacters usa sprites reales para las tres chicas y reemplaza los cuatro amigos del scope', () => {
+test('createCharacters usa sprites reales para las tres chicas y los cinco amigos integrados', () => {
   const sheets = [];
   const scene = characterScene(sheets);
   const runtimeFriendSprites = [];
@@ -536,6 +536,8 @@ test('createCharacters usa sprites reales para las tres chicas y reemplaza los c
     'friend_santy_blink',
     'friend_santy_phone_check',
     'friend_santy_drink',
+    'friend_uriel',
+    'friend_uriel_idle_down',
   ]);
   assert.equal(interactables.find(({ character }) => character.id === 'sofi').visual, 'sofi-sprite');
   const mili = interactables.find(({ character }) => character.id === 'mili');
@@ -548,14 +550,28 @@ test('createCharacters usa sprites reales para las tres chicas y reemplaza los c
   assert.equal(cami.sprite.anims.currentAnim.key, 'cami-idle-down');
 
   const runtimeFriends = runtimeFriendSprites.filter(({ friendId }) => friendId);
-  assert.equal(runtimeFriends.length, 4);
+  assert.equal(runtimeFriends.length, 5);
   for (const sprite of runtimeFriends) {
     const friend = patioFriends.find(({ id }) => id === sprite.friendId);
     const label = friendLabels.find(({ text }) => text === friend.name);
     assert.equal(sprite.depth, friend.y + 30);
     assert.equal(label.depth, sprite.depth + 1);
   }
-  for (const name of ['Uriel', 'Thiago']) {
+  const uriel = runtimeFriends.find(({ friendId }) => friendId === 'uriel');
+  assert.equal(uriel.x, 320);
+  assert.equal(uriel.y, 355);
+  assert.equal(uriel.scale, 1.24);
+  assert.equal(uriel.depth, 385);
+  assert.equal(uriel.key, 'friend_uriel_idle_down');
+  assert.equal(uriel.frame, 0);
+  assert.equal(uriel.anims.currentAnim.key, 'uriel-idle-down');
+  assert.equal(uriel.listeners.size, 0);
+  const urielLabel = friendLabels.find(({ text }) => text === 'Uriel');
+  assert.equal(urielLabel.x, 320);
+  assert.equal(urielLabel.y, 389);
+  assert.equal(urielLabel.depth, 386);
+  assert.ok(!proceduralFriends.some(({ x, y }) => x === 320 && y === 355));
+  for (const name of ['Thiago']) {
     const friend = patioFriends.find((entry) => entry.name === name);
     const sprite = proceduralFriends.find(({ x, y }) => x === friend.x && y === friend.y);
     assert.ok(sprite, `${name} remains a procedural container`);

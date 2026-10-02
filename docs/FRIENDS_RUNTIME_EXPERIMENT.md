@@ -4,7 +4,7 @@ Estado: integrado técnicamente; **VISUAL QA REQUIRED**. Actualizado 2026-10-02.
 
 ## Alcance
 
-Este pase integra Tobi, Pitity, Eze y Santy a partir de sus masters grandes aprobados. Uriel tiene nueva baseline idle down + walk atlas 4 direcciones aprobados y queda pendiente de integración para reemplazar su placeholder procedural. Thiago conserva el placeholder procedural. Se mantienen sus posiciones actuales.
+Tobi, Pitity, Eze y Santy están integrados a partir de sus masters grandes aprobados. Uriel ahora tiene idle down + walk atlas 4 direcciones integrados técnicamente / **VISUAL QA REQUIRED**, reemplazando su placeholder con los dos PNG aprobados sin modificar sus bytes. Thiago queda como único amigo principal procedural. Se mantienen sus posiciones actuales.
 
 ## Runtime
 
@@ -14,7 +14,7 @@ Este pase integra Tobi, Pitity, Eze y Santy a partir de sus masters grandes apro
 | Pitity | `friend_pitity_atlas_v1.png` | `friend_pitity_idle_down_atlas_v1.png` | `(1270, 500)` |
 | Santy | `friend_santy_atlas_v1.png` | `friend_santy_idle_down_atlas_v1.png` | `(380, 390)` |
 | Tobi | `friend_tobi_atlas_v1.png` | `friend_tobi_idle_down_atlas_v1.png` | `(470, 835)` |
-| Uriel (pendiente integración) | `friend_uriel_atlas_v1.png` | `friend_uriel_idle_down_atlas_v1.png` | `(320, 355)` |
+| Uriel (integrado técnicamente / VISUAL QA REQUIRED) | `friend_uriel_atlas_v1.png` | `friend_uriel_idle_down_atlas_v1.png` | `(320, 355)` |
 
 Special idles integrados al momento de esta actualización:
 
@@ -55,6 +55,21 @@ Eze utiliza el scheduler genérico de 5–10 s, únicamente en IDLE + DOWN. Los 
 `drunk` es exclusivamente una animación ambiental aleatoria de Eze. No existe integración con un sistema de alcohol, HUD, puntos, vidas, outcomes, stats sociales ni fases de la run.
 
 Validación técnica de esta integración: **210/210 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto. Los contratos existentes de Santy se parametrizaron también para Eze, reutilizando el mismo fixture: preload, atlas, frames/FPS, boundaries 70/20/10, retorno a neutral, exclusión mutua, state guards, interrupción y shutdown/restart. Eze debe validar manualmente cara/pelo, brazos/vaso en Drink, pies/sway en Drunk, continuidad con el neutral y frecuencia. Estado: **VISUAL QA REQUIRED**.
+
+### Uriel — idle + walk integrados
+
+Los dos PNG RGBA transparentes aprobados viven en `public/assets/characters/friends/`, copiados byte por byte:
+
+| Archivo | Asset key | Dimensiones | Frames |
+|---|---|---|---|
+| `friend_uriel_idle_down_atlas_v1.png` | `friend_uriel_idle_down` | 32×48 | 1 |
+| `friend_uriel_atlas_v1.png` | `friend_uriel` | 96×192 | 12 (3×4) |
+
+El atlas walk usa frames de 32×48 y filas DOWN/LEFT/RIGHT/UP. Las animaciones `uriel-walk-down`, `uriel-walk-left`, `uriel-walk-right` y `uriel-walk-up` utilizan respectivamente `[1,0,2,1]`, `[4,3,5,4]`, `[7,6,8,7]` y `[10,9,11,10]`, a 8 fps con `repeat: -1`. `uriel-idle-down` usa el neutral oficial `friend_uriel_idle_down`, frame 0; los idles LEFT/RIGHT/UP usan `friend_uriel`, frames 4/7/10.
+
+La entrada `id: 'uriel'` activa el path genérico de `createCharacters()` sin branch nuevo. Conserva nombre, posición `(320,355)`, escala 1.24 y `footDepthOffset: 30`: depth 385, label 386. No tiene special idles, delayed calls ni completion listeners adicionales. Thiago conserva exactamente su placeholder procedural en `(420,800)`.
+
+Validación técnica: **211/211 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto. Cobertura extendida en `friendSprite.test.js` y `miliSprite.test.js` para dimensiones, preload, registro/frame mappings/FPS, creación real por `createCharacters()`, posición, escala/depth/label, ausencia de specials y preservación de Thiago procedural. Estado: **VISUAL QA REQUIRED**. Dirección valida cara, pelo, camiseta, pies, escala y continuidad de los frames a zoom de juego; esta integración no declara aprobación visual.
 
 ## Procedencia, baseline y normalización
 

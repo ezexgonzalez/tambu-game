@@ -107,6 +107,11 @@ const FRIENDS = {
       },
     ],
   },
+  uriel: {
+    name: 'Uriel',
+    asset: 'friend_uriel',
+    idleDown: 'friend_uriel_idle_down',
+  },
 };
 
 const DIRECTIONS = ['down', 'left', 'right', 'up'];
