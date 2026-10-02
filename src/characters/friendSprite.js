@@ -111,6 +111,24 @@ const FRIENDS = {
     name: 'Uriel',
     asset: 'friend_uriel',
     idleDown: 'friend_uriel_idle_down',
+    specials: [
+      {
+        id: 'blink',
+        asset: 'friend_uriel_blink',
+        path: '/assets/characters/friends/friend_uriel_blink_down_atlas_v1.png',
+        frames: 5,
+        frameRate: 10,
+        weight: 0.75,
+      },
+      {
+        id: 'phone-check',
+        asset: 'friend_uriel_phone_check',
+        path: '/assets/characters/friends/friend_uriel_phone_check_down_atlas_v1.png',
+        frames: 8,
+        frameRate: 6,
+        weight: 0.25,
+      },
+    ],
   },
   thiago: {
     name: 'Thiago',

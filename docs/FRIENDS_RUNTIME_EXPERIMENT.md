@@ -23,6 +23,7 @@ Special idles integrados al momento de esta actualización:
 - Tobi: drink + arms-crossed down, con atlas reemplazados/corregidos para seguir su idle manual.
 - Eze: blink + drink + drunk down integrados técnicamente / **VISUAL QA REQUIRED**. Los tres PNG aprobados se integraron sin modificar sus bytes. `drunk` es solo actuación ambiental: no depende de `alcohol` ni cambia estado/balance de gameplay.
 - Santy: blink + phone-check + drink down integrados técnicamente / **VISUAL QA REQUIRED**. Se usan exactamente los tres PNG aprobados, sin reexportar ni modificar sus píxeles. La animación de baile queda **DEFERRED**.
+- Uriel: blink + phone-check down integrados técnicamente / **VISUAL QA REQUIRED**, con los dos PNG aprobados sin modificar sus bytes. Paquete funcional de animaciones V1 completo; Thiago specials sigue pendiente de una tarea separada.
 - **Tobi blink no está integrado** y no debe asumirse como parte del paquete actual.
 
 Los walk sheets usan 12 frames en grilla 3×4, cada frame de 32×48 px. Las filas son down/left/right/up; las columnas son paso/neutral/paso. Escala 1.24 y depth por pies con offset 30, siguiendo la familia humana actual. Idle down usa una única pose neutral aprobada del master runtime, para mantener quietud sin movimiento corporal artificial.
@@ -68,9 +69,26 @@ Los dos PNG RGBA transparentes aprobados viven en `public/assets/characters/frie
 
 El atlas walk usa frames de 32×48 y filas DOWN/LEFT/RIGHT/UP. Las animaciones `uriel-walk-down`, `uriel-walk-left`, `uriel-walk-right` y `uriel-walk-up` utilizan respectivamente `[1,0,2,1]`, `[4,3,5,4]`, `[7,6,8,7]` y `[10,9,11,10]`, a 8 fps con `repeat: -1`. `uriel-idle-down` usa el neutral oficial `friend_uriel_idle_down`, frame 0; los idles LEFT/RIGHT/UP usan `friend_uriel`, frames 4/7/10.
 
-La entrada `id: 'uriel'` activa el path genérico de `createCharacters()` sin branch nuevo. Conserva nombre, posición `(320,355)`, escala 1.24 y `footDepthOffset: 30`: depth 385, label 386. No tiene special idles, delayed calls ni completion listeners adicionales. En el momento de la integración de Uriel, Thiago todavía conservaba su placeholder procedural en `(420,800)`; la integración posterior registrada abajo lo reemplaza.
+La entrada `id: 'uriel'` activa el path genérico de `createCharacters()` sin branch nuevo. Conserva nombre, posición `(320,355)`, escala 1.24 y `footDepthOffset: 30`: depth 385, label 386. Al integrar la base no tenía special idles; el paquete posterior registrado abajo incorpora el scheduler y completion listeners genéricos. En el momento de la integración de Uriel, Thiago todavía conservaba su placeholder procedural en `(420,800)`; la integración posterior registrada abajo lo reemplaza.
 
 Validación técnica: **211/211 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto. Cobertura extendida en `friendSprite.test.js` y `miliSprite.test.js` para dimensiones, preload, registro/frame mappings/FPS, creación real por `createCharacters()`, posición, escala/depth/label, ausencia de specials y preservación de Thiago procedural. Estado: **VISUAL QA REQUIRED**. Dirección valida cara, pelo, camiseta, pies, escala y continuidad de los frames a zoom de juego; esta integración no declara aprobación visual.
+
+### Uriel — Blink + Phone Check integrados
+
+Los dos PNG RGBA aprobados se integraron byte por byte en `public/assets/characters/friends/`, con frames de 32×48:
+
+| Archivo | Asset key | Animation key | Dimensiones | Frames | FPS | Peso |
+|---|---|---|---|---|---|---|
+| `friend_uriel_blink_down_atlas_v1.png` | `friend_uriel_blink` | `uriel-blink-down` | 160×48 | 5 | 10 | 75% |
+| `friend_uriel_phone_check_down_atlas_v1.png` | `friend_uriel_phone_check` | `uriel-phone-check-down` | 256×48 | 8 | 6 | 25% |
+
+Ambas animaciones tienen `repeat: 0`. `FRIENDS.uriel.specials` activa exactamente el scheduler genérico de 5–10 s, solo en IDLE + DOWN. La selección usa Blink para valores menores que 0.75 y Phone Check desde 0.75. Durante SPECIAL_IDLE no puede comenzar otra variación. `animationcomplete` vuelve mediante `playFriendIdle(sprite, 'down')` a `uriel-idle-down`, cuyo neutral oficial sigue siendo `friend_uriel_idle_down`, frame 0, y programa una única nueva espera. No se conserva el último frame del teléfono como idle.
+
+Walk/cambio de facing cancela la espera y limpia el completion pendiente; shutdown/restart usa `destroyFriendSprite()` para remover timer/listener y limpiar `friendScene`. No se creó lógica exclusiva para Uriel. Sus atlas base, posición `(320,355)`, escala 1.24, depth 385 y label 386 permanecen intactos, al igual que los contratos de los otros amigos.
+
+Validación: **219/219 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto. El fixture existente de `santySpecialIdle.test.js` cubre también Uriel: PNG/preload, frames/FPS/repeat, boundaries deterministas 75/25, scheduler, retorno de ambos specials al neutral, exclusión mutua, guards IDLE + DOWN, interrupción y callbacks antiguos, shutdown y nueva Scene. Se actualizaron las expectativas de preload/lifecycle en `friendSprite.test.js` y `miliSprite.test.js`; el contrato anterior de ausencia de specials se reemplaza por esta cobertura.
+
+Estado: **INTEGRATED TECHNICALLY / VISUAL QA REQUIRED**. Dirección valida continuidad de cara/pelo/camiseta/pies, brazo/celular, aparición/desaparición del teléfono y frecuencia. El paquete funcional V1 de Uriel está implementado; no se declara FROZEN/FINAL/CAST CLOSED. Thiago specials queda pendiente para una tarea separada.
 
 ### Thiago “La Abuela” — idle + walk integrados
 

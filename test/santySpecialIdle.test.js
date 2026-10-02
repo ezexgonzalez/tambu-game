@@ -20,6 +20,18 @@ import { patioFriends } from '../src/data/patioCharacters.js';
 const root = resolve('public/assets/characters/friends');
 const packages = [
   {
+    friendId: 'uriel',
+    specials: [
+      { id: 'blink', asset: 'friend_uriel_blink', frames: 5, frameRate: 10 },
+      { id: 'phone-check', asset: 'friend_uriel_phone_check', frames: 8, frameRate: 6 },
+    ],
+    boundaries: [
+      [0, 'blink'], [0.749, 'blink'],
+      [0.75, 'phone-check'], [0.999, 'phone-check'], [1, 'phone-check'],
+    ],
+    timerCases: [[0.749, 'blink'], [0.75, 'phone-check']],
+  },
+  {
     friendId: 'santy',
     specials: [
       { id: 'blink', asset: 'friend_santy_blink', frames: 5, frameRate: 10 },
@@ -84,7 +96,7 @@ function makeScene(random = () => 0) {
 for (const { friendId, specials, boundaries, timerCases } of packages) {
   const friendData = patioFriends.find(({ id }) => id === friendId);
 
-  test(`${friendData.name} carga los tres atlas RGBA con sus frames reales de 32x48`, () => {
+  test(`${friendData.name} carga sus ${specials.length} atlas RGBA con sus frames reales de 32x48`, () => {
     const loaded = [];
     preloadFriends({ load: { spritesheet: (...args) => loaded.push(args) } });
     for (const { asset, frames } of specials) {
@@ -99,7 +111,7 @@ for (const { friendId, specials, boundaries, timerCases } of packages) {
     }
   });
 
-  test(`${friendData.name} registra sus tres specials DOWN con frames/FPS aprobados y repeat 0`, () => {
+  test(`${friendData.name} registra sus ${specials.length} specials DOWN con frames/FPS aprobados y repeat 0`, () => {
     const scene = makeScene();
     createFriendAnimations(scene);
     for (const { id, asset, frames, frameRate } of specials) {
@@ -144,7 +156,7 @@ for (const { friendId, specials, boundaries, timerCases } of packages) {
     }
   });
 
-  test(`los tres specials de ${friendData.name} vuelven al neutral sin solaparse ni cambiar su transform`, () => {
+  test(`los ${specials.length} specials de ${friendData.name} vuelven al neutral sin solaparse ni cambiar su transform`, () => {
     for (const { id } of specials) {
       const scene = makeScene();
       const sprite = createFriendSprite(scene, friendData);

@@ -38,8 +38,8 @@ test('preload y animaciones respetan filas, frames neutros y cuatro direcciones'
   };
   preloadFriends(scene);
   createFriendAnimations(scene);
-  assert.equal(sheets.length, 22);
-  assert.equal(animations.length, 58);
+  assert.equal(sheets.length, 24);
+  assert.equal(animations.length, 60);
   for (const id of ids) {
     for (const key of [`friend_${id}`, `friend_${id}_idle_down`]) {
       assert.deepEqual(sheets.find(([asset]) => asset === key), [
@@ -80,33 +80,6 @@ test('todos los amigos principales tienen un id runtime válido y ningún fallba
   createFriendSprite(scene, { id: 'tobi', x: 470, y: 835 });
   assert.deepEqual(calls[0], ['sprite', 470, 835, 'friend_tobi_idle_down', 0]);
   assert.ok(calls.some((call) => call[0] === 'play' && call[1] === 'tobi-idle-down'));
-});
-
-test('Uriel conserva su neutral aprobado sin programar specials, timers ni listeners', () => {
-  const friend = patioFriends.find(({ id }) => id === 'uriel');
-  assert.deepEqual(friend, { id: 'uriel', name: 'Uriel', x: 320, y: 355, palette: 3 });
-  const unexpected = () => assert.fail('Uriel no necesita timers ni listeners de specials');
-  const sprite = {
-    setOrigin() { return this; },
-    setScale() { return this; },
-    setDepth() { return this; },
-    once: unexpected,
-    play(key) { this.animation = key; return this; },
-  };
-  const scene = {
-    add: { sprite: () => sprite },
-    anims: { exists: () => true },
-    time: { delayedCall: unexpected },
-    events: { once: unexpected },
-  };
-  assert.equal(createFriendSprite(scene, friend), sprite);
-  assert.equal(sprite.animation, 'uriel-idle-down');
-  assert.equal(sprite.friendId, 'uriel');
-  assert.equal(sprite.friendIdleTimer, undefined);
-  assert.equal(sprite.friendSpecialCompletion, undefined);
-  for (const roll of [0, 0.5, 1]) {
-    assert.equal(chooseFriendIdleVariation('uriel', () => roll), null);
-  }
 });
 
 test('Thiago conserva su neutral aprobado sin programar specials, timers ni listeners', () => {
