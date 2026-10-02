@@ -1,6 +1,6 @@
 # Friends Runtime Experiment
 
-Estado: integrado técnicamente; **VISUAL QA REQUIRED**. Actualizado 2026-09-28.
+Estado: integrado técnicamente; **VISUAL QA REQUIRED**. Actualizado 2026-10-02.
 
 ## Alcance
 
@@ -20,10 +20,24 @@ Special idles integrados al momento de esta actualización:
 - Pitity: blink + phone-check down.
 - Tobi: drink + arms-crossed down, con atlas reemplazados/corregidos para seguir su idle manual.
 - Eze: sin specials integrados.
-- Santy: sin specials integrados todavía. Dirección aprobó tres atlas listos para integración: `friend_santy_blink_down_atlas_v1.png` (5 frames), `friend_santy_phone_check_down_atlas_v1.png` (8 frames) y `friend_santy_drink_down_atlas_v1.png` (8 frames). La animación de baile queda deferida.
+- Santy: blink + phone-check + drink down integrados técnicamente / **VISUAL QA REQUIRED**. Se usan exactamente los tres PNG aprobados, sin reexportar ni modificar sus píxeles. La animación de baile queda **DEFERRED**.
 - **Tobi blink no está integrado** y no debe asumirse como parte del paquete actual.
 
 Los walk sheets usan 12 frames en grilla 3×4, cada frame de 32×48 px. Las filas son down/left/right/up; las columnas son paso/neutral/paso. Escala 1.24 y depth por pies con offset 30, siguiendo la familia humana actual. Idle down usa una única pose neutral aprobada del master runtime, para mantener quietud sin movimiento corporal artificial.
+
+### Santy — special idles integrados
+
+Los atlas RGBA transparentes viven en `public/assets/characters/friends/`, con frames de 32×48 px:
+
+| Archivo | Asset key | Animation key | Dimensiones | Frames | FPS | Peso |
+|---|---|---|---|---|---|---|
+| `friend_santy_blink_down_atlas_v1.png` | `friend_santy_blink` | `santy-blink-down` | 160×48 | 5 | 10 | 70% |
+| `friend_santy_phone_check_down_atlas_v1.png` | `friend_santy_phone_check` | `santy-phone-check-down` | 256×48 | 8 | 6 | 15% |
+| `friend_santy_drink_down_atlas_v1.png` | `friend_santy_drink` | `santy-drink-down` | 256×48 | 8 | 6 | 15% |
+
+Las tres animaciones tienen `repeat: 0`. El scheduler existente de `friendSprite.js` espera 5–10 s, selecciona por peso solo en IDLE + DOWN y pasa a SPECIAL_IDLE. Al completar vuelve a `santy-idle-down`, usando el neutral aprobado `friend_santy_idle_down`, y programa una única nueva espera. Caminar/cambiar de facing o apagar la Scene cancela los timers y listeners mediante el lifecycle genérico existente.
+
+Validación técnica: **202/202 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto. Cobertura para preload, atlas, frames/FPS, boundaries 70/15/15, retorno a neutral, exclusión mutua, interrupción y shutdown/restart. Eze debe validar en patio la continuidad de cara/pelo, pies y silueta, aparición/desaparición del teléfono/vaso y frecuencia. Santy sigue en **VISUAL QA REQUIRED**.
 
 ## Procedencia, baseline y normalización
 

@@ -46,7 +46,37 @@ const FRIENDS = {
     ],
   },
   eze: { name: 'Eze', asset: 'friend_eze', idleDown: 'friend_eze_idle_down' },
-  santy: { name: 'Santy', asset: 'friend_santy', idleDown: 'friend_santy_idle_down' },
+  santy: {
+    name: 'Santy',
+    asset: 'friend_santy',
+    idleDown: 'friend_santy_idle_down',
+    specials: [
+      {
+        id: 'blink',
+        asset: 'friend_santy_blink',
+        path: '/assets/characters/friends/friend_santy_blink_down_atlas_v1.png',
+        frames: 5,
+        frameRate: 10,
+        weight: 0.70,
+      },
+      {
+        id: 'phone-check',
+        asset: 'friend_santy_phone_check',
+        path: '/assets/characters/friends/friend_santy_phone_check_down_atlas_v1.png',
+        frames: 8,
+        frameRate: 6,
+        weight: 0.15,
+      },
+      {
+        id: 'drink',
+        asset: 'friend_santy_drink',
+        path: '/assets/characters/friends/friend_santy_drink_down_atlas_v1.png',
+        frames: 8,
+        frameRate: 6,
+        weight: 0.15,
+      },
+    ],
+  },
 };
 
 const DIRECTIONS = ['down', 'left', 'right', 'up'];
