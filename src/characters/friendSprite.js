@@ -112,6 +112,11 @@ const FRIENDS = {
     asset: 'friend_uriel',
     idleDown: 'friend_uriel_idle_down',
   },
+  thiago: {
+    name: 'Thiago',
+    asset: 'friend_thiago',
+    idleDown: 'friend_thiago_idle_down',
+  },
 };
 
 const DIRECTIONS = ['down', 'left', 'right', 'up'];

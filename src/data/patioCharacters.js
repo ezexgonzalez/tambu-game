@@ -34,7 +34,7 @@ export const patioFriends = [
   { id: 'pitity', name: 'Pitity', x: 1270, y: 500, palette: 2 },
   { id: 'uriel', name: 'Uriel', x: 320, y: 355, palette: 3 },
   { id: 'santy', name: 'Santy', x: 380, y: 390, palette: 4 },
-  { name: 'Thiago', x: 420, y: 800, palette: 5 },
+  { id: 'thiago', name: 'Thiago', x: 420, y: 800, palette: 5 },
   { id: 'tobi', name: 'Tobi', x: 470, y: 835, palette: 6 },
 ];
 

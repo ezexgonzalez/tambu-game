@@ -4,7 +4,7 @@ Estado: integrado técnicamente; **VISUAL QA REQUIRED**. Actualizado 2026-10-02.
 
 ## Alcance
 
-Tobi, Pitity, Eze y Santy están integrados a partir de sus masters grandes aprobados. Uriel ahora tiene idle down + walk atlas 4 direcciones integrados técnicamente / **VISUAL QA REQUIRED**, reemplazando su placeholder con los dos PNG aprobados sin modificar sus bytes. Thiago tiene idle down + walk atlas 4 direcciones aprobados y queda pendiente de integración para reemplazar el último placeholder procedural de amigo principal. Se mantienen sus posiciones actuales.
+Tobi, Pitity, Eze y Santy están integrados a partir de sus masters grandes aprobados. Uriel ahora tiene idle down + walk atlas 4 direcciones integrados técnicamente / **VISUAL QA REQUIRED**, reemplazando su placeholder con los dos PNG aprobados sin modificar sus bytes. Thiago tiene idle down + walk atlas 4 direcciones integrados técnicamente / **VISUAL QA REQUIRED**, con los PNG aprobados copiados byte por byte; reemplaza el último placeholder procedural de amigo principal. Se mantienen sus posiciones actuales.
 
 ## Runtime
 
@@ -15,7 +15,7 @@ Tobi, Pitity, Eze y Santy están integrados a partir de sus masters grandes apro
 | Santy | `friend_santy_atlas_v1.png` | `friend_santy_idle_down_atlas_v1.png` | `(380, 390)` |
 | Tobi | `friend_tobi_atlas_v1.png` | `friend_tobi_idle_down_atlas_v1.png` | `(470, 835)` |
 | Uriel (integrado técnicamente / VISUAL QA REQUIRED) | `friend_uriel_atlas_v1.png` | `friend_uriel_idle_down_atlas_v1.png` | `(320, 355)` |
-| Thiago (pendiente integración) | `friend_thiago_atlas_v1.png` | `friend_thiago_idle_down_atlas_v1.png` | `(420, 800)` |
+| Thiago (integrado técnicamente / VISUAL QA REQUIRED) | `friend_thiago_atlas_v1.png` | `friend_thiago_idle_down_atlas_v1.png` | `(420, 800)` |
 
 Special idles integrados al momento de esta actualización:
 
@@ -68,9 +68,26 @@ Los dos PNG RGBA transparentes aprobados viven en `public/assets/characters/frie
 
 El atlas walk usa frames de 32×48 y filas DOWN/LEFT/RIGHT/UP. Las animaciones `uriel-walk-down`, `uriel-walk-left`, `uriel-walk-right` y `uriel-walk-up` utilizan respectivamente `[1,0,2,1]`, `[4,3,5,4]`, `[7,6,8,7]` y `[10,9,11,10]`, a 8 fps con `repeat: -1`. `uriel-idle-down` usa el neutral oficial `friend_uriel_idle_down`, frame 0; los idles LEFT/RIGHT/UP usan `friend_uriel`, frames 4/7/10.
 
-La entrada `id: 'uriel'` activa el path genérico de `createCharacters()` sin branch nuevo. Conserva nombre, posición `(320,355)`, escala 1.24 y `footDepthOffset: 30`: depth 385, label 386. No tiene special idles, delayed calls ni completion listeners adicionales. Thiago conserva exactamente su placeholder procedural en `(420,800)`.
+La entrada `id: 'uriel'` activa el path genérico de `createCharacters()` sin branch nuevo. Conserva nombre, posición `(320,355)`, escala 1.24 y `footDepthOffset: 30`: depth 385, label 386. No tiene special idles, delayed calls ni completion listeners adicionales. En el momento de la integración de Uriel, Thiago todavía conservaba su placeholder procedural en `(420,800)`; la integración posterior registrada abajo lo reemplaza.
 
 Validación técnica: **211/211 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto. Cobertura extendida en `friendSprite.test.js` y `miliSprite.test.js` para dimensiones, preload, registro/frame mappings/FPS, creación real por `createCharacters()`, posición, escala/depth/label, ausencia de specials y preservación de Thiago procedural. Estado: **VISUAL QA REQUIRED**. Dirección valida cara, pelo, camiseta, pies, escala y continuidad de los frames a zoom de juego; esta integración no declara aprobación visual.
+
+### Thiago “La Abuela” — idle + walk integrados
+
+Los dos PNG RGBA transparentes aprobados viven en `public/assets/characters/friends/`, copiados sin modificar sus bytes:
+
+| Archivo | Asset key | Dimensiones | Frames |
+|---|---|---|---|
+| `friend_thiago_idle_down_atlas_v1.png` | `friend_thiago_idle_down` | 32×48 | 1 |
+| `friend_thiago_atlas_v1.png` | `friend_thiago` | 96×192 | 12 (3×4) |
+
+Frames de 32×48, filas DOWN/LEFT/RIGHT/UP. `thiago-walk-down`, `thiago-walk-left`, `thiago-walk-right` y `thiago-walk-up` utilizan respectivamente `[1,0,2,1]`, `[4,3,5,4]`, `[7,6,8,7]` y `[10,9,11,10]`, a 8 fps con `repeat: -1`. `thiago-idle-down` usa `friend_thiago_idle_down`, frame 0; `thiago-idle-left/right/up` usan `friend_thiago`, frames 4/7/10.
+
+`FRIENDS.thiago` y `id: 'thiago'` activan la arquitectura genérica existente, sin branch exclusivo ni cambios en `createCharacters.js`. Conserva posición `(420,800)`, escala 1.24 y `footDepthOffset: 30`: sprite depth 830, label depth 831. El label sigue siendo `Thiago`, con su offset/estilo existente. No tiene special idles, delayed calls, completion listeners ni shutdown listener adicional. Los otros amigos conservan sus configuraciones.
+
+Validación técnica: **212/212 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto. Se extendieron `friendSprite.test.js` y `miliSprite.test.js` para atlas/preload, mappings/FPS, datos, creación runtime por `createCharacters()`, posición, escala/depth/label y ausencia de specials. Se protege que los seis registros de `patioFriends` tengan ids válidos y se creen como sprites, sin fallback procedural. El lifecycle existente sigue pasando sin nuevos timers.
+
+**ALL SIX MAIN FRIENDS NOW USE RUNTIME SPRITES:** Eze, Pitity, Uriel, Santy, Thiago y Tobi. **CAST VISUAL IMPLEMENTATION COMPLETE / VISUAL QA REQUIRED**. No queda ningún amigo principal procedural; `drawPerson()` permanece para fillers y otros fallbacks. La integración técnica no declara CAST CLOSED/FROZEN/FINAL. Dirección valida Uriel y Thiago y confirma el cast completo antes de cerrar esta etapa.
 
 ## Procedencia, baseline y normalización
 
