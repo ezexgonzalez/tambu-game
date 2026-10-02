@@ -4,7 +4,7 @@ Estado: integrado técnicamente; **VISUAL QA REQUIRED**. Actualizado 2026-10-02.
 
 ## Alcance
 
-Este pase integra Tobi, Pitity, Eze y Santy a partir de sus masters grandes aprobados. Uriel y Thiago conservan el placeholder procedural. Se mantienen sus posiciones actuales.
+Este pase integra Tobi, Pitity, Eze y Santy a partir de sus masters grandes aprobados. Uriel tiene nueva baseline idle down + walk atlas 4 direcciones aprobados y queda pendiente de integración para reemplazar su placeholder procedural. Thiago conserva el placeholder procedural. Se mantienen sus posiciones actuales.
 
 ## Runtime
 
@@ -14,6 +14,7 @@ Este pase integra Tobi, Pitity, Eze y Santy a partir de sus masters grandes apro
 | Pitity | `friend_pitity_atlas_v1.png` | `friend_pitity_idle_down_atlas_v1.png` | `(1270, 500)` |
 | Santy | `friend_santy_atlas_v1.png` | `friend_santy_idle_down_atlas_v1.png` | `(380, 390)` |
 | Tobi | `friend_tobi_atlas_v1.png` | `friend_tobi_idle_down_atlas_v1.png` | `(470, 835)` |
+| Uriel (pendiente integración) | `friend_uriel_atlas_v1.png` | `friend_uriel_idle_down_atlas_v1.png` | `(320, 355)` |
 
 Special idles integrados al momento de esta actualización:
 
