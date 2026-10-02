@@ -1,6 +1,6 @@
 # Friends Runtime Experiment
 
-Estado: integrado técnicamente; **VISUAL QA REQUIRED**. Actualizado 2026-10-02.
+Estado: **CAST CLOSURE — CLOSED / FROZEN FOR V1**. Aprobado por Dirección 2026-10-02.
 
 ## Alcance
 
@@ -123,7 +123,24 @@ Validación: **226/226 tests aprobados**, sin fallos ni omitidos; `npm run build
 
 Estado: **INTEGRATED TECHNICALLY / VISUAL QA REQUIRED**. Dirección valida idle → blink → idle e idle → drink → idle, cara/pelo/ropa, vaso/brazo, pies, jitter y frecuencia. Esta integración no declara aprobación visual.
 
-**ALL SIX MAIN FRIENDS NOW USE RUNTIME SPRITES:** Eze, Pitity, Uriel, Santy, Thiago y Tobi. **FRIENDS V1 IMPLEMENTATION COMPLETE / FINAL VISUAL QA PENDING**. No queda ningún amigo principal procedural; `drawPerson()` permanece para fillers y otros fallbacks. Los paquetes V1 aprobados están implementados; el cierre definitivo depende del QA manual del elenco completo por Dirección. No se declara CAST CLOSED/FROZEN/FINAL.
+**ALL SIX MAIN FRIENDS NOW USE RUNTIME SPRITES:** Eze, Pitity, Uriel, Santy, Thiago y Tobi. **CAST CLOSURE — CLOSED / FROZEN FOR V1**. No queda ningún amigo principal procedural; `drawPerson()` permanece para fillers y otros fallbacks. Dirección aprobó el elenco completo el 2026-10-02. Los paquetes V1 de bases, walks y special idles quedan congelados y no se reabren antes de V1 salvo bug concreto.
+
+## Cierre V1
+
+Dirección confirma el cierre del bloque de amigos el **2026-10-02**.
+
+Estado vigente:
+
+- Eze — CLOSED / FROZEN FOR V1
+- Pitity — CLOSED / FROZEN FOR V1
+- Uriel — CLOSED / FROZEN FOR V1
+- Santy — CLOSED / FROZEN FOR V1
+- Thiago “La Abuela” — CLOSED / FROZEN FOR V1
+- Tobi — CLOSED / FROZEN FOR V1
+
+La cobertura técnica más reciente queda en **226/226 tests aprobados**, sin fallos ni omitidos, con `npm run build` correcto.
+
+A partir de este punto no se agregan nuevos special idles, rediseños, walks ni polish cosmético de amigos dentro de V1. Solo se reabre este bloque ante un bug concreto que afecte lectura, identidad, lifecycle o gameplay. Fillers/NPCs de relleno pertenecen a PARTY PRESENCE y no forman parte de este cierre.
 
 ## Procedencia, baseline y normalización
 
