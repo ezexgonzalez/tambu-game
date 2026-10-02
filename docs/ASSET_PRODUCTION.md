@@ -230,7 +230,7 @@ Objetivo de esta fase:
 - rasgos reconocibles mediante pelo, outfit, silueta y uno o dos detalles;
 - **no todos los amigos necesitan special idles**;
 - un special nuevo debe justificar una escena, gag o función ambiental concreta;
-- Santy puede usar baile como firma contextual por su ubicación en DJ si el asset pasa QA; no implica que todos los amigos necesiten una animación equivalente;
+- Para Santy, la animación de baile queda deferida por ahora: resultó demasiado costosa/inestable para el cierre V1. Su paquete aprobado de special idles pasa a ser **blink + phone-check + drink**. El baile puede reabrirse en V1.1 o cuando exista un pipeline más fiable;
 - priorizar una animación bien cerrada sobre tres atlas mediocres;
 - no producir en batch varios personajes/animaciones cuando la fidelidad frame a frame esté fallando.
 
