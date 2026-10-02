@@ -23,7 +23,8 @@ Special idles integrados al momento de esta actualización:
 - Tobi: drink + arms-crossed down, con atlas reemplazados/corregidos para seguir su idle manual.
 - Eze: blink + drink + drunk down integrados técnicamente / **VISUAL QA REQUIRED**. Los tres PNG aprobados se integraron sin modificar sus bytes. `drunk` es solo actuación ambiental: no depende de `alcohol` ni cambia estado/balance de gameplay.
 - Santy: blink + phone-check + drink down integrados técnicamente / **VISUAL QA REQUIRED**. Se usan exactamente los tres PNG aprobados, sin reexportar ni modificar sus píxeles. La animación de baile queda **DEFERRED**.
-- Uriel: blink + phone-check down integrados técnicamente / **VISUAL QA REQUIRED**, con los dos PNG aprobados sin modificar sus bytes. Paquete funcional de animaciones V1 completo; Thiago specials sigue pendiente de una tarea separada.
+- Thiago: blink + drink down integrados técnicamente / **VISUAL QA REQUIRED**, con los dos PNG aprobados sin modificar sus bytes.
+- Uriel: blink + phone-check down integrados técnicamente / **VISUAL QA REQUIRED**, con los dos PNG aprobados sin modificar sus bytes. Paquete funcional de animaciones V1 completo.
 - **Tobi blink no está integrado** y no debe asumirse como parte del paquete actual.
 
 Los walk sheets usan 12 frames en grilla 3×4, cada frame de 32×48 px. Las filas son down/left/right/up; las columnas son paso/neutral/paso. Escala 1.24 y depth por pies con offset 30, siguiendo la familia humana actual. Idle down usa una única pose neutral aprobada del master runtime, para mantener quietud sin movimiento corporal artificial.
@@ -88,7 +89,7 @@ Walk/cambio de facing cancela la espera y limpia el completion pendiente; shutdo
 
 Validación: **219/219 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto. El fixture existente de `santySpecialIdle.test.js` cubre también Uriel: PNG/preload, frames/FPS/repeat, boundaries deterministas 75/25, scheduler, retorno de ambos specials al neutral, exclusión mutua, guards IDLE + DOWN, interrupción y callbacks antiguos, shutdown y nueva Scene. Se actualizaron las expectativas de preload/lifecycle en `friendSprite.test.js` y `miliSprite.test.js`; el contrato anterior de ausencia de specials se reemplaza por esta cobertura.
 
-Estado: **INTEGRATED TECHNICALLY / VISUAL QA REQUIRED**. Dirección valida continuidad de cara/pelo/camiseta/pies, brazo/celular, aparición/desaparición del teléfono y frecuencia. El paquete funcional V1 de Uriel está implementado; no se declara FROZEN/FINAL/CAST CLOSED. Thiago specials queda pendiente para una tarea separada.
+Estado: **INTEGRATED TECHNICALLY / VISUAL QA REQUIRED**. Dirección valida continuidad de cara/pelo/camiseta/pies, brazo/celular, aparición/desaparición del teléfono y frecuencia. El paquete funcional V1 de Uriel está implementado; no se declara FROZEN/FINAL/CAST CLOSED.
 
 ### Thiago “La Abuela” — idle + walk integrados
 
@@ -101,11 +102,28 @@ Los dos PNG RGBA transparentes aprobados viven en `public/assets/characters/frie
 
 Frames de 32×48, filas DOWN/LEFT/RIGHT/UP. `thiago-walk-down`, `thiago-walk-left`, `thiago-walk-right` y `thiago-walk-up` utilizan respectivamente `[1,0,2,1]`, `[4,3,5,4]`, `[7,6,8,7]` y `[10,9,11,10]`, a 8 fps con `repeat: -1`. `thiago-idle-down` usa `friend_thiago_idle_down`, frame 0; `thiago-idle-left/right/up` usan `friend_thiago`, frames 4/7/10.
 
-`FRIENDS.thiago` y `id: 'thiago'` activan la arquitectura genérica existente, sin branch exclusivo ni cambios en `createCharacters.js`. Conserva posición `(420,800)`, escala 1.24 y `footDepthOffset: 30`: sprite depth 830, label depth 831. El label sigue siendo `Thiago`, con su offset/estilo existente. No tiene special idles, delayed calls, completion listeners ni shutdown listener adicional. Los otros amigos conservan sus configuraciones.
+`FRIENDS.thiago` y `id: 'thiago'` activan la arquitectura genérica existente, sin branch exclusivo ni cambios en `createCharacters.js`. Conserva posición `(420,800)`, escala 1.24 y `footDepthOffset: 30`: sprite depth 830, label depth 831. El label sigue siendo `Thiago`, con su offset/estilo existente. Al integrar su base no tenía special idles ni timers/listeners adicionales; el paquete posterior registrado abajo incorpora el lifecycle genérico. Los otros amigos conservan sus configuraciones.
 
 Validación técnica: **212/212 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto. Se extendieron `friendSprite.test.js` y `miliSprite.test.js` para atlas/preload, mappings/FPS, datos, creación runtime por `createCharacters()`, posición, escala/depth/label y ausencia de specials. Se protege que los seis registros de `patioFriends` tengan ids válidos y se creen como sprites, sin fallback procedural. El lifecycle existente sigue pasando sin nuevos timers.
 
-**ALL SIX MAIN FRIENDS NOW USE RUNTIME SPRITES:** Eze, Pitity, Uriel, Santy, Thiago y Tobi. **CAST VISUAL IMPLEMENTATION COMPLETE / VISUAL QA REQUIRED**. No queda ningún amigo principal procedural; `drawPerson()` permanece para fillers y otros fallbacks. Uriel ya tiene su paquete final V1 Blink + Phone Check integrado técnicamente. Para Thiago, Dirección aprobó el paquete final V1 **Blink + Drink**, pendiente de integración: `friend_thiago_blink_down_atlas_v1.png` (160×48, 5 frames, 10 fps, 75%) y `friend_thiago_drink_down_atlas_v1.png` (256×48, 8 frames, 6 fps, 25%). Tras integrar y validar visualmente estos dos specials, el cast de amigos puede pasar a cierre V1.
+### Thiago “La Abuela” — Blink + Drink integrados
+
+Los PNG aprobados se validaron como PNG RGBA transparentes y se copiaron byte por byte, sin reexportar ni modificar píxeles:
+
+| Archivo | Asset key | Animation key | Dimensiones | Frames | FPS | Peso |
+|---|---|---|---|---|---|---|
+| `friend_thiago_blink_down_atlas_v1.png` | `friend_thiago_blink` | `thiago-blink-down` | 160×48 | 5 | 10 | 75% |
+| `friend_thiago_drink_down_atlas_v1.png` | `friend_thiago_drink` | `thiago-drink-down` | 256×48 | 8 | 6 | 25% |
+
+Ambos usan frames de 32×48 y `repeat: 0`. `FRIENDS.thiago.specials` reutiliza exclusivamente el sistema genérico existente: espera 5–10 s, selección ponderada, guard IDLE + DOWN, SPECIAL_IDLE excluyente y completion que vuelve mediante `playFriendIdle(sprite, 'down')` a `thiago-idle-down` (`friend_thiago_idle_down`, frame 0). Al terminar Drink no queda el vaso/frame especial como neutral permanente. Walk/cambio de facing cancela timer y completion; `destroyFriendSprite()` limpia timer/listener y `friendScene` durante shutdown/restart. No hay scheduler exclusivo.
+
+Sus atlas base, posición `(420,800)`, escala 1.24, walk a 8 fps, depth 830 y label 831 permanecen intactos. No cambian las configuraciones de otros amigos.
+
+Validación: **226/226 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto (advertencia existente de bundle >500 kB). El fixture de `santySpecialIdle.test.js` ahora cubre Thiago: PNG/preload, frames/FPS/repeat, boundaries deterministas 75/25, scheduler, retorno al neutral, exclusión mutua, guards, interrupción y callbacks antiguos, shutdown y nueva Scene. `friendSprite.test.js` y `miliSprite.test.js` actualizan preload/registro y cleanup de la creación real, reemplazando la expectativa obsoleta de ausencia de specials.
+
+Estado: **INTEGRATED TECHNICALLY / VISUAL QA REQUIRED**. Dirección valida idle → blink → idle e idle → drink → idle, cara/pelo/ropa, vaso/brazo, pies, jitter y frecuencia. Esta integración no declara aprobación visual.
+
+**ALL SIX MAIN FRIENDS NOW USE RUNTIME SPRITES:** Eze, Pitity, Uriel, Santy, Thiago y Tobi. **FRIENDS V1 IMPLEMENTATION COMPLETE / FINAL VISUAL QA PENDING**. No queda ningún amigo principal procedural; `drawPerson()` permanece para fillers y otros fallbacks. Los paquetes V1 aprobados están implementados; el cierre definitivo depende del QA manual del elenco completo por Dirección. No se declara CAST CLOSED/FROZEN/FINAL.
 
 ## Procedencia, baseline y normalización
 

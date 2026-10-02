@@ -20,6 +20,18 @@ import { patioFriends } from '../src/data/patioCharacters.js';
 const root = resolve('public/assets/characters/friends');
 const packages = [
   {
+    friendId: 'thiago',
+    specials: [
+      { id: 'blink', asset: 'friend_thiago_blink', frames: 5, frameRate: 10 },
+      { id: 'drink', asset: 'friend_thiago_drink', frames: 8, frameRate: 6 },
+    ],
+    boundaries: [
+      [0, 'blink'], [0.749, 'blink'],
+      [0.75, 'drink'], [0.999, 'drink'], [1, 'drink'],
+    ],
+    timerCases: [[0.749, 'blink'], [0.75, 'drink']],
+  },
+  {
     friendId: 'uriel',
     specials: [
       { id: 'blink', asset: 'friend_uriel_blink', frames: 5, frameRate: 10 },

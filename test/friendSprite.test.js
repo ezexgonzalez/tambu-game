@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
-  chooseFriendIdleVariation,
   createFriendAnimations,
   createFriendSprite,
   FRIEND_SPRITE_CONFIG,
@@ -38,8 +37,8 @@ test('preload y animaciones respetan filas, frames neutros y cuatro direcciones'
   };
   preloadFriends(scene);
   createFriendAnimations(scene);
-  assert.equal(sheets.length, 24);
-  assert.equal(animations.length, 60);
+  assert.equal(sheets.length, 26);
+  assert.equal(animations.length, 62);
   for (const id of ids) {
     for (const key of [`friend_${id}`, `friend_${id}_idle_down`]) {
       assert.deepEqual(sheets.find(([asset]) => asset === key), [
@@ -82,29 +81,3 @@ test('todos los amigos principales tienen un id runtime válido y ningún fallba
   assert.ok(calls.some((call) => call[0] === 'play' && call[1] === 'tobi-idle-down'));
 });
 
-test('Thiago conserva su neutral aprobado sin programar specials, timers ni listeners', () => {
-  const friend = patioFriends.find(({ id }) => id === 'thiago');
-  assert.deepEqual(friend, { id: 'thiago', name: 'Thiago', x: 420, y: 800, palette: 5 });
-  const unexpected = () => assert.fail('Thiago no necesita timers ni listeners de specials');
-  const sprite = {
-    setOrigin() { return this; },
-    setScale() { return this; },
-    setDepth() { return this; },
-    once: unexpected,
-    play(key) { this.animation = key; return this; },
-  };
-  const scene = {
-    add: { sprite: () => sprite },
-    anims: { exists: () => true },
-    time: { delayedCall: unexpected },
-    events: { once: unexpected },
-  };
-  assert.equal(createFriendSprite(scene, friend), sprite);
-  assert.equal(sprite.animation, 'thiago-idle-down');
-  assert.equal(sprite.friendId, 'thiago');
-  assert.equal(sprite.friendIdleTimer, undefined);
-  assert.equal(sprite.friendSpecialCompletion, undefined);
-  for (const roll of [0, 0.5, 1]) {
-    assert.equal(chooseFriendIdleVariation('thiago', () => roll), null);
-  }
-});

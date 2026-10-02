@@ -134,6 +134,24 @@ const FRIENDS = {
     name: 'Thiago',
     asset: 'friend_thiago',
     idleDown: 'friend_thiago_idle_down',
+    specials: [
+      {
+        id: 'blink',
+        asset: 'friend_thiago_blink',
+        path: '/assets/characters/friends/friend_thiago_blink_down_atlas_v1.png',
+        frames: 5,
+        frameRate: 10,
+        weight: 0.75,
+      },
+      {
+        id: 'drink',
+        asset: 'friend_thiago_drink',
+        path: '/assets/characters/friends/friend_thiago_drink_down_atlas_v1.png',
+        frames: 8,
+        frameRate: 6,
+        weight: 0.25,
+      },
+    ],
   },
 };
 
