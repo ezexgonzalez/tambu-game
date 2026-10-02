@@ -20,7 +20,7 @@ Special idles integrados al momento de esta actualización:
 - Pitity: blink + phone-check down.
 - Tobi: drink + arms-crossed down, con atlas reemplazados/corregidos para seguir su idle manual.
 - Eze: sin specials integrados.
-- Santy: sin specials integrados.
+- Santy: sin specials integrados todavía. Dirección aprobó tres atlas listos para integración: `friend_santy_blink_down_atlas_v1.png` (5 frames), `friend_santy_phone_check_down_atlas_v1.png` (8 frames) y `friend_santy_drink_down_atlas_v1.png` (8 frames). La animación de baile queda deferida.
 - **Tobi blink no está integrado** y no debe asumirse como parte del paquete actual.
 
 Los walk sheets usan 12 frames en grilla 3×4, cada frame de 32×48 px. Las filas son down/left/right/up; las columnas son paso/neutral/paso. Escala 1.24 y depth por pies con offset 30, siguiendo la familia humana actual. Idle down usa una única pose neutral aprobada del master runtime, para mantener quietud sin movimiento corporal artificial.
