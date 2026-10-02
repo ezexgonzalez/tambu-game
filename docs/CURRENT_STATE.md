@@ -71,6 +71,22 @@ La regla de dirección pasa a ser: **dejar de demostrar que el juego puede crece
 
 ## Integrado y estable
 
+### Amigos principales — CLOSED / FROZEN FOR V1
+
+- **CAST CLOSURE — CLOSED / FROZEN FOR V1 (Dirección, 2026-10-02).**
+- Los seis amigos principales usan sprites runtime propios: **Eze, Pitity, Uriel, Santy, Thiago y Tobi**.
+- Todos conservan walk 4 direcciones + idle DOWN dentro de la arquitectura genérica de `friendSprite.js`; no queda ningún amigo principal procedural.
+- Paquetes V1 de special idles cerrados:
+  - Eze: blink + drink + drunk.
+  - Pitity: blink + phone-check.
+  - Uriel: blink + phone-check.
+  - Santy: blink + phone-check + drink.
+  - Thiago “La Abuela”: blink + drink.
+  - Tobi: drink + arms-crossed.
+- Uriel y Thiago completaron la última pasada técnica: sus bases, walks y specials están integrados; la validación automatizada más reciente terminó en **226/226 tests aprobados** y `npm run build` correcto.
+- La Dirección da por aprobado el elenco de amigos para V1. Desde este punto **no se producen nuevos sprites, walks, special idles ni correcciones cosméticas de amigos antes de V1**, salvo bug visual/runtime concreto que rompa lectura, identidad o gameplay.
+- Specials previamente descartados o diferidos, como el dance de Santy o un blink adicional de Tobi, permanecen fuera del scope V1 y no constituyen deuda de cierre.
+
 ### Arquitectura
 
 - `PatioScene` funciona como orquestador.
@@ -130,14 +146,11 @@ Hay tests para sistema social, Sofi, Mili, Cami, Consejo, presentación y flujo 
 
 ## Provisional / placeholder
 
-### Personajes del patio
+### Población de relleno
 
-- **Eze, Pitity, Santy y Tobi** ya tienen walk 4 direcciones + idle down runtime y siguen **en validación visual**, no congelados. Pitity ejecuta blink/phone-check; Tobi ejecuta drink/arms-crossed con atlas corregidos. Para **Santy**, los tres special idles V1 **blink + phone-check + drink** están integrados técnicamente (2026-10-02) / **VISUAL QA REQUIRED**: 5 frames a 10 fps para blink, 8 frames a 6 fps para phone-check/drink, pesos 70/15/15 y scheduler genérico de 5–10 s. Solo ocurren en IDLE + DOWN, vuelven al idle neutral oficial y reutilizan la cancelación de timers/listeners al caminar o cerrar la Scene. La animación de baile queda **DEFERRED** por costo/fragilidad de producción y no forma parte del cierre actual. Para **Eze**, los tres special idles V1 **blink + drink + drunk** están integrados técnicamente (2026-10-02) / **VISUAL QA REQUIRED**: blink de 5 frames a 10 fps (70%), drink de 8 frames a 6 fps (20%) y drunk de 8 frames a 5 fps (10%). Reutilizan el scheduler genérico de 5–10 s, solo en IDLE + DOWN, con repeat 0, retorno a `eze-idle-down`, exclusión mutua y cleanup existente al caminar/cambiar de facing o cerrar la Scene. Los PNG aprobados se copiaron sin modificar sus bytes. El special `drunk` es únicamente actuación ambiental visual: no existe integración con sistema de alcohol ni cambios a HUD, puntos, vidas, outcomes, stats sociales o fases de la run. **Tobi blink no está integrado** y no debe darse por existente.
-- Los idles down de varios amigos recibieron corrección manual de píxeles. Desde ahora, el **visual master grande conserva identidad/outfit/silueta** y el **idle runtime manualmente aprobado fija la geometría pixelada, cara, pies y color exactos que deben conservar los special idles**.
-- **Uriel — idle + walk integrados técnicamente (2026-10-02) / VISUAL QA REQUIRED.** Los PNG aprobados `friend_uriel_idle_down_atlas_v1.png` (32×48, 1 frame neutral DOWN) y `friend_uriel_atlas_v1.png` (96×192, 12 frames de 32×48 en grilla 3×4, filas DOWN/LEFT/RIGHT/UP) se copiaron sin modificar sus bytes. Usa la arquitectura genérica de `friendSprite.js`, walk a 8 fps, escala 1.24, `footDepthOffset: 30`, posición original `(320,355)`, depth 385 y label inmediatamente encima (386). Su placeholder procedural queda reemplazado. **Blink + Phone Check integrados técnicamente / VISUAL QA REQUIRED**: `friend_uriel_blink_down_atlas_v1.png` (160×48, 5 frames, 10 fps, 75%) y `friend_uriel_phone_check_down_atlas_v1.png` (256×48, 8 frames, 6 fps, 25%), copiados sin modificar sus bytes. Ambos tienen `repeat: 0`, usan el scheduler genérico de 5–10 s solo en IDLE + DOWN, no se solapan y vuelven a `uriel-idle-down` (`friend_uriel_idle_down`, frame 0). Walk/cambio de facing y shutdown/restart reutilizan el cleanup de timers/listeners existente. Validación técnica actual: **219/219 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto. Uriel queda funcionalmente completo a nivel de animaciones V1, pero sigue en QA visual; no se declara FROZEN/FINAL/CAST CLOSED.
-- **Thiago “La Abuela” — idle + walk integrados técnicamente (2026-10-02) / VISUAL QA REQUIRED.** Los PNG aprobados `friend_thiago_idle_down_atlas_v1.png` (32×48, 1 frame neutral DOWN) y `friend_thiago_atlas_v1.png` (96×192, 12 frames de 32×48 en grilla 3×4, filas DOWN/LEFT/RIGHT/UP) se copiaron sin modificar sus bytes. Usa `friendSprite.js` y el path genérico de `createCharacters()`, walk a 8 fps, escala 1.24 y `footDepthOffset: 30`. Conserva posición `(420,800)` y label `Thiago`: sprite depth 830, label depth 831. **Blink + Drink integrados técnicamente / VISUAL QA REQUIRED**: `friend_thiago_blink_down_atlas_v1.png` (160×48, 5 frames, 10 fps, 75%) y `friend_thiago_drink_down_atlas_v1.png` (256×48, 8 frames, 6 fps, 25%), RGBA transparentes copiados byte por byte. Animaciones `thiago-blink-down` y `thiago-drink-down`, ambas con `repeat: 0`. Reutilizan el scheduler genérico 5–10 s solo en IDLE + DOWN, exclusión mutua y retorno a `thiago-idle-down` (`friend_thiago_idle_down`, frame 0). Walk/cambio de facing y shutdown/restart conservan el cleanup existente. Base/walk, posición, scale, depth y label permanecen intactos. Validación actual: **226/226 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto. Estado: **INTEGRATED TECHNICALLY / VISUAL QA REQUIRED**.
-- **ALL SIX MAIN FRIENDS NOW USE RUNTIME SPRITES:** Eze, Pitity, Uriel, Santy, Thiago y Tobi. No queda ningún amigo principal procedural. **CAST VISUAL IMPLEMENTATION COMPLETE / VISUAL QA REQUIRED**: esto cierra la implementación técnica de las bases, pero no declara el cast CLOSED/FROZEN/FINAL. Dirección debe validar visualmente Uriel y Thiago y confirmar el elenco completo. **FRIENDS V1 IMPLEMENTATION COMPLETE / FINAL VISUAL QA PENDING**: los paquetes de animaciones V1 aprobados de Eze, Pitity, Uriel, Santy, Thiago y Tobi están implementados. No se declara CAST CLOSED/FROZEN/FINAL; Dirección debe completar el QA manual de los seis amigos.
-- Los **37 fillers** siguen siendo provisionales; ocho tienen tween de baile y varias etiquetas de actividad todavía no producen una acción visible. La V1 no exige 37 diseños únicos: se resolverá con una familia pequeña/reutilizable y pocas actividades legibles.
+- Los **37 fillers** siguen siendo provisionales; ocho tienen tween de baile y varias etiquetas de actividad todavía no producen una acción visible.
+- La V1 no exige 37 diseños únicos: se resolverá con una familia pequeña/reutilizable y pocas actividades legibles.
+- El cierre de amigos principales no implica cerrar fillers; son un bloque separado de PARTY PRESENCE.
 
 ### Props y ambientación activa
 
@@ -204,7 +217,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 La segunda auditoría del 28/09 confirma que el loop funcional ya está cerrado. El roadmap activo de Dirección es:
 
 1. **STABILIZATION PASS** — corregir copy de SPACE, overwrite de depth de amigos y emits falsos de Mili. Bathroom Resistance Pass 2 ya está playtesteado y no forma parte de esta pasada salvo el copy de input engañoso.
-2. **CAST CLOSURE** — las bases de los seis amigos ya están integradas técnicamente; validar visualmente Uriel/Thiago, confirmar el cast completo y cerrar la producción individual intensiva de amigos. No todos necesitan special idles: cada animación nueva debe habilitar una escena, gag o función visible.
+2. **CAST CLOSURE — CLOSED / FROZEN FOR V1** — los seis amigos principales, sus walks/idles y los paquetes de special idles aprobados quedan cerrados. No reabrir producción individual de amigos salvo bug concreto.
 3. **BATHROOM RESISTANCE 2.0 — IDENTIDAD NARRATIVA** — convertir los tres intentos en sorpresa → incredulidad → caos usando amigos reconocibles, memoria real de run y pocas intervenciones claras, sin alterar el contrato secured/interrupted ya estable.
 4. **PARTY PRESENCE** — audio mínimo con mute/volumen + lote pequeño de fillers/actividades + 2–3 callbacks o beats ambientales de alto impacto. No construir simulación social.
 5. **V1 UX CLOSURE** — menú/onboarding mínimo, ocultar alcohol vacío, alinear HUD/diálogo/Consejo/outcomes/Resistance a `UI_DIRECTION.md` y asegurar que todos los prompts describan el input real.
