@@ -105,7 +105,7 @@ Frames de 32×48, filas DOWN/LEFT/RIGHT/UP. `thiago-walk-down`, `thiago-walk-lef
 
 Validación técnica: **212/212 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto. Se extendieron `friendSprite.test.js` y `miliSprite.test.js` para atlas/preload, mappings/FPS, datos, creación runtime por `createCharacters()`, posición, escala/depth/label y ausencia de specials. Se protege que los seis registros de `patioFriends` tengan ids válidos y se creen como sprites, sin fallback procedural. El lifecycle existente sigue pasando sin nuevos timers.
 
-**ALL SIX MAIN FRIENDS NOW USE RUNTIME SPRITES:** Eze, Pitity, Uriel, Santy, Thiago y Tobi. **CAST VISUAL IMPLEMENTATION COMPLETE / VISUAL QA REQUIRED**. No queda ningún amigo principal procedural; `drawPerson()` permanece para fillers y otros fallbacks. La integración técnica no declara CAST CLOSED/FROZEN/FINAL. Dirección valida Uriel y Thiago y confirma el cast completo antes de cerrar esta etapa.
+**ALL SIX MAIN FRIENDS NOW USE RUNTIME SPRITES:** Eze, Pitity, Uriel, Santy, Thiago y Tobi. **CAST VISUAL IMPLEMENTATION COMPLETE / VISUAL QA REQUIRED**. No queda ningún amigo principal procedural; `drawPerson()` permanece para fillers y otros fallbacks. Uriel ya tiene su paquete final V1 Blink + Phone Check integrado técnicamente. Para Thiago, Dirección aprobó el paquete final V1 **Blink + Drink**, pendiente de integración: `friend_thiago_blink_down_atlas_v1.png` (160×48, 5 frames, 10 fps, 75%) y `friend_thiago_drink_down_atlas_v1.png` (256×48, 8 frames, 6 fps, 25%). Tras integrar y validar visualmente estos dos specials, el cast de amigos puede pasar a cierre V1.
 
 ## Procedencia, baseline y normalización
 
