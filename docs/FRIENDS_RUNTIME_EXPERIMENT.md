@@ -4,7 +4,7 @@ Estado: integrado técnicamente; **VISUAL QA REQUIRED**. Actualizado 2026-10-02.
 
 ## Alcance
 
-Tobi, Pitity, Eze y Santy están integrados a partir de sus masters grandes aprobados. Uriel ahora tiene idle down + walk atlas 4 direcciones integrados técnicamente / **VISUAL QA REQUIRED**, reemplazando su placeholder con los dos PNG aprobados sin modificar sus bytes. Thiago queda como único amigo principal procedural. Se mantienen sus posiciones actuales.
+Tobi, Pitity, Eze y Santy están integrados a partir de sus masters grandes aprobados. Uriel ahora tiene idle down + walk atlas 4 direcciones integrados técnicamente / **VISUAL QA REQUIRED**, reemplazando su placeholder con los dos PNG aprobados sin modificar sus bytes. Thiago tiene idle down + walk atlas 4 direcciones aprobados y queda pendiente de integración para reemplazar el último placeholder procedural de amigo principal. Se mantienen sus posiciones actuales.
 
 ## Runtime
 
@@ -15,6 +15,7 @@ Tobi, Pitity, Eze y Santy están integrados a partir de sus masters grandes apro
 | Santy | `friend_santy_atlas_v1.png` | `friend_santy_idle_down_atlas_v1.png` | `(380, 390)` |
 | Tobi | `friend_tobi_atlas_v1.png` | `friend_tobi_idle_down_atlas_v1.png` | `(470, 835)` |
 | Uriel (integrado técnicamente / VISUAL QA REQUIRED) | `friend_uriel_atlas_v1.png` | `friend_uriel_idle_down_atlas_v1.png` | `(320, 355)` |
+| Thiago (pendiente integración) | `friend_thiago_atlas_v1.png` | `friend_thiago_idle_down_atlas_v1.png` | `(420, 800)` |
 
 Special idles integrados al momento de esta actualización:
 
