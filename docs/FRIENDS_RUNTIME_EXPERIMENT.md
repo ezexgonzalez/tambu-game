@@ -19,7 +19,7 @@ Special idles integrados al momento de esta actualización:
 
 - Pitity: blink + phone-check down.
 - Tobi: drink + arms-crossed down, con atlas reemplazados/corregidos para seguir su idle manual.
-- Eze: sin specials integrados.
+- Eze: sin specials integrados todavía. Dirección aprobó tres atlas listos para integración: `friend_eze_blink_down_atlas_v1.png` (5 frames), `friend_eze_drink_down_atlas_v1.png` (8 frames) y `friend_eze_drunk_down_atlas_v1.png` (8 frames). `drunk` es un special idle visual/ambiental; no depende de `alcohol` ni introduce mecánicas nuevas.
 - Santy: blink + phone-check + drink down integrados técnicamente / **VISUAL QA REQUIRED**. Se usan exactamente los tres PNG aprobados, sin reexportar ni modificar sus píxeles. La animación de baile queda **DEFERRED**.
 - **Tobi blink no está integrado** y no debe asumirse como parte del paquete actual.
 
