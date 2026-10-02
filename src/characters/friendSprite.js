@@ -45,7 +45,37 @@ const FRIENDS = {
       },
     ],
   },
-  eze: { name: 'Eze', asset: 'friend_eze', idleDown: 'friend_eze_idle_down' },
+  eze: {
+    name: 'Eze',
+    asset: 'friend_eze',
+    idleDown: 'friend_eze_idle_down',
+    specials: [
+      {
+        id: 'blink',
+        asset: 'friend_eze_blink',
+        path: '/assets/characters/friends/friend_eze_blink_down_atlas_v1.png',
+        frames: 5,
+        frameRate: 10,
+        weight: 0.70,
+      },
+      {
+        id: 'drink',
+        asset: 'friend_eze_drink',
+        path: '/assets/characters/friends/friend_eze_drink_down_atlas_v1.png',
+        frames: 8,
+        frameRate: 6,
+        weight: 0.20,
+      },
+      {
+        id: 'drunk',
+        asset: 'friend_eze_drunk',
+        path: '/assets/characters/friends/friend_eze_drunk_down_atlas_v1.png',
+        frames: 8,
+        frameRate: 5,
+        weight: 0.10,
+      },
+    ],
+  },
   santy: {
     name: 'Santy',
     asset: 'friend_santy',

@@ -37,8 +37,8 @@ test('preload y animaciones respetan filas, frames neutros y cuatro direcciones'
   };
   preloadFriends(scene);
   createFriendAnimations(scene);
-  assert.equal(sheets.length, 15);
-  assert.equal(animations.length, 39);
+  assert.equal(sheets.length, 18);
+  assert.equal(animations.length, 42);
   for (const id of ids) {
     const directions = ['down', 'left', 'right', 'up'];
     for (let row = 0; row < 4; row++) {

@@ -19,7 +19,7 @@ Special idles integrados al momento de esta actualización:
 
 - Pitity: blink + phone-check down.
 - Tobi: drink + arms-crossed down, con atlas reemplazados/corregidos para seguir su idle manual.
-- Eze: sin specials integrados todavía. Dirección aprobó tres atlas listos para integración: `friend_eze_blink_down_atlas_v1.png` (5 frames), `friend_eze_drink_down_atlas_v1.png` (8 frames) y `friend_eze_drunk_down_atlas_v1.png` (8 frames). `drunk` es un special idle visual/ambiental; no depende de `alcohol` ni introduce mecánicas nuevas.
+- Eze: blink + drink + drunk down integrados técnicamente / **VISUAL QA REQUIRED**. Los tres PNG aprobados se integraron sin modificar sus bytes. `drunk` es solo actuación ambiental: no depende de `alcohol` ni cambia estado/balance de gameplay.
 - Santy: blink + phone-check + drink down integrados técnicamente / **VISUAL QA REQUIRED**. Se usan exactamente los tres PNG aprobados, sin reexportar ni modificar sus píxeles. La animación de baile queda **DEFERRED**.
 - **Tobi blink no está integrado** y no debe asumirse como parte del paquete actual.
 
@@ -38,6 +38,22 @@ Los atlas RGBA transparentes viven en `public/assets/characters/friends/`, con f
 Las tres animaciones tienen `repeat: 0`. El scheduler existente de `friendSprite.js` espera 5–10 s, selecciona por peso solo en IDLE + DOWN y pasa a SPECIAL_IDLE. Al completar vuelve a `santy-idle-down`, usando el neutral aprobado `friend_santy_idle_down`, y programa una única nueva espera. Caminar/cambiar de facing o apagar la Scene cancela los timers y listeners mediante el lifecycle genérico existente.
 
 Validación técnica: **202/202 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto. Cobertura para preload, atlas, frames/FPS, boundaries 70/15/15, retorno a neutral, exclusión mutua, interrupción y shutdown/restart. Eze debe validar en patio la continuidad de cara/pelo, pies y silueta, aparición/desaparición del teléfono/vaso y frecuencia. Santy sigue en **VISUAL QA REQUIRED**.
+
+### Eze — special idles integrados
+
+Los atlas RGBA transparentes viven en `public/assets/characters/friends/`, con frames de 32×48 px:
+
+| Archivo | Asset key | Animation key | Dimensiones | Frames | FPS | Peso |
+|---|---|---|---|---|---|---|
+| `friend_eze_blink_down_atlas_v1.png` | `friend_eze_blink` | `eze-blink-down` | 160×48 | 5 | 10 | 70% |
+| `friend_eze_drink_down_atlas_v1.png` | `friend_eze_drink` | `eze-drink-down` | 256×48 | 8 | 6 | 20% |
+| `friend_eze_drunk_down_atlas_v1.png` | `friend_eze_drunk` | `eze-drunk-down` | 256×48 | 8 | 5 | 10% |
+
+Eze utiliza el scheduler genérico de 5–10 s, únicamente en IDLE + DOWN. Los tres specials tienen `repeat: 0`, no se solapan y vuelven mediante `playFriendIdle(sprite, 'down')` a `eze-idle-down`, cuyo neutral oficial sigue siendo `friend_eze_idle_down`. Después de completar se programa una única nueva espera. Walk/cambio de facing y shutdown/restart reutilizan la cancelación de timers/listeners existente.
+
+`drunk` es exclusivamente una animación ambiental aleatoria de Eze. No existe integración con un sistema de alcohol, HUD, puntos, vidas, outcomes, stats sociales ni fases de la run.
+
+Validación técnica de esta integración: **210/210 tests aprobados**, sin fallos ni omitidos; `npm run build` correcto. Los contratos existentes de Santy se parametrizaron también para Eze, reutilizando el mismo fixture: preload, atlas, frames/FPS, boundaries 70/20/10, retorno a neutral, exclusión mutua, state guards, interrupción y shutdown/restart. Eze debe validar manualmente cara/pelo, brazos/vaso en Drink, pies/sway en Drunk, continuidad con el neutral y frecuencia. Estado: **VISUAL QA REQUIRED**.
 
 ## Procedencia, baseline y normalización
 
