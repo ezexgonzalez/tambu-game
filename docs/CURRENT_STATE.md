@@ -218,7 +218,7 @@ La segunda auditoría del 28/09 confirma que el loop funcional ya está cerrado.
 
 1. **STABILIZATION PASS** — corregir copy de SPACE, overwrite de depth de amigos y emits falsos de Mili. Bathroom Resistance Pass 2 ya está playtesteado y no forma parte de esta pasada salvo el copy de input engañoso.
 2. **CAST CLOSURE — CLOSED / FROZEN FOR V1** — los seis amigos principales, sus walks/idles y los paquetes de special idles aprobados quedan cerrados. No reabrir producción individual de amigos salvo bug concreto.
-3. **BATHROOM RESISTANCE 2.0 — IDENTIDAD NARRATIVA** — convertir los tres intentos en sorpresa → incredulidad → caos usando amigos reconocibles, memoria real de run y pocas intervenciones claras, sin alterar el contrato secured/interrupted ya estable.
+3. **BATHROOM RESISTANCE 2.0 — IDENTIDAD NARRATIVA / DIRECTION APPROVED** — dirección congelada en `docs/BATHROOM_RESISTANCE_2_DIRECTION.md`: intento 1 = sorpresa (Pitity), intento 2 = incredulidad (Tobi + Uriel), intento 3 = caos (Santy + Thiago + Eze), con portraits 64×64 TALK/ANGRY/SHOUT y memoria real de resultados previos. Pendiente integración; balance/rewards siguen congelados.
 4. **PARTY PRESENCE** — audio mínimo con mute/volumen + lote pequeño de fillers/actividades + 2–3 callbacks o beats ambientales de alto impacto. No construir simulación social.
 5. **V1 UX CLOSURE** — menú/onboarding mínimo, ocultar alcohol vacío, alinear HUD/diálogo/Consejo/outcomes/Resistance a `UI_DIRECTION.md` y asegurar que todos los prompts describan el input real.
 6. **FEATURE FREEZE** — una vez cerrados los bloques anteriores no se agregan mecánicas, personajes o specials por impulso; solo fixes surgidos de QA.
