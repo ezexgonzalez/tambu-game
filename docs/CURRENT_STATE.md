@@ -132,7 +132,7 @@ La regla de dirección pasa a ser: **dejar de demostrar que el juego puede crece
 
 ### Bathroom Resistance 2.0 — correction pass
 
-**BATHROOM RESISTANCE 2.0 — CLOSED / BASELINE FOR V1 (Dirección 2026-10-04).** La pasada narrativa, portraits, pacing, golpes físicos, composite HUD, hold de cámara sobre la puerta, cámara UI aislada y framing dentro del world quedan aceptados como baseline V1. Dirección reconoce polish visual/UI pendiente, pero se difiere explícitamente para no frenar el roadmap. No reabrir este bloque antes de V1 salvo bug concreto que afecte lectura, input, memoria narrativa, cámara/lifecycle o gameplay. Balance Pass 2 permanece congelado.
+**BATHROOM RESISTANCE 2.0 — NARROW REOPEN: DIALOGUE PUNCH + CHAOS EMPHASIS (Dirección 2026-10-04).** Arquitectura, portraits, composite HUD, cámara, pacing base y balance quedan protegidos. Se reabre únicamente el copy/intervenciones para dar más humor al intento 1, más cargada/incredulidad al intento 2 y caos real al intento 3, incluyendo un acento rojo pixelado puntual `SE PUDRIÓ TODO` (y opcional `¡TRES!`) sin alterar mecánica ni theme general. Autoridad: `docs/BATHROOM_RESISTANCE_2_DIRECTION.md` §14.4.
 
 - `createBathroomChallengeUi()` mantiene un único panel compuesto para Resistance y resolución: marco de 760×310 a 1280×720, núcleo de 210 px y reaction dock inferior reservado de 100 px. Título, timer, speaker y prompts usan `pixelText`; se agregaron los glifos Á/Ó necesarios sin cambiar los existentes. El dock reutiliza portraits nativos 64×64 con `framed: false`, sin segunda caja flotante.
 - Los seis PNG aprobados siguen intactos en `public/assets/ui/portraits/friends/`, RGBA 192×64, expresiones TALK/ANGRY/SHOUT = 0/1/2 y nearest-neighbor. La UI no conoce `gameState` ni decide ramas narrativas.
@@ -236,7 +236,7 @@ La segunda auditoría del 28/09 confirma que el loop funcional ya está cerrado.
 
 1. **STABILIZATION PASS** — corregir copy de SPACE, overwrite de depth de amigos y emits falsos de Mili. Bathroom Resistance Pass 2 ya está playtesteado y no forma parte de esta pasada salvo el copy de input engañoso.
 2. **CAST CLOSURE — CLOSED / FROZEN FOR V1** — los seis amigos principales, sus walks/idles y los paquetes de special idles aprobados quedan cerrados. No reabrir producción individual de amigos salvo bug concreto.
-3. **BATHROOM RESISTANCE 2.0 — CLOSED / BASELINE FOR V1** — sorpresa → incredulidad → caos, portraits, memoria real, staging de puerta, composite HUD y cámara UI aislada aceptados. Polish visual fino diferido; no reabrir salvo bug concreto.
+3. **BATHROOM RESISTANCE 2.0 — DIALOGUE PUNCH PASS** — baseline técnica aceptada; queda una pasada acotada de copy/humor y énfasis visual del caos del tercer intento. Balance y arquitectura no se reabren.
 4. **PARTY PRESENCE** — audio mínimo con mute/volumen + lote pequeño de fillers/actividades + 2–3 callbacks o beats ambientales de alto impacto. No construir simulación social.
 5. **V1 UX CLOSURE** — menú/onboarding mínimo, ocultar alcohol vacío, alinear HUD/diálogo/Consejo/outcomes/Resistance a `UI_DIRECTION.md` y asegurar que todos los prompts describan el input real.
 6. **FEATURE FREEZE** — una vez cerrados los bloques anteriores no se agregan mecánicas, personajes o specials por impulso; solo fixes surgidos de QA.
