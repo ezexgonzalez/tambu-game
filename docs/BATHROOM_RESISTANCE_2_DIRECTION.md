@@ -613,6 +613,34 @@ Dirección aprueba:
 
 ---
 
+# 14.3 Cierre de Dirección — 2026-10-04
+
+Dirección aprueba Bathroom Resistance 2.0 como **CLOSED / BASELINE FOR V1**.
+
+Quedan aceptados:
+
+- progresión narrativa sorpresa → incredulidad → caos;
+- portraits y expresiones de los seis amigos;
+- memoria real de run;
+- composite panel;
+- reaction dock;
+- pacing de intervenciones;
+- golpes físicos de puerta;
+- zoom sostenido durante Resistance;
+- cámara UI desacoplada del zoom/shake del mundo;
+- framing clamped dentro del mapa;
+- success/failure + rewards actuales.
+
+Queda **polish visual/UI pendiente**, pero se difiere explícitamente. No es blocker de V1 ni justifica otra pasada ahora.
+
+Reabrir este bloque únicamente ante bug concreto que afecte lectura, input, cámara/lifecycle, narrativa/memoria o gameplay. No reabrir por microspacing, gusto cosmético, tamaños finos, ornamentación o refinamiento visual aislado.
+
+Siguiente bloque activo del roadmap:
+
+**PARTY PRESENCE**
+
+---
+
 # 15. Correction pass integrada — 2026-10-04
 
 **CORRECTION PASS INTEGRATED / VISUAL QA REQUIRED.** Este es el presentation contract runtime vigente. Las secciones 6–8 conservan la autoridad de copy/speakers/expresiones/memoria; sus timestamps describen los hits mecánicos, no obligan a reemplazar la frase visible en ese mismo instante. Los timings históricos de anticipation y la composición/cleanup de la sección 14 quedan supersedidos por esta corrección.
