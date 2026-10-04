@@ -607,7 +607,7 @@ Success/failure transforma la misma instancia en `PUERTA ASEGURADA` / `LA PUERTA
 
 HouseFacade devuelve `{ bathroomDoor: { sprite, label } }`. PatioWorld propaga esas referencias y PatioScene las conserva en `worldVisuals` para BathroomEvent. No se alteraron assets ni se creó puerta alternativa.
 
-La anticipación visual dura 4800 ms: approach 400 ms a zoom 1.75 hacia el centro real del baño, 250 ms de hold antes del primer impacto, tres golpes físicos a 650/850/1050 ms, voces aprobadas a 1700/3200 ms y retorno durante los últimos 350 ms. El framing normal se restituye antes de Resistance; la última frase se conserva al entrar al panel y no desaparece por el cambio de fase.
+La anticipación visual dura 4800 ms: approach 400 ms a zoom 1.75 hacia el centro real del baño, 250 ms de hold antes del primer impacto, tres golpes físicos a 650/850/1050 ms y voces aprobadas a 1700/3200 ms. **QA de Dirección 2026-10-04: el framing de puerta NO vuelve a normal al comenzar Resistance. El zoom/foco alcanzado durante anticipation debe mantenerse durante los 10 s completos del minijuego para que los siete golpes físicos sigan ocurriendo sobre la puerta en primer plano. La cámara se restaura recién cuando Resistance termina y se entra a success/failure, o antes si el evento se destruye/shutdown/retry.** La última frase se conserva al entrar al panel y no desaparece por el cambio de fase.
 
 `bathroomDoorStaging.js` interpola por delta, sin efectos pan/zoom, timers ni tweens pendientes. Snapshot/restauración de scroll, zoom X/Y, follow, roundPixels, lerp, offset y bounds; los bounds se suspenden solo durante el encuadre para centrar la fachada superior. Destroy/shutdown/retry abortan y restauran.
 
