@@ -15,7 +15,7 @@ export function preloadPortraitReactions(scene) {
   }
 }
 
-export function createPortraitReactionUi(scene, { x, y, width, framed = true, depth = 6200 } = {}) {
+export function createPortraitReactionUi(scene, { x, y, width, framed = true, depth = 6200, registerObject = (object) => object } = {}) {
   const viewportWidth = scene.scale?.width ?? 1280;
   const viewportHeight = scene.scale?.height ?? 720;
   x ??= viewportWidth / 2;
@@ -40,6 +40,7 @@ export function createPortraitReactionUi(scene, { x, y, width, framed = true, de
     fontFamily: 'monospace', fontSize: '18px', color: '#f2f5f7',
     wordWrap: { width: bubbleWidth - 32 },
   }).setScrollFactor(0).setDepth(depth + 1);
+  for (const object of [bubble, portrait, speech]) registerObject(object);
   let speakerLabel = null;
   let destroyed = false;
 
@@ -64,10 +65,10 @@ export function createPortraitReactionUi(scene, { x, y, width, framed = true, de
     bubble.setVisible(true);
     speech.setText(data.text).setVisible(true);
     speakerLabel?.destroy();
-    speakerLabel = createPixelText(scene, config.name, {
+    speakerLabel = registerObject(createPixelText(scene, config.name, {
       x: bubbleLeft + 16 + measurePixelText(config.name, { cellSize: 3 }).width / 2,
       y: y - 26, cellSize: 3, pixelInset: 0.5, color: 0x94a6b9, depth: depth + 1,
-    });
+    }));
   }
 
   function destroy() {

@@ -595,7 +595,7 @@ No se ejecutó browser QA ni se levantó el juego. Próximo paso exclusivo: **MA
 
 # 14.2 QA visual de Dirección — UI desacoplada del zoom + framing dentro del mapa (2026-10-04)
 
-QA detecta dos defectos pendientes:
+QA detectó dos defectos; corrección integrada técnicamente, pendiente de QA visual:
 
 1. El zoom de la world camera también escala el HUD de Bathroom Challenge. El HUD debe permanecer en tamaño/coordenadas de pantalla.
 2. El foco actual centra la puerta saliendo por encima de los límites del mapa, exponiendo un void oscuro.
@@ -629,7 +629,7 @@ HouseFacade devuelve `{ bathroomDoor: { sprite, label } }`. PatioWorld propaga e
 
 La anticipación visual dura 4800 ms: approach 400 ms a zoom 1.75 hacia el centro real del baño, 250 ms de hold antes del primer impacto, tres golpes físicos a 650/850/1050 ms y voces aprobadas a 1700/3200 ms. **CAMERA HOLD THROUGH RESISTANCE — INTEGRATED / VISUAL QA REQUIRED (2026-10-04): el framing de puerta NO vuelve a normal al comenzar Resistance. El zoom/foco alcanzado durante anticipation debe mantenerse durante los 10 s completos del minijuego para que los siete golpes físicos sigan ocurriendo sobre la puerta en primer plano. La cámara se restaura recién cuando Resistance termina y se entra a success/failure, o antes si el evento se destruye/shutdown/retry.** La última frase se conserva al entrar al panel y no desaparece por el cambio de fase.
 
-`bathroomDoorStaging.js` interpola por delta, sin efectos pan/zoom, timers ni tweens pendientes. Snapshot/restauración de scroll, zoom X/Y, follow, roundPixels, lerp, offset y bounds; los bounds se suspenden solo durante el encuadre para centrar la fachada superior. `hold()` mantiene el encuadre alcanzado sin nuevas escrituras/interpolación de cámara durante Resistance. `restore()` restituye el snapshot antes de transformar el panel a success/failure. `destroy()` queda como cleanup/final safety; restore/destroy son idempotentes y no duplican follow. No existe retorno de cámara en los últimos 350 ms de anticipation. Destroy/shutdown/retry abortan y restauran.
+`bathroomDoorStaging.js` interpola por delta, sin efectos pan/zoom, timers ni tweens pendientes. Snapshot/restauración de scroll, zoom X/Y, follow, roundPixels, lerp, offset, bounds y pivote. Los bounds permanecen activos; el viewport físico se limita al world real, sin scroll Y negativo. La puerta ocupa la franja superior. `hold()` mantiene el encuadre alcanzado sin nuevas escrituras/interpolación de cámara durante Resistance. `restore()` restituye el snapshot antes de transformar el panel a success/failure. `destroy()` queda como cleanup/final safety; restore/destroy son idempotentes y no duplican follow. No existe retorno de cámara en los últimos 350 ms de anticipation. Destroy/shutdown/retry abortan y restauran.
 
 Los nudges de puerta duran 120 ms con offsets enteros +2/−2/+1/0, moviendo sprite y BAÑO juntos y restituyendo el neutral exacto. Los siete impactos activos conservan daño/bar feedback y shake 80 ms/0.002, además del nudge. No hay rotación, scale ni deformación.
 
@@ -655,3 +655,16 @@ Microcorrección exclusivamente de cámara en `bathroomDoorStaging.js` y `bathro
 **254 tests aprobados, 0 fallos/omitidos; build correcto**, con advertencia existente de bundle >500 kB. UI, pacing, impactos +2/−2/+1/0 de 120 ms, shake 80 ms/0.002, active duration 10 s, balance/rewards y rutas permanecen intactos. Sin browser QA ni ejecución visual local.
 
 Próxima acción exclusiva: **MANUAL QA BY DIRECTION** para verificar puerta grande durante los diez segundos y framing normal al aparecer el resultado. **VISUAL QA REQUIRED; Bathroom Resistance 2.0 no queda CLOSED.**
+
+
+## UI CAMERA ISOLATION + WORLD-BOUND DOOR FRAMING — 2026-10-04
+
+**INTEGRATED TECHNICALLY / VISUAL QA REQUIRED.** Cámara local `bathroom-ui` (viewport completo, scroll 0/0, zoom 1, rotación 0) creada al comenzar anticipation y reutilizada hasta cerrar resolution. Main ignora todos los objetos Bathroom; la cámara UI ignora el mundo y demás HUDs, incluidos objetos añadidos después. El registro opt-in alcanza panel, barra, reward, texto, portraits y cada label pixel dinámico de timer/title/help/speaker, sin cambiar sus tamaños ni coordenadas. Los shakes siguen únicamente en main.
+
+PatioScene entrega `PATIO_LAYOUT.world` explícitamente al evento y al staging. El target usa width/zoom y height/zoom, clamped a 1680×960. A viewport 1280×720 y zoom 1.75: scroll aproximado (948.57, 0), puerta en franja superior; `useBounds = true` durante approach y hold. El pivote temporal (0,0) permite scroll como borde físico del viewport. Phaser 4.2.1 calcula clampX/Y y worldView suponiendo un pivote central: staging traduce únicamente los bounds del motor para conservar los límites físicos y ajusta worldView/midPoint derivado después de preRender, evitando culling incorrecto de tiles. El método preRender original, pivote, bounds y demás snapshot se restauran en success/failure y abort; no se modifica la geometría del mundo.
+
+La cámara UI permanece a zoom 1 durante resolution aunque main ya haya restaurado su framing. Finish/destroy/shutdown/retry eliminan cámara y listeners, restauran los bits de cameraFilter afectados preservando filtros ajenos y limpian referencias. Tres presentaciones consecutivas no acumulan cámaras. Restore/destroy son idempotentes.
+
+**257 tests aprobados; 0 fallos, 0 omitidos. `npm run build` correcto**, con advertencia existente de bundle >500 kB. Tests de UI cubren objetos estáticos/dinámicos y portrait speaker, aislamiento ante zoom/shake, resolución y tres ciclos/shutdown. Tests de staging aplican la fórmula real de clamp de Phaser durante todo approach y comprueban viewport/culling dentro del mundo y snapshot completo. Tests de evento mantienen siete golpes, hold activo, seis resoluciones y cleanup.
+
+No hubo navegador, screenshots ni ejecución visual local. Composición/pacing/copy/portraits, impactos, duración, JustDown/+4, perfiles/drain/damage/ordinal/rewards, rutas y retornos siguen intactos. Próxima acción exclusiva: **MANUAL QA BY DIRECTION** para framing dentro del mapa, HUD estable y cleanup visual. **VISUAL QA REQUIRED; Bathroom Resistance 2.0 no queda CLOSED.**

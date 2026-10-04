@@ -89,6 +89,7 @@ export class PatioScene extends Phaser.Scene {
             layout: PATIO_LAYOUT.events.bathroom,
             bathroomDoor: this.worldVisuals.bathroomDoor,
             bathroomBounds: PATIO_LAYOUT.house.bathroom,
+            worldBounds: PATIO_LAYOUT.world,
             ...eventConfig,
             onCompanionReturn: this.resolvedCharacterReturnSystem.start,
             onBathroomResolved: ({ characterId, result }) => {

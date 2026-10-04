@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { attachUiCameraManager } from '../test-support/bathroomCameras.js';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { EventEmitter } from 'node:events';
@@ -193,4 +194,56 @@ test('el dock interno no dibuja otro marco ni cola de globo', () => {
   const frame = scene.objects.find(({ type }) => type === 'graphics');
   assert.equal(frame.rectangles.length, 0);
   ui.destroy();
+});
+
+ test('Bathroom UI isolates static and dynamic objects from world zoom/shake through resolution', () => {
+  const scene = makeScene();
+  const world = { cameraFilter: 8 };
+  attachUiCameraManager(scene, [world]);
+  const ui = createBathroomChallengeUi(scene, getBathroomResistanceConfig(1));
+  const camera = scene.cameras.cameras[1];
+  assert.deepEqual([camera.x, camera.y, camera.width, camera.height, camera.scrollX, camera.scrollY,
+    camera.zoomX, camera.zoomY, camera.rotation], [0, 0, 1280, 720, 0, 0, 1, 1, 0]);
+  assert.equal(world.cameraFilter, 10);
+  scene.cameras.main.zoomX = 1.75; scene.cameras.main.shakeOffset = 12;
+  const checkUi = () => {
+    for (const object of scene.objects.filter(({ destroyed }) => !destroyed)) {
+      assert.equal(object.cameraFilter & 1, 1, 'main ignores every Bathroom object');
+      assert.equal(object.cameraFilter & 2, 0, 'UI camera includes every Bathroom object');
+    }
+    assert.equal(camera.zoomX, 1); assert.equal(camera.scrollX, 0);
+    assert.equal(camera.shakeOffset, undefined);
+  };
+  ui.showReaction(A); checkUi();
+  ui.startResistance();
+  for (let elapsedMs = 0; elapsedMs <= 10000; elapsedMs += 1000) {
+    ui.update({ state: { resistance: 55, elapsedMs }, presentation: elapsedMs % 2000 ? A : B }); checkUi();
+  }
+  const extraWorldObject = scene.add.rectangle(100, 100, 20, 20);
+  assert.equal(extraWorldObject.cameraFilter & 2, 2, 'new world objects are excluded');
+  extraWorldObject.destroy();
+  ui.showResolution('success', { rewardSettled: true, reaction: A }); ui.setReady(); checkUi();
+  assert.equal(scene.cameras.cameras.length, 2, 'resolution reuses its UI camera');
+  ui.destroy(); ui.destroy();
+  assert.equal(scene.cameras.cameras.length, 1); assert.equal(scene.cameras.removed, 1);
+  assert.equal(world.cameraFilter, 8, 'prior filters preserved');
+  assert.ok(scene.objects.every(({ cameraFilter }) => cameraFilter === 0));
+  assert.equal(scene.events.listenerCount('addedtoscene'), 0);
+});
+
+ test('three consecutive Bathroom presentations and shutdown leave no camera or filter leaks', () => {
+  const scene = makeScene(); const world = { cameraFilter: 0 };
+  attachUiCameraManager(scene, [world]);
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const ui = createBathroomChallengeUi(scene, getBathroomResistanceConfig(attempt));
+    ui.startResistance(); ui.showReaction(B);
+    assert.equal(scene.cameras.cameras.length, 2);
+    if (attempt === 3) scene.events.emit('shutdown'); else ui.destroy();
+    ui.destroy();
+    assert.equal(scene.cameras.cameras.length, 1);
+    assert.equal(world.cameraFilter, 0);
+    assert.equal(scene.events.listenerCount('addedtoscene'), 0);
+    assert.equal(scene.events.listenerCount('shutdown'), 0);
+  }
+  assert.equal(scene.cameras.removed, 3);
 });

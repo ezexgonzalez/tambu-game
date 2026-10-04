@@ -1,3 +1,4 @@
+import { createBathroomUiCameraScope } from './bathroomUiCamera.js';
 import { createPixelText } from './pixelText.js';
 import { createPortraitReactionUi } from './portraitReactionUi.js';
 import { BATHROOM_RESULT_CONFIG } from '../data/bathroomResultConfig.js';
@@ -52,8 +53,9 @@ function formatRemainingTime(remainingMs) {
 export function createBathroomChallengeUi(scene, config) {
   const layout = getBathroomPanelLayout(scene.scale?.width, scene.scale?.height);
   const { cx, top, left, width, height, dividerY, dockY } = layout;
+  const cameraScope = createBathroomUiCameraScope(scene);
   const elements = [];
-  const own = (object) => { elements.push(object); return object; };
+  const own = (object) => { elements.push(object); return cameraScope.register(object); };
   const panel = own(scene.add.rectangle(cx, top + height / 2, width, height, 0x081421, 0.97)
     .setScrollFactor(0).setDepth(PANEL_DEPTH).setStrokeStyle(1, 0x355a78, 1));
   const divider = own(scene.add.rectangle(cx, dividerY, width - 2, 1, 0x355a78, 1)
@@ -72,7 +74,7 @@ export function createBathroomChallengeUi(scene, config) {
     fontSize: '26px', color: '#f4cd63', fontStyle: 'bold',
   }).setOrigin(0.5));
   const reactions = createPortraitReactionUi(scene, {
-    x: cx, y: dockY, width: width - 48, framed: false, depth: PANEL_DEPTH + 3,
+    x: cx, y: dockY, width: width - 48, framed: false, depth: PANEL_DEPTH + 3, registerObject: cameraScope.register,
   });
   const labels = new Map();
   let phase = 'anticipation';
@@ -84,10 +86,10 @@ export function createBathroomChallengeUi(scene, config) {
     const previous = labels.get(id);
     if (previous?.text === text) return;
     previous?.object.destroy();
-    labels.set(id, { text, object: createPixelText(scene, text, {
+    labels.set(id, { text, object: cameraScope.register(createPixelText(scene, text, {
       x, y, cellSize, pixelInset: cellSize >= 3 ? 0.5 : 0,
       color, depth: PANEL_DEPTH + 2,
-    }) });
+    })) });
   }
   function removeLabel(id) { labels.get(id)?.object.destroy(); labels.delete(id); }
   function showReaction(reaction) {
@@ -142,6 +144,7 @@ export function createBathroomChallengeUi(scene, config) {
     reactions.destroy();
     for (const { object } of labels.values()) object.destroy();
     labels.clear(); elements.forEach((object) => object.destroy());
+    cameraScope.destroy();
     scene.events?.off?.('shutdown', destroy);
   }
   setAnticipation();

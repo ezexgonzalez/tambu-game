@@ -116,6 +116,7 @@ export function createBathroomEvent(scene, {
   layout,
   bathroomDoor,
   bathroomBounds,
+  worldBounds,
   onCompanionReturn = () => {},
   onBathroomResolved = () => false,
   resistanceConfig = getBathroomResistanceConfig(1),
@@ -240,7 +241,7 @@ export function createBathroomEvent(scene, {
   function startAnticipation() {
     destroyEventUi(uiElements);
     uiElements = createBathroomChallengeUi(scene, resistanceConfig);
-    cameraStaging = createBathroomCameraStaging(scene.cameras?.main, bathroomBounds);
+    cameraStaging = createBathroomCameraStaging(scene.cameras?.main, bathroomBounds, worldBounds);
     anticipationElapsedMs = 0;
     anticipationBeatIndex = 0;
     anticipationImpactIndex = 0;

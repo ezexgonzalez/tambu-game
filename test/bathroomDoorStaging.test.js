@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { attachWorldCameraGeometry } from '../test-support/bathroomCameras.js';
 import assert from 'node:assert/strict';
 import { registerHooks } from 'node:module';
 import { readFileSync } from 'node:fs';
@@ -19,7 +20,7 @@ function movable(x, y) {
   return { x, y, setPosition(x, y) { this.x = x; this.y = y; return this; } };
 }
 function camera() {
-  return {
+  return attachWorldCameraGeometry({
     width: 1280, height: 720, scrollX: 300, scrollY: 0, zoomX: 1, zoomY: 1,
     _follow: { x: 1343, y: 142 }, roundPixels: true, useBounds: true,
     lerp: { x: 0.1, y: 0.1 }, followOffset: { x: 7, y: 9 },
@@ -33,7 +34,7 @@ function camera() {
     },
     setScroll(x, y) { this.scrollX = x; this.scrollY = y; },
     setZoom(x, y) { this.zoomX = x; this.zoomY = y; },
-  };
+  }, PATIO_LAYOUT.world);
 }
 
 test('impacto pixel-safe mueve puerta y BAÑO juntos, restaura neutral y no acumula drift', () => {
@@ -58,22 +59,28 @@ test('camera staging centra baño, mantiene hold y restaura el snapshot solo con
   const cam = camera();
   const saved = { ...cam, lerp: { ...cam.lerp }, followOffset: { ...cam.followOffset } };
   const staging = createBathroomCameraStaging(cam, PATIO_LAYOUT.house.bathroom);
-  assert.equal(cam._follow, null); assert.equal(cam.useBounds, false);
+  assert.equal(cam._follow, null); assert.equal(cam.useBounds, true);
   staging.update(200);
   assert.ok(cam.zoomX > 1 && cam.zoomX < 1.75);
   staging.update(400);
   assert.equal(cam.zoomX, 1.75);
-  assert.equal(cam.scrollX + cam.width / 2, 1343);
-  assert.equal(cam.scrollY + cam.height / 2, 71);
+  cam.preRenderBounds();
+  assert.equal(cam.originX, 0); assert.equal(cam.originY, 0);
+  assert.ok(cam.scrollX >= 0 && cam.scrollY >= 0);
+  assert.ok(cam.scrollX + cam.width / cam.zoomX <= PATIO_LAYOUT.world.width + 1e-9);
+  assert.ok(cam.scrollY + cam.height / cam.zoomY <= PATIO_LAYOUT.world.height + 1e-9);
+  assert.equal(cam.scrollY, 0);
+  const doorScreenY = (150 - 61 - cam.scrollY) * cam.zoomY;
+  assert.ok(doorScreenY / cam.height >= 0.18 && doorScreenY / cam.height <= 0.28);
   const focused = [cam.scrollX, cam.scrollY, cam.zoomX, cam.zoomY];
   for (const elapsed of [4625, BATHROOM_DOOR_STAGING.durationMs, 14800]) {
     staging.update(elapsed); staging.hold();
     assert.deepEqual([cam.scrollX, cam.scrollY, cam.zoomX, cam.zoomY], focused);
-    assert.equal(cam._follow, null); assert.equal(cam.useBounds, false);
+    assert.equal(cam._follow, null); assert.equal(cam.useBounds, true);
     assert.equal(cam.followStarts, 0);
   }
   staging.restore();
-  for (const key of ['zoomX', 'zoomY', 'scrollX', 'scrollY', '_follow', 'roundPixels', 'useBounds', 'lerp', 'followOffset']) {
+  for (const key of ['zoomX', 'zoomY', 'scrollX', 'scrollY', '_follow', 'roundPixels', 'useBounds', 'lerp', 'followOffset', 'originX', 'originY', '_bounds', 'preRender']) {
     assert.deepEqual(cam[key], saved[key], key);
   }
   staging.restore(); staging.destroy(); staging.destroy(); staging.update(400); staging.hold();
@@ -142,4 +149,21 @@ test('createPatioWorld propaga el único sprite real de puerta y su label desde 
   const source = readFileSync('src/scenes/PatioScene.js', 'utf8');
   assert.match(source, /this\.worldVisuals = createPatioWorld\(this\)/);
   assert.match(source, /bathroomDoor: this\.worldVisuals\.bathroomDoor/);
+});
+
+ test('approach clamps the complete zoomed viewport within the real world on every frame', () => {
+  const cam = camera();
+  const staging = createBathroomCameraStaging(cam, PATIO_LAYOUT.house.bathroom, PATIO_LAYOUT.world);
+  for (let elapsed = 0; elapsed <= 400; elapsed += 10) {
+    staging.update(elapsed); cam.preRender();
+    assert.equal(cam.worldView.x, cam.scrollX);
+    assert.equal(cam.worldView.y, cam.scrollY);
+    assert.equal(cam.worldView.width, cam.width / cam.zoomX);
+    assert.equal(cam.worldView.height, cam.height / cam.zoomY);
+    assert.equal(cam.useBounds, true);
+    assert.ok(cam.scrollX >= -1e-9 && cam.scrollY >= -1e-9);
+    assert.ok(cam.scrollX + cam.width / cam.zoomX <= PATIO_LAYOUT.world.width + 1e-9);
+    assert.ok(cam.scrollY + cam.height / cam.zoomY <= PATIO_LAYOUT.world.height + 1e-9);
+  }
+  staging.destroy();
 });
