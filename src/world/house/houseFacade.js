@@ -62,12 +62,13 @@ function createBathroomDoor(scene, bathroom, floorY) {
     .setOrigin(0.5, 1)
     .setDepth(1);
 
-  scene.add.text(centerX, floorY - door.height + 12, 'BAÑO', {
+  const label = scene.add.text(centerX, floorY - door.height + 12, 'BAÑO', {
     fontFamily: 'monospace',
     fontSize: '8px',
     color: '#171a20',
     fontStyle: 'bold',
   }).setOrigin(0.5).setDepth(2);
+  return { sprite: door, label };
 }
 
 function createWallPlanters(scene, wallPlanters) {
@@ -99,7 +100,7 @@ export function createHouseFacade(scene, { house, wallPlanters }) {
 
   house.windows.forEach((window) => createWindow(scene, window));
   createHouseDoor(scene, house.secondaryDoor, floorY);
-  createBathroomDoor(scene, house.bathroom, floorY);
+  const bathroomDoor = createBathroomDoor(scene, house.bathroom, floorY);
 
   house.lamps.forEach(({ x, y }) => {
     scene.add.image(x + 7, y - 8, HOUSE_ASSETS.wallLamp.key)
@@ -108,4 +109,5 @@ export function createHouseFacade(scene, { house, wallPlanters }) {
   });
 
   createWallPlanters(scene, wallPlanters);
+  return { bathroomDoor };
 }

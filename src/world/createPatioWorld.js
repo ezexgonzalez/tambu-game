@@ -27,7 +27,7 @@ export function preloadPatioWorld(scene) {
 
 export function createPatioWorld(scene) {
   drawTerrain(scene);
-  drawArchitectureAndProps(scene);
+  return drawArchitectureAndProps(scene);
 }
 
 function drawTerrain(scene) {
@@ -66,7 +66,7 @@ function drawTerrain(scene) {
 function drawArchitectureAndProps(scene) {
   const graphics = scene.add.graphics();
 
-  createHouseFacade(scene, PATIO_LAYOUT);
+  const { bathroomDoor } = createHouseFacade(scene, PATIO_LAYOUT);
   createBar(scene, PATIO_LAYOUT.bar);
   createDjBooth(scene, PATIO_LAYOUT.dj);
   PATIO_LAYOUT.partyTables.forEach(({ x, y }) => drawPartyTable(graphics, x, y));
@@ -74,6 +74,7 @@ function drawArchitectureAndProps(scene) {
   drawPatioLanterns(graphics);
   drawGarlands(graphics);
   drawClutter(graphics);
+  return { bathroomDoor };
 }
 
 function drawPartyTable(graphics, x, y) {

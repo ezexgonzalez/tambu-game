@@ -15,7 +15,7 @@ export function preloadPortraitReactions(scene) {
   }
 }
 
-export function createPortraitReactionUi(scene, { x, y, width, depth = 6200 } = {}) {
+export function createPortraitReactionUi(scene, { x, y, width, framed = true, depth = 6200 } = {}) {
   const viewportWidth = scene.scale?.width ?? 1280;
   const viewportHeight = scene.scale?.height ?? 720;
   x ??= viewportWidth / 2;
@@ -25,13 +25,15 @@ export function createPortraitReactionUi(scene, { x, y, width, depth = 6200 } = 
   const bubbleLeft = left + 80;
   const bubbleWidth = width - 80;
   const bubble = scene.add.graphics().setScrollFactor(0).setDepth(depth);
-  bubble.fillStyle(0x081421, 1);
-  bubble.fillRect(bubbleLeft, y - 44, bubbleWidth, 88);
-  bubble.fillTriangle(bubbleLeft, y - 8, bubbleLeft - 10, y, bubbleLeft, y + 8);
-  bubble.lineStyle(1, 0x355a78, 1);
-  bubble.strokeRect(bubbleLeft, y - 44, bubbleWidth, 88);
-  bubble.lineBetween(bubbleLeft, y - 8, bubbleLeft - 10, y);
-  bubble.lineBetween(bubbleLeft - 10, y, bubbleLeft, y + 8);
+  if (framed) {
+    bubble.fillStyle(0x081421, 1);
+    bubble.fillRect(bubbleLeft, y - 44, bubbleWidth, 88);
+    bubble.fillTriangle(bubbleLeft, y - 8, bubbleLeft - 10, y, bubbleLeft, y + 8);
+    bubble.lineStyle(1, 0x355a78, 1);
+    bubble.strokeRect(bubbleLeft, y - 44, bubbleWidth, 88);
+    bubble.lineBetween(bubbleLeft, y - 8, bubbleLeft - 10, y);
+    bubble.lineBetween(bubbleLeft - 10, y, bubbleLeft, y + 8);
+  }
   const portrait = scene.add.image(left + 32, y, FRIEND_PORTRAITS.pitity.asset, 0)
     .setScrollFactor(0).setDepth(depth + 1);
   const speech = scene.add.text(bubbleLeft + 16, y - 6, '', {

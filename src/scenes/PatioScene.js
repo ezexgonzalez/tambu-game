@@ -62,7 +62,7 @@ export class PatioScene extends Phaser.Scene {
     this.runState = createRunState();
     this.configureWorld();
 
-    createPatioWorld(this);
+    this.worldVisuals = createPatioWorld(this);
     this.interactables = createCharacters(this);
     this.player = createPlayer(this);
     this.obstacles = createPatioCollisions(this, this.player.sprite);
@@ -87,6 +87,8 @@ export class PatioScene extends Phaser.Scene {
             ...request,
             player: this.player,
             layout: PATIO_LAYOUT.events.bathroom,
+            bathroomDoor: this.worldVisuals.bathroomDoor,
+            bathroomBounds: PATIO_LAYOUT.house.bathroom,
             ...eventConfig,
             onCompanionReturn: this.resolvedCharacterReturnSystem.start,
             onBathroomResolved: ({ characterId, result }) => {

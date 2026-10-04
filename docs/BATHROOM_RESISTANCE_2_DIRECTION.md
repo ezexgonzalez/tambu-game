@@ -1,6 +1,6 @@
 # Tambu Game — Bathroom Resistance 2.0 / Dirección narrativa
 
-**Estado:** CORRECTION PASS REQUIRED — UI / PACING / DOOR STAGING  
+**Estado:** CORRECTION PASS INTEGRATED / VISUAL QA REQUIRED  
 **Fecha:** 2026-10-03  
 **Autoridad:** dirección narrativa y presentation contract de Bathroom Resistance 2.0  
 **No reemplaza:** balance, rewards ni contratos de `bathroomResistance.js`
@@ -551,7 +551,9 @@ Esta correction pass es de presentación, pacing y staging. No reabre el diseño
 
 ---
 
-# 14. Registro de integración técnica — 2026-10-04
+# 14. Registro histórico de la primera integración técnica — 2026-10-04
+
+**Registro histórico: composición y knock cleanup reemplazados por la sección 15.**
 
 **BATHROOM RESISTANCE 2.0 — INTEGRATED TECHNICALLY / VISUAL QA REQUIRED.** El copy de las secciones 6–8 permanece intacto. CLOSED/FROZEN/BASELINE para esta capa depende del playtest de Dirección; el balance Pass 2 continúa cerrado.
 
@@ -587,3 +589,40 @@ Balance numérico sin cambios: 10 s, SPACE +4 mediante JustDown, siete impactos 
 **246/246 tests aprobados, 0 fallos, 0 omitidos. `npm run build` correcto**, con advertencia existente de chunk >500 kB. Cobertura nueva en `bathroomResistanceNarrative.test.js` y `portraitReactionUi.test.js`; extensión de `bathroomEvent.test.js`, `bathroomResistance.test.js` y `patioIntroGate.test.js` para contracts de assets/preload/expresiones, reemplazo/hide/destroy, knock cleanup, copy completo, ramas/snapshot sin mutación, fases/hits, seis resoluciones, cleanup/retry, layout geométrico y números de balance exactos. La cobertura existente de rewards, run state y retornos sigue verde.
 
 No se ejecutó browser QA ni se levantó el juego. Próximo paso exclusivo: **MANUAL NARRATIVE + VISUAL QA BY DIRECTION** sobre los tres intentos y sus ramas, según la sección 12. Esta integración no declara aprobación visual ni inicia PARTY PRESENCE.
+
+
+---
+
+# 15. Correction pass integrada — 2026-10-04
+
+**CORRECTION PASS INTEGRATED / VISUAL QA REQUIRED.** Este es el presentation contract runtime vigente. Las secciones 6–8 conservan la autoridad de copy/speakers/expresiones/memoria; sus timestamps describen los hits mecánicos, no obligan a reemplazar la frase visible en ese mismo instante. Los timings históricos de anticipation y la composición/cleanup de la sección 14 quedan supersedidos por esta corrección.
+
+## Una unidad visual
+
+`createBathroomChallengeUi()` crea un solo marco centrado de 760×310 px en viewport 1280×720, con núcleo de 210 px y dock inferior reservado de 100 px. Título `RESISTENCIA DEL BAÑO`, timer pixel `00:10` arriba a la derecha, barra oscura con borde y padding, resistencia numérica secundaria y prompt pequeño `SPACE · APRETÁ REPETIDAMENTE`. Divider de 1 px `0x355a78`; portrait nativo 64×64, nombre pixel uppercase y frase legible debajo. `framed: false` evita caja/cola de globo flotante adicional. El layout no cambia al reemplazar una voz o entrar a resolución.
+
+Success/failure transforma la misma instancia en `PUERTA ASEGURADA` / `LA PUERTA CEDIÓ`, reward +500/+250 liquidado y reaction dock. El prompt `ENTER · VOLVER AL PATIO` aparece tras 900 ms. ENTER/SPACE previos, incluidos los del frame habilitante, se consumen; se exige ENTER fresco para volver.
+
+## Puerta real y cámara
+
+HouseFacade devuelve `{ bathroomDoor: { sprite, label } }`. PatioWorld propaga esas referencias y PatioScene las conserva en `worldVisuals` para BathroomEvent. No se alteraron assets ni se creó puerta alternativa.
+
+La anticipación visual dura 4800 ms: approach 400 ms a zoom 1.75 hacia el centro real del baño, 250 ms de hold antes del primer impacto, tres golpes físicos a 650/850/1050 ms, voces aprobadas a 1700/3200 ms y retorno durante los últimos 350 ms. El framing normal se restituye antes de Resistance; la última frase se conserva al entrar al panel y no desaparece por el cambio de fase.
+
+`bathroomDoorStaging.js` interpola por delta, sin efectos pan/zoom, timers ni tweens pendientes. Snapshot/restauración de scroll, zoom X/Y, follow, roundPixels, lerp, offset y bounds; los bounds se suspenden solo durante el encuadre para centrar la fachada superior. Destroy/shutdown/retry abortan y restauran.
+
+Los nudges de puerta duran 120 ms con offsets enteros +2/−2/+1/0, moviendo sprite y BAÑO juntos y restituyendo el neutral exacto. Los siete impactos activos conservan daño/bar feedback y shake 80 ms/0.002, además del nudge. No hay rotación, scale ni deformación.
+
+## Pacing y golpes sin texto
+
+No se muestra `PUM` ni sus variantes. Un marcador sin speaker no genera texto y no limpia una intervención hablada. La última voz permanece hasta la siguiente voz/fase/resolución; nunca se acumulan portraits.
+
+`getBathroomReactionTimeline()` mantiene la selección narrativa aprobada y reserva lectura independientemente del daño: 1600 ms mínimos en intentos 1/2; 1400 ms para el cambio más rápido del intento 3; ramas de memoria con 2000 ms prioritarios. Las últimas líneas reciben 1900–2100 ms en intentos 1/2 y 1600 ms en el tercero. El timeline cabe en 10 s; no extiende el gameplay ni altera un hit. Fallo temprano puede interrumpir naturalmente la secuencia activa y pasar a su reacción final.
+
+## Regresiones protegidas y QA pendiente
+
+Balance Pass 2 intacto: active duration 10000 ms, JustDown/+4, perfiles, ordinal, siete timestamps/daños/drain y maxResistance. Rewards/vidas, secured/interrupted, Perfect Night, rutas/velocidad/return, portraits y copy/memoria no cambiaron. Los campos históricos de anticipation en el config mecánico no se modificaron; el controller usa el pacing visual explícito de esta sección.
+
+**253/253 tests verdes, 0 failures/skips; `npm run build` verde**. Sigue la advertencia conocida del chunk >500 kB. Tests nuevos en `bathroomDoorStaging.test.js`; ampliaciones en `bathroomEvent.test.js`, `portraitReactionUi.test.js` y `pixelText.test.js`: referencias reales, cámara y cleanup, impactos sin drift, timeline legible, dock/panel únicos, no textual knocks, persistencia de voces, transición y resolución compartidas, input residual y regresiones mecánicas/rewards.
+
+No hubo browser QA, screenshots ni ejecución visual local. Dirección debe validar encuadre/puerta, lectura de las tres progresiones y memoria, handoff, composición/dock, resolución e input. **No se declara CLOSED/BASELINE para Bathroom Resistance 2.0 ni se comienza el siguiente bloque.**

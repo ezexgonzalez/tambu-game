@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createPixelText, measurePixelText, PIXEL_GLYPHS } from '../src/ui/pixelText.js';
 
 test('pixel alphabet uses complete 5×7 binary glyphs', () => {
-  assert.equal(Object.keys(PIXEL_GLYPHS).length, 40);
+  assert.equal(Object.keys(PIXEL_GLYPHS).length, 42);
   for (const [letter, rows] of Object.entries(PIXEL_GLYPHS)) {
     assert.equal(rows.length, 7, `${letter} row count`);
     for (const row of rows) assert.match(row, /^[01]{5}$/, `${letter} glyph row`);

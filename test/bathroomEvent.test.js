@@ -18,6 +18,8 @@ import {
 import { getPatioCollisionZones } from '../src/world/createPatioCollisions.js';
 import { PATIO_LAYOUT } from '../src/world/patioLayout.js';
 import { getBathroomResistanceNarrative } from '../src/data/bathroomResistanceNarrative.js';
+import { BATHROOM_DOOR_STAGING } from '../src/events/bathroomDoorStaging.js';
+import { getBathroomReactionTimeline } from '../src/events/bathroomReactionTimeline.js';
 import { createBathroomResistanceUi } from '../src/ui/eventUi.js';
 
 const phaserMock = 'data:text/javascript,' + encodeURIComponent(`
@@ -37,7 +39,7 @@ const hooks = registerHooks({
 });
 const { createBathroomEvent, getBathroomFormationOffset } = await import('../src/events/bathroomEvent.js');
 hooks.deregister();
-import { getBathroomResistanceConfig } from '../src/events/bathroomResistance.js';
+import { advanceBathroomResistance, recoverBathroomResistance, getBathroomResistanceConfig } from '../src/events/bathroomResistance.js';
 
 function actor(x, y) {
   const sprite = {
@@ -264,28 +266,30 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
   keys.ENTER.edge = true;
   assert.equal(event.update(), true);
   assert.equal(event.getMode(), 'anticipation');
-  scene.game.loop.delta = 3000;
+  scene.game.loop.delta = BATHROOM_DOOR_STAGING.durationMs;
   event.update();
   assert.equal(event.getMode(), 'resistance');
   assert.equal(event.getResistanceState().resistance, 55);
-  assert.ok(objects.some(({ text }) => text.includes('RESISTENCIA DEL BAÑO')));
+  assert.ok(objects.some(({ depth }) => depth === 6102), 'pixel display registrado');
 
   scene.game.loop.delta = 1000;
   while (event.getMode() === 'resistance') event.update();
   assert.equal(event.getMode(), 'failure');
-  assert.ok(objects.some(({ text }) => text.includes('LA PUERTA CEDIÓ')));
+  assert.ok(objects.some(({ depth, destroyed }) => depth === 6102 && !destroyed));
   assert.ok(objects.some(({ text, destroyed }) => text === '+250 ★' && !destroyed));
   assert.deepEqual(bathroomResolutions, [{ characterId: 'sofi', result: 'failure' }]);
   assert.equal(gameState.player.points, 250);
   assert.equal(gameState.player.lives, 3);
   assert.equal(getBathroomResult(gameState, 'sofi'), 'interrupted');
   assert.equal(gameState.relationships.sofi.outcome, 'bathroom');
-  assert.ok(objects.some(({ text }) => text.includes('ENTER · VOLVER AL PATIO')));
+  assert.equal(event.getMode(), 'failure', 'el retorno espera un input nuevo tras la lectura');
 
   keys.SPACE.edge = true;
   assert.equal(event.update(), true);
   assert.equal(event.getMode(), 'failure');
 
+  scene.game.loop.delta = 900;
+  event.update();
   keys.ENTER.edge = true;
   assert.equal(event.update(), false);
   assert.equal(event.getMode(), 'complete');
@@ -374,7 +378,7 @@ test('BathroomEvent recibe el perfil del intento y SPACE solo recupera con JustD
   assert.ok(frames < 400);
   keys.ENTER.edge = true;
   event.update();
-  scene.game.loop.delta = 3000;
+  scene.game.loop.delta = BATHROOM_DOOR_STAGING.durationMs;
   event.update();
   assert.equal(event.getMode(), 'resistance');
   assert.equal(event.getResistanceState().resistance, 50);
@@ -398,7 +402,7 @@ test('Bathroom Resistance instruye pulsaciones repetidas', () => {
     },
   };
   const ui = createBathroomResistanceUi(scene, getBathroomResistanceConfig(1));
-  const help = ui.elements.find(({ text }) => text.includes('SPACE'));
+  const help = { text: ui.getView().labels.help };
 
   assert.equal(help.text, 'SPACE · APRETÁ REPETIDAMENTE');
   assert.doesNotMatch(help.text, /MANTENÉ|MANTENER/i);
@@ -533,7 +537,7 @@ test('SPACE sostenido mediante pulsaciones físicas permite asegurar la puerta',
   while (event.getMode() === 'walking') event.update();
   keys.SPACE.edge = true;
   event.update();
-  scene.game.loop.delta = 3000;
+  scene.game.loop.delta = BATHROOM_DOOR_STAGING.durationMs;
   event.update();
   assert.equal(event.getMode(), 'resistance');
 
@@ -552,7 +556,7 @@ test('SPACE sostenido mediante pulsaciones físicas permite asegurar la puerta',
   }
 
   assert.equal(event.getMode(), 'success');
-  assert.ok(objects.some(({ text }) => text.includes('PUERTA ASEGURADA')));
+  assert.ok(objects.some(({ depth, destroyed }) => depth === 6102 && !destroyed));
   assert.ok(objects.some(({ text, destroyed }) => text === '+500 ★' && !destroyed));
   assert.deepEqual(bathroomResolutions, [{ characterId: 'sofi', result: 'success' }]);
 
@@ -561,6 +565,8 @@ test('SPACE sostenido mediante pulsaciones físicas permite asegurar la puerta',
   assert.equal(event.getMode(), 'success');
   assert.equal(bathroomResolutions.length, 1, 'la liquidación ocurre solo al resolver Resistance');
 
+  scene.game.loop.delta = 900;
+  event.update();
   keys.ENTER.edge = true;
   assert.equal(event.update(), false);
   assert.equal(event.getMode(), 'complete');
@@ -725,6 +731,9 @@ function narrativeEventRuntime(attemptNumber, previousResults = []) {
     cameras: { main: { shake: (...args) => shakes.push(args) } },
   };
   const shakes = [];
+  const doorPositions = [];
+  const bathroomDoor = { sprite: display(1343, 150), label: display(1343, 40) };
+  bathroomDoor.sprite.setPosition = function (x, y) { this.x = x; this.y = y; doorPositions.push([x, y]); return this; };
   const player = { sprite: actor(400, 690), label: display(400, 724), facing: 'down' };
   const interactable = {
     sprite: actor(400, 690), label: display(400, 726), marker: display(400, 635),
@@ -732,11 +741,22 @@ function narrativeEventRuntime(attemptNumber, previousResults = []) {
   };
   const gameState = createGameState();
   gameState.relationships.sofi = { outcome: 'bathroom', bathroomResult: null, rewardSettled: false };
+  const camera = scene.cameras.main;
+  Object.assign(camera, {
+    width: 1280, height: 720, scrollX: 300, scrollY: 0, zoomX: 1, zoomY: 1,
+    _follow: player.sprite, roundPixels: true, useBounds: true,
+    lerp: { x: 0.1, y: 0.1 }, followOffset: { x: 0, y: 0 },
+    stopFollow() { this._follow = null; },
+    startFollow(target) { this._follow = target; this.scrollX = 999; this.scrollY = 999; },
+    setScroll(x, y) { this.scrollX = x; this.scrollY = y; },
+    setZoom(x, y) { this.zoomX = x; this.zoomY = y; },
+  });
   const narrative = getBathroomResistanceNarrative({ attemptNumber, previousResults });
   const event = createBathroomEvent(scene, {
     player, interactable, outcome: SOFI_CONVERSATION.outcomes.bathroom,
     layout: PATIO_LAYOUT.events.bathroom,
     resistanceConfig: getBathroomResistanceConfig(attemptNumber), narrative,
+    bathroomDoor, bathroomBounds: PATIO_LAYOUT.house.bathroom,
     onBathroomResolved: ({ characterId, result }) => settleBathroomResult(gameState, characterId, result),
   });
   for (let frames = 0; event.getMode() === 'walking' && frames < 400; frames++) event.update();
@@ -745,90 +765,87 @@ function narrativeEventRuntime(attemptNumber, previousResults = []) {
   event.update();
   const visibleText = () => objects.filter(({ visible, destroyed }) => visible && !destroyed).map(({ text }) => text);
   const portrait = () => objects.find(({ texture, destroyed }) => texture && !destroyed);
-  return { scene, event, objects, keys, shakes, gameState, narrative, player, interactable, visibleText, portrait };
+  return { scene, event, objects, keys, shakes, bathroomDoor, doorPositions, gameState, narrative, player, interactable, visibleText, portrait };
 }
 
-test('los beats 1700/2450 ms usan speakers exactos y el comienzo de Resistance limpia anticipation', () => {
+test('anticipation permite leer las dos voces y conserva la última al aparecer Resistance', () => {
   for (const [attempt, previous] of [[1, []], [2, ['secured']], [3, ['secured', 'interrupted']]]) {
     const runtime = narrativeEventRuntime(attempt, previous);
     const { scene, event, narrative, visibleText, portrait } = runtime;
-    scene.game.loop.delta = 1699;
-    event.update();
+    scene.game.loop.delta = 1699; event.update();
     assert.equal(portrait().visible, false);
-    scene.game.loop.delta = 1;
-    event.update();
-    assert.ok(visibleText().includes(narrative.anticipation[0].text));
-    assert.equal(portrait().visible, Boolean(narrative.anticipation[0].speaker));
-    scene.game.loop.delta = 750;
-    event.update();
+    scene.game.loop.delta = 1; event.update();
+    if (narrative.anticipation[0].speaker) assert.ok(visibleText().includes(narrative.anticipation[0].text));
+    assert.ok(visibleText().every((text) => !String(text).includes('PUM')));
+    scene.game.loop.delta = 1500; event.update();
     assert.ok(visibleText().includes(narrative.anticipation[1].text));
-    assert.equal(portrait().texture, `ui_portrait_${narrative.anticipation[1].speaker}`);
-    assert.equal(portrait().frame, narrative.anticipation[1].expression === 'angry' ? 1 : 0);
-    scene.game.loop.delta = 550;
-    event.update();
+    const lastPortrait = portrait();
+    scene.game.loop.delta = 1600; event.update();
     assert.equal(event.getMode(), 'resistance');
-    assert.equal(portrait().visible, false);
+    assert.equal(portrait(), lastPortrait, 'handoff mantiene el widget y su geometría');
+    assert.ok(visibleText().includes(narrative.anticipation[1].text));
+    scene.game.loop.delta = 799; event.update();
+    assert.ok(visibleText().includes(narrative.anticipation[1].text));
     event.destroy();
     assert.ok(runtime.objects.every(({ destroyed }) => destroyed));
     assert.equal(scene.events.listenerCount('shutdown'), 0);
   }
 });
 
-test('los siete hits presentan el índice correcto, knock limpia la cara y shake conserva 80/0.002', () => {
+test('los siete hits mantienen daño/shake y las voces siguen su timeline sin texto de golpes', () => {
   for (const [attempt, previous] of [[1, []], [2, ['interrupted']], [3, ['secured', 'interrupted']]]) {
     const runtime = narrativeEventRuntime(attempt, previous);
     const { scene, event, narrative, keys, portrait, visibleText } = runtime;
-    scene.game.loop.delta = 3000;
-    event.update();
-    for (let elapsed = 100; elapsed <= 9300; elapsed += 100) {
-      const oldIndex = event.getResistanceState().nextHitIndex;
-      scene.game.loop.delta = 100;
-      keys.SPACE.edge = true;
-      event.update();
-      const index = event.getResistanceState().nextHitIndex;
-      if (index !== oldIndex) {
-        const beat = narrative.hits[index - 1];
-        assert.ok(visibleText().includes(beat.text));
-        assert.equal(portrait().visible, Boolean(beat.speaker));
-        if (beat.speaker) {
-          assert.equal(portrait().texture, `ui_portrait_${beat.speaker}`);
-          assert.equal(portrait().frame, { talk: 0, angry: 1, shout: 2 }[beat.expression]);
-        }
-      }
+    scene.game.loop.delta = BATHROOM_DOOR_STAGING.durationMs; event.update();
+    const timeline = getBathroomReactionTimeline(narrative, getBathroomResistanceConfig(attempt));
+    let expectedState = event.getResistanceState();
+    for (let elapsed = 100; elapsed <= 9900; elapsed += 100) {
+      scene.game.loop.delta = 100; keys.SPACE.edge = true; event.update();
+      expectedState = advanceBathroomResistance(recoverBathroomResistance(expectedState, getBathroomResistanceConfig(attempt)), 100, getBathroomResistanceConfig(attempt)).state;
+      assert.deepEqual(event.getResistanceState(), expectedState, 'presentación no altera la mecánica');
+      const expected = timeline.filter(({ at }) => at <= elapsed).at(-1)?.reaction
+        ?? narrative.anticipation[1];
+      assert.ok(visibleText().includes(expected.text));
+      assert.equal(portrait().texture, `ui_portrait_${expected.speaker}`);
+      assert.equal(portrait().frame, { talk: 0, angry: 1, shout: 2 }[expected.expression]);
+      assert.ok(visibleText().every((text) => !String(text).includes('PUM')));
     }
     assert.equal(event.getResistanceState().nextHitIndex, 7);
     assert.deepEqual(runtime.shakes, Array.from({ length: 7 }, () => [80, 0.002]));
+    assert.equal(runtime.doorPositions.filter(([x]) => x === 1345).length, 8, 'primera ráfaga encolada + siete impactos activos');
     event.destroy();
+    assert.deepEqual([runtime.bathroomDoor.sprite.x, runtime.bathroomDoor.label.x], [1343, 1343]);
   }
 });
 
-test('los seis cierres narrativos liquidan una vez, conservan vidas y limpian la UI al devolver el patio', () => {
+test('los seis cierres liquidan una vez y exigen ENTER fresco tras 900 ms de lectura', () => {
   for (const attempt of [1, 2, 3]) {
     for (const result of ['success', 'failure']) {
       const runtime = narrativeEventRuntime(attempt, Array(attempt - 1).fill('secured'));
       const { scene, event, keys, gameState, narrative, visibleText, portrait } = runtime;
-      scene.game.loop.delta = 3000;
-      event.update();
+      scene.game.loop.delta = BATHROOM_DOOR_STAGING.durationMs; event.update();
+      const firstPortrait = portrait();
       for (let frames = 0; event.getMode() === 'resistance' && frames < 101; frames++) {
-        scene.game.loop.delta = 100;
-        keys.SPACE.edge = result === 'success';
-        event.update();
+        scene.game.loop.delta = 100; keys.SPACE.edge = result === 'success'; event.update();
       }
       assert.equal(event.getMode(), result);
+      assert.equal(portrait(), firstPortrait, 'resolución transforma el mismo componente');
       assert.ok(visibleText().includes(narrative.resolution[result].text));
-      assert.equal(portrait().texture, `ui_portrait_${narrative.resolution[result].speaker}`);
       assert.equal(gameState.player.points, result === 'success' ? 500 : 250);
       assert.equal(gameState.player.lives, 3);
       assert.equal(gameState.relationships.sofi.bathroomResult, result === 'success' ? 'secured' : 'interrupted');
       assert.equal(gameState.relationships.sofi.outcome, 'bathroom');
-      event.update();
-      assert.equal(gameState.player.points, result === 'success' ? 500 : 250);
-      keys.ENTER.edge = true;
-      assert.equal(event.update(), false);
+      for (const delta of [450, 450]) {
+        scene.game.loop.delta = delta; keys.ENTER.edge = true;
+        assert.equal(event.update(), true, 'input temprano y del frame habilitante consumido');
+      }
+      scene.game.loop.delta = 0;
+      assert.equal(event.update(), true, 'no se reutiliza el ENTER consumido');
+      keys.ENTER.edge = true; assert.equal(event.update(), false);
       assert.equal(runtime.player.sprite.visible, true);
       assert.equal(runtime.interactable.sprite.visible, true);
-      event.destroy();
-      event.destroy();
+      assert.equal(gameState.player.points, result === 'success' ? 500 : 250);
+      event.destroy(); event.destroy();
       assert.equal(event.update(), false);
       assert.ok(runtime.objects.every(({ destroyed }) => destroyed));
       assert.equal(scene.events.listenerCount('shutdown'), 0);
@@ -836,27 +853,22 @@ test('los seis cierres narrativos liquidan una vez, conservan vidas y limpian la
   }
 });
 
-test('stop/shutdown en anticipation, resistance o resolution no deja UI ni reacción al iniciar otra run', () => {
+test('stop/shutdown en anticipation, resistance o resolution limpia UI y permite una run nueva', () => {
   for (const phase of ['anticipation', 'resistance', 'resolution']) {
     const runtime = narrativeEventRuntime(2, ['secured']);
     const { scene, event } = runtime;
-    scene.game.loop.delta = 2450;
-    event.update();
+    scene.game.loop.delta = 3200; event.update();
     if (phase !== 'anticipation') {
-      scene.game.loop.delta = 550;
-      event.update();
-      scene.game.loop.delta = 1900;
-      event.update();
+      scene.game.loop.delta = 1600; event.update();
+      scene.game.loop.delta = 1900; event.update();
     }
     if (phase === 'resolution') {
-      scene.game.loop.delta = 10000;
-      event.update();
+      scene.game.loop.delta = 10000; event.update();
       assert.equal(event.getMode(), 'failure');
     }
     const system = createOutcomeEventSystem({ handlers: { bathroom: () => event } });
     system.start({ type: 'bathroom' });
-    scene.events.once('shutdown', system.stop);
-    scene.events.emit('shutdown');
+    scene.events.once('shutdown', system.stop); scene.events.emit('shutdown');
     assert.equal(system.isActive(), false);
     assert.equal(event.update(), false);
     assert.ok(runtime.objects.every(({ destroyed }) => destroyed));
@@ -864,7 +876,30 @@ test('stop/shutdown en anticipation, resistance o resolution no deja UI ni reacc
     assert.equal(runtime.player.sprite.visible, true);
     const next = narrativeEventRuntime(1);
     assert.equal(next.portrait().visible, false);
-    assert.ok(next.visibleText().every((text) => !text.includes('LA PRIMERA TE SALIÓ')));
+    assert.ok(next.visibleText().every((text) => !String(text).includes('LA PRIMERA TE SALIÓ')));
     next.event.destroy();
+  }
+});
+
+
+test('BathroomEvent restaura cámara antes de Resistance y shutdown devuelve puerta/cámara durante staging', () => {
+  for (const interrupt of [false, true]) {
+    const runtime = narrativeEventRuntime(2, ['secured']);
+    const { scene, event, player, bathroomDoor } = runtime;
+    const camera = scene.cameras.main;
+    assert.equal(camera._follow, null);
+    scene.game.loop.delta = 650; event.update();
+    assert.equal(camera.zoomX, 1.75);
+    assert.equal(bathroomDoor.sprite.x, 1345);
+    assert.equal(bathroomDoor.label.x, 1345);
+    if (interrupt) scene.events.emit('shutdown');
+    else { scene.game.loop.delta = 4150; event.update(); }
+    assert.deepEqual([camera.scrollX, camera.scrollY, camera.zoomX, camera.zoomY], [300, 0, 1, 1]);
+    assert.equal(camera._follow, player.sprite);
+    assert.equal(camera.useBounds, true);
+    if (!interrupt) assert.equal(event.getMode(), 'resistance');
+    event.destroy();
+    assert.deepEqual([bathroomDoor.sprite.x, bathroomDoor.label.x], [1343, 1343]);
+    assert.equal(scene.events.listenerCount('shutdown'), 0);
   }
 });

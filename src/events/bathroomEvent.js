@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { BATHROOM_DOOR_STAGING, createBathroomCameraStaging, createBathroomDoorImpact } from './bathroomDoorStaging.js';
+import { getBathroomReactionTimeline } from './bathroomReactionTimeline.js';
 import { getBathroomResistanceNarrative } from '../data/bathroomResistanceNarrative.js';
 import { playCamiIdle, playCamiWalk, setCamiDepth } from '../characters/camiSprite.js';
 import { playMiliIdle, playMiliWalk, setMiliDepth } from '../characters/miliSprite.js';
@@ -11,9 +13,7 @@ import {
   recoverBathroomResistance,
 } from './bathroomResistance.js';
 import {
-  createBathroomAnticipationUi,
-  createBathroomResistanceUi,
-  createBathroomResolutionUi,
+  createBathroomChallengeUi,
   createOutcomeEventUi,
   destroyEventUi,
 } from '../ui/eventUi.js';
@@ -114,6 +114,8 @@ export function createBathroomEvent(scene, {
   interactable,
   outcome,
   layout,
+  bathroomDoor,
+  bathroomBounds,
   onCompanionReturn = () => {},
   onBathroomResolved = () => false,
   resistanceConfig = getBathroomResistanceConfig(1),
@@ -145,6 +147,13 @@ export function createBathroomEvent(scene, {
   let uiElements = null;
   let anticipationElapsedMs = 0;
   let anticipationBeatIndex = 0;
+  let anticipationImpactIndex = 0;
+  let reactionIndex = 0;
+  let resolutionElapsedMs = 0;
+  let resolutionReady = false;
+  let cameraStaging = null;
+  const doorImpact = createBathroomDoorImpact(bathroomDoor);
+  const reactionTimeline = getBathroomReactionTimeline(narrative, resistanceConfig);
   let resistanceState = null;
   let presentation = null;
   let destroyed = false;
@@ -197,6 +206,9 @@ export function createBathroomEvent(scene, {
   }
 
   function finish() {
+    cameraStaging?.destroy();
+    doorImpact.destroy();
+    scene.events?.off?.('shutdown', destroy);
     restorePlayer();
     restoreCompanion();
     onCompanionReturn(interactable);
@@ -227,64 +239,66 @@ export function createBathroomEvent(scene, {
 
   function startAnticipation() {
     destroyEventUi(uiElements);
-    uiElements = createBathroomAnticipationUi(scene);
-    uiElements.update(null);
+    uiElements = createBathroomChallengeUi(scene, resistanceConfig);
+    cameraStaging = createBathroomCameraStaging(scene.cameras?.main, bathroomBounds);
     anticipationElapsedMs = 0;
     anticipationBeatIndex = 0;
+    anticipationImpactIndex = 0;
     mode = 'anticipation';
   }
 
   function startResistance() {
-    destroyEventUi(uiElements);
+    cameraStaging?.destroy();
     resistanceState = createBathroomResistanceState(resistanceConfig);
-    presentation = null;
-    uiElements = createBathroomResistanceUi(scene, resistanceConfig);
+    uiElements.startResistance(presentation);
     uiElements.update({ state: resistanceState, presentation });
     mode = 'resistance';
   }
 
   function updateAnticipation() {
+    Phaser.Input.Keyboard.JustDown(enterKey);
+    Phaser.Input.Keyboard.JustDown(spaceKey);
     anticipationElapsedMs += Math.max(0, scene.game.loop.delta);
-    const beats = resistanceConfig.anticipation.beats;
-    while (
-      anticipationBeatIndex < beats.length
-      && beats[anticipationBeatIndex].at <= anticipationElapsedMs
-    ) {
-      uiElements.update(narrative.anticipation[anticipationBeatIndex]);
-      anticipationBeatIndex += 1;
+    cameraStaging.update(anticipationElapsedMs);
+    while (anticipationImpactIndex < BATHROOM_DOOR_STAGING.impacts.length
+      && BATHROOM_DOOR_STAGING.impacts[anticipationImpactIndex] <= anticipationElapsedMs) {
+      doorImpact.trigger();
+      anticipationImpactIndex += 1;
     }
-    if (anticipationElapsedMs >= resistanceConfig.anticipation.durationMs) startResistance();
+    while (anticipationBeatIndex < narrative.anticipation.length
+      && BATHROOM_DOOR_STAGING.spokenAt[anticipationBeatIndex] <= anticipationElapsedMs) {
+      const beat = narrative.anticipation[anticipationBeatIndex++];
+      if (beat.speaker) { presentation = beat; uiElements.showReaction(beat); }
+    }
+    if (anticipationElapsedMs >= BATHROOM_DOOR_STAGING.durationMs) startResistance();
     return true;
   }
 
   function showResistanceResolution(result) {
-    destroyEventUi(uiElements);
     const rewardSettled = onBathroomResolved({ characterId, result }) === true;
-    uiElements = createBathroomResolutionUi(scene, result, { rewardSettled, reaction: narrative.resolution[result] });
+    uiElements.showResolution(result, { rewardSettled, reaction: narrative.resolution[result] });
+    resolutionElapsedMs = 0;
+    resolutionReady = false;
     mode = result;
   }
 
   function updateResistance() {
+    Phaser.Input.Keyboard.JustDown(enterKey);
     const space = Phaser.Input.Keyboard.JustDown(spaceKey);
     if (space) resistanceState = recoverBathroomResistance(resistanceState, resistanceConfig);
-
-    const update = advanceBathroomResistance(
-      resistanceState,
-      Math.max(0, scene.game.loop.delta),
-      resistanceConfig,
-    );
+    const update = advanceBathroomResistance(resistanceState,
+      Math.max(0, scene.game.loop.delta), resistanceConfig);
     resistanceState = update.state;
-    const hit = update.hits.at(-1);
-    if (hit) {
-      presentation = narrative.hits[resistanceState.nextHitIndex - 1];
+    for (const hit of update.hits) {
+      doorImpact.trigger();
       scene.cameras?.main?.shake?.(80, 0.002);
     }
-    uiElements.update({
-      state: resistanceState,
-      presentation,
-      feedback: hit ? 'hit' : space ? 'recover' : 'idle',
-    });
-
+    while (reactionIndex < reactionTimeline.length
+      && reactionTimeline[reactionIndex].at <= resistanceState.elapsedMs) {
+      presentation = reactionTimeline[reactionIndex++].reaction;
+    }
+    uiElements.update({ state: resistanceState, presentation,
+      feedback: update.hits.length ? 'hit' : space ? 'recover' : 'idle' });
     if (resistanceState.status !== 'active') showResistanceResolution(resistanceState.status);
     return true;
   }
@@ -298,12 +312,21 @@ export function createBathroomEvent(scene, {
 
   function updateResolution() {
     const enter = Phaser.Input.Keyboard.JustDown(enterKey);
-    if (enter) return finish();
+    Phaser.Input.Keyboard.JustDown(spaceKey);
+    const wasReady = resolutionReady;
+    resolutionElapsedMs += Math.max(0, scene.game.loop.delta);
+    if (!resolutionReady && resolutionElapsedMs >= 900) {
+      resolutionReady = true;
+      uiElements.setReady();
+    }
+    // Consume the input on the enabling frame too; a fresh press returns to the patio.
+    if (wasReady && enter) return finish();
     return true;
   }
 
   function update() {
     if (destroyed) return false;
+    doorImpact.update(scene.game.loop.delta);
     if (mode === 'walking') return updateWalking();
     if (mode === 'bathroom-achieved') return updateBathroomAchieved();
     if (mode === 'anticipation') return updateAnticipation();
@@ -315,6 +338,9 @@ export function createBathroomEvent(scene, {
   function destroy() {
     if (destroyed) return;
     destroyed = true;
+    cameraStaging?.destroy();
+    doorImpact.destroy();
+    scene.events?.off?.('shutdown', destroy);
     destroyEventUi(uiElements);
     uiElements = null;
 
@@ -332,6 +358,7 @@ export function createBathroomEvent(scene, {
     }
   }
 
+  scene.events?.once?.('shutdown', destroy);
   return {
     update,
     destroy,

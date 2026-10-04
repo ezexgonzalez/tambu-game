@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { EventEmitter } from 'node:events';
 import { createPortraitReactionUi, FRIEND_PORTRAITS, PORTRAIT_EXPRESSIONS, preloadPortraitReactions } from '../src/ui/portraitReactionUi.js';
-import { createBathroomResistanceUi, createBathroomResolutionUi, destroyEventUi } from '../src/ui/eventUi.js';
+import { createBathroomResistanceUi, createBathroomResolutionUi, createBathroomChallengeUi, destroyEventUi } from '../src/ui/eventUi.js';
 import { getBathroomResistanceConfig } from '../src/events/bathroomResistance.js';
 import { getBathroomResistanceNarrative } from '../src/data/bathroomResistanceNarrative.js';
 
@@ -116,7 +116,7 @@ test('hide limpia portrait, globito, speaker y speech; destroy es idempotente y 
   }
 });
 
-test('golpe puro oculta la reacción anterior y SPACE/bar feedback no crea ni altera el portrait', () => {
+test('golpe puro conserva la reacción anterior sin texto PUM y SPACE no altera el portrait', () => {
   const scene = makeScene();
   const config = getBathroomResistanceConfig(1);
   const ui = createBathroomResistanceUi(scene, config);
@@ -129,8 +129,9 @@ test('golpe puro oculta la reacción anterior y SPACE/bar feedback no crea ni al
   assert.equal(portrait.visible, true);
   assert.equal(portrait.frame, 0);
   ui.update({ state, presentation: { speaker: null, expression: null, text: 'PUM PUM' }, feedback: 'hit' });
-  assert.equal(portrait.visible, false);
-  assert.ok(scene.objects.some(({ text, visible }) => visible && text === 'PUM PUM'));
+  assert.equal(portrait.visible, true);
+  assert.equal(ui.getView().reaction, A);
+  assert.ok(scene.objects.every(({ text, visible }) => !visible || !String(text).includes('PUM')));
   destroyEventUi(ui);
   destroyEventUi(ui);
   assert.ok(scene.objects.every(({ destroyed, destroyCount }) => destroyed && destroyCount === 1));
@@ -145,24 +146,51 @@ test('resolución muestra reaction y recompensa liquidada sin el párrafo genér
     const texts = scene.objects.filter(({ type }) => type === 'text').map(({ text }) => text);
     assert.ok(texts.includes(data.resolution[result].text));
     assert.ok(texts.includes(result === 'success' ? '+500 ★' : '+250 ★'));
-    assert.ok(texts.includes('ENTER · VOLVER AL PATIO'));
+    assert.equal(ui.getView().ready, false);
+    assert.equal(ui.getView().labels.help, undefined);
+    ui.setReady();
+    assert.equal(ui.getView().labels.help, 'ENTER · VOLVER AL PATIO');
     assert.ok(texts.every((text) => !text.includes('finalmente se rinden') && !text.includes('se abre de golpe')));
     destroyEventUi(ui);
     assert.ok(scene.objects.every(({ destroyed }) => destroyed));
   }
 });
 
-test('reaction cluster se centra en el viewport arriba del panel sin tapar barra/timer/prompts', () => {
+test('panel compuesto reserva dock inferior estable y mantiene geometría en resolución', () => {
   for (const [width, height] of [[1280, 720], [960, 540], [1600, 900]]) {
     const scene = makeScene(width, height);
-    const ui = createBathroomResistanceUi(scene, getBathroomResistanceConfig(1));
-    ui.update({ state: { resistance: 55, elapsedMs: 0 }, presentation: A });
+    const ui = createBathroomChallengeUi(scene, getBathroomResistanceConfig(1));
+    ui.startResistance();
+    const layout = ui.getView().layout;
     const panel = scene.objects.find(({ type }) => type === 'rectangle');
-    const bubble = scene.objects.find(({ type }) => type === 'graphics').rectangles[0];
+    const initialGeometry = [panel.x, panel.y, panel.width, panel.height];
+    assert.equal(panel.width, Math.min(760, width - 48));
+    assert.equal(panel.height, 310);
+    assert.equal(layout.top + layout.height - layout.dividerY, 100);
+    assert.equal(ui.getView().labels.title, 'RESISTENCIA DEL BAÑO');
+    ui.update({ state: { resistance: 55, elapsedMs: 0 }, presentation: A });
     const portrait = scene.objects.find(({ type }) => type === 'image');
-    assert.ok(bubble[1] >= 0 && bubble[1] + bubble[3] < panel.y - panel.height / 2);
-    assert.ok(portrait.x - 32 >= 0 && bubble[0] + bubble[2] <= width);
-    assert.ok(portrait.depth > panel.depth);
+    assert.ok(portrait.y - 32 > layout.dividerY && portrait.y + 32 < layout.top + layout.height);
+    assert.ok(portrait.x - 32 >= layout.left && portrait.x + 32 < layout.left + layout.width);
+    assert.equal(scene.objects.filter(({ type, width, height }) => type === 'rectangle' && width > 700 && height > 200).length,
+      1, 'un solo marco principal');
+    ui.showResolution('failure', { rewardSettled: true, reaction: B });
+    assert.equal(panel.destroyed, false);
+    assert.deepEqual([panel.x, panel.y, panel.width, panel.height], initialGeometry);
+    assert.equal(ui.getView().labels.title, 'LA PUERTA CEDIÓ');
+    assert.equal(ui.getView().reward, '+250 ★');
+    assert.equal(ui.getView().labels.timer, undefined);
+    assert.equal(portrait.y, layout.dockY);
     destroyEventUi(ui);
+    assert.ok(scene.objects.every(({ destroyed, destroyCount }) => destroyed && destroyCount === 1));
   }
+});
+
+test('el dock interno no dibuja otro marco ni cola de globo', () => {
+  const scene = makeScene();
+  const ui = createPortraitReactionUi(scene, { framed: false, x: 640, y: 465, width: 712 });
+  ui.show(A);
+  const frame = scene.objects.find(({ type }) => type === 'graphics');
+  assert.equal(frame.rectangles.length, 0);
+  ui.destroy();
 });
