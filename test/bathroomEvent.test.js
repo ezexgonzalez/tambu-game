@@ -744,12 +744,17 @@ function narrativeEventRuntime(attemptNumber, previousResults = []) {
   const camera = scene.cameras.main;
   Object.assign(camera, {
     width: 1280, height: 720, scrollX: 300, scrollY: 0, zoomX: 1, zoomY: 1,
-    _follow: player.sprite, roundPixels: true, useBounds: true,
+    _follow: player.sprite, roundPixels: true, useBounds: true, followStarts: 0,
+    scrollWrites: 0, zoomWrites: 0,
     lerp: { x: 0.1, y: 0.1 }, followOffset: { x: 0, y: 0 },
     stopFollow() { this._follow = null; },
-    startFollow(target) { this._follow = target; this.scrollX = 999; this.scrollY = 999; },
-    setScroll(x, y) { this.scrollX = x; this.scrollY = y; },
-    setZoom(x, y) { this.zoomX = x; this.zoomY = y; },
+    startFollow(target, roundPixels, x, y, ox, oy) {
+      this.followStarts++; this._follow = target; this.roundPixels = roundPixels;
+      this.lerp = { x, y }; this.followOffset = { x: ox, y: oy };
+      this.scrollX = 999; this.scrollY = 999;
+    },
+    setScroll(x, y) { this.scrollWrites++; this.scrollX = x; this.scrollY = y; },
+    setZoom(x, y) { this.zoomWrites++; this.zoomX = x; this.zoomY = y; },
   });
   const narrative = getBathroomResistanceNarrative({ attemptNumber, previousResults });
   const event = createBathroomEvent(scene, {
@@ -798,11 +803,20 @@ test('los siete hits mantienen daño/shake y las voces siguen su timeline sin te
     const { scene, event, narrative, keys, portrait, visibleText } = runtime;
     scene.game.loop.delta = BATHROOM_DOOR_STAGING.durationMs; event.update();
     const timeline = getBathroomReactionTimeline(narrative, getBathroomResistanceConfig(attempt));
+    const camera = scene.cameras.main;
+    const focused = [camera.scrollX, camera.scrollY, camera.zoomX, camera.zoomY];
+    const writes = [camera.scrollWrites, camera.zoomWrites];
+    assert.deepEqual(focused, [703, -289, 1.75, 1.75]);
+    assert.equal(camera.followStarts, 0);
     let expectedState = event.getResistanceState();
     for (let elapsed = 100; elapsed <= 9900; elapsed += 100) {
       scene.game.loop.delta = 100; keys.SPACE.edge = true; event.update();
       expectedState = advanceBathroomResistance(recoverBathroomResistance(expectedState, getBathroomResistanceConfig(attempt)), 100, getBathroomResistanceConfig(attempt)).state;
       assert.deepEqual(event.getResistanceState(), expectedState, 'presentación no altera la mecánica');
+      assert.deepEqual([camera.scrollX, camera.scrollY, camera.zoomX, camera.zoomY], focused);
+      assert.deepEqual([camera.scrollWrites, camera.zoomWrites], writes, 'no interpolación durante Resistance');
+      assert.equal(camera._follow, null);
+      assert.equal(camera.useBounds, false);
       const expected = timeline.filter(({ at }) => at <= elapsed).at(-1)?.reaction
         ?? narrative.anticipation[1];
       assert.ok(visibleText().includes(expected.text));
@@ -829,6 +843,14 @@ test('los seis cierres liquidan una vez y exigen ENTER fresco tras 900 ms de lec
         scene.game.loop.delta = 100; keys.SPACE.edge = result === 'success'; event.update();
       }
       assert.equal(event.getMode(), result);
+      const camera = scene.cameras.main;
+      assert.deepEqual([camera.scrollX, camera.scrollY, camera.zoomX, camera.zoomY], [300, 0, 1, 1]);
+      assert.equal(camera._follow, runtime.player.sprite);
+      assert.equal(camera.useBounds, true);
+      assert.equal(camera.followStarts, 1);
+      assert.deepEqual(camera.lerp, { x: 0.1, y: 0.1 });
+      assert.deepEqual(camera.followOffset, { x: 0, y: 0 });
+      assert.equal(camera.roundPixels, true);
       assert.equal(portrait(), firstPortrait, 'resolución transforma el mismo componente');
       assert.ok(visibleText().includes(narrative.resolution[result].text));
       assert.equal(gameState.player.points, result === 'success' ? 500 : 250);
@@ -846,6 +868,7 @@ test('los seis cierres liquidan una vez y exigen ENTER fresco tras 900 ms de lec
       assert.equal(runtime.interactable.sprite.visible, true);
       assert.equal(gameState.player.points, result === 'success' ? 500 : 250);
       event.destroy(); event.destroy();
+      assert.equal(camera.followStarts, 1, 'finish/cleanup no duplican restore');
       assert.equal(event.update(), false);
       assert.ok(runtime.objects.every(({ destroyed }) => destroyed));
       assert.equal(scene.events.listenerCount('shutdown'), 0);
@@ -882,7 +905,7 @@ test('stop/shutdown en anticipation, resistance o resolution limpia UI y permite
 });
 
 
-test('BathroomEvent restaura cámara antes de Resistance y shutdown devuelve puerta/cámara durante staging', () => {
+test('startResistance conserva exactamente el framing y shutdown en anticipation restaura', () => {
   for (const interrupt of [false, true]) {
     const runtime = narrativeEventRuntime(2, ['secured']);
     const { scene, event, player, bathroomDoor } = runtime;
@@ -892,14 +915,42 @@ test('BathroomEvent restaura cámara antes de Resistance y shutdown devuelve pue
     assert.equal(camera.zoomX, 1.75);
     assert.equal(bathroomDoor.sprite.x, 1345);
     assert.equal(bathroomDoor.label.x, 1345);
+    const focused = [camera.scrollX, camera.scrollY, camera.zoomX, camera.zoomY];
     if (interrupt) scene.events.emit('shutdown');
-    else { scene.game.loop.delta = 4150; event.update(); }
+    else {
+      scene.game.loop.delta = 4150; event.update();
+      assert.equal(event.getMode(), 'resistance');
+      assert.deepEqual([camera.scrollX, camera.scrollY, camera.zoomX, camera.zoomY], focused);
+      assert.equal(camera._follow, null); assert.equal(camera.useBounds, false);
+      assert.equal(camera.followStarts, 0);
+    }
+    event.destroy(); event.destroy();
     assert.deepEqual([camera.scrollX, camera.scrollY, camera.zoomX, camera.zoomY], [300, 0, 1, 1]);
     assert.equal(camera._follow, player.sprite);
-    assert.equal(camera.useBounds, true);
-    if (!interrupt) assert.equal(event.getMode(), 'resistance');
-    event.destroy();
+    assert.equal(camera.useBounds, true); assert.equal(camera.followStarts, 1);
     assert.deepEqual([bathroomDoor.sprite.x, bathroomDoor.label.x], [1343, 1343]);
+    assert.equal(scene.events.listenerCount('shutdown'), 0);
+  }
+});
+
+test('destroy y shutdown durante Resistance restituyen snapshot una sola vez', () => {
+  for (const shutdown of [false, true]) {
+    const runtime = narrativeEventRuntime(3, ['secured', 'secured']);
+    const { scene, event, player } = runtime;
+    scene.game.loop.delta = BATHROOM_DOOR_STAGING.durationMs; event.update();
+    scene.game.loop.delta = 800; event.update();
+    assert.equal(event.getMode(), 'resistance');
+    const camera = scene.cameras.main;
+    assert.equal(camera.zoomX, 1.75); assert.equal(camera._follow, null);
+    if (shutdown) scene.events.emit('shutdown');
+    else event.destroy();
+    event.destroy(); scene.events.emit('shutdown');
+    assert.deepEqual([camera.scrollX, camera.scrollY, camera.zoomX, camera.zoomY], [300, 0, 1, 1]);
+    assert.equal(camera._follow, player.sprite);
+    assert.equal(camera.useBounds, true); assert.equal(camera.followStarts, 1);
+    assert.deepEqual(camera.lerp, { x: 0.1, y: 0.1 });
+    assert.deepEqual(camera.followOffset, { x: 0, y: 0 });
+    assert.equal(event.update(), false);
     assert.equal(scene.events.listenerCount('shutdown'), 0);
   }
 });

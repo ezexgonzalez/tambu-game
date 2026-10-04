@@ -1,6 +1,6 @@
 // Delta-controlled presentation only: no tweens, delayed calls or camera effects to leak.
 export const BATHROOM_DOOR_STAGING = Object.freeze({
-  durationMs: 4800, approachMs: 400, restoreMs: 350, zoom: 1.75,
+  durationMs: 4800, approachMs: 400, zoom: 1.75,
   impacts: Object.freeze([650, 850, 1050]),
   spokenAt: Object.freeze([1700, 3200]),
 });
@@ -33,7 +33,7 @@ export function createBathroomDoorImpact(door) {
 }
 
 export function createBathroomCameraStaging(camera, bathroom) {
-  if (!camera?.setScroll || !camera?.setZoom || !bathroom) return { update() {}, destroy() {} };
+  if (!camera?.setScroll || !camera?.setZoom || !bathroom) return { update() {}, hold() {}, restore() {}, destroy() {} };
   // Phaser 4.2.1 stores follow on _follow; startFollow also changes scroll, restored below.
   const saved = {
     x: camera.scrollX, y: camera.scrollY, zoomX: camera.zoomX ?? camera.zoom,
@@ -50,6 +50,7 @@ export function createBathroomCameraStaging(camera, bathroom) {
   // The facade is at the top bound; allow its visual center to occupy the viewport center.
   camera.useBounds = false;
   let restored = false;
+  let held = false;
   const smooth = (t) => t * t * (3 - 2 * t);
   function restore() {
     if (restored) return;
@@ -57,22 +58,29 @@ export function createBathroomCameraStaging(camera, bathroom) {
     camera.useBounds = saved.useBounds;
     if (saved.target) camera.startFollow(saved.target, saved.roundPixels,
       saved.lerpX, saved.lerpY, saved.offsetX, saved.offsetY);
+    camera.roundPixels = saved.roundPixels;
     camera.setZoom(saved.zoomX, saved.zoomY);
     camera.setScroll(saved.x, saved.y);
   }
+  function focus(amount) {
+    camera.setScroll(saved.x + (target.x - saved.x) * amount,
+      saved.y + (target.y - saved.y) * amount);
+    camera.setZoom(saved.zoomX + (BATHROOM_DOOR_STAGING.zoom - saved.zoomX) * amount,
+      saved.zoomY + (BATHROOM_DOOR_STAGING.zoom - saved.zoomY) * amount);
+  }
+  function hold() {
+    if (restored || held) return;
+    focus(1);
+    held = true;
+  }
   return {
     update(elapsed) {
-      if (restored) return;
-      const { durationMs, approachMs, restoreMs, zoom } = BATHROOM_DOOR_STAGING;
-      if (elapsed >= durationMs) { restore(); return; }
-      const approach = smooth(Math.min(1, elapsed / approachMs));
-      const returning = smooth(Math.max(0, (elapsed - (durationMs - restoreMs)) / restoreMs));
-      const amount = approach * (1 - returning);
-      camera.setScroll(saved.x + (target.x - saved.x) * amount,
-        saved.y + (target.y - saved.y) * amount);
-      camera.setZoom(saved.zoomX + (zoom - saved.zoomX) * amount,
-        saved.zoomY + (zoom - saved.zoomY) * amount);
+      if (restored || held) return;
+      if (elapsed >= BATHROOM_DOOR_STAGING.approachMs) { hold(); return; }
+      focus(smooth(Math.max(0, elapsed / BATHROOM_DOOR_STAGING.approachMs)));
     },
+    hold,
+    restore,
     destroy: restore,
   };
 }

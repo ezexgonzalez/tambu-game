@@ -540,7 +540,7 @@ Nueva dirección aprobada:
 2. **REACTION DOCK BELOW GAMEPLAY.** El área de comments queda reservada debajo de barra/timer/prompt. No debe saltar el layout cuando aparece/desaparece una frase.
 3. **READABLE PACING.** Golpes puros no limpian una reacción hablada. Las líneas habladas deben tener exposición suficiente y la narrativa visual puede desacoplarse de los timings mecánicos para mantener lectura, sin alterar damage/drain/duration.
 4. **NO TEXTUAL KNOCKS.** El texto `PUM` deja de formar parte de la UI final. Los golpes se comunican mediante staging físico de puerta + feedback mecánico existente.
-5. **DOOR ANTICIPATION CINEMATIC.** Antes del panel de minijuego, la cámara prepara la escena con un zoom/pan corto hacia la puerta del baño. La puerta recibe pequeños impactos visuales sincronizados. Luego vuelve al framing normal y aparece el panel.
+5. **DOOR ANTICIPATION CINEMATIC.** Antes del panel de minijuego, la cámara prepara la escena con un zoom/pan corto hacia la puerta del baño. La puerta recibe pequeños impactos visuales sincronizados. El panel aparece sobre ese framing, que permanece enfocado durante Resistance; la cámara vuelve al framing normal al entrar a success/failure.
 6. **DOOR HIT FEEDBACK DURING RESISTANCE.** Los hits mecánicos pueden volver a sacudir/nudgear la puerta además del feedback de barra/cámara, sin cambiar daños.
 7. **SAME PANEL FOR RESOLUTION.** Success/failure transforma el mismo lenguaje del panel: result title + reward + reaction dock + return prompt. No portrait block separado arriba.
 8. **BALANCE STILL FROZEN.** 10 s, SPACE +4, hit timings/damages/drain, rewards y secured/interrupted siguen intactos.
@@ -607,9 +607,9 @@ Success/failure transforma la misma instancia en `PUERTA ASEGURADA` / `LA PUERTA
 
 HouseFacade devuelve `{ bathroomDoor: { sprite, label } }`. PatioWorld propaga esas referencias y PatioScene las conserva en `worldVisuals` para BathroomEvent. No se alteraron assets ni se creó puerta alternativa.
 
-La anticipación visual dura 4800 ms: approach 400 ms a zoom 1.75 hacia el centro real del baño, 250 ms de hold antes del primer impacto, tres golpes físicos a 650/850/1050 ms y voces aprobadas a 1700/3200 ms. **QA de Dirección 2026-10-04: el framing de puerta NO vuelve a normal al comenzar Resistance. El zoom/foco alcanzado durante anticipation debe mantenerse durante los 10 s completos del minijuego para que los siete golpes físicos sigan ocurriendo sobre la puerta en primer plano. La cámara se restaura recién cuando Resistance termina y se entra a success/failure, o antes si el evento se destruye/shutdown/retry.** La última frase se conserva al entrar al panel y no desaparece por el cambio de fase.
+La anticipación visual dura 4800 ms: approach 400 ms a zoom 1.75 hacia el centro real del baño, 250 ms de hold antes del primer impacto, tres golpes físicos a 650/850/1050 ms y voces aprobadas a 1700/3200 ms. **CAMERA HOLD THROUGH RESISTANCE — INTEGRATED / VISUAL QA REQUIRED (2026-10-04): el framing de puerta NO vuelve a normal al comenzar Resistance. El zoom/foco alcanzado durante anticipation debe mantenerse durante los 10 s completos del minijuego para que los siete golpes físicos sigan ocurriendo sobre la puerta en primer plano. La cámara se restaura recién cuando Resistance termina y se entra a success/failure, o antes si el evento se destruye/shutdown/retry.** La última frase se conserva al entrar al panel y no desaparece por el cambio de fase.
 
-`bathroomDoorStaging.js` interpola por delta, sin efectos pan/zoom, timers ni tweens pendientes. Snapshot/restauración de scroll, zoom X/Y, follow, roundPixels, lerp, offset y bounds; los bounds se suspenden solo durante el encuadre para centrar la fachada superior. Destroy/shutdown/retry abortan y restauran.
+`bathroomDoorStaging.js` interpola por delta, sin efectos pan/zoom, timers ni tweens pendientes. Snapshot/restauración de scroll, zoom X/Y, follow, roundPixels, lerp, offset y bounds; los bounds se suspenden solo durante el encuadre para centrar la fachada superior. `hold()` mantiene el encuadre alcanzado sin nuevas escrituras/interpolación de cámara durante Resistance. `restore()` restituye el snapshot antes de transformar el panel a success/failure. `destroy()` queda como cleanup/final safety; restore/destroy son idempotentes y no duplican follow. No existe retorno de cámara en los últimos 350 ms de anticipation. Destroy/shutdown/retry abortan y restauran.
 
 Los nudges de puerta duran 120 ms con offsets enteros +2/−2/+1/0, moviendo sprite y BAÑO juntos y restituyendo el neutral exacto. Los siete impactos activos conservan daño/bar feedback y shake 80 ms/0.002, además del nudge. No hay rotación, scale ni deformación.
 
@@ -623,6 +623,15 @@ No se muestra `PUM` ni sus variantes. Un marcador sin speaker no genera texto y 
 
 Balance Pass 2 intacto: active duration 10000 ms, JustDown/+4, perfiles, ordinal, siete timestamps/daños/drain y maxResistance. Rewards/vidas, secured/interrupted, Perfect Night, rutas/velocidad/return, portraits y copy/memoria no cambiaron. Los campos históricos de anticipation en el config mecánico no se modificaron; el controller usa el pacing visual explícito de esta sección.
 
-**253/253 tests verdes, 0 failures/skips; `npm run build` verde**. Sigue la advertencia conocida del chunk >500 kB. Tests nuevos en `bathroomDoorStaging.test.js`; ampliaciones en `bathroomEvent.test.js`, `portraitReactionUi.test.js` y `pixelText.test.js`: referencias reales, cámara y cleanup, impactos sin drift, timeline legible, dock/panel únicos, no textual knocks, persistencia de voces, transición y resolución compartidas, input residual y regresiones mecánicas/rewards.
+**254/254 tests verdes, 0 failures/skips; `npm run build` verde**. Sigue la advertencia conocida del chunk >500 kB. Tests nuevos en `bathroomDoorStaging.test.js`; ampliaciones en `bathroomEvent.test.js`, `portraitReactionUi.test.js` y `pixelText.test.js`: referencias reales, cámara y cleanup, impactos sin drift, timeline legible, dock/panel únicos, no textual knocks, persistencia de voces, transición y resolución compartidas, input residual y regresiones mecánicas/rewards.
 
 No hubo browser QA, screenshots ni ejecución visual local. Dirección debe validar encuadre/puerta, lectura de las tres progresiones y memoria, handoff, composición/dock, resolución e input. **No se declara CLOSED/BASELINE para Bathroom Resistance 2.0 ni se comienza el siguiente bloque.**
+
+
+## Validación de CAMERA HOLD THROUGH RESISTANCE — 2026-10-04
+
+Microcorrección exclusivamente de cámara en `bathroomDoorStaging.js` y `bathroomEvent.js`. Tests de staging/event actualizados para no restaurar al comenzar Resistance, mantener zoom 1.75 y scroll estables durante los siete hits (sin interpolación), restituir el snapshot en los seis casos success/failure de los tres intentos y limpiar destroy/shutdown durante Resistance. Repetir restore/destroy no reinicia follow más de una vez.
+
+**254 tests aprobados, 0 fallos/omitidos; build correcto**, con advertencia existente de bundle >500 kB. UI, pacing, impactos +2/−2/+1/0 de 120 ms, shake 80 ms/0.002, active duration 10 s, balance/rewards y rutas permanecen intactos. Sin browser QA ni ejecución visual local.
+
+Próxima acción exclusiva: **MANUAL QA BY DIRECTION** para verificar puerta grande durante los diez segundos y framing normal al aparecer el resultado. **VISUAL QA REQUIRED; Bathroom Resistance 2.0 no queda CLOSED.**

@@ -248,7 +248,7 @@ export function createBathroomEvent(scene, {
   }
 
   function startResistance() {
-    cameraStaging?.destroy();
+    cameraStaging?.hold();
     resistanceState = createBathroomResistanceState(resistanceConfig);
     uiElements.startResistance(presentation);
     uiElements.update({ state: resistanceState, presentation });
@@ -275,6 +275,7 @@ export function createBathroomEvent(scene, {
   }
 
   function showResistanceResolution(result) {
+    cameraStaging?.restore();
     const rewardSettled = onBathroomResolved({ characterId, result }) === true;
     uiElements.showResolution(result, { rewardSettled, reaction: narrative.resolution[result] });
     resolutionElapsedMs = 0;

@@ -23,8 +23,10 @@ function camera() {
     width: 1280, height: 720, scrollX: 300, scrollY: 0, zoomX: 1, zoomY: 1,
     _follow: { x: 1343, y: 142 }, roundPixels: true, useBounds: true,
     lerp: { x: 0.1, y: 0.1 }, followOffset: { x: 7, y: 9 },
+    followStarts: 0,
     stopFollow() { this._follow = null; },
     startFollow(target, roundPixels, x, y, ox, oy) {
+      this.followStarts++;
       this._follow = target; this.roundPixels = roundPixels;
       this.lerp = { x, y }; this.followOffset = { x: ox, y: oy };
       this.scrollX = 999; this.scrollY = 999; // Phaser startFollow writes scroll too.
@@ -52,7 +54,7 @@ test('impacto pixel-safe mueve puerta y BAÑO juntos, restaura neutral y no acum
   assert.deepEqual([door.sprite.x, door.label.x], [1343, 1343]);
 });
 
-test('camera staging centra baño, llega a 1.75 y devuelve exactamente zoom/follow/scroll/bounds', () => {
+test('camera staging centra baño, mantiene hold y restaura el snapshot solo con restore', () => {
   const cam = camera();
   const saved = { ...cam, lerp: { ...cam.lerp }, followOffset: { ...cam.followOffset } };
   const staging = createBathroomCameraStaging(cam, PATIO_LAYOUT.house.bathroom);
@@ -63,18 +65,24 @@ test('camera staging centra baño, llega a 1.75 y devuelve exactamente zoom/foll
   assert.equal(cam.zoomX, 1.75);
   assert.equal(cam.scrollX + cam.width / 2, 1343);
   assert.equal(cam.scrollY + cam.height / 2, 71);
-  staging.update(4625);
-  assert.ok(cam.zoomX > 1 && cam.zoomX < 1.75);
-  staging.update(BATHROOM_DOOR_STAGING.durationMs);
+  const focused = [cam.scrollX, cam.scrollY, cam.zoomX, cam.zoomY];
+  for (const elapsed of [4625, BATHROOM_DOOR_STAGING.durationMs, 14800]) {
+    staging.update(elapsed); staging.hold();
+    assert.deepEqual([cam.scrollX, cam.scrollY, cam.zoomX, cam.zoomY], focused);
+    assert.equal(cam._follow, null); assert.equal(cam.useBounds, false);
+    assert.equal(cam.followStarts, 0);
+  }
+  staging.restore();
   for (const key of ['zoomX', 'zoomY', 'scrollX', 'scrollY', '_follow', 'roundPixels', 'useBounds', 'lerp', 'followOffset']) {
     assert.deepEqual(cam[key], saved[key], key);
   }
-  staging.destroy(); staging.update(400);
+  staging.restore(); staging.destroy(); staging.destroy(); staging.update(400); staging.hold();
   assert.equal(cam.zoomX, 1);
+  assert.equal(cam.followStarts, 1);
 });
 
-test('abortar staging en approach, hold o retorno no deja cámara alterada', () => {
-  for (const elapsed of [200, 3200, 4625]) {
+test('abortar staging en approach, anticipation hold o resistance hold no deja cámara alterada', () => {
+  for (const elapsed of [200, 3200, 14800]) {
     const cam = camera(); const follow = cam._follow;
     const staging = createBathroomCameraStaging(cam, PATIO_LAYOUT.house.bathroom);
     staging.update(elapsed); staging.destroy();
