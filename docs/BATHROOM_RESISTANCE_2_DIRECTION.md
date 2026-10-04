@@ -1,6 +1,6 @@
 # Tambu Game — Bathroom Resistance 2.0 / Dirección narrativa
 
-**Estado:** INTEGRATED TECHNICALLY / VISUAL QA REQUIRED  
+**Estado:** CORRECTION PASS REQUIRED — UI / PACING / DOOR STAGING  
 **Fecha:** 2026-10-03  
 **Autoridad:** dirección narrativa y presentation contract de Bathroom Resistance 2.0  
 **No reemplaza:** balance, rewards ni contratos de `bathroomResistance.js`
@@ -516,6 +516,37 @@ Después de implementación + QA manual de Dirección:
 El siguiente bloque del roadmap será:
 
 **PARTY PRESENCE**
+
+
+---
+
+# 14.1 QA visual de Dirección — correction pass requerido (2026-10-04)
+
+La primera integración técnica valida portraits, memoria y narrativa, pero **NO queda visualmente aprobada**.
+
+Problemas observados en juego:
+
+- Portrait Reaction aparece como un bloque superior independiente del panel del minijuego/resolución, fragmentando la composición.
+- El panel central y el bloque de reacción deben convertirse en **una sola unidad visual**.
+- Las reacciones cambian demasiado rápido; algunas no llegan a leerse.
+- Una reacción presente al inicio del minijuego desaparece casi inmediatamente por el cambio de fase.
+- Los golpes puros siguen representándose como `PUM / PUM PUM / PUM PUM PUM` en texto, con lectura pobre y centrado poco convincente.
+- El HUD de Resistance todavía se siente provisional y necesita una pasada dedicada de jerarquía, spacing, pixel display y agrupación.
+- La resolución actual repite el mismo problema de dos bloques independientes.
+
+Nueva dirección aprobada:
+
+1. **ONE COMPOSITE BATHROOM PANEL.** Resistance, reaction dock y resolution pertenecen al mismo componente visual. Portrait + speaker + frase viven debajo del núcleo del minijuego dentro del mismo panel/marco.
+2. **REACTION DOCK BELOW GAMEPLAY.** El área de comments queda reservada debajo de barra/timer/prompt. No debe saltar el layout cuando aparece/desaparece una frase.
+3. **READABLE PACING.** Golpes puros no limpian una reacción hablada. Las líneas habladas deben tener exposición suficiente y la narrativa visual puede desacoplarse de los timings mecánicos para mantener lectura, sin alterar damage/drain/duration.
+4. **NO TEXTUAL KNOCKS.** El texto `PUM` deja de formar parte de la UI final. Los golpes se comunican mediante staging físico de puerta + feedback mecánico existente.
+5. **DOOR ANTICIPATION CINEMATIC.** Antes del panel de minijuego, la cámara prepara la escena con un zoom/pan corto hacia la puerta del baño. La puerta recibe pequeños impactos visuales sincronizados. Luego vuelve al framing normal y aparece el panel.
+6. **DOOR HIT FEEDBACK DURING RESISTANCE.** Los hits mecánicos pueden volver a sacudir/nudgear la puerta además del feedback de barra/cámara, sin cambiar daños.
+7. **SAME PANEL FOR RESOLUTION.** Success/failure transforma el mismo lenguaje del panel: result title + reward + reaction dock + return prompt. No portrait block separado arriba.
+8. **BALANCE STILL FROZEN.** 10 s, SPACE +4, hit timings/damages/drain, rewards y secured/interrupted siguen intactos.
+9. **NO NEW ART REQUIRED.** Reutilizar la puerta runtime actual y los portraits aprobados. La animación de golpe puede resolverse con desplazamiento pixel-safe del sprite/label de puerta y cámara; no generar un nuevo atlas de puerta salvo blocker demostrado.
+
+Esta correction pass es de presentación, pacing y staging. No reabre el diseño mecánico.
 
 
 ---
