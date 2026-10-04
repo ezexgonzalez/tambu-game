@@ -132,7 +132,7 @@ La regla de dirección pasa a ser: **dejar de demostrar que el juego puede crece
 
 ### Bathroom Resistance 2.0 — correction pass
 
-**BATHROOM RESISTANCE 2.0 — NARROW REOPEN: DIALOGUE PUNCH + CHAOS EMPHASIS (Dirección 2026-10-04).** Arquitectura, portraits, composite HUD, cámara, pacing base y balance quedan protegidos. Se reabre únicamente el copy/intervenciones para dar más humor al intento 1, más cargada/incredulidad al intento 2 y caos real al intento 3, incluyendo un acento rojo pixelado puntual `SE PUDRIÓ TODO` (y opcional `¡TRES!`) sin alterar mecánica ni theme general. Autoridad: `docs/BATHROOM_RESISTANCE_2_DIRECTION.md` §14.4.
+**BATHROOM RESISTANCE 2.0 — CLOSED / BASELINE FOR V1 (Dirección 2026-10-04).** Arquitectura, portraits, composite HUD, cámara, pacing base, memoria y balance quedan aceptados. El wording de las intervenciones queda explícitamente **provisional** y se difiere al futuro DIALOGUE / CHARACTER VOICE PASS global. Lo único congelado narrativamente ahora es la escalada: Baño 1 = sorpresa con Pitity solo; Baño 2 = incredulidad con Tobi + Uriel y memoria real; Baño 3 = caos total con Santy + Thiago + Eze, con posibilidad de un acento rojo pixelado puntual. No hacer nuevos punch-ups aislados.
 
 - `createBathroomChallengeUi()` mantiene un único panel compuesto para Resistance y resolución: marco de 760×310 a 1280×720, núcleo de 210 px y reaction dock inferior reservado de 100 px. Título, timer, speaker y prompts usan `pixelText`; se agregaron los glifos Á/Ó necesarios sin cambiar los existentes. El dock reutiliza portraits nativos 64×64 con `framed: false`, sin segunda caja flotante.
 - Los seis PNG aprobados siguen intactos en `public/assets/ui/portraits/friends/`, RGBA 192×64, expresiones TALK/ANGRY/SHOUT = 0/1/2 y nearest-neighbor. La UI no conoce `gameState` ni decide ramas narrativas.
@@ -236,11 +236,12 @@ La segunda auditoría del 28/09 confirma que el loop funcional ya está cerrado.
 
 1. **STABILIZATION PASS** — corregir copy de SPACE, overwrite de depth de amigos y emits falsos de Mili. Bathroom Resistance Pass 2 ya está playtesteado y no forma parte de esta pasada salvo el copy de input engañoso.
 2. **CAST CLOSURE — CLOSED / FROZEN FOR V1** — los seis amigos principales, sus walks/idles y los paquetes de special idles aprobados quedan cerrados. No reabrir producción individual de amigos salvo bug concreto.
-3. **BATHROOM RESISTANCE 2.0 — DIALOGUE PUNCH PASS** — baseline técnica aceptada; queda una pasada acotada de copy/humor y énfasis visual del caos del tercer intento. Balance y arquitectura no se reabren.
+3. **BATHROOM RESISTANCE 2.0 — CLOSED / BASELINE FOR V1** — baseline técnica y escalada sorpresa → incredulidad → caos aceptadas. Wording provisional; su reescritura se difiere al DIALOGUE / CHARACTER VOICE PASS global.
 4. **PARTY PRESENCE** — audio mínimo con mute/volumen + lote pequeño de fillers/actividades + 2–3 callbacks o beats ambientales de alto impacto. No construir simulación social.
 5. **V1 UX CLOSURE** — menú/onboarding mínimo, ocultar alcohol vacío, alinear HUD/diálogo/Consejo/outcomes/Resistance a `UI_DIRECTION.md` y asegurar que todos los prompts describan el input real.
-6. **FEATURE FREEZE** — una vez cerrados los bloques anteriores no se agregan mecánicas, personajes o specials por impulso; solo fixes surgidos de QA.
-7. **RELEASE CANDIDATE / PLAYTEST** — tests + build verdes, smoke manual de las tres terminaciones y reintentos, QA visual del elenco/UI y playtest con personas que completen una noche sin explicación oral del creador.
+6. **DIALOGUE / CHARACTER VOICE PASS** — pasada global de escritura cerca del cierre de V1. Crear un agente especializado y alimentarlo con vocabulario real del grupo, personalidad individual, relaciones, muletillas, límites de voz y contexto completo. Revisar conversaciones, outcomes, post-outcome, Bathroom Resistance y demás líneas como un sistema de voces coherente. Evitar punch-ups genéricos aislados. Regla local ya fijada: `piscina`, no `pileta`.
+7. **FEATURE FREEZE** — una vez cerrados los bloques anteriores no se agregan mecánicas, personajes o specials por impulso; solo fixes surgidos de QA.
+8. **RELEASE CANDIDATE / PLAYTEST** — tests + build verdes, smoke manual de las tres terminaciones y reintentos, QA visual del elenco/UI y playtest con personas que completen una noche sin explicación oral del creador.
 
 Audio puede prepararse en paralelo al cierre del cast cuando no dependa de assets visuales. Los sectores estables solo se tocan ante un defecto concreto.
 
