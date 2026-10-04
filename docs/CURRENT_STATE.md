@@ -132,7 +132,7 @@ La regla de dirección pasa a ser: **dejar de demostrar que el juego puede crece
 
 ### Bathroom Resistance 2.0 — integración técnica
 
-**INTEGRATED TECHNICALLY / VISUAL QA REQUIRED (2026-10-04).** La autoridad de copy sigue siendo `docs/BATHROOM_RESISTANCE_2_DIRECTION.md`; esta integración no declara CLOSED/FROZEN/BASELINE para la nueva capa narrativa.
+**CORRECTION PASS REQUIRED — UI / PACING / DOOR STAGING (QA Dirección 2026-10-04).** Portraits, memoria y narrativa están integrados técnicamente, pero la composición visual no queda aprobada: reaction + minigame/resolution deben unificarse en un panel, las líneas necesitan mayor tiempo de lectura y los golpes textuales deben reemplazarse por staging de cámara/puerta. La autoridad actualizada es `docs/BATHROOM_RESISTANCE_2_DIRECTION.md`; balance/rewards siguen congelados.
 
 - `src/ui/portraitReactionUi.js` agrega una foundation reutilizable con `preloadPortraitReactions(scene)` y `createPortraitReactionUi(scene).show({ speaker, expression, text }) / hide() / destroy()`. La UI no conoce `gameState` ni decide la historia.
 - Los seis strips aprobados de Pitity, Tobi, Uriel, Santy, Thiago y Eze se copiaron byte por byte a `public/assets/ui/portraits/friends/ui_portrait_<speaker>_v1.png`. PNG RGBA transparente 192×64, tres frames horizontales nativos 64×64; TALK/ANGRY/SHOUT mapean 0/1/2. Se precargan en `PatioScene`, sin carga durante el evento.
@@ -231,7 +231,7 @@ La segunda auditoría del 28/09 confirma que el loop funcional ya está cerrado.
 
 1. **STABILIZATION PASS** — corregir copy de SPACE, overwrite de depth de amigos y emits falsos de Mili. Bathroom Resistance Pass 2 ya está playtesteado y no forma parte de esta pasada salvo el copy de input engañoso.
 2. **CAST CLOSURE — CLOSED / FROZEN FOR V1** — los seis amigos principales, sus walks/idles y los paquetes de special idles aprobados quedan cerrados. No reabrir producción individual de amigos salvo bug concreto.
-3. **BATHROOM RESISTANCE 2.0 — IDENTIDAD NARRATIVA / DIRECTION APPROVED** — dirección congelada en `docs/BATHROOM_RESISTANCE_2_DIRECTION.md`: intento 1 = sorpresa (Pitity), intento 2 = incredulidad (Tobi + Uriel), intento 3 = caos (Santy + Thiago + Eze), con portraits 64×64 TALK/ANGRY/SHOUT y memoria real de resultados previos. **INTEGRATED TECHNICALLY / VISUAL QA REQUIRED**; pendiente QA narrativo/visual manual de Dirección. Balance/rewards siguen congelados.
+3. **BATHROOM RESISTANCE 2.0 — IDENTIDAD NARRATIVA / DIRECTION APPROVED** — dirección congelada en `docs/BATHROOM_RESISTANCE_2_DIRECTION.md`: intento 1 = sorpresa (Pitity), intento 2 = incredulidad (Tobi + Uriel), intento 3 = caos (Santy + Thiago + Eze), con portraits 64×64 TALK/ANGRY/SHOUT y memoria real de resultados previos. **CORRECTION PASS REQUIRED — UI / PACING / DOOR STAGING** tras QA visual. Portrait/memory/narrativa base se conservan; balance/rewards siguen congelados.
 4. **PARTY PRESENCE** — audio mínimo con mute/volumen + lote pequeño de fillers/actividades + 2–3 callbacks o beats ambientales de alto impacto. No construir simulación social.
 5. **V1 UX CLOSURE** — menú/onboarding mínimo, ocultar alcohol vacío, alinear HUD/diálogo/Consejo/outcomes/Resistance a `UI_DIRECTION.md` y asegurar que todos los prompts describan el input real.
 6. **FEATURE FREEZE** — una vez cerrados los bloques anteriores no se agregan mecánicas, personajes o specials por impulso; solo fixes surgidos de QA.
