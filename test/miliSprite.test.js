@@ -30,7 +30,8 @@ import {
   preloadMili,
   setMiliDepth,
 } from '../src/characters/miliSprite.js';
-import { patioFriends } from '../src/data/patioCharacters.js';
+import { fillerGroups, patioFriends, patioWomen } from '../src/data/patioCharacters.js';
+import { getPatioCollisionZones } from '../src/world/createPatioCollisions.js';
 
 function object(x = 0, y = 0) {
   const listeners = new Map();
@@ -503,7 +504,30 @@ test('createCharacters usa sprites reales para las tres chicas y los seis amigos
     return container;
   };
   preloadCharacters(scene);
+  const danceTweens = [];
+  scene.tweens.add = (config) => danceTweens.push(config);
   const interactables = createCharacters(scene);
+
+  // Composition contracts leave room for later visual adjustments, rather than fixing each pixel.
+  const djCore = fillerGroups.filter(([, , palette]) => palette >= 10 && palette <= 15);
+  assert.equal(djCore.length, 4);
+  assert.ok(djCore.every(([x, y, , activity]) => x >= 175 && x <= 300
+    && y >= 380 && y <= 465 && activity === 'dance'));
+  assert.ok(new Set(djCore.map(([x]) => x)).size > 2);
+  assert.ok(new Set(djCore.map(([, y]) => y)).size > 2);
+  for (const [x, y] of djCore) {
+    assert.ok(!getPatioCollisionZones().some((zone) => (
+      x + 15 > zone.x - zone.width / 2 && x - 15 < zone.x + zone.width / 2
+      && y + 27 > zone.y - zone.height / 2 && y - 42 < zone.y + zone.height / 2
+    )), 'placeholder completo + recorrido del tween fuera de colliders');
+    assert.ok(danceTweens.some(({ targets, y: targetY }) => targets.x === x
+      && targets.y === y && targetY === y - 5));
+  }
+  assert.equal(fillerGroups.length - djCore.length, 31, 'otras zonas mantienen su población');
+  assert.deepEqual(proceduralFriends.map(({ x, y }) => [x, y]),
+    fillerGroups.map(([x, y]) => [x, y]), 'todos los fillers siguen siendo los placeholders actuales');
+  assert.equal(danceTweens.length, fillerGroups.filter(([, , , activity]) => activity === 'dance').length);
+  assert.deepEqual(interactables.map(({ character }) => character), patioWomen);
 
   assert.deepEqual(sheets.map(({ key }) => key), [
     'sofi',

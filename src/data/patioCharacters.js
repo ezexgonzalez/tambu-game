@@ -39,9 +39,10 @@ export const patioFriends = [
 ];
 
 export const fillerGroups = [
-  // Zona DJ / baile, siempre a la izquierda de la piscina.
-  [170, 400, 10, 'dance'], [215, 420, 11, 'dance'], [260, 405, 12, 'dance'],
-  [390, 470, 13, 'dance'], [430, 455, 14, 'dance'], [465, 485, 15, 'dance'],
+  // DJ social zone prototype: núcleo irregular; Uriel/Santy forman el borde social.
+  // Reservar el lateral derecho para circulación y aire hacia la piscina.
+  [185, 395, 10, 'dance'], [230, 420, 11, 'dance'],
+  [280, 395, 12, 'dance'], [260, 460, 13, 'dance'],
 
   // Deck / parte alta del patio.
   [545, 300, 16, 'chat'], [590, 305, 17, 'chat'], [650, 320, 18, 'drink'],

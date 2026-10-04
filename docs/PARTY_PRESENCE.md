@@ -31,7 +31,7 @@ Si Tambu se queda quieto durante unos 20 segundos, el jugador debe seguir percib
 
 # 2. Problema actual
 
-El runtime actual contiene **37 fillers procedurales** definidos en `src/data/patioCharacters.js`.
+El runtime actual contiene **35 fillers procedurales** (37 antes del PASS 01A DJ) definidos en `src/data/patioCharacters.js`.
 
 Aunque existen etiquetas como:
 
@@ -52,7 +52,7 @@ Problema perceptual:
 
 La V1 NO está obligada a conservar 37 fillers.
 
-**37 es el estado actual, no un target de diseño.**
+**37 era el estado previo al prototype DJ, no un target de diseño. El total actual de 35 tampoco es un target final.**
 
 Dirección puede:
 
@@ -270,7 +270,7 @@ Razones:
 Runtime actual relevante:
 
 - DJ: `x 116, y 202, width 302, height 120`;
-- fillers actuales asociados al DJ: **6 dancers**;
+- fillers asociados al DJ: **4 dancers** después del PASS 01A (6 antes);
 - Uriel y Santy ya están físicamente cerca de esta zona;
 - los fillers actuales ocupan una franja amplia y se sienten más como puntos repartidos que como una escena social.
 
@@ -402,3 +402,27 @@ No construir para V1:
 - roaming autónomo global.
 
 PARTY PRESENCE debe terminar la fiesta actual, no convertirse en otro juego.
+
+
+---
+
+# 17. PASS 01A — DJ social zone composition prototype — 2026-10-04
+
+**DJ SOCIAL ZONE — PROTOTYPE INTEGRATED / VISUAL QA REQUIRED.** Prototype espacial con placeholders actuales; sin arte nuevo ni cambios de actuación.
+
+| Filler (palette existente) | X | Y | Activity |
+|---|---:|---:|---|
+| A (10) | 185 | 395 | dance |
+| B (11) | 230 | 420 | dance |
+| C (12) | 280 | 395 | dance |
+| D (13) | 260 | 460 | dance |
+
+**Antes: 6 fillers DJ. Después: 4 dancers + 0 fillers social-edge.** Uriel (320,355) y Santy (380,390) ya forman el borde social; no se movieron ni se escondieron detrás de fillers nuevos. Esta decisión específica del prototype limita la idea general de microgrupos de la sección 12: no se agrega población al borde en esta pasada.
+
+El núcleo abarca 95×65 px entre anchors, con separaciones irregulares y sin línea/grid uniforme. El cuarto dancer queda en (260,460) para separar mejor su silueta del segundo. Las envolventes procedurales y los 5 px de recorrido del tween están fuera de los collision zones actuales. Se reserva aire delante del booth y hacia el lateral derecho/piscina, retirando el scatter que antes llegaba a (465,485). La circulación y legibilidad óptica quedan pendientes de validación en juego.
+
+Se conservan paletas 10–13 y el renderer/tween procedural existente. Se eliminan los antiguos fillers DJ de paletas 14 y 15; no se reubican en otra zona. Los otros **31 fillers** permanecen exactamente iguales, total actual **35**. DJ, piscina, Uriel/Santy y todos los amigos, chicas/interactables, Tambu spawn, colliders y rutas BathroomEvent quedan intactos.
+
+Validación: **257/257 tests aprobados, 0 fallos, 0 omitidos; `npm run build` correcto**, con advertencia existente de chunk >500 kB. Se amplía la cobertura existente de `createCharacters` en `miliSprite.test.js`: cuatro dancers dentro de un sector compacto, distribución no lineal, envolvente/tween fuera de colliders, placeholders creados desde la data, población de otras zonas y conservación de amigos/interactables. La comparación estática confirma que solo cambió el bloque DJ en `patioCharacters.js`.
+
+No se realizó browser QA, screenshots ni ejecución visual local. **No se declara composición final.** Próxima acción exclusiva: **DJ SOCIAL ZONE — MANUAL VISUAL QA BY DIRECTION** para lectura conjunta, negative space, anchors y circulación. No iniciar barra, piscina ni deck.
