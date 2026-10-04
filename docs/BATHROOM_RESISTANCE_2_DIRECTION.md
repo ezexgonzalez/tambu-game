@@ -641,92 +641,70 @@ Siguiente bloque activo del roadmap:
 
 ---
 
-# 14.4 Dialogue Punch Pass — Dirección 2026-10-04
+# 14.4 Dialogue direction — wording deferred to final V1 dialogue pass
 
-Dirección reabre Bathroom Resistance 2.0 de forma **acotada** únicamente para mejorar humor, personalidad y escalada de las intervenciones. No se reabre HUD general, cámara, balance, portraits, memoria ni mecánica.
+Dirección **rechaza** el copy propuesto en la pasada anterior por falta de voz real del grupo. No integrar esas líneas ni tomarlas como referencia de tono.
 
-Objetivo de tono:
+El problema no se resolverá con frases genéricas de comedia. La escritura final de Bathroom Resistance se hará más adelante dentro de un bloque completo de **DIALOGUE / CHARACTER VOICE PASS** para todo el juego, con un agente especializado que reciba:
 
-- **Baño 1 — sorpresa con chispa:** Pitity debe sentirse sorprendido, impaciente y gracioso; evitar que el primer intento sea una versión plana de “abrí / tengo que mear”.
-- **Baño 2 — incredulidad + cargada:** Tobi y Uriel ya saben lo que pasó; deben burlarse de Tambu, reconocer la repetición y tener remates más memorables.
-- **Baño 3 — caos real:** Santy, Thiago y Eze deben sentirse como una escalada colectiva. Además del cambio de speakers, se aprueba una señal visual roja puntual de alto impacto para marcar que “se pudrió todo”, sin convertir toda la UI en roja.
+- vocabulario real y ampliado del grupo;
+- formas de hablar de cada personaje;
+- insultos, muletillas, ritmos y remates propios;
+- relaciones entre personajes;
+- contexto narrativo completo de la noche;
+- conversaciones y outcomes ya existentes;
+- límites de personalidad: qué diría y qué jamás diría cada uno.
 
-Dirección de copy propuesta para integración:
+Regla lingüística del proyecto: en este grupo/contexto usar **PISCINA**, no `pileta`.
 
-## BAÑO 1 — PITITY
+Hasta esa pasada, el wording actual de Bathroom Resistance se considera **provisional** y no debe recibir nuevos “punch-ups” aislados.
 
-Anticipation:
-- TALK: `¿TAMBU? ... ¿QUÉ HACÉS AHÍ ADENTRO?`
+Lo que SÍ queda congelado desde ahora es la diferencia estructural entre los tres intentos:
 
-Resistance:
-- TALK: `DALE, ABRÍ UN SEGUNDO.`
-- ANGRY: `NO ME HAGAS MEAR EN LA PILETA.`
-- SHOUT: `¡ABRÍ, ANIMAL, QUE NO AGUANTO MÁS!`
+## BAÑO 1 — SORPRESA
 
-Resolution secured:
-- ANGRY: `BUENO. ME MEO AFUERA. FELICIDADES.`
+- escala social pequeña;
+- **Pitity solo**;
+- sensación de descubrimiento;
+- todavía no existe certeza colectiva de lo que Tambu está haciendo;
+- intensidad más baja;
+- pocas interrupciones;
+- humor futuro debe salir de la voz específica de Pitity, no de chistes intercambiables.
 
-Resolution interrupted:
-- SHOUT: `¡TE DIJE QUE NO AGUANTABA!`
+## BAÑO 2 — INCREDULIDAD
 
-## BAÑO 2 — TOBI + URIEL
+- **Tobi + Uriel**;
+- ambos reconocen que esto ya ocurrió;
+- debe sentirse claramente “no puede estar haciendo esto otra vez”;
+- la memoria real del primer resultado sigue siendo parte central;
+- más intercambio entre speakers y más presión que en el primero;
+- humor futuro debe salir de cómo Tobi y Uriel reaccionarían realmente, no de arquetipos.
 
-Anticipation:
-- Tobi TALK: `NO... NO PUEDE SER.`
-- Uriel TALK: `¿OTRA VEZ EL MISMO BAÑO?`
+## BAÑO 3 — CAOS TOTAL
 
-Resistance:
-- Tobi ANGRY: `ABRÍ, CASANOVA.`
-- Uriel TALK: `TE JURO QUE ESTÁ AHÍ ADENTRO.`
-- Tobi SHOUT: `¡TAMBU, CERRÁ EL BOLICHE!`
-- Memory branch Uriel:
-  - previous secured → ANGRY: `LA PRIMERA TE SALIÓ. NO TE AGRANDES.`
-  - previous interrupted → ANGRY: `¿EN SERIO QUERÉS PERDER DOS VECES?`
-- Tobi SHOUT: `¡DALE, FIGURA, ABRÍ!`
+- **Santy + Thiago + Eze**;
+- ya no hay sorpresa: todos saben qué está pasando;
+- ritmo visual/social más denso;
+- cambios de speaker más frecuentes;
+- golpes físicos y staging de puerta deben sentirse más agresivos aunque el balance mecánico no cambie;
+- la memory branch de Eze sigue siendo importante;
+- debe sentirse cualitativamente más descontrolado que los dos intentos anteriores.
 
-Resolution secured:
-- Tobi ANGRY: `NO PUEDE SER. DOS VECES.`
+Se aprueba para el intento 3 un recurso visual de **alerta roja pixelada puntual** para enfatizar la escalada, pero su copy final queda diferido junto con el resto de los diálogos. Puede ser un flash/label corto de alto impacto, no un theme rojo permanente.
 
-Resolution interrupted:
-- Uriel TALK: `Y... DURÓ LO QUE TENÍA QUE DURAR.`
+No cambiar:
 
-## BAÑO 3 — SANTY + THIAGO + EZE
+- duración activa;
+- hit timings;
+- damage/drain;
+- rewards;
+- portraits;
+- expresiones;
+- cámara;
+- composite HUD;
+- memory logic.
 
-Anticipation:
-- Santy TALK: `CHE... ESTÁ DE NUEVO.`
-- Thiago ANGRY: `NO. ESTE HIJO DE PUTA NO APRENDE.`
-- Después de la segunda línea aparece una señal roja pixelada breve:
-  - `SE PUDRIÓ TODO`
-  - duración aproximada: 700–1000 ms
-  - color rojo de alerta contenido, sin glow
-  - no reemplaza el título del minijuego ni cambia la paleta permanente
-
-Resistance:
-- Santy SHOUT: `¡TAMBUUU!`
-- Thiago ANGRY: `ABRÍ ANTES QUE SAQUEMOS LA PUERTA.`
-- Eze memory branch:
-  - 2 secured → ANGRY: `DOS VECES TE SALIÓ. HOY NO HAY TERCERA.`
-  - 1 secured → TALK: `UNA GANASTE VOS. UNA NOSOTROS. DESEMPATE.`
-  - 0 secured → TALK: `DOS VECES TE LA TIRAMOS. ¿QUERÉS LA TERCERA?`
-- Santy SHOUT: `¡A LA CUENTA DE TRES!`
-- Thiago SHOUT: `¡TENGO QUE MEAR, PELOTUDO!`
-- Eze ANGRY: `UNO... DOS...`
-- último impacto mecánico: opcionalmente acompañar con un microtexto rojo pixelado `¡TRES!` durante un instante breve, sin portrait y sin alterar damage/timing.
-
-Resolution secured:
-- Eze TALK: `NAH. DEJALO. YA ES INHUMANO.`
-
-Resolution interrupted:
-- Santy SHOUT: `¡TE DIJIMOS TRES, GIL!`
-
-Reglas:
-
-- Mantener una sola reacción con portrait a la vez.
-- El rojo es acento semántico exclusivo del intento 3, no un nuevo theme.
-- No cambiar duración activa, hit timings, damage, drain, rewards ni input.
-- No agregar nuevas expresiones ni portraits.
-- Las líneas deben seguir teniendo tiempo mínimo de lectura según el pacing actual.
-- Si una línea resulta demasiado larga en runtime, ajustar spacing/timing antes de mutilar el chiste; cualquier cambio de copy debe volver a Dirección.
+La próxima vez que se reabra wording de Bathroom Resistance debe ser dentro del **DIALOGUE / CHARACTER VOICE PASS global**, no como microtarea aislada.
 
 
 ---
