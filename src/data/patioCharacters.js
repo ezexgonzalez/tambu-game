@@ -37,35 +37,3 @@ export const patioFriends = [
   { id: 'thiago', name: 'Thiago', x: 420, y: 800, palette: 5 },
   { id: 'tobi', name: 'Tobi', x: 470, y: 835, palette: 6 },
 ];
-
-export const fillerGroups = [
-  // DJ social zone prototype: núcleo irregular; Uriel/Santy forman el borde social.
-  // Reservar el lateral derecho para circulación y aire hacia la piscina.
-  [185, 395, 10, 'dance'], [230, 420, 11, 'dance'],
-  [280, 395, 12, 'dance'], [260, 460, 13, 'dance'],
-
-  // Deck / parte alta del patio.
-  [545, 300, 16, 'chat'], [590, 305, 17, 'chat'], [650, 320, 18, 'drink'],
-  [700, 325, 19, 'chat'], [745, 315, 20, 'chat'], [825, 300, 21, 'phone'],
-  [1010, 370, 44, 'chat'],
-  [1060, 365, 47, 'drink'],
-
-  // Barra y sector derecho superior.
-  [1165, 390, 22, 'drink'], [1215, 400, 23, 'drink'], [1375, 390, 24, 'chat'],
-  [1425, 410, 25, 'chat'], [1510, 430, 26, 'drink'],
-
-  // Lateral izquierdo de la piscina.
-  [450, 560, 45, 'phone'], [430, 610, 46, 'drink'], [470, 670, 48, 'chat'],
-
-  // Lateral derecho de la piscina.
-  [1190, 560, 40, 'chat'], [1235, 585, 41, 'chat'], [1290, 650, 49, 'drink'],
-  [1340, 675, 50, 'chat'],
-
-  // Debajo de la piscina: zona social amplia y segura.
-  [540, 800, 27, 'sit'], [590, 820, 28, 'chat'], [640, 810, 29, 'chat'],
-  [900, 820, 30, 'kiss'], [930, 820, 31, 'kiss'], [1040, 800, 32, 'drink'],
-
-  // Sector inferior derecho sin invadir el acceso.
-  [1280, 790, 33, 'chat'], [1330, 815, 34, 'chat'], [1380, 760, 35, 'phone'],
-  [1590, 700, 36, 'dance'], [1620, 745, 37, 'dance'],
-];

@@ -90,7 +90,7 @@ La regla de dirección pasa a ser: **dejar de demostrar que el juego puede crece
 ### Arquitectura
 
 - `PatioScene` funciona como orquestador.
-- Mundo modularizado en césped, deck, casa, piscina, barra, DJ, perímetro y colisiones.
+- Mundo modularizado en césped, deck, casa, piscina, barra, DJ y colisiones; el perímetro rechazado fue retirado del runtime.
 - Sistemas separados para interacción, diálogo, flujo de conversación, estado social, Consejo, outcomes y eventos.
 - Movimiento con teclado, cámara con seguimiento, bounds y Arcade Physics.
 
@@ -104,7 +104,7 @@ La regla de dirección pasa a ser: **dejar de demostrar que el juego puede crece
 | Piscina | Frame, superficie continua, luces, escalera y flotadores | Integrado / estable |
 | Barra | Kit modular, props y bartender animado | Integrado / estable |
 | DJ | Estructura por planos, consola, parlantes animados y DJ residente | Integrado / estable |
-| Perímetro | Laterales top-down, seto inferior y uniones de esquina | En validación visual |
+| Perímetro legacy | Retirado del preload y runtime; PNG históricos inactivos | REJECTED |
 | Tambu | Spritesheet 4 direcciones, idle y walk | Integrado / estable |
 | Sofi | Walk 4 direcciones, idle estable con blink ocasional, special idles de teléfono/bebida en down y caminata del evento del baño | Integrado / estable |
 | Mili | Atlas 4 direcciones, idle estático, blink down ocasional, hair adjust y drink down esporádicos, y caminata del evento del baño | Congelado |
@@ -164,24 +164,16 @@ Hay tests para sistema social, Sofi, Mili, Cami, Consejo, presentación y flujo 
 
 ## Provisional / placeholder
 
-### Población de relleno
+### Party Presence — clean canvas
 
-- Los **35 fillers** (37 antes del prototype DJ) siguen siendo provisionales y su distribución actual NO se considera composición final. La nueva autoridad es `docs/PARTY_PRESENCE.md`: primero se diseñan **social zones + micro-clusters + negative space + circulation** y recién después se producen assets finales.
-- La V1 no exige conservar 37 NPCs ni crear 37 diseños únicos. Dirección puede reducir/mover/agrupar fillers según la lectura del mapa; se resolverá con una familia pequeña/reutilizable y pocas actividades visibles.
-- PARTY PRESENCE queda **ACTIVE**. **DJ SOCIAL ZONE — PASS 01A: PROTOTYPE INTEGRATED / VISUAL QA REQUIRED (2026-10-04).** Se pasa de 6 dancers dispersos a un núcleo de 4: (185,395), (230,420), (280,395), (260,460), todos `dance` con su tween procedural actual. No se agrega filler social-edge: Uriel (320,355) y Santy (380,390) ya aportan el borde social y permanecen intactos. Se retiran los dos fillers restantes del scatter derecho; las otras zonas conservan exactamente sus 31 fillers.
-- Solo cambia la data espacial de fillers DJ; DJ, piscina, amigos, chicas/interactables, spawn, assets, colliders y rutas siguen intactos. Cobertura existente de `createCharacters` ampliada para verificar núcleo compacto, render procedural, tween, geometría y anchors. **257 tests aprobados, 0 fallos/omitidos; build correcto**, con advertencia conocida de bundle >500 kB. Sin browser QA, screenshots ni ejecución visual local. Próximo paso exclusivo: **DJ SOCIAL ZONE — MANUAL VISUAL QA BY DIRECTION**; no iniciar barra/piscina/deck.
+**PARTY PRESENCE — CLEAN CANVAS INTEGRATED / VISUAL QA REQUIRED (2026-10-04).** **0 LEGACY FILLERS**: se retiraron los 35 fillers procedurales, su lista de coordenadas y el contrato `fillerGroups`, sus tweens de baile y parejas decorativas. El prototype DJ PASS 01A queda supersedido, no es composición vigente.
 
-### Props y ambientación activa
-
-`createPatioWorld.js` todavía dibuja mediante `Graphics`:
-
-- mesas de fiesta;
-- cooler;
-- faroles del patio;
-- guirnaldas y postes;
-- vasos, botellas y clutter pequeño.
-
-Cumplen función espacial, pero no son arte final.
+- Se elimina `patioPerimeter.js`, su import, preload y creación. Fence lateral, hedge inferior y esquinas/transiciones vegetales ya no tienen presencia visual; sus PNG quedan históricos/no activos en `public/assets/props/perimeter/`.
+- Se retiran mesas Graphics, cooler, guirnaldas/postes, faroles procedurales y clutter del piso. Se eliminan sus funciones y entries `partyTables`, `cooler`, `garlands`, `patioLanterns`, `clutter` del layout.
+- Se quitan los tres colliders correspondientes: `party-table-0`, `party-table-1`, `cooler`. Quedan los ocho collision rects reales de house/pool/bar/DJ. No se modifican bounds, spawn ni rutas del Bathroom Event.
+- Grass/deck/access, casa completa (incluidos wallPlanters), piscina, barra y DJ mantienen sus módulos/assets aprobados. Se preservan luces/props seleccionados del deck estable y props integrados de las estructuras; no se confunden con ambientación provisional Graphics eliminada. Tambu, seis amigos y Sofi/Mili/Cami conservan posiciones, sprites, animaciones, labels, markers e interacción.
+- **259 tests aprobados, 0 fallos/omitidos; build correcto**, con advertencia conocida de bundle >500 kB. Cobertura de población limpia, preload sin perímetro, estructuras/door refs preservadas, colliders visibles y puntos de mesas/cooler liberados. Sin navegador, screenshots ni ejecución visual local.
+- Pipeline vigente: **CLEAN PATIO SCREENSHOT → SOCIAL ZONE DESIGNER → APPROVED ZONE MOCKUP → ART DIRECTOR → INTEGRATION ENGINEER**. No se integra reemplazo alguno durante la limpieza. Próxima acción de Dirección: inspección/captura limpia y luego diseño de zona DJ; no iniciar fillers, props ni decoración automáticamente.
 
 ### UI
 
@@ -209,7 +201,7 @@ El hecho de que un archivo exista en `public/assets` no significa que esté apro
 ## En validación o ajuste
 
 - Intro de la noche `00:00 → 00:01`: blackout desde el primer frame, reloj pixelado, transición blanco → ventana, reveal centrado y túnel final a través del `:` integrados. Baseline visual aprobada para avanzar; quedan microdetalles de polish diferidos para una pasada posterior.
-- Perímetro actual: comprobar en juego continuidad de laterales, oclusión de pies en el seto inferior y uniones de ambas esquinas.
+- Clean canvas: Dirección debe confirmar visualmente ausencia de ambientación legacy y conservación de estructuras/personajes. El perímetro anterior está rechazado e inactivo.
 - Retorno post-baño: rutas seguras temporales por personaje, retorno a facing down e idles normales/special idles validados manualmente.
 - Balance numérico de rutas sociales y recompensas: la estructura está implementada, pero el playtest puede justificar ajustes.
 - **Bathroom Resistance — BALANCE PASS 2 CLOSED / BASELINE:** el ordinal runtime cuenta solo resultados previos liquidados (`secured` o `interrupted`), excluyendo el outcome `bathroom` pending del evento actual. Los tres perfiles mantienen SPACE `+4`, 10 s y siete golpes con dificultad progresiva 1/2/3. Eze ya realizó el playtest manual posterior al rebalance y la baseline actual queda aceptada. No ajustar números nuevamente salvo evidencia nueva de playtest.
@@ -238,7 +230,7 @@ La segunda auditoría del 28/09 confirma que el loop funcional ya está cerrado.
 1. **STABILIZATION PASS** — corregir copy de SPACE, overwrite de depth de amigos y emits falsos de Mili. Bathroom Resistance Pass 2 ya está playtesteado y no forma parte de esta pasada salvo el copy de input engañoso.
 2. **CAST CLOSURE — CLOSED / FROZEN FOR V1** — los seis amigos principales, sus walks/idles y los paquetes de special idles aprobados quedan cerrados. No reabrir producción individual de amigos salvo bug concreto.
 3. **BATHROOM RESISTANCE 2.0 — CLOSED / BASELINE FOR V1** — baseline técnica y escalada sorpresa → incredulidad → caos aceptadas. Wording provisional; su reescritura se difiere al DIALOGUE / CHARACTER VOICE PASS global.
-4. **PARTY PRESENCE — ACTIVE** — dirección congelada en `docs/PARTY_PRESENCE.md`. Orden interno: social zoning/composition → filler visual family → audio foundation → activities + 2–3 ambient beats. Primera zona oficial: **DJ / dance floor**. Los 35 fillers actuales (37 antes del prototype DJ) son estado provisional, no target; se pueden reducir/mover/agrupar. No construir simulación social.
+4. **PARTY PRESENCE — ACTIVE** — dirección congelada en `docs/PARTY_PRESENCE.md`. Orden interno: social zoning/composition → filler visual family → audio foundation → activities + 2–3 ambient beats. Primera zona oficial futura: **DJ / dance floor**, a partir de captura real limpia y mockup aprobado del Social Zone Designer. **0 legacy fillers**; el prototype de coordenadas DJ queda supersedido. No agregar población/props antes del diseño aprobado ni construir simulación social.
 5. **V1 UX CLOSURE** — menú/onboarding mínimo, ocultar alcohol vacío, alinear HUD/diálogo/Consejo/outcomes/Resistance a `UI_DIRECTION.md` y asegurar que todos los prompts describan el input real.
 6. **DIALOGUE / CHARACTER VOICE PASS** — pasada global de escritura cerca del cierre de V1. Crear un agente especializado y alimentarlo con vocabulario real del grupo, personalidad individual, relaciones, muletillas, límites de voz y contexto completo. Revisar conversaciones, outcomes, post-outcome, Bathroom Resistance y demás líneas como un sistema de voces coherente. Evitar punch-ups genéricos aislados. Regla local ya fijada: `piscina`, no `pileta`.
 7. **FEATURE FREEZE** — una vez cerrados los bloques anteriores no se agregan mecánicas, personajes o specials por impulso; solo fixes surgidos de QA.

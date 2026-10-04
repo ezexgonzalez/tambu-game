@@ -1,4 +1,4 @@
-import { fillerGroups, patioFriends, patioWomen } from '../data/patioCharacters.js';
+import { patioFriends, patioWomen } from '../data/patioCharacters.js';
 import { createCamiSprite, destroyCamiSprite, preloadCami } from './camiSprite.js';
 import { createMiliSprite, destroyMiliSprite, preloadMili } from './miliSprite.js';
 import { createSofiSprite, destroySofiSprite, preloadSofi } from './sofiSprite.js';
@@ -9,26 +9,6 @@ const SKIN_COLORS = [0xe8b990, 0xd79c73, 0xc5835f, 0xf0c8a7];
 const HAIR_COLORS = [0x1d1715, 0x593a2d, 0xb88652, 0x15151a, 0x7a5139];
 
 export function createCharacters(scene) {
-  fillerGroups.forEach(([x, y, palette, activity]) => {
-    const sprite = drawPerson(scene, x, y, palette);
-    if (activity === 'dance') {
-      scene.tweens.add({
-        targets: sprite,
-        y: y - 5,
-        duration: 320 + (palette % 4) * 70,
-        yoyo: true,
-        repeat: -1,
-      });
-    }
-    if (activity === 'kiss') {
-      scene.add.text(x, y - 54, '♥', {
-        fontFamily: 'monospace',
-        fontSize: '13px',
-        color: '#ff7b9c',
-      }).setOrigin(0.5);
-    }
-  });
-
   patioFriends.forEach((friend) => {
     const hasRuntimeSprite = Boolean(friend.id);
     const sprite = hasRuntimeSprite

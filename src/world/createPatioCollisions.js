@@ -21,27 +21,13 @@ function localRectZone(parent, rect, prefix) {
 }
 
 export function getPatioCollisionZones() {
-  const { house, pool, bar, dj, partyTables, cooler } = PATIO_LAYOUT;
+  const { house, pool, bar, dj } = PATIO_LAYOUT;
 
   return [
     centeredZone(house, 'house'),
     centeredZone(pool, 'pool'),
     ...bar.collisionRects.map((rect) => localRectZone(bar, rect, 'bar')),
     ...dj.collisionRects.map((rect) => localRectZone(dj, rect, 'dj')),
-    ...partyTables.map((table, index) => ({
-      id: `party-table-${index}`,
-      x: table.x,
-      y: table.y + table.colliderCenterOffsetY,
-      width: table.colliderWidth,
-      height: table.colliderHeight,
-    })),
-    {
-      id: 'cooler',
-      x: cooler.x + cooler.colliderCenterOffsetX,
-      y: cooler.y + cooler.colliderCenterOffsetY,
-      width: cooler.colliderWidth,
-      height: cooler.colliderHeight,
-    },
   ];
 }
 

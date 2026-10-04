@@ -149,39 +149,10 @@ export const PATIO_LAYOUT = {
   events: {
     bathroom: BATHROOM_EVENT,
   },
-  partyTables: [
-    { x: 1178, y: 530, colliderCenterOffsetY: 28, colliderWidth: 72, colliderHeight: 80 },
-    { x: 360, y: 565, colliderCenterOffsetY: 27, colliderWidth: 72, colliderHeight: 80 },
-  ],
-  cooler: {
-    x: 1326,
-    y: 502,
-    width: 58,
-    height: 38,
-    colliderCenterOffsetX: 28,
-    colliderCenterOffsetY: 19,
-    colliderWidth: 68,
-    colliderHeight: 50,
-  },
-  garlands: [
-    { x1: 76, y1: 378, x2: 910, y2: 378, sag: 22, poleHeight: 58 },
-    { x1: 1140, y1: 458, x2: 1590, y2: 446, sag: 18, poleHeight: 62 },
-  ],
   wallPlanters: [
     { x: 58, y: 104, width: 112 },
     { x: 494, y: 104, width: 112 },
     { x: 1032, y: 105, width: 124 },
     { x: 1462, y: 105, width: 118 },
-  ],
-  patioLanterns: [
-    { x: 64, y: 666 },
-    { x: 430, y: 900 },
-    { x: 1160, y: 900 },
-    { x: 1604, y: 780 },
-  ],
-  clutter: [
-    [485, 350], [1090, 385], [1190, 740], [1280, 610], [410, 805], [1040, 830],
-    [720, 790], [280, 500], [1560, 580], [850, 360], [200, 720], [1240, 450],
-    [470, 755], [1180, 870], [840, 805], [1500, 860], [310, 870], [60, 700],
   ],
 };

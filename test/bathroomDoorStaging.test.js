@@ -8,12 +8,13 @@ import { getBathroomReactionTimeline } from '../src/events/bathroomReactionTimel
 import { getBathroomResistanceNarrative } from '../src/data/bathroomResistanceNarrative.js';
 import { getBathroomResistanceConfig } from '../src/events/bathroomResistance.js';
 import { PATIO_LAYOUT } from '../src/world/patioLayout.js';
+import { getPatioCollisionZones, createPatioCollisions } from '../src/world/createPatioCollisions.js';
 
 const hooks = registerHooks({ resolve(specifier, context, next) {
   return specifier === 'phaser' ? { shortCircuit: true,
     url: 'data:text/javascript,export default {Math:{Linear:(a,b,t)=>a+(b-a)*t}}' } : next(specifier, context);
 } });
-const { createPatioWorld } = await import('../src/world/createPatioWorld.js');
+const { createPatioWorld, preloadPatioWorld } = await import('../src/world/createPatioWorld.js');
 hooks.deregister();
 
 function movable(x, y) {
@@ -135,17 +136,27 @@ test('createPatioWorld propaga el único sprite real de puerta y su label desde 
   const scene = {
     add: { graphics: () => display('graphics'), image: (x, y, key) => display('image', x, y, key),
       sprite: (x, y, key) => display('sprite', x, y, key),
-      tileSprite: (x, y) => display('tileSprite', x, y), rectangle: (x, y) => display('rectangle', x, y),
+      tileSprite: (x, y, width, height, key) => display('tileSprite', x, y, key), rectangle: (x, y) => display('rectangle', x, y),
       text: (x, y, text) => display('text', x, y, text) },
     textures: { get: () => ({ getSourceImage: () => ({ height: 32, width: 32 }) }) },
     anims: { exists: () => true }, time: { delayedCall() {} },
-    make: { tilemap: () => ({ addTilesetImage: () => ({}), createLayer: () => ({ setDepth() {} }) }) },
+    make: { tilemap: () => ({ addTilesetImage: () => ({}), createLayer: () => display('grass-layer') }) },
   };
   const { bathroomDoor } = createPatioWorld(scene);
   assert.equal(bathroomDoor.sprite, objects.find(({ key }) => key === 'house-door-bathroom'));
   assert.equal(bathroomDoor.label, objects.find(({ key }) => key === 'BAÑO'));
   assert.equal(objects.filter(({ key }) => key === 'house-door-bathroom').length, 1);
   assert.deepEqual([bathroomDoor.sprite.x, bathroomDoor.sprite.y], [1343, 150]);
+  const keys = objects.map(({ key }) => key);
+  for (const key of ['deck-base-01', 'deck-edge-bottom', 'terrain', 'house-wall-base',
+    'house-door', 'house-door-bathroom', 'house-planter', 'pool-frame-04',
+    'pool-water-surface-07', 'bar-front-center-02', 'dj-booth-front-01']) {
+    assert.ok(keys.includes(key), `estructura preservada: ${key}`);
+  }
+  assert.equal(objects.filter(({ type }) => type === 'grass-layer').length, 2);
+  assert.equal(objects.filter(({ type }) => type === 'graphics').length, 1,
+    'solo queda Graphics del deck aprobado; no ambientación provisional del patio');
+  assert.ok(keys.every((key) => !key.startsWith('perimeter-')));
   const source = readFileSync('src/scenes/PatioScene.js', 'utf8');
   assert.match(source, /this\.worldVisuals = createPatioWorld\(this\)/);
   assert.match(source, /bathroomDoor: this\.worldVisuals\.bathroomDoor/);
@@ -166,4 +177,44 @@ test('createPatioWorld propaga el único sprite real de puerta y su label desde 
     assert.ok(cam.scrollY + cam.height / cam.zoomY <= PATIO_LAYOUT.world.height + 1e-9);
   }
   staging.destroy();
+});
+
+
+test('clean canvas preload conserva estructuras y no carga assets del perímetro rechazado', () => {
+  const loaded = [];
+  preloadPatioWorld({ load: {
+    image: (key, path) => loaded.push([key, path]),
+    spritesheet: (key, path) => loaded.push([key, path]),
+  } });
+  assert.ok(loaded.every(([key, path]) => !key.startsWith('perimeter-') && !path.includes('/perimeter/')));
+  for (const prefix of ['grass-', 'deck-', 'house-', 'pool-', 'bar-', 'dj-']) {
+    assert.ok(loaded.some(([key]) => key.startsWith(prefix)), prefix);
+  }
+  assert.ok(loaded.some(([key]) => key === 'terrain'));
+});
+
+test('clean canvas conserva solo los ocho colliders de house/pool/bar/DJ y libera los props retirados', () => {
+  const zones = getPatioCollisionZones();
+  assert.deepEqual(zones.map(({ id }) => id), [
+    'house', 'pool', 'bar-body', 'dj-front', 'dj-speaker-left', 'dj-speaker-right',
+    'dj-support-left', 'dj-support-right',
+  ]);
+  for (const [x, y] of [[1178, 558], [360, 592], [1354, 521]]) {
+    assert.ok(!zones.some((zone) => Math.abs(x - zone.x) <= zone.width / 2
+      && Math.abs(y - zone.y) <= zone.height / 2), 'sin obstáculos invisibles en mesas/cooler retirados');
+  }
+  for (const field of ['partyTables', 'cooler', 'garlands', 'patioLanterns', 'clutter']) {
+    assert.equal(Object.hasOwn(PATIO_LAYOUT, field), false, `data legacy removida: ${field}`);
+  }
+  const bodies = []; const links = []; const player = {};
+  const scene = {
+    add: { rectangle: (x, y, width, height) => ({ x, y, width, height }) },
+    physics: { add: { existing: (zone, isStatic) => bodies.push([zone, isStatic]),
+      collider: (actor, zone) => links.push([actor, zone]) } },
+  };
+  const actual = createPatioCollisions(scene, player);
+  assert.equal(actual.length, 8); assert.equal(bodies.length, 8); assert.equal(links.length, 8);
+  assert.ok(bodies.every(([, isStatic]) => isStatic));
+  assert.ok(links.every(([actor]) => actor === player));
+  assert.deepEqual(actual, zones.map(({ id, ...rect }) => rect));
 });

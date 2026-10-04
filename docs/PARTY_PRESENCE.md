@@ -1,7 +1,7 @@
 # Tambu Game — Party Presence
 
-**Versión:** 1.0  
-**Estado:** ACTIVE DIRECTION / DJ SOCIAL ZONE FIRST  
+**Versión:** 1.1  
+**Estado:** CLEAN CANVAS INTEGRATED / VISUAL QA REQUIRED  
 **Fecha:** 2026-10-04  
 **Scope:** V1 · patio actual  
 **Autoridad relacionada:** `CURRENT_STATE.md`, `GAME_DESIGN.md`, `ART_DIRECTION.md`, `PIXEL_ART_STYLE_GUIDE.md`
@@ -31,38 +31,11 @@ Si Tambu se queda quieto durante unos 20 segundos, el jugador debe seguir percib
 
 # 2. Problema actual
 
-El runtime actual contiene **35 fillers procedurales** (37 antes del PASS 01A DJ) definidos en `src/data/patioCharacters.js`.
+El runtime actual contiene **0 LEGACY FILLERS**. La población procedural histórica (37 originalmente, 35 después del prototype DJ PASS 01A) fue removida por Dirección para preparar un canvas limpio.
 
-Aunque existen etiquetas como:
+Se retiran también perímetro rechazado, mesas/cooler Graphics, guirnaldas/postes, faroles procedurales y clutter del piso, incluidos colliders de props que desaparecieron. Ninguna coordenada legacy representa un anchor aprobado para la nueva composición.
 
-- `dance`;
-- `chat`;
-- `drink`;
-- `phone`;
-- `sit`;
-- `kiss`;
-
-la mayoría no tienen todavía una actuación visual suficiente.
-
-Además, la distribución actual fue construida principalmente como ocupación espacial segura y termina sintiéndose demasiado repartida por el mapa.
-
-Problema perceptual:
-
-> hay personas en muchos lugares, pero no siempre parece que existan grupos sociales reales.
-
-La V1 NO está obligada a conservar 37 fillers.
-
-**37 era el estado previo al prototype DJ, no un target de diseño. El total actual de 35 tampoco es un target final.**
-
-Dirección puede:
-
-- reducir;
-- mover;
-- agrupar;
-- reutilizar;
-- reemplazar;
-
-fillers según lo que haga mejor la composición final.
+La V1 no tiene un target de cantidad heredado. El número de personajes y sus actividades debe salir de cada mockup de zona aprobado. No se crea replacement durante este pass.
 
 ---
 
@@ -220,14 +193,14 @@ El contenido exacto se decide después de cerrar las social zones.
 
 # 10. Orden de trabajo actualizado
 
-Dirección cambia el orden interno de PARTY PRESENCE porque la distribución actual de fillers necesita una base espacial mejor antes de producir arte final.
+Dirección establece como preparación obligatoria el CLEAN CANVAS. Flujo vigente: REAL CLEAN SCREENSHOT → SOCIAL ZONE DESIGNER → APPROVED ZONE MOCKUP → ART DIRECTOR → INTEGRATION ENGINEER. El antiguo prototype basado en fillers actuales queda supersedido.
 
 ## PASS 1 — SOCIAL ZONING / COMPOSITION
 
-- auditar los 37 fillers actuales;
+- diseñar desde captura real limpia, sin fillers legacy;
 - dejar de tratarlos como distribución final;
 - trabajar el patio zona por zona;
-- validar clusters y negative space con placeholders existentes.
+- validar clusters, negative space y circulación en el mockup aprobado antes de integración.
 
 ## PASS 2 — FILLER VISUAL FAMILY
 
@@ -270,9 +243,9 @@ Razones:
 Runtime actual relevante:
 
 - DJ: `x 116, y 202, width 302, height 120`;
-- fillers asociados al DJ: **4 dancers** después del PASS 01A (6 antes);
+- fillers asociados al DJ: **0**, hasta aprobar el nuevo mockup;
 - Uriel y Santy ya están físicamente cerca de esta zona;
-- los fillers actuales ocupan una franja amplia y se sienten más como puntos repartidos que como una escena social.
+- el scatter legacy ya no está activo ni sirve como referencia de composición.
 
 Los amigos principales son anchors protegidos.
 
@@ -318,32 +291,11 @@ El jugador tiene que poder atravesar la zona sin leerla como una pared humana.
 
 ---
 
-# 13. DJ zone — prototype rule
+# 13. DJ zone — source of truth vigente
 
-PRIMERO validar composición con placeholders existentes.
+La captura limpia real del patio es el input del Social Zone Designer. El mockup de zona aprobado define composición y prop manifest antes de producir arte o integrar población.
 
-NO producir todavía sprites finales de fillers.
-
-Durante el prototype se puede:
-
-- mover fillers;
-- reducir su cantidad;
-- cambiar actividad metadata;
-- probar orientación/spacing;
-- crear clusters explícitos.
-
-No:
-
-- rediseñar DJ;
-- mover piscina;
-- mover amigos principales;
-- generar arte final;
-- agregar roaming;
-- abrir scope de todo el mapa.
-
-El objetivo del prototype es responder:
-
-> “¿La zona del DJ parece un lugar donde espontáneamente se juntó gente?”
+No reutilizar la distribución procedural eliminada como referencia. No mover DJ, piscina ni amigos principales para acomodar una nueva ilustración. No agregar fillers/props/decoración antes del siguiente brief aprobado.
 
 ---
 
@@ -406,23 +358,26 @@ PARTY PRESENCE debe terminar la fiesta actual, no convertirse en otro juego.
 
 ---
 
-# 17. PASS 01A — DJ social zone composition prototype — 2026-10-04
+# 17. PASS 01A — histórico / supersedido
 
-**DJ SOCIAL ZONE — PROTOTYPE INTEGRATED / VISUAL QA REQUIRED.** Prototype espacial con placeholders actuales; sin arte nuevo ni cambios de actuación.
+El prototype DJ de `main@adb6887` pasó de seis a cuatro fillers. Fue una exploración temporal; Dirección lo reemplaza por CLEAN CANVAS. Sus coordenadas y actividades no son dirección vigente y fueron retiradas de la data runtime. Git conserva el historial.
 
-| Filler (palette existente) | X | Y | Activity |
-|---|---:|---:|---|
-| A (10) | 185 | 395 | dance |
-| B (11) | 230 | 420 | dance |
-| C (12) | 280 | 395 | dance |
-| D (13) | 260 | 460 | dance |
+---
 
-**Antes: 6 fillers DJ. Después: 4 dancers + 0 fillers social-edge.** Uriel (320,355) y Santy (380,390) ya forman el borde social; no se movieron ni se escondieron detrás de fillers nuevos. Esta decisión específica del prototype limita la idea general de microgrupos de la sección 12: no se agrega población al borde en esta pasada.
+# 18. CLEAN CANVAS — integrado — 2026-10-04
 
-El núcleo abarca 95×65 px entre anchors, con separaciones irregulares y sin línea/grid uniforme. El cuarto dancer queda en (260,460) para separar mejor su silueta del segundo. Las envolventes procedurales y los 5 px de recorrido del tween están fuera de los collision zones actuales. Se reserva aire delante del booth y hacia el lateral derecho/piscina, retirando el scatter que antes llegaba a (465,485). La circulación y legibilidad óptica quedan pendientes de validación en juego.
+**PARTY PRESENCE — CLEAN CANVAS INTEGRATED / VISUAL QA REQUIRED.**
 
-Se conservan paletas 10–13 y el renderer/tween procedural existente. Se eliminan los antiguos fillers DJ de paletas 14 y 15; no se reubican en otra zona. Los otros **31 fillers** permanecen exactamente iguales, total actual **35**. DJ, piscina, Uriel/Santy y todos los amigos, chicas/interactables, Tambu spawn, colliders y rutas BathroomEvent quedan intactos.
+- Fillers: **35 → 0**, sin lista espacial `fillerGroups` ni tweens/parejas decorativas activos.
+- Perímetro: fence laterales, hedge inferior, esquinas vegetales/transiciones retirados; `patioPerimeter.js` eliminado y sin preload. PNG históricos conservados, no activos.
+- Ambientación Graphics legacy: mesas, cooler, guirnaldas/postes, patio lanterns y floor clutter retirados sin reemplazo. Entries de layout y funciones consumidoras eliminadas.
+- Colliders: retirados `party-table-0`, `party-table-1`, `cooler`; preservados los ocho rects de house/pool/bar/DJ.
+- Preservados: grass, deck/edge/access, fachada con wallPlanters, piscina completa, barra y DJ (incluidos props/performers integrados). El deck estable conserva sus luces/props seleccionados. Tambu, seis amigos y Sofi/Mili/Cami permanecen exactamente en sus posiciones con su runtime actual. No cambia ningún evento, cámara, UI, rewards, diálogo ni ruta.
 
-Validación: **257/257 tests aprobados, 0 fallos, 0 omitidos; `npm run build` correcto**, con advertencia existente de chunk >500 kB. Se amplía la cobertura existente de `createCharacters` en `miliSprite.test.js`: cuatro dancers dentro de un sector compacto, distribución no lineal, envolvente/tween fuera de colliders, placeholders creados desde la data, población de otras zonas y conservación de amigos/interactables. La comparación estática confirma que solo cambió el bloque DJ en `patioCharacters.js`.
+Validación: **259/259 tests aprobados; 0 fallos, 0 omitidos. `npm run build` correcto**, con advertencia conocida de chunk >500 kB. Se actualiza cobertura de `createCharacters` para cero placeholders, seis amigos y tres interactables; world/preload preservan estructuras y excluyen perímetro; colisiones eliminan únicamente props retirados y liberan sus ubicaciones. Assets y módulos estructurales protegidos sin modificaciones.
 
-No se realizó browser QA, screenshots ni ejecución visual local. **No se declara composición final.** Próxima acción exclusiva: **DJ SOCIAL ZONE — MANUAL VISUAL QA BY DIRECTION** para lectura conjunta, negative space, anchors y circulación. No iniciar barra, piscina ni deck.
+No se realizó navegador, screenshots ni ejecución visual local. No se declara aprobación visual. **STOP después del push.** La próxima acción es de Dirección:
+
+**CLEAN PATIO SCREENSHOT → SOCIAL ZONE DESIGNER → APPROVED DJ ZONE MOCKUP → ART DIRECTOR → INTEGRATION ENGINEER.**
+
+Sin nueva población, props, vegetación ni decoración en esta pasada.
