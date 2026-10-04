@@ -641,6 +641,96 @@ Siguiente bloque activo del roadmap:
 
 ---
 
+# 14.4 Dialogue Punch Pass — Dirección 2026-10-04
+
+Dirección reabre Bathroom Resistance 2.0 de forma **acotada** únicamente para mejorar humor, personalidad y escalada de las intervenciones. No se reabre HUD general, cámara, balance, portraits, memoria ni mecánica.
+
+Objetivo de tono:
+
+- **Baño 1 — sorpresa con chispa:** Pitity debe sentirse sorprendido, impaciente y gracioso; evitar que el primer intento sea una versión plana de “abrí / tengo que mear”.
+- **Baño 2 — incredulidad + cargada:** Tobi y Uriel ya saben lo que pasó; deben burlarse de Tambu, reconocer la repetición y tener remates más memorables.
+- **Baño 3 — caos real:** Santy, Thiago y Eze deben sentirse como una escalada colectiva. Además del cambio de speakers, se aprueba una señal visual roja puntual de alto impacto para marcar que “se pudrió todo”, sin convertir toda la UI en roja.
+
+Dirección de copy propuesta para integración:
+
+## BAÑO 1 — PITITY
+
+Anticipation:
+- TALK: `¿TAMBU? ... ¿QUÉ HACÉS AHÍ ADENTRO?`
+
+Resistance:
+- TALK: `DALE, ABRÍ UN SEGUNDO.`
+- ANGRY: `NO ME HAGAS MEAR EN LA PILETA.`
+- SHOUT: `¡ABRÍ, ANIMAL, QUE NO AGUANTO MÁS!`
+
+Resolution secured:
+- ANGRY: `BUENO. ME MEO AFUERA. FELICIDADES.`
+
+Resolution interrupted:
+- SHOUT: `¡TE DIJE QUE NO AGUANTABA!`
+
+## BAÑO 2 — TOBI + URIEL
+
+Anticipation:
+- Tobi TALK: `NO... NO PUEDE SER.`
+- Uriel TALK: `¿OTRA VEZ EL MISMO BAÑO?`
+
+Resistance:
+- Tobi ANGRY: `ABRÍ, CASANOVA.`
+- Uriel TALK: `TE JURO QUE ESTÁ AHÍ ADENTRO.`
+- Tobi SHOUT: `¡TAMBU, CERRÁ EL BOLICHE!`
+- Memory branch Uriel:
+  - previous secured → ANGRY: `LA PRIMERA TE SALIÓ. NO TE AGRANDES.`
+  - previous interrupted → ANGRY: `¿EN SERIO QUERÉS PERDER DOS VECES?`
+- Tobi SHOUT: `¡DALE, FIGURA, ABRÍ!`
+
+Resolution secured:
+- Tobi ANGRY: `NO PUEDE SER. DOS VECES.`
+
+Resolution interrupted:
+- Uriel TALK: `Y... DURÓ LO QUE TENÍA QUE DURAR.`
+
+## BAÑO 3 — SANTY + THIAGO + EZE
+
+Anticipation:
+- Santy TALK: `CHE... ESTÁ DE NUEVO.`
+- Thiago ANGRY: `NO. ESTE HIJO DE PUTA NO APRENDE.`
+- Después de la segunda línea aparece una señal roja pixelada breve:
+  - `SE PUDRIÓ TODO`
+  - duración aproximada: 700–1000 ms
+  - color rojo de alerta contenido, sin glow
+  - no reemplaza el título del minijuego ni cambia la paleta permanente
+
+Resistance:
+- Santy SHOUT: `¡TAMBUUU!`
+- Thiago ANGRY: `ABRÍ ANTES QUE SAQUEMOS LA PUERTA.`
+- Eze memory branch:
+  - 2 secured → ANGRY: `DOS VECES TE SALIÓ. HOY NO HAY TERCERA.`
+  - 1 secured → TALK: `UNA GANASTE VOS. UNA NOSOTROS. DESEMPATE.`
+  - 0 secured → TALK: `DOS VECES TE LA TIRAMOS. ¿QUERÉS LA TERCERA?`
+- Santy SHOUT: `¡A LA CUENTA DE TRES!`
+- Thiago SHOUT: `¡TENGO QUE MEAR, PELOTUDO!`
+- Eze ANGRY: `UNO... DOS...`
+- último impacto mecánico: opcionalmente acompañar con un microtexto rojo pixelado `¡TRES!` durante un instante breve, sin portrait y sin alterar damage/timing.
+
+Resolution secured:
+- Eze TALK: `NAH. DEJALO. YA ES INHUMANO.`
+
+Resolution interrupted:
+- Santy SHOUT: `¡TE DIJIMOS TRES, GIL!`
+
+Reglas:
+
+- Mantener una sola reacción con portrait a la vez.
+- El rojo es acento semántico exclusivo del intento 3, no un nuevo theme.
+- No cambiar duración activa, hit timings, damage, drain, rewards ni input.
+- No agregar nuevas expresiones ni portraits.
+- Las líneas deben seguir teniendo tiempo mínimo de lectura según el pacing actual.
+- Si una línea resulta demasiado larga en runtime, ajustar spacing/timing antes de mutilar el chiste; cualquier cambio de copy debe volver a Dirección.
+
+
+---
+
 # 15. Correction pass integrada — 2026-10-04
 
 **CORRECTION PASS INTEGRATED / VISUAL QA REQUIRED.** Este es el presentation contract runtime vigente. Las secciones 6–8 conservan la autoridad de copy/speakers/expresiones/memoria; sus timestamps describen los hits mecánicos, no obligan a reemplazar la frase visible en ese mismo instante. Los timings históricos de anticipation y la composición/cleanup de la sección 14 quedan supersedidos por esta corrección.
