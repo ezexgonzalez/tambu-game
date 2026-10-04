@@ -593,6 +593,26 @@ No se ejecutó browser QA ni se levantó el juego. Próximo paso exclusivo: **MA
 
 ---
 
+# 14.2 QA visual de Dirección — UI desacoplada del zoom + framing dentro del mapa (2026-10-04)
+
+QA detecta dos defectos pendientes:
+
+1. El zoom de la world camera también escala el HUD de Bathroom Challenge. El HUD debe permanecer en tamaño/coordenadas de pantalla.
+2. El foco actual centra la puerta saliendo por encima de los límites del mapa, exponiendo un void oscuro.
+
+Dirección aprueba:
+
+- Separar world camera y Bathroom Challenge UI. La puerta/mundo mantiene zoom 1.75 durante Resistance; el HUD se renderiza mediante cámara/UI viewport propio a zoom 1.0.
+- No compensar con escala inversa del HUD.
+- La cámara UI debe cubrir panel, barra, timer, labels pixel, portraits, reaction dock, reward y prompt; limpiarse en finish/destroy/shutdown/retry.
+- El focus de puerta debe respetar/clamp `PATIO_LAYOUT.world`. No usar scroll Y negativo ni mostrar espacio fuera del world bound.
+- La puerta no necesita quedar centrada matemáticamente. Preferir tercio superior y composición limpia.
+- No agregar cielo/techo/fondo ficticio para tapar el vacío. Resolverlo con framing correcto.
+- Zoom 1.75, door impacts, narrative pacing y balance siguen protegidos.
+
+
+---
+
 # 15. Correction pass integrada — 2026-10-04
 
 **CORRECTION PASS INTEGRATED / VISUAL QA REQUIRED.** Este es el presentation contract runtime vigente. Las secciones 6–8 conservan la autoridad de copy/speakers/expresiones/memoria; sus timestamps describen los hits mecánicos, no obligan a reemplazar la frase visible en ese mismo instante. Los timings históricos de anticipation y la composición/cleanup de la sección 14 quedan supersedidos por esta corrección.
