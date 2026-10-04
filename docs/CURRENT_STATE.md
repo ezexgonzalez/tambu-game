@@ -166,9 +166,9 @@ Hay tests para sistema social, Sofi, Mili, Cami, Consejo, presentación y flujo 
 
 ### Población de relleno
 
-- Los **37 fillers** siguen siendo provisionales; ocho tienen tween de baile y varias etiquetas de actividad todavía no producen una acción visible.
-- La V1 no exige 37 diseños únicos: se resolverá con una familia pequeña/reutilizable y pocas actividades legibles.
-- El cierre de amigos principales no implica cerrar fillers; son un bloque separado de PARTY PRESENCE.
+- Los **37 fillers** siguen siendo provisionales y su distribución actual NO se considera composición final. La nueva autoridad es `docs/PARTY_PRESENCE.md`: primero se diseñan **social zones + micro-clusters + negative space + circulation** y recién después se producen assets finales.
+- La V1 no exige conservar 37 NPCs ni crear 37 diseños únicos. Dirección puede reducir/mover/agrupar fillers según la lectura del mapa; se resolverá con una familia pequeña/reutilizable y pocas actividades visibles.
+- PARTY PRESENCE queda **ACTIVE** y empieza por la zona **DJ / dance floor**, usando placeholders actuales para validar composición antes de generar arte final. Uriel y Santy, ya cercanos a esa zona, son anchors protegidos y no se mueven en el primer prototype.
 
 ### Props y ambientación activa
 
@@ -237,7 +237,7 @@ La segunda auditoría del 28/09 confirma que el loop funcional ya está cerrado.
 1. **STABILIZATION PASS** — corregir copy de SPACE, overwrite de depth de amigos y emits falsos de Mili. Bathroom Resistance Pass 2 ya está playtesteado y no forma parte de esta pasada salvo el copy de input engañoso.
 2. **CAST CLOSURE — CLOSED / FROZEN FOR V1** — los seis amigos principales, sus walks/idles y los paquetes de special idles aprobados quedan cerrados. No reabrir producción individual de amigos salvo bug concreto.
 3. **BATHROOM RESISTANCE 2.0 — CLOSED / BASELINE FOR V1** — baseline técnica y escalada sorpresa → incredulidad → caos aceptadas. Wording provisional; su reescritura se difiere al DIALOGUE / CHARACTER VOICE PASS global.
-4. **PARTY PRESENCE** — audio mínimo con mute/volumen + lote pequeño de fillers/actividades + 2–3 callbacks o beats ambientales de alto impacto. No construir simulación social.
+4. **PARTY PRESENCE — ACTIVE** — dirección congelada en `docs/PARTY_PRESENCE.md`. Orden interno: social zoning/composition → filler visual family → audio foundation → activities + 2–3 ambient beats. Primera zona oficial: **DJ / dance floor**. Los 37 fillers actuales son estado provisional, no target; se pueden reducir/mover/agrupar. No construir simulación social.
 5. **V1 UX CLOSURE** — menú/onboarding mínimo, ocultar alcohol vacío, alinear HUD/diálogo/Consejo/outcomes/Resistance a `UI_DIRECTION.md` y asegurar que todos los prompts describan el input real.
 6. **DIALOGUE / CHARACTER VOICE PASS** — pasada global de escritura cerca del cierre de V1. Crear un agente especializado y alimentarlo con vocabulario real del grupo, personalidad individual, relaciones, muletillas, límites de voz y contexto completo. Revisar conversaciones, outcomes, post-outcome, Bathroom Resistance y demás líneas como un sistema de voces coherente. Evitar punch-ups genéricos aislados. Regla local ya fijada: `piscina`, no `pileta`.
 7. **FEATURE FREEZE** — una vez cerrados los bloques anteriores no se agregan mecánicas, personajes o specials por impulso; solo fixes surgidos de QA.
