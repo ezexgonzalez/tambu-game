@@ -2,20 +2,12 @@ const DURATION_MS = 10000;
 const ANTICIPATION = Object.freeze({
   durationMs: 3000,
   beats: Object.freeze([
-    Object.freeze({ at: 1700, text: 'PUM PUM PUM' }),
-    Object.freeze({ at: 2450, text: 'TAMBU.' }),
+    Object.freeze({ at: 1700 }),
+    Object.freeze({ at: 2450 }),
   ]),
 });
 
-const HIT_TIMINGS_AND_TEXT = [
-  [800, 'PUM'],
-  [1900, 'PUM PUM'],
-  [3100, 'TAMBU.'],
-  [4400, 'ABRÍ.'],
-  [6100, 'PUM PUM PUM'],
-  [7900, 'DALE BOLUDO, TENGO QUE MEAR.'],
-  [9200, 'PUM PUM PUM'],
-];
+const HIT_TIMINGS = [800, 1900, 3100, 4400, 6100, 7900, 9200];
 
 function createProfile(startResistance, drainRates, hitDamages) {
   return Object.freeze({
@@ -29,8 +21,8 @@ function createProfile(startResistance, drainRates, hitDamages) {
       Object.freeze({ untilMs: 7000, perSecond: drainRates[1] }),
       Object.freeze({ untilMs: DURATION_MS, perSecond: drainRates[2] }),
     ]),
-    hits: Object.freeze(HIT_TIMINGS_AND_TEXT.map(([at, text], index) => (
-      Object.freeze({ at, damage: hitDamages[index], text })
+    hits: Object.freeze(HIT_TIMINGS.map((at, index) => (
+      Object.freeze({ at, damage: hitDamages[index] })
     ))),
   });
 }

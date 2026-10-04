@@ -10,6 +10,7 @@ import {
   canInteractWithCharacter,
   createGameState,
   getBathroomAttemptNumber,
+  getCompletedBathroomResults,
   isCharacterResolved,
   settleBathroomResult,
 } from '../state/gameState.js';
@@ -19,6 +20,8 @@ import { createInteractionSystem } from '../systems/interactionSystem.js';
 import { createOutcomeEventSystem } from '../systems/outcomeEventSystem.js';
 import { createBathroomEvent } from '../events/bathroomEvent.js';
 import { getBathroomResistanceConfig } from '../events/bathroomResistance.js';
+import { getBathroomResistanceNarrative } from '../data/bathroomResistanceNarrative.js';
+import { preloadPortraitReactions } from '../ui/portraitReactionUi.js';
 import { createNightIntro } from '../events/nightIntro.js';
 import { createResolvedCharacterReturnSystem } from '../events/resolvedCharacterReturn.js';
 import { createHud } from '../ui/createHud.js';
@@ -33,6 +36,15 @@ export function getBathroomResistanceConfigForRun(gameState) {
   return getBathroomResistanceConfig(getBathroomAttemptNumber(gameState));
 }
 
+export function getBathroomEventConfigForRun(gameState) {
+  const attemptNumber = getBathroomAttemptNumber(gameState);
+  const previousResults = getCompletedBathroomResults(gameState);
+  return {
+    resistanceConfig: getBathroomResistanceConfig(attemptNumber),
+    narrative: getBathroomResistanceNarrative({ attemptNumber, previousResults }),
+  };
+}
+
 export class PatioScene extends Phaser.Scene {
   constructor() {
     super('PatioScene');
@@ -42,6 +54,7 @@ export class PatioScene extends Phaser.Scene {
     preloadPatioWorld(this);
     preloadPlayer(this);
     preloadCharacters(this);
+    preloadPortraitReactions(this);
   }
 
   create() {
@@ -68,18 +81,21 @@ export class PatioScene extends Phaser.Scene {
     );
     this.outcomeEventSystem = createOutcomeEventSystem({
       handlers: {
-        bathroom: (request) => createBathroomEvent(this, {
-          ...request,
-          player: this.player,
-          layout: PATIO_LAYOUT.events.bathroom,
-          resistanceConfig: getBathroomResistanceConfigForRun(this.gameState),
-          onCompanionReturn: this.resolvedCharacterReturnSystem.start,
-          onBathroomResolved: ({ characterId, result }) => {
-            const settled = settleBathroomResult(this.gameState, characterId, result);
-            if (settled) onGameStateChange(this.gameState);
-            return settled;
-          },
-        }),
+        bathroom: (request) => {
+          const eventConfig = getBathroomEventConfigForRun(this.gameState);
+          return createBathroomEvent(this, {
+            ...request,
+            player: this.player,
+            layout: PATIO_LAYOUT.events.bathroom,
+            ...eventConfig,
+            onCompanionReturn: this.resolvedCharacterReturnSystem.start,
+            onBathroomResolved: ({ characterId, result }) => {
+              const settled = settleBathroomResult(this.gameState, characterId, result);
+              if (settled) onGameStateChange(this.gameState);
+              return settled;
+            },
+          });
+        },
       },
     });
     this.dialogueSystem = createDialogueSystem(this, {

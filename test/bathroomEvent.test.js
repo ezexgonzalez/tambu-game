@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { registerHooks } from 'node:module';
+import { EventEmitter } from 'node:events';
+import { createOutcomeEventSystem } from '../src/systems/outcomeEventSystem.js';
 import { CAMI_CONVERSATION } from '../src/data/conversations/camiConversation.js';
 import { MILI_CONVERSATION } from '../src/data/conversations/miliConversation.js';
 import { SOFI_CONVERSATION } from '../src/data/conversations/sofiConversation.js';
@@ -15,6 +17,7 @@ import {
 } from '../src/state/gameState.js';
 import { getPatioCollisionZones } from '../src/world/createPatioCollisions.js';
 import { PATIO_LAYOUT } from '../src/world/patioLayout.js';
+import { getBathroomResistanceNarrative } from '../src/data/bathroomResistanceNarrative.js';
 import { createBathroomResistanceUi } from '../src/ui/eventUi.js';
 
 const phaserMock = 'data:text/javascript,' + encodeURIComponent(`
@@ -57,6 +60,13 @@ function actor(x, y) {
 function display(x, y, text = '') {
   return {
     x, y, text, visible: true, destroyed: false,
+    fillStyle() { return this; },
+    fillRect() { return this; },
+    fillTriangle() { return this; },
+    lineStyle() { return this; },
+    strokeRect() { return this; },
+    lineBetween() { return this; },
+    setTexture(key, frame) { this.texture = key; this.frame = frame; return this; },
     setScrollFactor() { return this; },
     setDepth(depth) { this.depth = depth; return this; },
     setStrokeStyle() { return this; },
@@ -186,6 +196,8 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
   const scene = {
     input: { keyboard: { addKey(code) { keys[code] = { edge: false }; return keys[code]; } } },
     add: {
+      graphics() { const object = display(0, 0); objects.push(object); return object; },
+      image(x, y) { const object = display(x, y); objects.push(object); return object; },
       rectangle(x, y) { const object = display(x, y); objects.push(object); return object; },
       text(x, y, text) { const object = display(x, y, text); objects.push(object); return object; },
     },
@@ -325,7 +337,7 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
     ) > playerFootprint().halfWidth + GIRL_FOOTPRINT.halfWidth,
     'Tambu and the companion have separate footprints at the doorway',
   );
-  assert.ok(objects.filter(({ text }) => text).every(({ destroyed }) => destroyed));
+  assert.ok(objects.every(({ destroyed }) => destroyed));
 });
 
 test('BathroomEvent recibe el perfil del intento y SPACE solo recupera con JustDown', () => {
@@ -333,6 +345,8 @@ test('BathroomEvent recibe el perfil del intento y SPACE solo recupera con JustD
   const scene = {
     input: { keyboard: { addKey(code) { keys[code] = { edge: false }; return keys[code]; } } },
     add: {
+      graphics() { const object = display(0, 0); return object; },
+      image(x, y) { const object = display(x, y); return object; },
       rectangle(x, y) { return display(x, y); },
       text(x, y, text) { return display(x, y, text); },
     },
@@ -377,6 +391,8 @@ test('BathroomEvent recibe el perfil del intento y SPACE solo recupera con JustD
 test('Bathroom Resistance instruye pulsaciones repetidas', () => {
   const scene = {
     add: {
+      graphics() { const object = display(0, 0); return object; },
+      image(x, y) { const object = display(x, y); return object; },
       rectangle(x, y, width, height) { return display(x, y); },
       text(x, y, text) { return display(x, y, text); },
     },
@@ -394,6 +410,8 @@ test('Mili usa walk real, depth por pies y vuelve a idle durante BathroomEvent',
   const scene = {
     input: { keyboard: { addKey(code) { keys[code] = { edge: false }; return keys[code]; } } },
     add: {
+      graphics() { const object = display(0, 0); objects.push(object); return object; },
+      image(x, y) { const object = display(x, y); objects.push(object); return object; },
       rectangle(x, y) { const object = display(x, y); objects.push(object); return object; },
       text(x, y, text) { const object = display(x, y, text); objects.push(object); return object; },
     },
@@ -439,6 +457,8 @@ test('Cami usa walk real, depth por pies y vuelve a idle durante BathroomEvent',
   const scene = {
     input: { keyboard: { addKey(code) { keys[code] = { edge: false }; return keys[code]; } } },
     add: {
+      graphics() { const object = display(0, 0); objects.push(object); return object; },
+      image(x, y) { const object = display(x, y); objects.push(object); return object; },
       rectangle(x, y) { const object = display(x, y); objects.push(object); return object; },
       text(x, y, text) { const object = display(x, y, text); objects.push(object); return object; },
     },
@@ -484,6 +504,8 @@ test('SPACE sostenido mediante pulsaciones físicas permite asegurar la puerta',
   const scene = {
     input: { keyboard: { addKey(code) { keys[code] = { edge: false }; return keys[code]; } } },
     add: {
+      graphics() { const object = display(0, 0); objects.push(object); return object; },
+      image(x, y) { const object = display(x, y); objects.push(object); return object; },
       rectangle(x, y) { const object = display(x, y); objects.push(object); return object; },
       text(x, y, text) { const object = display(x, y, text); objects.push(object); return object; },
     },
@@ -680,5 +702,169 @@ test('la formación gira con el trayecto y ambos avanzan juntos sin pausas en wa
       frames += 1;
     }
     assert.equal(event.getMode(), 'bathroom-achieved');
+  }
+});
+
+
+function narrativeEventRuntime(attemptNumber, previousResults = []) {
+  const objects = [];
+  const keys = {};
+  const scene = {
+    scale: { width: 1280, height: 720 },
+    events: new EventEmitter(),
+    game: { loop: { delta: 50 } },
+    input: { keyboard: { addKey(code) { keys[code] = { edge: false }; return keys[code]; } } },
+    add: {
+      graphics() { const object = display(0, 0); objects.push(object); return object; },
+      image(x, y, key, frame) {
+        const object = display(x, y).setTexture(key, frame); objects.push(object); return object;
+      },
+      rectangle(x, y) { const object = display(x, y); objects.push(object); return object; },
+      text(x, y, text) { const object = display(x, y, text); objects.push(object); return object; },
+    },
+    cameras: { main: { shake: (...args) => shakes.push(args) } },
+  };
+  const shakes = [];
+  const player = { sprite: actor(400, 690), label: display(400, 724), facing: 'down' };
+  const interactable = {
+    sprite: actor(400, 690), label: display(400, 726), marker: display(400, 635),
+    visual: 'sofi-sprite', character: { id: 'sofi' },
+  };
+  const gameState = createGameState();
+  gameState.relationships.sofi = { outcome: 'bathroom', bathroomResult: null, rewardSettled: false };
+  const narrative = getBathroomResistanceNarrative({ attemptNumber, previousResults });
+  const event = createBathroomEvent(scene, {
+    player, interactable, outcome: SOFI_CONVERSATION.outcomes.bathroom,
+    layout: PATIO_LAYOUT.events.bathroom,
+    resistanceConfig: getBathroomResistanceConfig(attemptNumber), narrative,
+    onBathroomResolved: ({ characterId, result }) => settleBathroomResult(gameState, characterId, result),
+  });
+  for (let frames = 0; event.getMode() === 'walking' && frames < 400; frames++) event.update();
+  assert.equal(event.getMode(), 'bathroom-achieved');
+  keys.ENTER.edge = true;
+  event.update();
+  const visibleText = () => objects.filter(({ visible, destroyed }) => visible && !destroyed).map(({ text }) => text);
+  const portrait = () => objects.find(({ texture, destroyed }) => texture && !destroyed);
+  return { scene, event, objects, keys, shakes, gameState, narrative, player, interactable, visibleText, portrait };
+}
+
+test('los beats 1700/2450 ms usan speakers exactos y el comienzo de Resistance limpia anticipation', () => {
+  for (const [attempt, previous] of [[1, []], [2, ['secured']], [3, ['secured', 'interrupted']]]) {
+    const runtime = narrativeEventRuntime(attempt, previous);
+    const { scene, event, narrative, visibleText, portrait } = runtime;
+    scene.game.loop.delta = 1699;
+    event.update();
+    assert.equal(portrait().visible, false);
+    scene.game.loop.delta = 1;
+    event.update();
+    assert.ok(visibleText().includes(narrative.anticipation[0].text));
+    assert.equal(portrait().visible, Boolean(narrative.anticipation[0].speaker));
+    scene.game.loop.delta = 750;
+    event.update();
+    assert.ok(visibleText().includes(narrative.anticipation[1].text));
+    assert.equal(portrait().texture, `ui_portrait_${narrative.anticipation[1].speaker}`);
+    assert.equal(portrait().frame, narrative.anticipation[1].expression === 'angry' ? 1 : 0);
+    scene.game.loop.delta = 550;
+    event.update();
+    assert.equal(event.getMode(), 'resistance');
+    assert.equal(portrait().visible, false);
+    event.destroy();
+    assert.ok(runtime.objects.every(({ destroyed }) => destroyed));
+    assert.equal(scene.events.listenerCount('shutdown'), 0);
+  }
+});
+
+test('los siete hits presentan el índice correcto, knock limpia la cara y shake conserva 80/0.002', () => {
+  for (const [attempt, previous] of [[1, []], [2, ['interrupted']], [3, ['secured', 'interrupted']]]) {
+    const runtime = narrativeEventRuntime(attempt, previous);
+    const { scene, event, narrative, keys, portrait, visibleText } = runtime;
+    scene.game.loop.delta = 3000;
+    event.update();
+    for (let elapsed = 100; elapsed <= 9300; elapsed += 100) {
+      const oldIndex = event.getResistanceState().nextHitIndex;
+      scene.game.loop.delta = 100;
+      keys.SPACE.edge = true;
+      event.update();
+      const index = event.getResistanceState().nextHitIndex;
+      if (index !== oldIndex) {
+        const beat = narrative.hits[index - 1];
+        assert.ok(visibleText().includes(beat.text));
+        assert.equal(portrait().visible, Boolean(beat.speaker));
+        if (beat.speaker) {
+          assert.equal(portrait().texture, `ui_portrait_${beat.speaker}`);
+          assert.equal(portrait().frame, { talk: 0, angry: 1, shout: 2 }[beat.expression]);
+        }
+      }
+    }
+    assert.equal(event.getResistanceState().nextHitIndex, 7);
+    assert.deepEqual(runtime.shakes, Array.from({ length: 7 }, () => [80, 0.002]));
+    event.destroy();
+  }
+});
+
+test('los seis cierres narrativos liquidan una vez, conservan vidas y limpian la UI al devolver el patio', () => {
+  for (const attempt of [1, 2, 3]) {
+    for (const result of ['success', 'failure']) {
+      const runtime = narrativeEventRuntime(attempt, Array(attempt - 1).fill('secured'));
+      const { scene, event, keys, gameState, narrative, visibleText, portrait } = runtime;
+      scene.game.loop.delta = 3000;
+      event.update();
+      for (let frames = 0; event.getMode() === 'resistance' && frames < 101; frames++) {
+        scene.game.loop.delta = 100;
+        keys.SPACE.edge = result === 'success';
+        event.update();
+      }
+      assert.equal(event.getMode(), result);
+      assert.ok(visibleText().includes(narrative.resolution[result].text));
+      assert.equal(portrait().texture, `ui_portrait_${narrative.resolution[result].speaker}`);
+      assert.equal(gameState.player.points, result === 'success' ? 500 : 250);
+      assert.equal(gameState.player.lives, 3);
+      assert.equal(gameState.relationships.sofi.bathroomResult, result === 'success' ? 'secured' : 'interrupted');
+      assert.equal(gameState.relationships.sofi.outcome, 'bathroom');
+      event.update();
+      assert.equal(gameState.player.points, result === 'success' ? 500 : 250);
+      keys.ENTER.edge = true;
+      assert.equal(event.update(), false);
+      assert.equal(runtime.player.sprite.visible, true);
+      assert.equal(runtime.interactable.sprite.visible, true);
+      event.destroy();
+      event.destroy();
+      assert.equal(event.update(), false);
+      assert.ok(runtime.objects.every(({ destroyed }) => destroyed));
+      assert.equal(scene.events.listenerCount('shutdown'), 0);
+    }
+  }
+});
+
+test('stop/shutdown en anticipation, resistance o resolution no deja UI ni reacción al iniciar otra run', () => {
+  for (const phase of ['anticipation', 'resistance', 'resolution']) {
+    const runtime = narrativeEventRuntime(2, ['secured']);
+    const { scene, event } = runtime;
+    scene.game.loop.delta = 2450;
+    event.update();
+    if (phase !== 'anticipation') {
+      scene.game.loop.delta = 550;
+      event.update();
+      scene.game.loop.delta = 1900;
+      event.update();
+    }
+    if (phase === 'resolution') {
+      scene.game.loop.delta = 10000;
+      event.update();
+      assert.equal(event.getMode(), 'failure');
+    }
+    const system = createOutcomeEventSystem({ handlers: { bathroom: () => event } });
+    system.start({ type: 'bathroom' });
+    scene.events.once('shutdown', system.stop);
+    scene.events.emit('shutdown');
+    assert.equal(system.isActive(), false);
+    assert.equal(event.update(), false);
+    assert.ok(runtime.objects.every(({ destroyed }) => destroyed));
+    assert.equal(scene.events.listenerCount('shutdown'), 0);
+    assert.equal(runtime.player.sprite.visible, true);
+    const next = narrativeEventRuntime(1);
+    assert.equal(next.portrait().visible, false);
+    assert.ok(next.visibleText().every((text) => !text.includes('LA PRIMERA TE SALIÓ')));
+    next.event.destroy();
   }
 });

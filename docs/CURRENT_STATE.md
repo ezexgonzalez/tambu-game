@@ -130,6 +130,19 @@ La regla de dirección pasa a ser: **dejar de demostrar que el juego puede crece
 - Anticipación, golpes, barra de resistencia, input con `SPACE`, éxito o fracaso y regreso al patio.
 - El outcome social Baño se conserva si la chica acepta y llegan al evento, pero la recompensa se difiere hasta Bathroom Resistance: success acredita +500 y persiste `bathroomResult: secured`; failure acredita +250, persiste `bathroomResult: interrupted` y no quita vida. La acreditación es idempotente y la futura Perfect Night contará solo Baños asegurados.
 
+### Bathroom Resistance 2.0 — integración técnica
+
+**INTEGRATED TECHNICALLY / VISUAL QA REQUIRED (2026-10-04).** La autoridad de copy sigue siendo `docs/BATHROOM_RESISTANCE_2_DIRECTION.md`; esta integración no declara CLOSED/FROZEN/BASELINE para la nueva capa narrativa.
+
+- `src/ui/portraitReactionUi.js` agrega una foundation reutilizable con `preloadPortraitReactions(scene)` y `createPortraitReactionUi(scene).show({ speaker, expression, text }) / hide() / destroy()`. La UI no conoce `gameState` ni decide la historia.
+- Los seis strips aprobados de Pitity, Tobi, Uriel, Santy, Thiago y Eze se copiaron byte por byte a `public/assets/ui/portraits/friends/ui_portrait_<speaker>_v1.png`. PNG RGBA transparente 192×64, tres frames horizontales nativos 64×64; TALK/ANGRY/SHOUT mapean 0/1/2. Se precargan en `PatioScene`, sin carga durante el evento.
+- Una sola reacción visible: portrait nativo nearest-neighbor, speaker en `pixelText`, frase legible en globito rectangular nocturno con cola, arriba del panel. Un golpe puro oculta y limpia la reacción previa; SPACE conserva únicamente su feedback mecánico.
+- `src/data/bathroomResistanceNarrative.js` resuelve data pura: intento 1 sorpresa (Pitity), intento 2 incredulidad (Tobi + Uriel), intento 3 caos (Santy + Thiago + Eze), con anticipation, siete hits y reacciones distintas por success/failure.
+- `getCompletedBathroomResults(gameState)` lee solo outcomes bathroom con resultado secured/interrupted; excluye pending y otros outcomes. `PatioScene` resuelve una sola vez config mecánica + narrativa al iniciar el evento. La rama de intento 2 lee el resultado anterior real; intento 3 usa 0/1/2 secured previos, sin depender del orden ni del settlement actual.
+- `BathroomEvent` consume esa data sin importar `gameState`. `eventUi` reemplaza la voz genérica AFUERA por la reacción y conserva golpes, barra/timer, prompts, reward y resolución. Finish/destroy/shutdown/retry destruyen portraits/globos/textos y remueven listeners; no hay nuevos timers narrativos.
+- Balance Pass 2, duración 10 s, SPACE +4/JustDown, anticipation 3000 ms con beats 1700/2450, siete timings/daños/drains, ordinal, shake 80/0.002, rewards secured +500/interrupted +250, vidas, Perfect Night, rutas y retornos permanecen intactos. El perfil mecánico ya no contiene copy: la autoridad narrativa está separada.
+- Validación técnica actual: **246/246 tests aprobados, 0 fallos, 0 omitidos**; `npm run build` correcto, con la advertencia existente de bundle >500 kB. QA manual pendiente: una run con tres Bathrooms, speakers/expresiones, ramas de memoria, lectura del globito sin tapar gameplay y continuidad de las resoluciones.
+
 ### Ciclo de la run
 
 - `src/state/runState.js` mantiene las fases `INTRO`, `PARTY_ACTIVE`, `GAME_OVER`, `NORMAL_END`, `PERFECT_NIGHT` y `POST_WIN_FREE_ROAM`, sin duplicar puntos, vidas ni resultados sociales.
@@ -218,7 +231,7 @@ La segunda auditoría del 28/09 confirma que el loop funcional ya está cerrado.
 
 1. **STABILIZATION PASS** — corregir copy de SPACE, overwrite de depth de amigos y emits falsos de Mili. Bathroom Resistance Pass 2 ya está playtesteado y no forma parte de esta pasada salvo el copy de input engañoso.
 2. **CAST CLOSURE — CLOSED / FROZEN FOR V1** — los seis amigos principales, sus walks/idles y los paquetes de special idles aprobados quedan cerrados. No reabrir producción individual de amigos salvo bug concreto.
-3. **BATHROOM RESISTANCE 2.0 — IDENTIDAD NARRATIVA / DIRECTION APPROVED** — dirección congelada en `docs/BATHROOM_RESISTANCE_2_DIRECTION.md`: intento 1 = sorpresa (Pitity), intento 2 = incredulidad (Tobi + Uriel), intento 3 = caos (Santy + Thiago + Eze), con portraits 64×64 TALK/ANGRY/SHOUT y memoria real de resultados previos. Pendiente integración; balance/rewards siguen congelados.
+3. **BATHROOM RESISTANCE 2.0 — IDENTIDAD NARRATIVA / DIRECTION APPROVED** — dirección congelada en `docs/BATHROOM_RESISTANCE_2_DIRECTION.md`: intento 1 = sorpresa (Pitity), intento 2 = incredulidad (Tobi + Uriel), intento 3 = caos (Santy + Thiago + Eze), con portraits 64×64 TALK/ANGRY/SHOUT y memoria real de resultados previos. **INTEGRATED TECHNICALLY / VISUAL QA REQUIRED**; pendiente QA narrativo/visual manual de Dirección. Balance/rewards siguen congelados.
 4. **PARTY PRESENCE** — audio mínimo con mute/volumen + lote pequeño de fillers/actividades + 2–3 callbacks o beats ambientales de alto impacto. No construir simulación social.
 5. **V1 UX CLOSURE** — menú/onboarding mínimo, ocultar alcohol vacío, alinear HUD/diálogo/Consejo/outcomes/Resistance a `UI_DIRECTION.md` y asegurar que todos los prompts describan el input real.
 6. **FEATURE FREEZE** — una vez cerrados los bloques anteriores no se agregan mecánicas, personajes o specials por impulso; solo fixes surgidos de QA.

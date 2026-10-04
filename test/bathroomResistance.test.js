@@ -63,10 +63,14 @@ test('los perfiles comparten contrato y aumentan la presión de 1 a 3', () => {
     [800, 1900, 3100, 4400, 6100, 7900, 9200],
     [800, 1900, 3100, 4400, 6100, 7900, 9200],
   ]);
-  assert.deepEqual(profiles[0].hits.map(({ text }) => text), [
-    'PUM', 'PUM PUM', 'TAMBU.', 'ABRÍ.', 'PUM PUM PUM',
-    'DALE BOLUDO, TENGO QUE MEAR.', 'PUM PUM PUM',
+  assert.deepEqual(profiles.map(({ hits }) => hits.map(({ damage }) => damage)), [
+    [5, 6, 7, 8, 9, 10, 10], [6, 7, 8, 9, 10, 12, 14], [7, 8, 10, 11, 13, 15, 16],
   ]);
+  for (const profile of profiles) {
+    assert.deepEqual(profile.drainPhases.map(({ untilMs }) => untilMs), [3500, 7000, 10000]);
+    assert.deepEqual(profile.anticipation, { durationMs: 3000, beats: [{ at: 1700 }, { at: 2450 }] });
+    assert.ok(profile.hits.every((hit) => !('text' in hit)), 'el perfil mecánico no decide copy');
+  }
   const pressure = profiles.map(({ startResistance, drainPhases, hits }) => (
     100 - startResistance
       + calculateBathroomDrain(0, 10000, drainPhases)

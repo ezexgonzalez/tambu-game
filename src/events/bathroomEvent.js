@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { getBathroomResistanceNarrative } from '../data/bathroomResistanceNarrative.js';
 import { playCamiIdle, playCamiWalk, setCamiDepth } from '../characters/camiSprite.js';
 import { playMiliIdle, playMiliWalk, setMiliDepth } from '../characters/miliSprite.js';
 import { PLAYER_CONFIG } from '../player/playerConfig.js';
@@ -116,6 +117,7 @@ export function createBathroomEvent(scene, {
   onCompanionReturn = () => {},
   onBathroomResolved = () => false,
   resistanceConfig = getBathroomResistanceConfig(1),
+  narrative = getBathroomResistanceNarrative(),
 }) {
   if (!player?.sprite || !interactable?.sprite || !outcome || !layout) return null;
   const path = getBathroomRoute(layout, interactable);
@@ -144,7 +146,7 @@ export function createBathroomEvent(scene, {
   let anticipationElapsedMs = 0;
   let anticipationBeatIndex = 0;
   let resistanceState = null;
-  let outsideText = '';
+  let presentation = null;
   let destroyed = false;
 
   player.sprite.setVelocity?.(0, 0);
@@ -226,7 +228,7 @@ export function createBathroomEvent(scene, {
   function startAnticipation() {
     destroyEventUi(uiElements);
     uiElements = createBathroomAnticipationUi(scene);
-    uiElements.update('');
+    uiElements.update(null);
     anticipationElapsedMs = 0;
     anticipationBeatIndex = 0;
     mode = 'anticipation';
@@ -235,9 +237,9 @@ export function createBathroomEvent(scene, {
   function startResistance() {
     destroyEventUi(uiElements);
     resistanceState = createBathroomResistanceState(resistanceConfig);
-    outsideText = '';
+    presentation = null;
     uiElements = createBathroomResistanceUi(scene, resistanceConfig);
-    uiElements.update({ state: resistanceState, outsideText });
+    uiElements.update({ state: resistanceState, presentation });
     mode = 'resistance';
   }
 
@@ -248,7 +250,7 @@ export function createBathroomEvent(scene, {
       anticipationBeatIndex < beats.length
       && beats[anticipationBeatIndex].at <= anticipationElapsedMs
     ) {
-      uiElements.update(beats[anticipationBeatIndex].text);
+      uiElements.update(narrative.anticipation[anticipationBeatIndex]);
       anticipationBeatIndex += 1;
     }
     if (anticipationElapsedMs >= resistanceConfig.anticipation.durationMs) startResistance();
@@ -258,7 +260,7 @@ export function createBathroomEvent(scene, {
   function showResistanceResolution(result) {
     destroyEventUi(uiElements);
     const rewardSettled = onBathroomResolved({ characterId, result }) === true;
-    uiElements = createBathroomResolutionUi(scene, result, { rewardSettled });
+    uiElements = createBathroomResolutionUi(scene, result, { rewardSettled, reaction: narrative.resolution[result] });
     mode = result;
   }
 
@@ -274,12 +276,12 @@ export function createBathroomEvent(scene, {
     resistanceState = update.state;
     const hit = update.hits.at(-1);
     if (hit) {
-      outsideText = hit.text;
+      presentation = narrative.hits[resistanceState.nextHitIndex - 1];
       scene.cameras?.main?.shake?.(80, 0.002);
     }
     uiElements.update({
       state: resistanceState,
-      outsideText,
+      presentation,
       feedback: hit ? 'hit' : space ? 'recover' : 'idle',
     });
 
@@ -301,6 +303,7 @@ export function createBathroomEvent(scene, {
   }
 
   function update() {
+    if (destroyed) return false;
     if (mode === 'walking') return updateWalking();
     if (mode === 'bathroom-achieved') return updateBathroomAchieved();
     if (mode === 'anticipation') return updateAnticipation();

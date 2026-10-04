@@ -31,6 +31,14 @@ export function getSecuredBathroomCount(gameState) {
     .length;
 }
 
+// A fresh array of settled results only; the current pending bathroom is excluded.
+export function getCompletedBathroomResults(gameState) {
+  return Object.values(gameState?.relationships ?? {})
+    .filter((relationship) => relationship.outcome === 'bathroom'
+      && ['secured', 'interrupted'].includes(relationship.bathroomResult))
+    .map((relationship) => relationship.bathroomResult);
+}
+
 export function getBathroomAttemptNumber(gameState) {
   const completedAttempts = Object.values(gameState?.relationships ?? {})
     .filter((relationship) => (

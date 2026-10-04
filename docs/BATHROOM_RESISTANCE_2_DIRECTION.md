@@ -1,6 +1,6 @@
 # Tambu Game — Bathroom Resistance 2.0 / Dirección narrativa
 
-**Estado:** APPROVED DIRECTION / PENDING INTEGRATION  
+**Estado:** INTEGRATED TECHNICALLY / VISUAL QA REQUIRED  
 **Fecha:** 2026-10-03  
 **Autoridad:** dirección narrativa y presentation contract de Bathroom Resistance 2.0  
 **No reemplaza:** balance, rewards ni contratos de `bathroomResistance.js`
@@ -516,3 +516,43 @@ Después de implementación + QA manual de Dirección:
 El siguiente bloque del roadmap será:
 
 **PARTY PRESENCE**
+
+
+---
+
+# 14. Registro de integración técnica — 2026-10-04
+
+**BATHROOM RESISTANCE 2.0 — INTEGRATED TECHNICALLY / VISUAL QA REQUIRED.** El copy de las secciones 6–8 permanece intacto. CLOSED/FROZEN/BASELINE para esta capa depende del playtest de Dirección; el balance Pass 2 continúa cerrado.
+
+## Assets y UI foundation
+
+Los seis PNG aprobados se copiaron byte por byte, sin reexportar ni alterar píxeles/alpha, a `public/assets/ui/portraits/friends/`:
+
+| Archivo | Asset key |
+|---|---|
+| `ui_portrait_pitity_v1.png` | `ui_portrait_pitity` |
+| `ui_portrait_tobi_v1.png` | `ui_portrait_tobi` |
+| `ui_portrait_uriel_v1.png` | `ui_portrait_uriel` |
+| `ui_portrait_santy_v1.png` | `ui_portrait_santy` |
+| `ui_portrait_thiago_v1.png` | `ui_portrait_thiago` |
+| `ui_portrait_eze_v1.png` | `ui_portrait_eze` |
+
+Todos cumplen PNG RGBA transparente 192×64, tres frames de 64×64. `PORTRAIT_EXPRESSIONS` define talk=0, angry=1, shout=2. `preloadPortraitReactions(scene)` carga los strips en `PatioScene.preload()`.
+
+`createPortraitReactionUi(scene, options)` expone `show({ speaker, expression, text })`, `hide()` y `destroy()`. Presenta una sola reacción: portrait nativo nearest-neighbor, nombre uppercase mediante `pixelText`, globito rectangular oscuro con borde/cola y texto legible. El layout deriva del viewport y vive arriba del panel jugable. Reemplazo, hide, destroy y shutdown limpian los objetos/listeners; no hay timers ni input propios.
+
+## Narrativa y memoria
+
+`getBathroomResistanceNarrative({ attemptNumber, previousResults })`, en `src/data/bathroomResistanceNarrative.js`, devuelve data inmutable para anticipation/hits/resolution. Conserva la dirección sorpresa → incredulidad → caos y todo el copy aprobado, incluidas las seis reacciones de success/failure.
+
+`getCompletedBathroomResults(gameState)` devuelve únicamente resultados anteriores secured/interrupted de outcomes bathroom. Excluye el bathroom actual pending y cualquier outcome no-bathroom. `getBathroomEventConfigForRun(gameState)` en PatioScene resuelve una única vez el perfil y la narrativa al iniciar BathroomEvent; settlement posterior no cambia la rama de memoria. Intento 2 lee el único resultado previo; intento 3 cuenta secured previos (0/1/2), sin distinguir el orden de las dos combinaciones mixtas.
+
+BathroomEvent consume la narrativa sin acceder a gameState. Las UI de anticipation/resistance/resolution reciben presentation data. Los golpes puros limpian el portrait anterior; la resolución reemplaza el párrafo genérico por la reacción del amigo y conserva título, reward y ENTER. Todos los objetos nuevos se destruyen al cambiar de fase, finish, destroy, shutdown o retry.
+
+## Regresiones protegidas y validación
+
+Balance numérico sin cambios: 10 s, SPACE +4 mediante JustDown, siete impactos con timings/daños idénticos, perfiles/drain Pass 2, anticipation 3000 ms con beats 1700/2450. Solo se desacopló el texto embebido del perfil. Shake 80 ms/0.002, ordinal, secured/interrupted, settlement idempotente +500/+250 sin penalización de vidas, Perfect Night de tres secured, rutas y retornos permanecen intactos.
+
+**246/246 tests aprobados, 0 fallos, 0 omitidos. `npm run build` correcto**, con advertencia existente de chunk >500 kB. Cobertura nueva en `bathroomResistanceNarrative.test.js` y `portraitReactionUi.test.js`; extensión de `bathroomEvent.test.js`, `bathroomResistance.test.js` y `patioIntroGate.test.js` para contracts de assets/preload/expresiones, reemplazo/hide/destroy, knock cleanup, copy completo, ramas/snapshot sin mutación, fases/hits, seis resoluciones, cleanup/retry, layout geométrico y números de balance exactos. La cobertura existente de rewards, run state y retornos sigue verde.
+
+No se ejecutó browser QA ni se levantó el juego. Próximo paso exclusivo: **MANUAL NARRATIVE + VISUAL QA BY DIRECTION** sobre los tres intentos y sus ramas, según la sección 12. Esta integración no declara aprobación visual ni inicia PARTY PRESENCE.

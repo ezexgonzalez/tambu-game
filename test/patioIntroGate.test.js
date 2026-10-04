@@ -20,7 +20,7 @@ const hooks = registerHooks({
       : nextResolve(specifier, context);
   },
 });
-const { PatioScene, getBathroomResistanceConfigForRun } = await import('../src/scenes/PatioScene.js');
+const { PatioScene, getBathroomResistanceConfigForRun, getBathroomEventConfigForRun } = await import('../src/scenes/PatioScene.js');
 hooks.deregister();
 import { createGameState } from '../src/state/gameState.js';
 import { createRunState, RUN_PHASES } from '../src/state/runState.js';
@@ -330,4 +330,34 @@ test('PERFECT_NIGHT bloquea gameplay mientras la UI espera y POST_WIN_FREE_ROAM 
   assert.equal(scene.gameState.player.points, 1500);
   assert.equal(scene.runState.evaluate(scene.gameState), false);
   assert.equal(scene.runState.getPhase(), RUN_PHASES.POST_WIN_FREE_ROAM);
+});
+
+
+test('PatioScene precarga los seis portraits y resuelve config/narrativa desde un único snapshot de run', () => {
+  const loaded = [];
+  PatioScene.prototype.preload.call({ load: {
+    image() {},
+    spritesheet: (...args) => loaded.push(args),
+  } });
+  const portraits = loaded.filter(([key]) => key.startsWith('ui_portrait_'));
+  assert.equal(portraits.length, 6);
+  assert.ok(portraits.every(([, , frame]) => frame.frameWidth === 64 && frame.frameHeight === 64));
+  const state = createGameState();
+  state.relationships.sofi = { outcome: 'bathroom', bathroomResult: null };
+  let config = getBathroomEventConfigForRun(state);
+  assert.equal(config.resistanceConfig.startResistance, 55);
+  assert.equal(config.narrative.attemptNumber, 1);
+  state.relationships.sofi.bathroomResult = 'interrupted';
+  state.relationships.mili = { outcome: 'bathroom', bathroomResult: null };
+  config = getBathroomEventConfigForRun(state);
+  assert.equal(config.resistanceConfig.startResistance, 52);
+  assert.equal(config.narrative.attemptNumber, 2);
+  assert.equal(config.narrative.hits[4].text, '¿NO APRENDISTE NADA?');
+  state.relationships.sofi.bathroomResult = 'secured';
+  state.relationships.mili.bathroomResult = 'secured';
+  state.relationships.cami = { outcome: 'bathroom', bathroomResult: null };
+  const third = getBathroomEventConfigForRun(state);
+  assert.equal(third.resistanceConfig.startResistance, 50);
+  assert.equal(third.narrative.hits[2].text, 'DOS VECES TE SALIÓ. ESTA NO.');
+  assert.equal(config.narrative.hits[4].text, '¿NO APRENDISTE NADA?', 'la narrativa anterior no se recalcula');
 });
