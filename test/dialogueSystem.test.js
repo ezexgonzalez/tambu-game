@@ -36,6 +36,8 @@ function harness(character = patioWomen[0], options = {}) {
   function display(x, y, text = '') {
     const object = {
       x, y, text, visible: true, destroyed: false,
+      setPosition(x,y) { this.x=x; this.y=y; return this; },
+      clear() { return this; }, fillStyle() { return this; }, fillRect() { return this; },
       setScrollFactor() { return this; },
       setDepth() { return this; },
       setStrokeStyle() { return this; },
@@ -50,7 +52,8 @@ function harness(character = patioWomen[0], options = {}) {
   }
   const scene = {
     input: { keyboard: { addKey(code) { keys[code] = { edge: false, held: false }; return keys[code]; } } },
-    add: { text: display, rectangle: (x, y) => display(x, y) },
+    scale: { width:1280, height:720 },
+    add: { text: display, rectangle: (x, y) => display(x, y), graphics: () => display(0,0) },
     events: { once(event, callback) { onShutdown = callback; } },
     game: { loop: { delta: 0 } },
   };
@@ -72,8 +75,8 @@ function harness(character = patioWomen[0], options = {}) {
     codes.forEach((code) => { keys[code].held = false; });
     return locked;
   }
-  function textAt(y) {
-    return objects.findLast((object) => !object.destroyed && object.visible && object.y === y)?.text;
+  function textAt(role) {
+    return objects.findLast((object) => !object.destroyed && object.visible && object.uiRole === role)?.text;
   }
   return {
     system, state, objects, keys, frame, press, textAt, eventRequests, interactable,
@@ -86,7 +89,7 @@ function harness(character = patioWomen[0], options = {}) {
 function completeSequence(h, sequence) {
   for (const entry of sequence) {
     assert.equal(h.press('ENTER'), true);
-    assert.equal(h.textAt(433), entry.text);
+    assert.equal(h.textAt('reaction-body'), entry.text);
     assert.equal(h.press('SPACE'), true);
   }
 }
@@ -109,17 +112,17 @@ function playDialogueRoute(h, route) {
 
 function completeCouncilExchange(h) {
   assert.equal(h.system.getCouncilPhase(), 'advice');
-  assert.equal(h.textAt(568), '“”');
+  assert.equal(h.textAt('advice-body'), '“”');
   h.press('ENTER');
   assert.equal(h.system.getCouncilPhase(), 'advice');
-  assert.ok(h.textAt(568).length > 2);
+  assert.ok(h.textAt('advice-body').length > 2);
   h.press('SPACE');
   assert.equal(h.system.getCouncilPhase(), 'tambu-reaction');
-  assert.equal(h.textAt(520), 'EL CONSEJO · TAMBU');
-  assert.equal(h.textAt(568), '“”');
+  assert.equal(h.textAt('advice-name'), 'EL CONSEJO · TAMBU');
+  assert.equal(h.textAt('advice-body'), '“”');
   h.press('ENTER');
   assert.equal(h.system.getCouncilPhase(), 'tambu-reaction');
-  assert.ok(h.textAt(568).length > 2);
+  assert.ok(h.textAt('advice-body').length > 2);
   h.press('SPACE');
   assert.equal(h.system.getMode(), 'question');
 }
@@ -127,14 +130,14 @@ function completeCouncilExchange(h) {
 test('prompt bloquea opciones/C y descarta teclas anticipadas, incluso al completarse', () => {
   const h = harness();
   h.open();
-  assert.equal(h.textAt(510), '');
-  assert.equal(h.textAt(568), undefined);
+  assert.equal(h.textAt('question-body'), '');
+  assert.equal(h.textAt('choice-0'), undefined);
   h.press('ONE', 'C');
   assert.equal(h.system.getMode(), 'question');
   h.press('ENTER', 'FOUR', 'C');
   assert.equal(h.system.getMode(), 'question');
-  assert.equal(h.textAt(510), patioWomen[0].conversation.beats[0].prompt);
-  assert.ok(h.textAt(568));
+  assert.equal(h.textAt('question-body'), patioWomen[0].conversation.beats[0].prompt);
+  assert.ok(h.textAt('choice-0'));
   h.frame();
   assert.equal(h.system.getMode(), 'question');
   assert.deepEqual(h.state.relationships, {});
@@ -148,17 +151,17 @@ test('papi avanza intervención por intervención; ENTER+SPACE no deja un salto 
   const sequence = normalizeDialogueSequence(patioWomen[0].conversation.beats[0].choices[3], 'Sofi');
   for (const entry of sequence) {
     assert.equal(h.system.getMode(), 'reaction');
-    assert.equal(h.textAt(395), entry.speaker?.toUpperCase() ?? '');
-    assert.equal(h.textAt(433), '');
+    assert.equal(h.textAt('reaction-name'), entry.speaker?.toUpperCase() ?? '');
+    assert.equal(h.textAt('reaction-body'), '');
     assert.equal(h.press('ENTER', 'SPACE'), true);
-    assert.equal(h.textAt(433), entry.text);
+    assert.equal(h.textAt('reaction-body'), entry.text);
     h.frame();
-    assert.equal(h.textAt(433), entry.text);
+    assert.equal(h.textAt('reaction-body'), entry.text);
     h.press('SPACE');
   }
   assert.equal(h.system.getMode(), 'question');
-  assert.equal(h.textAt(478), '2 / 4');
-  assert.equal(h.textAt(510), '');
+  assert.equal(h.textAt('question-progress'), '2 / 4');
+  assert.equal(h.textAt('question-body'), '');
 });
 
 test('mantener ENTER no repite el avance; soltar y pulsar vuelve a avanzar', () => {
@@ -169,13 +172,13 @@ test('mantener ENTER no repite el avance; soltar y pulsar vuelve a avanzar', () 
   h.keys.ENTER.edge = true;
   h.keys.ENTER.held = true;
   h.frame();
-  const first = h.textAt(433);
+  const first = h.textAt('reaction-body');
   for (let frame = 0; frame < 20; frame += 1) h.frame(28);
-  assert.equal(h.textAt(433), first);
+  assert.equal(h.textAt('reaction-body'), first);
   h.keys.ENTER.held = false;
   h.press('ENTER');
-  assert.equal(h.textAt(395), 'TAMBU');
-  assert.equal(h.textAt(433), '');
+  assert.equal(h.textAt('reaction-name'), 'TAMBU');
+  assert.equal(h.textAt('reaction-body'), '');
 });
 
 test('reaction + bridge completo, Consejo, outcome/HUD y bloqueo siguen funcionando', () => {
@@ -191,7 +194,7 @@ test('reaction + bridge completo, Consejo, outcome/HUD y bloqueo siguen funciona
       h.press('ONE');
       assert.deepEqual(h.state.relationships, {});
       completeCouncilExchange(h);
-      assert.ok(h.textAt(568));
+      assert.ok(h.textAt('choice-0'));
       h.press('C');
       assert.equal(h.system.getMode(), 'question');
     }
@@ -200,7 +203,7 @@ test('reaction + bridge completo, Consejo, outcome/HUD y bloqueo siguen funciona
     const sequence = normalizeDialogueSequence(choice, 'Sofi');
     for (const entry of sequence) {
       assert.equal(h.press('ENTER'), true);
-      assert.equal(h.textAt(433), entry.text);
+      assert.equal(h.textAt('reaction-body'), entry.text);
       assert.equal(h.press('SPACE'), true);
     }
   }
@@ -230,30 +233,30 @@ test('Consejo muestra advisor, reacción de Tambu y vuelve a la misma pregunta s
     'Sofi',
   ));
   h.press('ENTER');
-  const promptBeforeCouncil = h.textAt(510);
+  const promptBeforeCouncil = h.textAt('question-body');
   const stateBeforeCouncil = structuredClone(h.state);
 
   h.press('C');
   assert.equal(h.system.getCouncilPhase(), 'selection');
   h.press('ESC');
   assert.equal(h.system.getMode(), 'question');
-  assert.equal(h.textAt(510), promptBeforeCouncil);
+  assert.equal(h.textAt('question-body'), promptBeforeCouncil);
   h.press('C');
   assert.equal(h.system.getCouncilPhase(), 'selection');
   h.press('ONE');
   h.press('ENTER');
-  assert.equal(h.textAt(568), '“Rarillo.”');
+  assert.equal(h.textAt('advice-body'), '“Rarillo.”');
   h.press('SPACE');
-  assert.equal(h.textAt(520), 'EL CONSEJO · TAMBU');
+  assert.equal(h.textAt('advice-name'), 'EL CONSEJO · TAMBU');
   h.press('ESC');
   assert.equal(h.system.getMode(), 'council');
   assert.equal(h.system.getCouncilPhase(), 'tambu-reaction');
   h.press('ENTER');
-  assert.equal(h.textAt(568), '“¿Rarillo qué, boludo?”');
+  assert.equal(h.textAt('advice-body'), '“¿Rarillo qué, boludo?”');
   h.press('SPACE');
 
   assert.equal(h.system.getMode(), 'question');
-  assert.equal(h.textAt(510), promptBeforeCouncil);
+  assert.equal(h.textAt('question-body'), promptBeforeCouncil);
   assert.deepEqual(h.state, stateBeforeCouncil);
   h.press('C');
   assert.equal(h.system.getMode(), 'question');
@@ -269,13 +272,13 @@ test('Consejo con Mili también inserta la reacción de Tambu sin alterar el di�
     'Mili',
   ));
   h.press('ENTER');
-  const promptBeforeCouncil = h.textAt(510);
+  const promptBeforeCouncil = h.textAt('question-body');
 
   h.press('C');
   h.press('THREE');
   completeCouncilExchange(h);
 
-  assert.equal(h.textAt(510), promptBeforeCouncil);
+  assert.equal(h.textAt('question-body'), promptBeforeCouncil);
   h.press('C');
   assert.equal(h.system.getMode(), 'question');
 });
@@ -330,7 +333,7 @@ test('ESC y shutdown descartan presentación; reabrir comienza vacío sin recomp
   h.press('ESC');
   assert.equal(h.system.isOpen(), false);
   h.open();
-  assert.equal(h.textAt(510), '');
+  assert.equal(h.textAt('question-body'), '');
   h.press('ENTER');
   h.press('FOUR');
   h.press('ESC');
@@ -349,7 +352,7 @@ test('Mili inicia su intercambio secuencial y ESC todavía descarta la sesión',
   h.press('ONE');
   h.press('ENTER');
   assert.equal(
-    h.textAt(433),
+    h.textAt('reaction-body'),
     patioWomen[1].conversation.beats[0].choices[0].reaction[0].text,
   );
   h.press('ENTER');
@@ -389,7 +392,7 @@ test('personaje resuelto abre post-outcome sin opciones, Consejo ni mutación so
   const before = structuredClone(h.state);
   h.open();
   assert.equal(h.system.getMode(), 'post-outcome');
-  assert.equal(h.textAt(510), undefined);
+  assert.equal(h.textAt('question-body'), undefined);
   assert.equal(h.objects.some(({ text, destroyed }) => !destroyed && /1\. |EL CONSEJO/.test(text)), false);
 
   h.press('C', 'ONE', 'TWO', 'THREE', 'FOUR');

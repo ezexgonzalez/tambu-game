@@ -1,93 +1,43 @@
+import { createUiLabel, createUiPanel, getUiViewport, UI_COLORS } from './uiTheme.js';
+
 export function createHud(scene, gameState) {
-  const hudShadow = scene.add.rectangle(1090, 44, 356, 64, 0x020409, 0.38)
-    .setOrigin(0.5)
-    .setScrollFactor(0)
-    .setDepth(4999);
-
-  const hudBg = scene.add.rectangle(1086, 40, 350, 58, 0x080b13, 0.96)
-    .setOrigin(0.5)
-    .setScrollFactor(0)
-    .setDepth(5000);
-  hudBg.setStrokeStyle(2, 0x65728a, 0.72);
-
-  const hudDecor = scene.add.graphics()
-    .setScrollFactor(0)
-    .setDepth(5001);
-  hudDecor.fillStyle(0x253044, 0.52);
-  hudDecor.fillRect(918, 17, 336, 2);
-  hudDecor.fillStyle(0xe0ad54, 0.72);
-  hudDecor.fillRect(918, 17, 54, 2);
-  hudDecor.fillStyle(0x5e687b, 0.52);
-  hudDecor.fillRect(1019, 21, 2, 38);
-  hudDecor.fillRect(1172, 21, 2, 38);
-
-  hudDecor.fillStyle(0x111722, 1);
-  hudDecor.fillRect(1037, 49, 112, 8);
-  hudDecor.lineStyle(1, 0x8994a7, 0.68);
-  hudDecor.strokeRect(1037, 49, 112, 8);
-
-  const alcoholFill = scene.add.rectangle(1038, 50, 1, 6, 0xf0b849, 1)
-    .setOrigin(0)
-    .setScrollFactor(0)
-    .setDepth(5002)
-    .setVisible(false);
-
-  const hearts = scene.add.text(935, 27, Array(gameState.player.lives).fill('♥').join(' '), {
-    fontFamily: 'monospace',
-    fontSize: '22px',
-    color: '#ff5a65',
-    fontStyle: 'bold',
-  }).setScrollFactor(0).setDepth(5002);
-  hearts.setShadow(0, 0, '#ff4059', 4, true, true);
-
-  const alcohol = scene.add.text(1035, 29, '', {
-    fontFamily: 'monospace',
-    fontSize: '15px',
-    color: '#f1d18a',
-    fontStyle: 'bold',
-  }).setScrollFactor(0).setDepth(5002);
-
-  const points = scene.add.text(1188, 29, '', {
-    fontFamily: 'monospace',
-    fontSize: '15px',
-    color: '#f4cd63',
-    fontStyle: 'bold',
-  }).setScrollFactor(0).setDepth(5002);
-  points.setShadow(0, 0, '#e7a93d', 3, true, true);
-
-  const interactionPrompt = scene.add.text(640, 658, '', {
-    fontFamily: 'monospace',
-    fontSize: '15px',
-    color: '#f4f4ef',
-    fontStyle: 'bold',
-    backgroundColor: '#090b10',
-    padding: { x: 14, y: 9 },
-  }).setOrigin(0.5).setScrollFactor(0).setDepth(5002).setVisible(false);
-  interactionPrompt.setShadow(2, 2, '#000000', 3, true, true);
-
-  const elements = [hudShadow, hudBg, hudDecor, hearts, alcohol, points];
+  const { width, height } = getUiViewport(scene);
+  const panelWidth = Math.min(310, width - 32);
+  const left = width - panelWidth - 20;
+  const background = createUiPanel(scene, { x: left, y: 20, width: panelWidth, height: 54 }, 5000);
+  const lives = createUiLabel(scene, '', { x: left + 18, y: 47, align: 'left', maxWidth: 110, depth: 5002 });
+  const points = createUiLabel(scene, '', { x: width - 38, y: 47, align: 'right',
+    maxWidth: panelWidth - 158, color: UI_COLORS.gold, depth: 5002 });
+  const divider = scene.add.rectangle(left + 139, 47, 1, 26, UI_COLORS.frame)
+    .setScrollFactor(0).setDepth(5001);
+  const promptWidth = Math.min(590, width - 48);
+  const promptBackground = createUiPanel(scene, { x: (width - promptWidth) / 2,
+    y: height - 72, width: promptWidth, height: 44 }, 5000).setVisible(false);
+  const interactionPrompt = createUiLabel(scene, '', { x: width / 2, y: height - 50,
+    maxWidth: promptWidth - 32, cellSize: 3, depth: 5002 }).setVisible(false);
+  const showPrompt = interactionPrompt.setVisible.bind(interactionPrompt);
   let visible = true;
-  let alcoholWidth = 0;
-
-  function setVisible(nextVisible) {
-    visible = nextVisible;
-    elements.forEach((element) => element.setVisible(visible));
-    alcoholFill.setVisible(visible && alcoholWidth > 0);
-    if (!visible) interactionPrompt.setVisible(false);
+  interactionPrompt.setVisible = (value) => {
+    promptBackground.setVisible(visible && value);
+    return showPrompt(visible && value);
+  };
+  function setVisible(value) {
+    visible = value;
+    [background, divider, lives, points].forEach((object) => object.setVisible(value));
+    if (!value) interactionPrompt.setVisible(false);
   }
-
-  function update(nextState) {
-    const playerState = nextState.player;
-    hearts.setText(Array(playerState.lives).fill('♥').join(' '));
-    alcohol.setText(`ALCOHOL  ${playerState.alcohol}%`);
-    points.setText(`★ ${String(playerState.points).padStart(4, '0')}`);
-
-    const alcoholPercent = Math.max(0, Math.min(playerState.alcohol, 100));
-    const fillWidth = Math.round(110 * alcoholPercent / 100);
-    alcoholWidth = fillWidth;
-    alcoholFill.setDisplaySize(Math.max(fillWidth, 1), 6).setVisible(visible && fillWidth > 0);
+  function update(state) {
+    lives.setText(`VIDAS ${state.player.lives}`);
+    points.setText(`PUNTOS ${String(state.player.points).padStart(4, '0')}`);
   }
-
+  let destroyed = false;
+  function destroy() {
+    if (destroyed) return;
+    destroyed = true;
+    [background, divider, lives, points, promptBackground, interactionPrompt].forEach((object) => object.destroy());
+    scene.events?.off?.('shutdown', destroy);
+  }
+  scene.events?.once?.('shutdown', destroy);
   update(gameState);
-  return { interactionPrompt, update, setVisible };
+  return { interactionPrompt, update, setVisible, destroy };
 }

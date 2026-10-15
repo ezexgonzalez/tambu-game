@@ -1,16 +1,11 @@
 import Phaser from 'phaser';
 import { createPixelText, measurePixelText } from './pixelText.js';
+import { UI_COLORS as COLORS } from './uiTheme.js';
 
 const NORMAL_END_DEPTH = 22_000;
 const OVERLAY_COLOR = 0x060b14;
 const OVERLAY_ALPHA = 0.94;
-const COLORS = Object.freeze({
-  title: 0xf2f5f7,
-  text: 0xd5dce4,
-  secondary: 0x94a6b9,
-  frame: 0x355a78,
-  panel: 0x081421,
-});
+
 
 export const NORMAL_END_COPY = Object.freeze({
   title: 'LA NOCHE DE TAMBU',
@@ -92,8 +87,9 @@ function makePixelLine(scene, text, {
   color,
   depth,
   visible = false,
+  align = 'center',
 }) {
-  const pixelInset = Math.max(1, Math.round(cellSize * 2 / 14));
+  const pixelInset = cellSize <= 5 ? 0.5 : Math.max(1, Math.round(cellSize * 2 / 14));
   return createPixelText(scene, text, {
     x,
     y,
@@ -102,7 +98,7 @@ function makePixelLine(scene, text, {
     glyphGap: 1,
     lineGap: 2,
     color,
-    depth,
+    depth, align,
   }).setVisible(visible);
 }
 
@@ -207,14 +203,12 @@ export function createNormalEndUi(scene, { hud, onReplay = () => {} }) {
   boardRules.fillStyle(COLORS.frame, 0.78);
   for (let row = 0; row < CHARACTER_ORDER.length; row += 1) {
     const ruleY = board.y + headerHeight + row * rowHeight;
-    if (row < CHARACTER_ORDER.length - 1) {
-      boardRules.fillRect(
-        Math.round(board.x),
-        Math.round(ruleY),
-        Math.round(board.width),
-        boardLineWidth,
-      );
-    }
+    boardRules.fillRect(
+      Math.round(board.x),
+      Math.round(ruleY),
+      Math.round(board.width),
+      boardLineWidth,
+    );
   }
 
   const dividerWidth = Math.max(3, boardLineWidth);
@@ -236,7 +230,7 @@ export function createNormalEndUi(scene, { hud, onReplay = () => {} }) {
   const headerCenterY = board.y + headerHeight * 0.53;
   const leftColumnCenter = board.x + (dividerX - board.x) / 2;
   const resultColumnWidth = board.x + board.width - dividerX;
-  const resultTextCenter = dividerX + resultColumnWidth * 0.53;
+  const resultTextStart = dividerX + 32;
   const headerCellSize = (text, columnWidth) => fitCellSize(text, {
     maxCellSize: 5,
     maxWidth: columnWidth * 0.82,
@@ -309,13 +303,13 @@ export function createNormalEndUi(scene, { hud, onReplay = () => {} }) {
     if (destroyed || active) return false;
     const presentation = formatNormalEndSummary(summary);
     const rowTextStartX = board.x + (dividerX - board.x) * 0.16;
-    const resultCellMaxWidth = resultColumnWidth * 0.91;
+    const resultCellMaxWidth = resultColumnWidth - 64;
     const innerPadding = Math.max(8, lineWidth * 4);
 
     rows = presentation.rows.map((row, index) => {
       const rowY = board.y + headerHeight + rowHeight * (index + 0.5);
       const nameCellSize = fitCellSize(row.characterName, {
-        maxCellSize: 8,
+        maxCellSize: 6,
         maxWidth: dividerX - rowTextStartX - innerPadding,
         maxHeight: rowHeight * 0.48,
       });
@@ -334,7 +328,7 @@ export function createNormalEndUi(scene, { hud, onReplay = () => {} }) {
         maxHeight: rowHeight * 0.48,
       });
       const outcome = makePixelLine(scene, row.outcomeLabel, {
-        x: resultTextCenter,
+        x: resultTextStart, align: 'left',
         y: rowY,
         cellSize: outcomeCellSize,
         color: COLORS.text,

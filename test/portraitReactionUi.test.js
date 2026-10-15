@@ -144,9 +144,9 @@ test('resolución muestra reaction y recompensa liquidada sin el párrafo genér
     const scene = makeScene();
     const data = getBathroomResistanceNarrative({ attemptNumber: 3, previousResults: ['secured', 'secured'] });
     const ui = createBathroomResolutionUi(scene, result, { rewardSettled: true, reaction: data.resolution[result] });
-    const texts = scene.objects.filter(({ type }) => type === 'text').map(({ text }) => text);
+    const texts = scene.objects.filter(({ text }) => text !== undefined).map(({ text }) => text);
     assert.ok(texts.includes(data.resolution[result].text));
-    assert.ok(texts.includes(result === 'success' ? '+500 ★' : '+250 ★'));
+    assert.ok(texts.includes(result === 'success' ? '+500 PUNTOS' : '+250 PUNTOS'));
     assert.equal(ui.getView().ready, false);
     assert.equal(ui.getView().labels.help, undefined);
     ui.setReady();
@@ -179,7 +179,7 @@ test('panel compuesto reserva dock inferior estable y mantiene geometría en res
     assert.equal(panel.destroyed, false);
     assert.deepEqual([panel.x, panel.y, panel.width, panel.height], initialGeometry);
     assert.equal(ui.getView().labels.title, 'LA PUERTA CEDIÓ');
-    assert.equal(ui.getView().reward, '+250 ★');
+    assert.equal(ui.getView().reward, '+250 PUNTOS');
     assert.equal(ui.getView().labels.timer, undefined);
     assert.equal(portrait.y, layout.dockY);
     destroyEventUi(ui);

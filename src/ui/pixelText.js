@@ -16,6 +16,11 @@ export const PIXEL_GLYPHS = Object.freeze({
   ':': ['00000', '00100', '00100', '00000', '00100', '00100', '00000'],
   '/': ['00001', '00010', '00010', '00100', '01000', '01000', '10000'],
   '·': ['00000', '00000', '00000', '00100', '00000', '00000', '00000'],
+  '+': ['00000', '00100', '00100', '11111', '00100', '00100', '00000'],
+  '-': ['00000', '00000', '00000', '11111', '00000', '00000', '00000'],
+  É: ['00100', '01000', '11111', '10000', '11110', '10000', '11111'],
+  Í: ['00100', '01000', '11111', '00100', '00100', '00100', '11111'],
+  Ú: ['00100', '01000', '10001', '10001', '10001', '10001', '01110'],
   Á: ['00100', '01000', '01110', '10001', '11111', '10001', '10001'],
   Ó: ['00100', '01000', '01110', '10001', '10001', '10001', '01110'],
   A: ['01110', '10001', '10001', '11111', '10001', '10001', '10001'],
@@ -86,40 +91,48 @@ export function createPixelText(scene, text, {
   lineGap = 2,
   color = 0xffffff,
   depth = 0,
+  maxWidth = Infinity,
+  maxHeight = Infinity,
+  align = 'center',
 } = {}) {
-  const lines = getLines(text);
-  const metrics = measurePixelText(text, { cellSize, glyphGap, lineGap });
-  const pixelSize = Math.max(1, cellSize - pixelInset * 2);
   const graphics = scene.add.graphics();
-
-  graphics.fillStyle(color, 1);
-
-  lines.forEach((line, lineIndex) => {
-    const lineWidth = getLineWidthCells(line, glyphGap) * cellSize;
-    let cursorX = -lineWidth / 2;
-    const cursorY = -metrics.height / 2 + lineIndex * (GLYPH_HEIGHT + lineGap) * cellSize;
-
-    for (const character of line) {
-      const glyph = PIXEL_GLYPHS[character];
-      if (glyph) {
-        for (let row = 0; row < GLYPH_HEIGHT; row += 1) {
-          for (let column = 0; column < GLYPH_WIDTH; column += 1) {
-            if (glyph[row][column] !== '1') continue;
-            graphics.fillRect(
-              Math.round(cursorX + column * cellSize + pixelInset),
-              Math.round(cursorY + row * cellSize + pixelInset),
-              pixelSize,
-              pixelSize,
-            );
+  const maxCellSize = cellSize;
+  let current = null;
+  function draw(value) {
+    value = String(value);
+    if (value === current) return graphics;
+    current = value;
+    const unit = measurePixelText(value, { cellSize: 1, glyphGap, lineGap });
+    const fitted = Math.max(1, Math.min(maxCellSize,
+      Math.floor(maxWidth / Math.max(1, unit.widthCells)),
+      Math.floor(maxHeight / Math.max(1, unit.heightCells))));
+    const metrics = measurePixelText(value, { cellSize: fitted, glyphGap, lineGap });
+    const inset = Math.min(pixelInset, Math.max(0, (fitted - 1) / 2));
+    const pixelSize = Math.max(1, fitted - inset * 2);
+    graphics.clear?.();
+    graphics.fillStyle(color, 1);
+    getLines(value).forEach((line, lineIndex) => {
+      const lineWidth = getLineWidthCells(line, glyphGap) * fitted;
+      let cursorX = align === 'left' ? 0 : align === 'right' ? -lineWidth : -lineWidth / 2;
+      const cursorY = -metrics.height / 2 + lineIndex * (GLYPH_HEIGHT + lineGap) * fitted;
+      for (const character of line) {
+        const glyph = PIXEL_GLYPHS[character];
+        if (glyph) for (let row = 0; row < GLYPH_HEIGHT; row++) {
+          for (let column = 0; column < GLYPH_WIDTH; column++) {
+            if (glyph[row][column] === '1') graphics.fillRect(
+              Math.round(cursorX + column * fitted + inset),
+              Math.round(cursorY + row * fitted + inset), pixelSize, pixelSize);
           }
         }
+        cursorX += (getCharacterWidth(character) + glyphGap) * fitted;
       }
-      cursorX += (getCharacterWidth(character) + glyphGap) * cellSize;
-    }
-  });
-
-  return graphics
-    .setPosition(x, y)
-    .setScrollFactor(0)
-    .setDepth(depth);
+    });
+    graphics.text = value;
+    graphics.pixelAlign = align;
+    graphics.pixelMetrics = { ...metrics, cellSize: fitted };
+    return graphics;
+  }
+  graphics.setText = draw;
+  draw(text);
+  return graphics.setPosition(x, y).setScrollFactor(0).setDepth(depth);
 }

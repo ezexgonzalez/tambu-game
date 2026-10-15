@@ -1,6 +1,6 @@
 # Tambu Game — UI Consolidation & Polish Pass
 
-**Estado:** DIRECTION APPROVED / PENDING INTEGRATION  
+**Estado:** UI CONSOLIDATION INTEGRATED / MANUAL VISUAL QA REQUIRED  
 **Fecha:** 2026-10-15  
 **Scope:** UI de V1 ya existente; no feature design  
 **Autoridades:** `docs/CURRENT_STATE.md`, `docs/UI_DIRECTION.md`, `docs/GAME_DESIGN.md`
@@ -95,3 +95,45 @@ El Engineer puede trabajar de manera autónoma dentro de este scope, con checkpo
 10. Dirección puede hacer una pasada visual con la V1 completa y decidir correcciones dirigidas.
 
 **No reabrir PARTY PRESENCE ni otro scope durante este bloque.**
+
+
+## 9. Entrega técnica — 2026-10-15
+
+Base sincronizada: `main@76a495f386eb4e5172af2d2ac542a5209772f32f`.
+
+### Auditoría y decisiones
+
+| Hallazgo | Corrección | Motivo |
+|---|---|---|
+| HUD rígido a 1280, alcohol vacío, glyphs de sistema y glow | Anclaje por viewport; solo VIDAS/PUNTOS; display pixel; prompt separado | Menor ruido y lectura inmediata |
+| Diálogos/Consejo con títulos monospace y spacing independiente | Familia de paneles/labels/body; jerarquía speaker → cuerpo → opciones → ayudas | Coherencia sin sacrificar lectura |
+| Opciones largas y coordenadas inflexibles | Dos columnas con fit conservador, padding y número propio | Fit a 960×540 y asociación teclado/texto |
+| Outcomes dependen de emojis y símbolos de reward | Títulos pixel y consecuencias explícitas; pending en Baño | Semántica legible sin iconografía ajena |
+| Bathroom header/timer y valores sin misma alineación | Padding compartido, barra/valores refinados, dock original | Mejora conservadora del panel aprobado |
+| Terminales con distinto peso de prompts/subtitles | Prompt Game Over pixel; jerarquía Perfect Night; tabla Normal End más consistente | Conservar carácter de cada cierre |
+| Falta divisoria horizontal entre segunda/tercera fila | Tres reglas de tabla y outcomes alineados a padding fijo | Lectura por filas sin cortes |
+
+Foundation: `src/ui/uiTheme.js`, extensión acotada de `pixelText.js`; sin framework/manager, librerías nuevas ni assets. Actualización de labels en el mismo Graphics y fit de cuerpo cacheado por intervención completa.
+
+### Protección funcional
+
+GameState/RunState, rewards/stats/choices/signals, data y copy narrativo, typewriter 28 ms, inputs, terminal beats/gates, restart/post-win, intro, Bathroom Resistance balance/10 s/+4/siete hits, door impacts, cámaras, memoria, rutas, mapa y personajes permanecen intactos. Se modifica solo presentación y su cobertura. Alcohol deja de verse, el campo sigue existiendo.
+
+### Validación
+
+- Checkpoints: suite previa de 259 tests mantenida verde tras foundation/diálogo y después de adaptar los mocks de render a los labels pixel nuevos.
+- Final: **266 tests aprobados; 0 fallos, 0 omitidos**.
+- Build: correcto; bundle JS aproximado 1.55 MB minificado, advertencia existente de chunk >500 kB; sin cambios de dependencias.
+- Nuevos tests: HUD/state/visibility/prompt/shutdown, pixel labels dinámicos, preguntas/opciones reales, reacción/post-outcome/Consejo, outcomes/pending sin emojis, composite Bathroom y geometría/gating de los tres terminales en dos viewports.
+- Existentes: se conservan contratos de typewriter, 256 rutas sociales, input/Consejo, cámara/shake/cleanup, rewards, fases terminales y replay. Se sustituyen únicamente expectativas cosméticas de coordenadas/texto de reward por la presentación nueva.
+- Sin navegador, Playwright, screenshots, DevTools ni sesión visual local.
+
+### Checklist de Dirección
+
+1. HUD legible/discreto, score estable, alcohol ausente, prompt E visible solo cuando corresponde; intro oculta todo.
+2. Preguntas/reacciones y opciones largas en las tres chicas: speaker/cuerpo claros, sin salto de tamaño mientras se escribe, Consejo y post-outcome con prompts correctos.
+3. Instagram/Friendzone/Rechazo y entrada al baño: copy original, consecuencias correctas, sin +500 anticipado ni emojis de sistema.
+4. Bathroom intentos 1/2/3: HUD a zoom 1, puerta enfocada, barra/timer/dock claros, portraits/voz intactos y success/failure sumando +500/+250 en su momento.
+5. GAME OVER/retry, NORMAL END/replay y PERFECT NIGHT/continue: delays iguales, sin input residual, tabla/score legibles; repetir en 960×540.
+
+Limitación pendiente: fit lógico/estimación monospace no reemplaza la evaluación óptica real sobre el mundo, ni verifica preferencias de ritmo/jerarquía. **GLOBAL UI VISUAL QA BY DIRECTION** es la siguiente acción. No se declara CLOSED/FROZEN ni se inicia Party Presence, audio, menú o contenido nuevo.

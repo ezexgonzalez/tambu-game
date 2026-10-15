@@ -1,4 +1,4 @@
-import { createPixelText, measurePixelText } from './pixelText.js';
+import { createUiLabel, UI_COLORS, cssColor } from './uiTheme.js';
 
 export const PORTRAIT_EXPRESSIONS = Object.freeze({ talk: 0, angry: 1, shout: 2 });
 export const FRIEND_PORTRAITS = Object.freeze(Object.fromEntries(
@@ -37,7 +37,7 @@ export function createPortraitReactionUi(scene, { x, y, width, framed = true, de
   const portrait = scene.add.image(left + 32, y, FRIEND_PORTRAITS.pitity.asset, 0)
     .setScrollFactor(0).setDepth(depth + 1);
   const speech = scene.add.text(bubbleLeft + 16, y - 6, '', {
-    fontFamily: 'monospace', fontSize: '18px', color: '#f2f5f7',
+    fontFamily: 'monospace', fontSize: '17px', color: cssColor(UI_COLORS.text), lineSpacing: 4,
     wordWrap: { width: bubbleWidth - 32 },
   }).setScrollFactor(0).setDepth(depth + 1);
   for (const object of [bubble, portrait, speech]) registerObject(object);
@@ -65,8 +65,8 @@ export function createPortraitReactionUi(scene, { x, y, width, framed = true, de
     bubble.setVisible(true);
     speech.setText(data.text).setVisible(true);
     speakerLabel?.destroy();
-    speakerLabel = registerObject(createPixelText(scene, config.name, {
-      x: bubbleLeft + 16 + measurePixelText(config.name, { cellSize: 3 }).width / 2,
+    speakerLabel = registerObject(createUiLabel(scene, config.name, {
+      x: bubbleLeft + 16, align: 'left', maxWidth: bubbleWidth - 32,
       y: y - 26, cellSize: 3, pixelInset: 0.5, color: 0x94a6b9, depth: depth + 1,
     }));
   }

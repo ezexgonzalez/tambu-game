@@ -76,6 +76,7 @@ function display(x, y, text = '') {
     setOrigin() { return this; },
     setScale() { return this; },
     setFillStyle() { return this; },
+    setStyle() { return this; },
     setPosition(nextX, nextY) { this.x = nextX; this.y = nextY; return this; },
     setVisible(visible) { this.visible = visible; return this; },
     setText(text) { this.text = text; return this; },
@@ -277,7 +278,7 @@ test('Sofi y Tambu llegan al acceso real, resisten y Tambu vuelve controlable', 
   while (event.getMode() === 'resistance') event.update();
   assert.equal(event.getMode(), 'failure');
   assert.ok(objects.some(({ depth, destroyed }) => depth === 6102 && !destroyed));
-  assert.ok(objects.some(({ text, destroyed }) => text === '+250 ★' && !destroyed));
+  assert.ok(objects.some(({ text, destroyed }) => text === '+250 PUNTOS' && !destroyed));
   assert.deepEqual(bathroomResolutions, [{ characterId: 'sofi', result: 'failure' }]);
   assert.equal(gameState.player.points, 250);
   assert.equal(gameState.player.lives, 3);
@@ -558,7 +559,7 @@ test('SPACE sostenido mediante pulsaciones físicas permite asegurar la puerta',
 
   assert.equal(event.getMode(), 'success');
   assert.ok(objects.some(({ depth, destroyed }) => depth === 6102 && !destroyed));
-  assert.ok(objects.some(({ text, destroyed }) => text === '+500 ★' && !destroyed));
+  assert.ok(objects.some(({ text, destroyed }) => text === '+500 PUNTOS' && !destroyed));
   assert.deepEqual(bathroomResolutions, [{ characterId: 'sofi', result: 'success' }]);
 
   keys.SPACE.edge = true;
@@ -577,7 +578,7 @@ test('interrumpir la pantalla de resultado nunca deja a Tambu invisible', () => 
   const keys = {};
   const scene = {
     input: { keyboard: { addKey(code) { keys[code] = { edge: false }; return keys[code]; } } },
-    add: { rectangle: display, text: display },
+    add: { rectangle: display, text: display, graphics: () => display(0,0) },
     game: { loop: { delta: 50 } },
   };
   const player = { sprite: actor(400, 690), label: display(400, 724), facing: 'up' };
@@ -687,7 +688,7 @@ test('la formación gira con el trayecto y ambos avanzan juntos sin pausas en wa
   for (const { id, x, y } of patioWomen) {
     const scene = {
       input: { keyboard: { addKey() { return { edge: false }; } } },
-      add: { rectangle: display, text: display },
+      add: { rectangle: display, text: display, graphics: () => display(0,0) },
       game: { loop: { delta: 50 } },
     };
     const player = { sprite: actor(x - bathroom.actorSpacing, y), label: display(x, y), facing: 'down' };

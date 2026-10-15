@@ -70,8 +70,8 @@ test('Game Over conserva patio y HUD durante el beat y revela el título pixelad
   assert.deepEqual(background.args, [0, 0, 1280, 720, 0xd71920]);
   assert.equal(title.type, 'graphics');
   assert.ok(title.rects.length > 100);
-  assert.equal(objects.filter(({ type }) => type === 'text').length, 1);
-  assert.equal(retryPrompt.args[2], 'ENTER / SPACE · REINTENTAR');
+  assert.equal(objects.filter(({ type }) => type === 'text').length, 0);
+  assert.equal(retryPrompt.text, 'ENTER / SPACE · REINTENTAR');
   assert.equal(ui.update(1000), false);
   assert.equal(ui.show(), true);
   assert.equal(ui.isActive(), true);

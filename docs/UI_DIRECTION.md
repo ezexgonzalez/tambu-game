@@ -1,7 +1,7 @@
 # Tambu Game — UI Direction
 
-**Versión:** 1.0  
-**Estado:** dirección activa — baseline de UI definida  
+**Versión:** 1.1  
+**Estado:** UI CONSOLIDATION INTEGRATED / MANUAL VISUAL QA REQUIRED  
 **Scope:** V1 · todo el juego  
 **Base visual de referencia:** intro nocturna, GAME OVER, PERFECT NIGHT y NORMAL END integrados en `main`
 
@@ -524,7 +524,7 @@ Ejemplos:
 - Bathroom Resistance;
 - outcomes intermedios.
 
-Estado: **funcionales, visualmente provisionales**.
+Estado: **consolidados técnicamente; aprobación visual pendiente**.
 
 Deben migrar gradualmente hacia:
 
@@ -543,10 +543,11 @@ Ejemplos:
 
 - vidas;
 - puntos;
-- alcohol;
 - interaction prompt.
 
-Estado: **funcional, provisional**.
+Alcohol no se representa visualmente en V1; su campo interno permanece intacto.
+
+Estado: **HUD compacto integrado; aprobación visual pendiente**.
 
 Debe ser la capa más liviana del sistema:
 
@@ -715,3 +716,32 @@ Debe reconocerla por:
 La UI debe acompañar el humor del juego sin convertirse en el chiste.
 
 **El mundo tiene personalidad. La interfaz también, pero sabe cuándo callarse.**
+
+
+---
+
+# 21. Consolidación integrada — 2026-10-15
+
+**UI CONSOLIDATION INTEGRATED / MANUAL VISUAL QA REQUIRED.** La dirección de este documento continúa vigente; esta pasada aplica el lenguaje a las superficies existentes, sin introducir otra marca ni pantallas funcionales.
+
+## Foundation runtime
+
+`uiTheme.js` centraliza paleta, conversiones de color, viewport, panel ortogonal fino, labels de display y cuerpo de lectura. No hay UI manager, fuente externa ni assets nuevos. `pixelText.js` mantiene sus glyphs/renderer base y suma É/Í/Ú, + y −, alineación left/center/right y actualización in-place que borra los glyphs anteriores; ajusta cellSize a ancho/alto disponible sin escalado continuo. Los títulos/labels son display; narrativa larga sigue en monospace. El preflight de cuerpo usa una estimación conservadora por carácter y respeta las líneas completas, sin reescribirlas; la rasterización/lectura real debe validarla Dirección.
+
+## Aplicación por superficie
+
+- **HUD:** bloque de 310×54 como máximo, anclado arriba a la derecha, vidas y puntos textuales, sin alcohol/glow/emojis. Prompt inferior independiente de hasta 590×44, oculto si HUD/interaction no están disponibles.
+- **Diálogo:** panel derivado de viewport (hasta 1120×360), speaker dominante, progreso secundario, cuerpo legible y cuatro opciones en dos columnas con número y wrapping propio. Las opciones/C se muestran solo cuando la línea está completa. El tamaño del cuerpo usa el texto completo para no cambiar mientras se escribe. Los prompts distinguen avanzar, elegir, abandonar/cerrar y volver.
+- **Consejo:** selección con filas y números; advice con speaker, cuerpo y ayuda separados, sin portraits inventados. No cambia consejo, frecuencia, anti-repetición ni reacción de Tambu.
+- **Outcomes:** sin emoji de `outcome.icon` en presentación; se mantienen títulos y narrativa de data. Consecuencias explícitas `+N PUNTOS` / `-1 VIDA`; bathroom pending visible hasta el minijuego.
+- **Bathroom:** conserva panel compuesto, tamaño/dock, portraits y cámara propia. Header/timer alineados con padding, barra con separación clara, resistencia/reward en pixel y speech de 17 px con interlineado. La cámara UI sigue a zoom 1 y main a 1.75 durante el minijuego; no hay cambios de staging, shake, restore, pacing ni input.
+- **GAME OVER:** misma frase, rojo, composición principal y 900/450 ms; prompt ahora pixel y mejor separado del punchline.
+- **PERFECT NIGHT:** misma ceremonia/copy/700/500 ms; menor competencia del 3/3 y subtitle con el título, prompt discreto.
+- **NORMAL END:** mismos datos/orden/replay/700/500 ms; outcomes parten de un padding fijo de columna y entran incluso con `BAÑO INTERRUMPIDO`; reglas horizontales y divisoria vertical continuas.
+- **Intro:** baseline protegida, sin modificaciones de secuencia, reloj, máscara, túnel, cámara ni timings.
+
+## Contratos y QA
+
+**266 tests, 0 fallos, 0 omitidos; `npm run build` correcto**, con advertencia existente de bundle >500 kB. Geometría y contenido real a 1280×720 y 960×540, cambios de dígitos, visibilidad/cleanup, post-outcome, gating/inputs residuales y cámara del baño cubiertos. Tests existentes conservados; las aserciones que buscaban texto por coordenadas provisionales ahora usan roles de presentación, manteniendo las mismas expectativas de texto, orden e interacción.
+
+No se ejecutó navegador, Playwright, screenshots ni experiencia visual local. No se declara CLOSED/FROZEN. Dirección debe recorrer HUD → preguntas/reacciones → Consejo → outcomes → Bathroom → tres terminales/retry/post-win y probar 960×540. Confirmar lectura, alineación óptica, wrapping real, ausencia de jitter y continuidad de cámaras. Menú, audio, diálogos y Party Presence siguen fuera de este pass.

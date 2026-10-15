@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { createPixelText, measurePixelText } from './pixelText.js';
+import { UI_COLORS } from './uiTheme.js';
 
 const PERFECT_NIGHT_DEPTH = 21_000;
 const OVERLAY_COLOR = 0x05080d;
@@ -24,8 +25,8 @@ function fitCellSize(scene, text, maxCellSize, horizontalPadding = 64) {
   return Math.max(2, Math.min(maxCellSize, maxByWidth, maxByHeight));
 }
 
-function makePixelLine(scene, text, y, cellSize, depth) {
-  const pixelInset = Math.max(1, Math.round(cellSize * 2 / 14));
+function makePixelLine(scene, text, y, cellSize, depth, color = UI_COLORS.title) {
+  const pixelInset = cellSize <= 5 ? 0.5 : Math.max(1, Math.round(cellSize * 2 / 14));
   return createPixelText(scene, text, {
     x: scene.scale.width / 2,
     y,
@@ -33,7 +34,7 @@ function makePixelLine(scene, text, y, cellSize, depth) {
     pixelInset,
     glyphGap: 1,
     lineGap: 2,
-    color: 0xffffff,
+    color,
     depth,
   }).setVisible(false);
 }
@@ -49,8 +50,8 @@ export function createPerfectNightUi(scene, { hud, onContinue = () => false }) {
   const perfectCount = makePixelLine(
     scene,
     PERFECT_NIGHT_COPY.count,
-    height * 0.19,
-    fitCellSize(scene, PERFECT_NIGHT_COPY.count, 16),
+    height * 0.23,
+    fitCellSize(scene, PERFECT_NIGHT_COPY.count, 10),
     PERFECT_NIGHT_DEPTH + 1,
   );
   const title = makePixelLine(
@@ -64,15 +65,15 @@ export function createPerfectNightUi(scene, { hud, onContinue = () => false }) {
     scene,
     PERFECT_NIGHT_COPY.subtitle,
     height * 0.61,
-    fitCellSize(scene, PERFECT_NIGHT_COPY.subtitle, 8),
-    PERFECT_NIGHT_DEPTH + 1,
+    fitCellSize(scene, PERFECT_NIGHT_COPY.subtitle, 4),
+    PERFECT_NIGHT_DEPTH + 1, UI_COLORS.success,
   );
   const continuePrompt = makePixelLine(
     scene,
     PERFECT_NIGHT_COPY.continuePrompt,
     height * 0.85,
-    fitCellSize(scene, PERFECT_NIGHT_COPY.continuePrompt, 6, 80),
-    PERFECT_NIGHT_DEPTH + 1,
+    fitCellSize(scene, PERFECT_NIGHT_COPY.continuePrompt, 3, 80),
+    PERFECT_NIGHT_DEPTH + 1, UI_COLORS.secondary,
   );
 
   const keyboard = scene.input.keyboard;

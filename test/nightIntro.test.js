@@ -339,12 +339,12 @@ test('HUD oculta todas sus piezas y conserva el prompt oculto al restaurarse', (
   const state = createGameState();
   state.player.alcohol = 50;
   const hud = createHud(scene, state);
-  assert.equal(objects.length, 8);
+  assert.equal(objects.length, 6);
   hud.setVisible(false);
   assert.ok(objects.every(({ visible }) => visible === false));
   hud.update(state);
   assert.ok(objects.every(({ visible }) => visible === false));
   hud.setVisible(true);
-  assert.ok(objects.slice(0, -1).every(({ visible }) => visible === true));
+  assert.ok(objects.slice(0, 4).every(({ visible }) => visible === true));
   assert.equal(hud.interactionPrompt.visible, false);
 });

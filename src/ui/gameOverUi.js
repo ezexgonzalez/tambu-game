@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { createPixelText, measurePixelText } from './pixelText.js';
+import { createUiLabel } from './uiTheme.js';
 
 const GAME_OVER_DEPTH = 20_000;
 const GAME_OVER_RED = 0xd71920;
@@ -42,16 +43,10 @@ export function createGameOverUi(scene, { hud, onRetry = () => {} }) {
     color: 0xffffff,
     depth: GAME_OVER_DEPTH + 1,
   }).setVisible(false);
-  const retryPrompt = scene.add.text(width / 2, height * 0.68, RETRY_PROMPT, {
-    fontFamily: 'monospace',
-    fontSize: '20px',
-    color: '#ffffff',
-    align: 'center',
-  })
-    .setOrigin(0.5)
-    .setScrollFactor(0)
-    .setDepth(GAME_OVER_DEPTH + 1)
-    .setVisible(false);
+  const retryPrompt = createUiLabel(scene, RETRY_PROMPT, {
+    x: width / 2, y: height * 0.72, maxWidth: width - 96,
+    cellSize: 3, color: 0xffffff, depth: GAME_OVER_DEPTH + 1,
+  }).setVisible(false);
 
   let active = false;
   let overlayVisible = false;
