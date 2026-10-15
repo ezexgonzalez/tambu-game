@@ -1,8 +1,8 @@
 # Tambu Game — Party Presence
 
-**Versión:** 1.1  
-**Estado:** CLEAN CANVAS INTEGRATED / VISUAL QA REQUIRED  
-**Fecha:** 2026-10-04  
+**Versión:** 1.2  
+**Estado:** DJ ENVIRONMENT DESIGN / BORDER FIRST — ACTIVE (concept only)  
+**Fecha:** 2026-10-15  
 **Scope:** V1 · patio actual  
 **Autoridad relacionada:** `CURRENT_STATE.md`, `GAME_DESIGN.md`, `ART_DIRECTION.md`, `PIXEL_ART_STYLE_GUIDE.md`
 
@@ -193,24 +193,28 @@ El contenido exacto se decide después de cerrar las social zones.
 
 # 10. Orden de trabajo actualizado
 
-Dirección establece como preparación obligatoria el CLEAN CANVAS. Flujo vigente: REAL CLEAN SCREENSHOT → SOCIAL ZONE DESIGNER → APPROVED ZONE MOCKUP → ART DIRECTOR → INTEGRATION ENGINEER. El antiguo prototype basado en fillers actuales queda supersedido.
+Dirección establece como preparación obligatoria el CLEAN CANVAS. Tras varias generaciones completas de capturas con NPCs y props improvisados, se cambia el método: **captura real limpia → environment design sin NPCs → manifiesto de assets y layout aprobado → Art Director produce PNGs por familias → composición controlada con esos assets sobre captura original → social composition con NPCs → Integration Engineer reproduce target aprobado**. Las imágenes anteriores de crowd/decoración son exploraciones rechazadas, NO objetivos aprobados. El antiguo prototype basado en fillers queda supersedido.
 
-## PASS 1 — SOCIAL ZONING / COMPOSITION
+## PASS 1 — ENVIRONMENT DESIGN / BORDER FIRST
 
-- diseñar desde captura real limpia, sin fillers legacy;
-- dejar de tratarlos como distribución final;
-- trabajar el patio zona por zona;
-- validar clusters, negative space y circulación en el mockup aprobado antes de integración.
+- estudiar referencias de paisajismo y mobiliario de una fiesta nocturna en patio moderno (función y materiales), separadas de la referencia de estilo pixel-art de Tambu;
+- trabajar primero el **borde izquierdo y el borde inferior del sector DJ** señalados por Dirección en la captura anotada;
+- especificar ambientación, mobiliario, vegetación, iluminación, apoyos de bebidas, circulación y un manifiesto de assets; **sin agregar NPCs nuevos ni generar otra captura completa en esta subfase**;
+- la captura define geometría y piezas protegidas, pero la idea se valida como plano compositivo y catálogo de props antes de la producción.
 
-## PASS 2 — FILLER VISUAL FAMILY
+## PASS 2 — ART PRODUCTION + CONTROLLED COMPOSITE
 
-Con posiciones/actividades ya validadas:
+- Art Director produce las familias de assets necesarias en PNG transparentes aprobables a escala del juego;
+- composición supervisada y editable de los PNG sobre la captura limpia, sin reinterpretar la totalidad del mundo;
+- iterar ubicación/espaciado/variedad de props por capas hasta aprobar la escena ambiental.
 
-- definir lote pequeño de diseños base;
-- reutilizar variantes;
-- producir solo los assets que las social zones realmente necesitan.
+## PASS 3 — SOCIAL COMPOSITION + FILLER FAMILY
 
-## PASS 3 — AUDIO FOUNDATION
+- incorporar clusters y actividades sobre el entorno ya diseñado, sin redistribución aleatoria;
+- producir solo la familia pequeña de NPCs/poses que esa composición necesita;
+- conservar legibilidad de Sofi, amigos, DJ, accesos y rutas.
+
+## PASS 4 — AUDIO FOUNDATION
 
 - música;
 - ambience;
@@ -219,7 +223,7 @@ Con posiciones/actividades ya validadas:
 
 Puede avanzar en paralelo cuando no dependa de assets visuales.
 
-## PASS 4 — ACTIVITIES + AMBIENT BEATS
+## PASS 5 — ACTIVITIES + AMBIENT BEATS
 
 - convertir metadata en actividad visible;
 - sumar 2–3 beats ambientales;
@@ -293,9 +297,9 @@ El jugador tiene que poder atravesar la zona sin leerla como una pared humana.
 
 # 13. DJ zone — source of truth vigente
 
-La captura limpia real del patio es el input del Social Zone Designer. El mockup de zona aprobado define composición y prop manifest antes de producir arte o integrar población.
+La captura limpia real del patio es referencia geométrica de la zona y de los anchors protegidos. **No usar una generación única de imagen final como contrato de producción.** Primero plano/composición ambiental y manifiesto, luego assets aprobados y composición con capas PNG reales; recién después NPCs y handoff técnico.
 
-No reutilizar la distribución procedural eliminada como referencia. No mover DJ, piscina ni amigos principales para acomodar una nueva ilustración. No agregar fillers/props/decoración antes del siguiente brief aprobado.
+No reutilizar distribución procedural eliminada ni las ilustraciones IA rechazadas como objetivos. No mover DJ, piscina ni amigos principales para acomodar un diseño. No agregar fillers/props/decoración al runtime antes de aprobación visual y assets.
 
 ---
 
@@ -381,3 +385,33 @@ No se realizó navegador, screenshots ni ejecución visual local. No se declara 
 **CLEAN PATIO SCREENSHOT → SOCIAL ZONE DESIGNER → APPROVED DJ ZONE MOCKUP → ART DIRECTOR → INTEGRATION ENGINEER.**
 
 Sin nueva población, props, vegetación ni decoración en esta pasada.
+
+---
+
+# 19. DJ ENVIRONMENT DESIGN — borde primero / nueva metodología — 2026-10-15
+
+**Estado: ACTIVE CONCEPT / NO ASSETS OR CODE APPROVED.** Dirección rechaza las iteraciones previas de “generar una fiesta completa encima de la captura”: acumulación de props repetidos, plantas como sellos de perímetro, mesas de picnic, crowd dispuesto por relleno e incoherencias de estilo.
+
+## Alcance de la primera prueba
+
+- Trabajar únicamente **el borde izquierdo y el borde inferior de la zona DJ marcados en rojo en la captura de referencia**. Son **límites visuales del sector que se está diseñando**, no nuevas coordenadas ni una instrucción de construir un muro/collider/perímetro uniforme a lo largo de todo el mapa.
+- **No agregar NPCs** en este primer diseño ambiental. Uriel, Santy, Sofi, Thiago y Tobi permanecen visibles e intactos en sus ubicaciones aprobadas.
+- Priorizar un **borde vivo** y no una cerca decorativa: alternancia de grupos vegetales desiguales, posibles tramos de lounge/mobiliario moderno, iluminación con causa física y pequeños apoyos de bebidas solo donde exista función.
+- Romper repetición: cada familia de planta/mueble debe tener razón de colocación, silueta/variación y escala coherentes. Evitar una maceta idéntica en cada intervalo; evitar convertir todo el borde en una muralla de vegetación.
+- La zona central queda mayormente libre en esta primera prueba, sin que eso implique que será así en el resultado final. Se diseñará la distribución social después de aprobar el borde y el entorno.
+- Preservar corredores, colisión, acceso al DJ, piscina, Sofi y todos los personajes/estructuras. No recrear bordes rechazados del CLEAN CANVAS.
+
+## Entregable del Environment Designer, antes de generar imágenes
+
+1. Diagnóstico de la captura real y función del borde, distinguiendo tramo izquierdo, esquina y tramo inferior.
+2. **Dos variantes conceptuales acotadas**, con distinta combinación de vegetación/mobiliario/iluminación, ambas viables con assets pixel-art modulares.
+3. Plano de colocación descriptivo por tramos, anclado a elementos visibles; si se presenta un esquema anotado, debe ser de planificación y no simular una captura final.
+4. Catálogo/manifest de assets: ID, silueta/material/escala relativa, variantes mínimas, cantidad aproximada, orientación, propósito, prioridad y posibilidad de reutilización en otras zonas.
+5. Riesgos de colisión, oclusión, repetición y jerarquía de lectura.
+6. Recomendación de una variante con argumentos; **Dirección la aprueba antes de pedir producción visual.**
+
+## Flujo de aprobación
+
+**Environment Designer (conceptual)** → Dirección aprueba layout/familias → **Art Director produce un pequeño kit de PNGs verificables** → composición controlada de las piezas sobre captura real (sin regenerar fondo/personajes) → Dirección aprueba ambiente → **Social Zone Designer ubica NPCs** → Art Director produce fillers necesarios → Integration Engineer implementa **sin inventar layout** → QA manual.
+
+No iniciar Art Director, Integration Engineer ni nueva generación de crowd hasta que Dirección apruebe el primer plano ambiental. No comprometer la V1 con una factoría enorme de props.
