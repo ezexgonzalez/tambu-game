@@ -1,8 +1,8 @@
 # Tambu Game — Party Presence
 
-**Versión:** 1.2  
-**Estado:** DJ ENVIRONMENT DESIGN / BORDER FIRST — ACTIVE (concept only)  
-**Fecha:** 2026-10-15  
+**Versión:** 1.3  
+**Estado:** DJ ENVIRONMENT DRESSING FIRST — ACTIVE / VISUAL APPROVAL PENDING  
+**Fecha:** 2026-10-21  
 **Scope:** V1 · patio actual  
 **Autoridad relacionada:** `CURRENT_STATE.md`, `GAME_DESIGN.md`, `ART_DIRECTION.md`, `PIXEL_ART_STYLE_GUIDE.md`
 
@@ -415,3 +415,44 @@ Sin nueva población, props, vegetación ni decoración en esta pasada.
 **Environment Designer (conceptual)** → Dirección aprueba layout/familias → **Art Director produce un pequeño kit de PNGs verificables** → composición controlada de las piezas sobre captura real (sin regenerar fondo/personajes) → Dirección aprueba ambiente → **Social Zone Designer ubica NPCs** → Art Director produce fillers necesarios → Integration Engineer implementa **sin inventar layout** → QA manual.
 
 No iniciar Art Director, Integration Engineer ni nueva generación de crowd hasta que Dirección apruebe el primer plano ambiental. No comprometer la V1 con una factoría enorme de props.
+
+---
+
+# 20. PARTY PRESENCE — DECORATION-ONLY FIRST, SOCIAL ZONE SECOND (2026-10-21)
+
+Dirección aprueba una **separación estricta de producción visual en dos pasadas** para las zonas de V1:
+
+**PASS A — ENVIRONMENT / DECORATION ONLY → Dirección aprueba → PASS B — SOCIAL POPULATION / NPC CLUSTERS.**
+
+Esta decisión reemplaza la restricción temporal de §19 de trabajar solamente el borde y entregar únicamente planes textuales. El diseño ambiental ahora puede intervenir **toda la zona proporcionada** en la captura, con el borde como prioridad compositiva, y debe devolver una propuesta visual de SOLO objetos. En ningún caso combinar ambas pasadas en una generación.
+
+## A. Decorative Environment Pass — única tarea inmediata
+
+- Entrada: **captura limpia real** y, cuando exista, **referencia de límites marcada por Dirección**.
+- Entrega principal: propuesta visual con **el mismo encuadre, estructuras, suelo y personajes importantes intactos**, modificando exclusivamente **ambiente, objetos y mobiliario**. La imagen es referencia de diseño, NO PNG integrable ni pixel-perfect garantizado; inspeccionar y corregir alteraciones de los elementos protegidos.
+- Se puede diseñar: lounge moderno, mesas bajas/altas adecuadas a fiesta, mesas auxiliares, vegetación variada, jardineras/macetones, iluminación con fuente legible, coolers, botellas/vasos y clutter pequeño coherente.
+- No agregar **NINGÚN NPC nuevo** ni modificar el sprite, posición, expresión, ropa, pose o label de amigos/chicas/Tambu. No crear crowd. No adelantar social composition.
+- No pintar colores/glow arbitrarios, no llenar el suelo de copas ni repetir palmeras idénticas; nada de mesas de picnic/parque, cercos lineales vegetales, muros falsos o decoraciones que aparenten nueva arquitectura.
+- El borde marcado es un área a **componer con variación y pausas**, no una orden de cubrirlo entero ni de construir otra cerca. Evaluar lado izquierdo, esquina inferior, tramo inferior y su transición al centro.
+- Debe leerse como **patio de casa moderna preparado para una fiesta nocturna aun sin NPCs nuevos**.
+- Dejar un **núcleo central libre útil** para el futuro dance core, y circulación clara hacia DJ, Sofi, amigos y piscina. El centro puede tener apoyos puntuales si aportan función, pero no mobiliario que invada la pista.
+- No inventar coordenadas exactas sin fundamentos; los anclajes visuales aprobados pasan luego a medición e integración técnica.
+
+## Entregables y decisión
+
+1. **Visual limpio** de ambientación sobre la captura base, sin anotaciones ni nuevas personas.
+2. **Manifest de producción** con cada familia prop/mueble/planta/luz: ID, cantidad, escala relativa al sprite runtime, silueta/material, variantes necesarias, función, zona, prioridad y estado (asset existente comprobado / nuevo / candidato por verificar).
+3. **Notas de composición** con foco, borde, transición, circulación y espacios expresamente reservados para población futura.
+4. **Opciones de reducción** si la propuesta cuesta demasiado: distinguir esenciales vs opcionales.
+5. Marcar cualquier alteración de elementos protegidos como **error a corregir**, nunca como libertad creativa.
+
+**No enviar directamente el resultado a Integration Engineer.** Dirección decide primero aprobación visual. Después Art Director produce assets exactos/familias. Idealmente componer con PNGs aprobados como capas sobre la captura original para preservar píxeles reales antes de integración.
+
+## B. Social Population Pass — NO AHORA
+
+Solo después de aprobar la ambientación: usar esa base para ubicar dancers, bebida/chat, observadores y microclusters creíbles. No mover los props aprobados arbitrariamente para meter NPCs. Entregar manifiesto de fillers/poses/orientación. Luego Art Director + Integration Engineer.
+
+## Estado
+
+**DJ DECORATION-ONLY PASS — READY FOR AGENT / AWAITING VISUAL PROPOSAL.**
+Sin implementación técnica nueva autorizada, sin NPCs, sin asset final aprobado. UI Consolidation es un bloque paralelo, no alterar sus archivos.
