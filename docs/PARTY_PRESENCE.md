@@ -454,5 +454,5 @@ Solo después de aprobar la ambientación: usar esa base para ubicar dancers, be
 
 ## Estado
 
-**DJ DECORATION-ONLY PASS — READY FOR AGENT / AWAITING VISUAL PROPOSAL.**
-Sin implementación técnica nueva autorizada, sin NPCs, sin asset final aprobado. UI Consolidation es un bloque paralelo, no alterar sus archivos.
+**DJ DECORATION-ONLY PASS — VISUAL REFERENCE ACCEPTED / ASSET KIT PENDING (2026-10-21).**
+La última captura ambiental elegida por Dirección habilita **planificación de producción** documentada en `docs/PARTY_PRESENCE_DJ_ASSET_MANIFEST.md`; no implica aprobación de PNGs individuales ni calidad pixel-perfect del mockup. La captura no está guardada en el repo y debe adjuntarse a cada handoff. Art Director audita reutilización y produce familias por packs. Integration Engineer espera assets y composición aprobados. SIN nuevos NPCs hasta cierre ambiental. UI Consolidation no entra en este scope.
