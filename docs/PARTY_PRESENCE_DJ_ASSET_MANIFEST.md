@@ -1,6 +1,6 @@
 # Tambu Game — DJ Environment Asset Manifest
 
-**Estado:** VISUAL TARGET ACCEPTED FOR ART PRODUCTION PLANNING / ASSETS NOT APPROVED  
+**Estado:** VISUAL TARGET ACCEPTED / PACK A ART APPROVED (2026-10-27) / PACKS B–D PENDING / RUNTIME NOT APPROVED  
 **Dirección:** 2026-10-21  
 **Scope:** solo decoración de la zona DJ, a la izquierda de piscina y borde inferior del sector  
 **Referencia visual:** última captura ambiental aceptada en conversación (1087×1447 px). Entregar esa imagen directamente a los agentes; **no está guardada como PNG dentro del repositorio**.  
@@ -19,6 +19,8 @@ La imagen es un **objetivo compositivo**, NO sprites runtime ni referencia fiabl
 - Separar en los archivos el mobiliario, plantas, lámparas y clutter que requieran depths/colliders/iluminación independientes. No generar un atlas gigantesco con la escena entera.
 - Un asset existente en `public/assets/props/patio/` es **CANDIDATE**, no approved runtime. Los assets de `public/assets/props/deck/` requieren comprobación de escala/estilo para reutilización.
 - El borde inferior ya fue limpiado de perímetro legacy. Los maceteros modulares diseñados ahora **no son** recreación del fence/hedge rechazado ni deben formar collider perimetral invisible.
+
+**Status Pack A:** 12 PNG del paquete `tambu_dj_environment_pack_a_correction01(1).zip` **APPROVED FOR ART** tras QA de Dirección 2026-10-27; ver `docs/PARTY_PRESENCE_DJ_PACK_A_QA.md` §6. El archivo ZIP no está incorporado en `main`. No confundir aprobación artística con preview de runtime: escala, origins/colliders y posiciones de mundo pendientes de comprobación en Phaser.
 
 ## 2. Pack A — Mobiliario (producir primero)
 
