@@ -48,3 +48,38 @@ La **última** referencia ambiental entregada y aceptada por Dirección en conve
 Hasta aprobar visualmente: **NO entregar a Integration Engineer, NO integrar al runtime, NO declarar Pack A CLOSED**.
 
 No producir Pack B/C/D ni agregar NPCs como parte de la corrección. Al terminar, Dirección inspecciona la nueva entrega y da veredicto: APPROVED / CORRECTION PASS / REJECT.
+
+
+---
+
+## 6. Direction QA — correction01 (2026-10-27)
+
+**Entrega revisada:** `tambu_dj_environment_pack_a_correction01(1).zip` (archivo adjunto en conversación; no subido al repo).
+
+**VEREDICTO: APPROVED FOR ART / PENDING RUNTIME INTEGRATION QA.**
+
+Se cerraron los bloqueos de producción visual de Pack A. Se inspeccionaron los 12 PNG, contact sheet, dos lounges aislados, comparación a escala con Tambu, preview contextual y comparativa de material. Se comparó binariamente la referencia del ZIP contra `image(4).png`, confirmando imagen final idéntica de **1087×1447** y hash `b77a8380f219d529f2291fc3c03b4d068fbb765a41c0188cf911401a70a3e418`.
+
+### QA material y contrato
+
+- F01 (5 módulos de sofá): **APPROVED ART**. Costuras, planos de tapizado y transición de esquina más limpios; ensamble preservado sin modificar geometrías/sockets.
+- F02 (2 cojines): **APPROVED ART**, binariamente sin cambios respecto de v1.
+- F03 mesa cuadrada: **APPROVED ART**. Grosor de tapa, soporte y patas más definidos.
+- F04 mesa circular baja: **APPROVED ART**. Base baja y canto separados de tapa.
+- F05 mesa cóctel: **APPROVED ART**, binariamente sin cambios.
+- F06 pouf: **APPROVED ART**. Costura/ribete legible sin incremento excesivo de detalle.
+- F07 alfombra: **APPROVED ART**. Tejido más orgánico, sin collider.
+
+Comprobaciones propias sobre ambos ZIPs: **12/12** RGBA `alpha={0,255}`, bbox de contenido con margen transparente, **9 modificados + 3 idénticos**. Previews y handoff MD/JSON presentes. Composición overlay no altera píxeles fuera de su cobertura. No se ejecutaron tests/build de juego porque no hubo código ni implementación.
+
+### Importante: qué NO está aprobado todavía
+
+- **No hay world coords congeladas ni colliders validados.** La preview contextual utiliza un multiplicador ilustrativo `1.65` y superpone muebles sobre mobiliario ya dibujado en la captura. Es útil para comparar materiales, **no** un layout limpio ni prueba de escala/oclusiones dentro de Phaser.
+- **No copiar `1.65` al runtime:** los sprites nativos se entregan con `scale=1.0` sugerido. Debe verificarse en juego frente a Tambu y geometría real.
+- En futura composición e integración, evitar duplicación de muebles visuales de referencia, comprobar profundidad por piezas de sofá, respetar el hueco interior de los colliders en L y mantener alfombra no colisionable.
+- La aprobación no autoriza automáticamente editar la escena, agregar props/fillers ni declarar PARTY PRESENCE CLOSED.
+- El ZIP de producción sigue fuera del repositorio; la aprobación del documento NO equivale a incorporación de los PNG en `main`.
+
+**Siguiente paso autorizado de producción artística:** DJ **Pack B — Vegetación y bordes** basado en la misma captura final y manifiesto. **Integration Engineer permanece en espera** hasta disponer de Pack A/B/C/D aprobados y composición en contexto revisada por Dirección. Social NPC Pass después.
+
+No reabrir Pack A salvo bug visual o de ensamblaje demostrado en un preview de runtime posterior.
