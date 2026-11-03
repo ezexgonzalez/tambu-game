@@ -61,3 +61,41 @@
 - Integración: espera packs de arte/composición visual aprobados.
 
 **Siguiente acción:** Art Director Pack B correction01. El objetivo de la corrección es enriquecer bordes y plantas **sin perder el buen contrato modular y técnico logrado**.
+
+
+---
+
+## 5. Correction01 — Dirección QA 2026-11-03
+
+**Entrega revisada:** `Tambu_DJ_Pack_B_Correction01(1).zip` (archivo adjunto en conversación, **no incorporado al repositorio**). Se comparó en conjunto con el Pack A aprobado `tambu_dj_environment_pack_a_correction01(2).zip`.
+
+**VEREDICTO: APPROVED FOR ART / RUNTIME COMPOSITION PENDING.**
+
+### Technical inspection, verified
+
+- **18/18 PNG B RGBA**, alpha estrictamente 0/255, con contenido interior y márgenes transparentes; todos decodifican.
+- **12/12 PNG A RGBA**, alpha estrictamente 0/255. Total de **30 PNG** entre ambos.
+- Ambas entregas incluyen idéntica referencia de **1087×1447**, SHA-256 `b77a8380f219d529f2291fc3c03b4d068fbb765a41c0188cf911401a70a3e418`.
+- Correction01 B declara y documenta **5 REFINE + 13 KEEP**: V06A/V06B y V07-left/middle/right fueron refinados; árbol, tropicales, arbustos, variantes florales y complementos no se regeneraron.
+- Las dos macetas V06 ahora contienen **sustrato marrón oscuro visible**, abertura con pared interior y borde frontal; el montaje incorpora superposición de planta y labio delantero. La tierra existe tanto en V06A como en V06B.
+- Las tres piezas V07 presentan borde/material más legible y suelo interior; los montajes inferiores usan tres segmentos visualmente distintos, vegetación alternada y pausas entre conjuntos. Permanecen módulos ensamblables, no un PNG de borde completo.
+- Se inspeccionaron hoja de contacto, QA soil gate, uniones V07, ensambles left/lower, escala con Tambu y composición local con Pack A. Los assets A no fueron alterados por B.
+- `handoff/asset_manifest.json`, `README.md`, comparaciones y cambios explícitos presentes.
+- Al no existir cambios de código de juego, **no hubo tests/build ni playtest Phaser**. Los contratos de scale/depth/colliders siguen siendo propuestas técnicas no validadas en runtime.
+
+### Resultado visual
+
+- **V06 SOIL / ROOT GATE: PASS.** Corregida la objeción de plantas aparentemente apoyadas sobre macetas vacías.
+- **V07 LOWER BORDER: PASS FOR ART.** Los tres grupos, follaje y volumetría funcionan como un kit modular suficientemente rico; la colocación final en el mapa debe evitar la lectura de una franja uniforme.
+- **TREE/TROPICAL/SHRUB/CROSS-PACK MATERIALS: PASS FOR ART.** Variación y contraste proporcionados; no reabrir sólo por microdetalle.
+- **A+B 1x ASSEMBLY: PASS AS ART PREVIEW**, no world positioning. Ningún nuevo asset o escala fue aprobado por la simulación ilustrativa de contexto.
+
+### Limitaciones protegidas
+
+- La preview conjunta presenta los PNG a escala local 1x, **no** una composición definitiva sobre captura real limpia ni coordenadas de mapa.
+- Las piezas entregadas **NO han sido publicadas en main** por la revisión documental. Debe incorporarlas el Integration Engineer sólo después de la aprobación del pack restante y de la disposición en zona.
+- Para montar plantas: respetar sockets de V06, insertion depths y orden recipiente → vegetal → labio delantero. Para V07: respetar uniones left/middle/right y render de follaje por encima del sustrato, con base física separada del área foliar.
+- No colocar muebles o jardineras bloqueando a Uriel, Santy, Sofi, Thiago, Tobi o rutas de Bathroom Event.
+- La aprobación artística no significa que el aspecto de la captura final sea reproducido automáticamente. Hace falta un **COMPOSITION PASS** con los PNG finales sobre fondo limpio y luego QA runtime.
+
+**Next:** Pack C de iluminación, después D de bebidas y microprops (preferir reuse existente), composición por capas A+B+C+D, QA de Dirección y finalmente Integration Engineer. Social NPC pass sigue posterior.
