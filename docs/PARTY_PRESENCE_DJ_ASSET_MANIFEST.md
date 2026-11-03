@@ -1,6 +1,6 @@
 # Tambu Game — DJ Environment Asset Manifest
 
-**Estado:** VISUAL TARGET ACCEPTED / PACK A ART APPROVED (2026-10-27) / PACKS B–D PENDING / RUNTIME NOT APPROVED  
+**Estado:** VISUAL TARGET ACCEPTED / PACKS A+B ART APPROVED (2026-11-03) / PACKS C–D PENDING / RUNTIME NOT APPROVED  
 **Dirección:** 2026-10-21  
 **Scope:** solo decoración de la zona DJ, a la izquierda de piscina y borde inferior del sector  
 **Referencia visual:** última captura ambiental aceptada en conversación (1087×1447 px). Entregar esa imagen directamente a los agentes; **no está guardada como PNG dentro del repositorio**.  
@@ -36,7 +36,7 @@ La imagen es un **objetivo compositivo**, NO sprites runtime ni referencia fiabl
 
 **Entrega Pack A:** PNG transparentes por pieza/módulo + muestra ensamblada de dos lounges y mesa alta junto a Tambu. No hacer personas sentadas en esta pasada.
 
-## 3. Pack B — Vegetación y jardineras
+**Status Pack B:** 18 PNG del kit `Tambu_DJ_Pack_B_Correction01(1).zip` **APPROVED FOR ART** tras QA de Dirección 2026-11-03, incluyendo suelo de V06 y jardineras V07. Ver `docs/PARTY_PRESENCE_DJ_PACK_B_QA.md` §5. ZIP aún no incorporado en main; sin escala/colisiones/posiciones de runtime validadas.\n\n## 3. Pack B — Vegetación y jardineras
 
 | ID | Asset / familia | Instancias estimadas | Diseñar y exportar | Aproximación escala | Estado / prioridad |
 | --- | --- | --- | --- | --- | --- |
