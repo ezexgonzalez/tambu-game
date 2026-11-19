@@ -49,3 +49,34 @@
 
 **A/B — ART APPROVED. C — DELIVERED / TARGETED CORRECTION REQUIRED. D — NOT STARTED.**
 Integración solo después de cerrar packs y composición aprobada sobre base limpia. Los ZIPs adjuntos a conversaciones no equivalen a assets publicados en repo.
+
+
+---
+
+## 6. Correction01 — Direction QA (2026-11-19)
+
+**Entrega inspeccionada:** `Tambu_DJ_Pack_C_Correction01(2).zip` (archivo de conversación, todavía NO subido al repositorio).
+
+**VEREDICTO: PACK C APPROVED FOR ART / L05 EXCLUDED FROM NEW DJ PLACEMENT PENDING STYLE REVIEW.** El pack físico de iluminación se puede cerrar artísticamente sin otra pasada.
+
+### Evidencia verificada
+
+- ZIP completo de 24 entradas pasa CRC; 9 PNG de `assets/` decodifican y tienen `RGBA` con alpha estricta `{0,255}`, contenido no vacío y margen transparente. Coinciden exactamente los 9 paths/dimensiones/SHA-256 del manifiesto.
+- Comparación directa contra `Tambu_DJ_Pack_C_v1(1).zip`: SOLO dos PNG modificados. `L02` baliza 23 píxeles cambiados; `L03-B` bombilla 17 píxeles cambiados. Los otros siete PNG son byte-identical, incluido L05.
+- `L02`: mismo canvas **14×38**, mismo ground anchor `(7,35)`, emission `(6,9)`; vidrio cálido creció a 5×7, lectura a 1x mejorada manteniendo armazón y alpha.
+- `L03-B`: mismo canvas **11×16**, attachment `(5,2)`, emission `(5,10)`; silueta cálida con hombros/base escalonados y forma menos cuadrada. El bulbo mantiene conexiones con cable.
+- `L03-A0/A1/A2`, fijación L03-C, farol L01 y mesa L04: intactos y previamente aprobables. Los montajes de guirnaldas de 4/6 módulos se conservan en `qa/05_garland_assemblies.png`.
+- `qa/09_glass_before_after.png` documenta a 1x y 5x cambios de material/silueta, sin halo horneado.
+- Referencia `1087×1447` y SHA `b77a8380f219d529f2291fc3c03b4d068fbb765a41c0188cf911401a70a3e418` confirmada contra `image(4).png` local; en esta corrección el ZIP **no contiene** copia binaria de esa referencia, sino que la declara y verifica en el manifest/README.
+
+### Decisiones específicas
+
+- **L01, L02, L03 completo, L04: ART APPROVED.** No reabrir por refinamiento cosmético sin un problema claro en escena.
+- **L05:** archivo original `public/assets/props/deck/lantern.png` intacto y su copia de Pack C también. **NO APROBADO PARA COLOCACIONES NUEVAS DE DJ POR AHORA**. Es un candidato de reutilización con excepción de estilo, no defecto que bloquee el resto del pack. Reconsiderar opcionalmente al componer; puede omitirse sin fabricar reemplazo.
+- La recomendación de escala 1x, anchors, footprints y depth es handoff ilustrativo; **no equivale** a runtime QA. No hay emisiones Phaser, world coords, collisions ni zoom comprobados.
+
+### Next authorized stage
+
+Pack D **minimal drinks and microprops reuse audit**: evaluar primero `props/deck/bottle.png` y `glass.png`, fabricar sólo lo necesario para la referencia. Luego composición controlada con PNG A+B+C+D sobre screenshot limpia, QA Dirección y posterior integración Phaser. **No social NPC pass todavía.**
+
+**State:** PACK A + PACK B + PACK C: ART APPROVED (con excepción L05). PACK D: PENDING. Integración pendiente. No se declara PARTY PRESENCE CLOSED.
