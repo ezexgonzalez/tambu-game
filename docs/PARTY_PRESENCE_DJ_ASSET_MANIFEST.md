@@ -1,6 +1,6 @@
 # Tambu Game — DJ Environment Asset Manifest
 
-**Estado:** VISUAL TARGET ACCEPTED / PACKS A+B+C ART APPROVED (2026-11-19) / PACK D PENDING / RUNTIME NOT APPROVED  
+**Estado:** VISUAL TARGET ACCEPTED / PACKS A+B+C+D ART APPROVED (2026-11-19) / COMPOSITION PENDING / RUNTIME NOT APPROVED  
 **Dirección:** 2026-10-21  
 **Scope:** solo decoración de la zona DJ, a la izquierda de piscina y borde inferior del sector  
 **Referencia visual:** última captura ambiental aceptada en conversación (1087×1447 px). Entregar esa imagen directamente a los agentes; **no está guardada como PNG dentro del repositorio**.  
@@ -64,7 +64,7 @@ La imagen es un **objetivo compositivo**, NO sprites runtime ni referencia fiabl
 
 **Contrato luz:** todos los `glows` y contaminaciones cálidas de la referencia deben implementarse como feedback/luz runtime separado, con parámetros y puntos de origen anclados a las luminarias. **No generar PNG de grandes halos**.
 
-## 5. Pack D — Bebidas / detalles pequeños
+**Status Pack D:** `Tambu_DJ_Pack_D_v1(1).zip` ART APPROVED 2026-11-19. Se reutiliza C01 `public/assets/props/deck/bottle.png`, se entrega solo el PNG refinado C02 `dj_cup_red_v1.png`; C03 omitido. Ver `docs/PARTY_PRESENCE_DJ_PACK_D_QA.md`. Los montajes de mesas son QA artístico a escala nativa, no integración de mundo.\n\n## 5. Pack D — Bebidas / detalles pequeños
 
 | ID | Asset / familia | Instancias estimadas | Diseñar y exportar | Aproximación escala | Estado / prioridad |
 | --- | --- | --- | --- | --- | --- |
