@@ -128,6 +128,13 @@ function createScene({ completeOnUpdate = false, outcomeActive = false, dialogue
   };
 }
 
+test('visual editor update does not require gameplay systems', () => {
+  const scene = Object.create(PatioScene.prototype);
+  scene.worldOptions = { djLayoutEdit: true };
+  scene.player = { sprite: {} };
+  scene.update(); // An attempted gameplay update would read the absent run state.
+});
+
 test('PatioScene no ejecuta systems de gameplay mientras la intro está activa', () => {
   const { scene, getIntroUpdates, getReturnUpdates } = createScene();
 

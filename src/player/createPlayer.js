@@ -10,7 +10,7 @@ export function preloadPlayer(scene) {
   });
 }
 
-export function createPlayer(scene) {
+export function createPlayer(scene, { readInput = true } = {}) {
   const { sprite: spriteConfig, start, initialFacing, label: labelConfig } = PLAYER_CONFIG;
 
   createTambuAnimations(scene);
@@ -30,6 +30,8 @@ export function createPlayer(scene) {
     labelConfig.text,
     labelConfig.style,
   ).setOrigin(0.5).setDepth(footDepth + 1);
+
+  if (!readInput) return { sprite, label, facing: initialFacing };
 
   const cursors = scene.input.keyboard.createCursorKeys();
   const wasd = scene.input.keyboard.addKeys({

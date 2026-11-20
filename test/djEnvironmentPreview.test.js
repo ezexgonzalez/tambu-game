@@ -62,6 +62,13 @@ test('preview is opt-in; preload requests only used new textures with the deck b
   assert.deepEqual(new Set(newPaths), expected);
   assert.equal(newPaths.length, expected.size, 'each texture loads once, even when several parts use it');
   assert.ok(!newPaths.includes(assets['L03-A0'].path));
+  for (const flags of [{ djLayoutEdit: true }, { djLayoutEdit: true, djEnvPreview: true }]) {
+    loaded.length = 0;
+    preloadPatioWorld(scene, flags);
+    const editorPaths = loaded.filter(([, path]) => path.includes('/dj_environment/')).map(([, path]) => path);
+    assert.deepEqual(new Set(editorPaths), expected);
+    assert.equal(editorPaths.length, expected.size);
+  }
 });
 
 function mockScene() {

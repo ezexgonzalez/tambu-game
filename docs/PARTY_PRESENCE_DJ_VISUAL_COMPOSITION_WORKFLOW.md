@@ -1,7 +1,7 @@
 # Tambu Game — DJ Visual Composition Workflow / Direction Correction
 
 **Direction review:** 2026-11-19  
-**State:** DIRECTION APPROVED / COMPOSITION TARGET NOT APPROVED / EDITOR SPIKE PENDING  
+**State:** DJ VISUAL COMPOSER INTEGRATED / MANUAL TOOL QA REQUIRED / BASE COMPOSITION NOT APPROVED
 **Scope:** correcting spatial composition workflow without creating new assets, NPCs or gameplay.
 
 ## 1. Diagnosis after manual preview
@@ -59,3 +59,22 @@ The reference's warm light cannot be judged fairly while emission isn't implemen
 - No NPC fillers or dancing population until environment QA.
 - No rebalancing gameplay, no character edits, no UI changes, no added furniture family.
 - Current runtime composition stays **INTEGRATED / VISUAL COMPOSITION CORRECTION REQUIRED**, not CLOSED.
+
+## 6. Guía de uso — Pass 01
+
+1. Agregá **`?djLayoutEdit=1`** a la URL del juego (o **`&djLayoutEdit=1`** si ya tiene otros parámetros). Se abre el patio real con la decoración base y la cámara a 1×. En este modo se pausa la interacción de juego y no se inicia una partida.
+2. En **Grupo**, hacé clic sobre una pieza visible o elegí uno de los siete grupos en la lista. Arrastrá desde un sprite del grupo. Para ajustar la selección, usá **Flechas** (1 px) o **Shift + flechas** (8 px). **Esc** deselecciona y conserva los cambios hechos. Para recorrer el patio, mantené **Espacio** y arrastrá el fondo.
+3. En **Pieza**, seleccioná por sprite o ID. Si seleccionás un componente montado, se mueve su conjunto: el vaso con la mesa, el sofá con sus almohadones o el macetero con planta y borde. Así se pueden ajustar, por separado, `upper-tropical` y `lower-tropical`. **Ocultar / Mostrar** actúa sobre la selección. Un conjunto oculto se puede seleccionar de nuevo por su ID en la lista.
+4. **Guías y avisos de solapes** muestra las estructuras, el espacio de los personajes, la pista reservada y las rutas de baño. Los avisos son orientativos: no bloquean la edición ni crean colisiones. Si movés el árbol/guirnalda, revisá su anclaje al parlante, que permanece fijo.
+5. **Exportar JSON** descarga `tambu-dj-layout-v1.json`. **Importar JSON** reproduce un archivo compatible. **Reset** vuelve al layout base. Exportá antes de recargar: el editor no guarda automáticamente ni modifica el repo. Para comparar sin herramientas, abrí `?djEnvPreview=1`; sin flags se abre el juego normal.
+
+### Formato JSON v1
+
+- **`version`**: `1`.
+- **`groups`**: los siete IDs estables, con desplazamientos `dx`, `dy` enteros respecto a la base. IDs: `upper-dj-edge`, `upper-lounge`, `lower-lounge`, `lower-border-west`, `lower-border-middle`, `lower-border-east`, `pool-side`.
+- **`overrides`**: desplazamientos `dx`, `dy` adicionales por ID raíz de conjunto (p. ej. `lower-tropical`). Puede estar vacío. Tanto grupos como overrides admiten `visible: false`; se omite cuando es verdadero.
+- **`objects`**: todos los IDs, incluidos los componentes montados y labios, con coordenadas enteras **`x`, `y` del borde superior izquierdo del PNG** en el mundo, y `visible: false` si están ocultos. La posición resulta de sumar base, grupo y override. La profundidad se deriva de la base: se conserva el plano de la alfombra y el orden de los apoyos.
+
+Al importar se verifican versión, IDs, límites del mundo y que las posiciones coincidan con los desplazamientos. Un archivo inválido no borra la edición. Pasá el JSON exportado completo a Integración cuando apruebes la composición; el editor tampoco duplica piezas en Pass 01.
+
+**Verificación de ingeniería:** 288/288 tests; build OK (aviso de Vite por tamaño del bundle). Sin browser ni screenshots. Pendiente: validación manual de Dirección y entrega del JSON aprobado.

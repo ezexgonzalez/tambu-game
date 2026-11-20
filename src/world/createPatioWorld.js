@@ -10,10 +10,10 @@ import { createHouseFacade, preloadHouseFacade } from './house/houseFacade.js';
 import { createPool, preloadPool } from './pool/poolStructure.js';
 import { PATIO_LAYOUT } from './patioLayout.js';
 
-export function preloadPatioWorld(scene, { djEnvPreview = false } = {}) {
+export function preloadPatioWorld(scene, { djEnvPreview = false, djLayoutEdit = false } = {}) {
   preloadGrass(scene);
   preloadDeckSurface(scene);
-  if (djEnvPreview) preloadDjEnvironmentPreview(scene);
+  if (djEnvPreview || djLayoutEdit) preloadDjEnvironmentPreview(scene);
   preloadDjBooth(scene);
   preloadBar(scene);
   preloadHouseFacade(scene);
@@ -24,10 +24,11 @@ export function preloadPatioWorld(scene, { djEnvPreview = false } = {}) {
   });
 }
 
-export function createPatioWorld(scene, { djEnvPreview = false } = {}) {
+export function createPatioWorld(scene, { djEnvPreview = false, djLayoutEdit = false } = {}) {
   drawTerrain(scene);
   const world = drawArchitectureAndProps(scene);
-  if (djEnvPreview) createDjEnvironmentPreview(scene);
+  if (djLayoutEdit) world.djEnvironmentImages = createDjEnvironmentPreview(scene);
+  else if (djEnvPreview) createDjEnvironmentPreview(scene);
   return world;
 }
 

@@ -30,6 +30,8 @@ import { createNormalEndUi } from '../ui/normalEndUi.js';
 import { createPerfectNightUi } from '../ui/perfectNightUi.js';
 import { createPatioCollisions } from '../world/createPatioCollisions.js';
 import { createPatioWorld, preloadPatioWorld } from '../world/createPatioWorld.js';
+import { createDjLayoutEditor } from '../world/dj/djLayoutEditor.js';
+import { isDjLayoutEditorEnabled } from '../world/dj/djLayoutEditorState.js';
 import { isDjEnvironmentPreviewEnabled } from '../world/dj/djEnvironmentPreview.js';
 import { PATIO_LAYOUT } from '../world/patioLayout.js';
 
@@ -52,7 +54,11 @@ export class PatioScene extends Phaser.Scene {
   }
 
   preload() {
-    this.worldOptions = { djEnvPreview: isDjEnvironmentPreviewEnabled(globalThis.location?.search) };
+    const search = globalThis.location?.search;
+    this.worldOptions = {
+      djEnvPreview: isDjEnvironmentPreviewEnabled(search),
+      djLayoutEdit: isDjLayoutEditorEnabled(search),
+    };
     preloadPatioWorld(this, this.worldOptions);
     preloadPlayer(this);
     preloadCharacters(this);
@@ -60,13 +66,18 @@ export class PatioScene extends Phaser.Scene {
   }
 
   create() {
-    this.gameState = createGameState();
-    this.runState = createRunState();
     this.configureWorld();
 
     this.worldVisuals = createPatioWorld(this, this.worldOptions);
     this.interactables = createCharacters(this);
-    this.player = createPlayer(this);
+    this.player = createPlayer(this, { readInput: !this.worldOptions?.djLayoutEdit });
+    if (this.worldOptions?.djLayoutEdit) {
+      createDjLayoutEditor(this, this.worldVisuals.djEnvironmentImages);
+      this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => destroyCharacterSprites(this.interactables));
+      return;
+    }
+    this.gameState = createGameState();
+    this.runState = createRunState();
     this.obstacles = createPatioCollisions(this, this.player.sprite);
 
     const hud = createHud(this, this.gameState);
@@ -155,7 +166,7 @@ export class PatioScene extends Phaser.Scene {
   }
 
   update() {
-    if (!this.player?.sprite) return;
+    if (this.worldOptions?.djLayoutEdit || !this.player?.sprite) return;
 
     if (this.runState.getPhase() === RUN_PHASES.INTRO) {
       if (!this.nightIntro.isComplete()) {

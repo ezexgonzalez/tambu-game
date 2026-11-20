@@ -9,13 +9,15 @@ const layers = { ground: -16, step: 0.01 };
 // Coordinates are world pixels at native scale, measured from the PNG's top-left.
 // Use atFeet for ground contacts and mount for a socket on another sprite.
 function place(sector, id, assetId, x, y, options = {}) {
-  const { parent, support, crop, anchor, offset = layers.step } = options;
+  const { parent, support, crop, anchor, assembly, offset = layers.step } = options;
+  const group = options.group ?? parent?.group ?? (sector === 'upper-left' ? 'upper-dj-edge' : sector);
   const asset = assets[assetId];
   const scale = asset.scale;
   const depthRule = parent ? 'parent' : asset.depthBehavior === 'ground' ? 'ground' : 'feet';
   const depth = parent ? parent.depth + offset
     : depthRule === 'ground' ? layers.ground : y + asset.contactPx[1] * scale;
-  const item = { id, assetId, x, y, scale, sector, depthRule, depth,
+  const item = { id, assetId, x, y, scale, sector, group, depthRule, depth,
+    ...(assembly && { assembly }),
     ...(parent && { parent: parent.id, support }),
     ...(crop && { crop }),
     ...(anchor && { anchor }),
@@ -24,9 +26,9 @@ function place(sector, id, assetId, x, y, options = {}) {
   return item;
 }
 
-function atFeet(sector, id, assetId, x, y) {
+function atFeet(sector, id, assetId, x, y, options) {
   const { contactPx: [cx, cy], scale } = assets[assetId];
-  return place(sector, id, assetId, x - cx * scale, y - cy * scale);
+  return place(sector, id, assetId, x - cx * scale, y - cy * scale, options);
 }
 
 function mount(parent, id, assetId, support, options) {
@@ -44,8 +46,8 @@ function frontLip(pot, fromY) {
   });
 }
 
-function planter(sector, id, potId, plantId, x, y, root) {
-  const pot = atFeet(sector, id, potId, x, y);
+function planter(sector, id, potId, plantId, x, y, root, options) {
+  const pot = atFeet(sector, id, potId, x, y, options);
   mount(pot, `${id}-plant`, plantId, root);
   frontLip(pot, potId === 'V06A' ? 14 : 12);
 }
@@ -60,19 +62,22 @@ function table(sector, id, assetId, x, y, props) {
 function sofa(sector, id, x, y, cushions, long = false) {
   // Pack A exact joints, including the transparent margin. Do not rotate modules.
   const corner = place(sector, `${id}-corner`, 'F01a', x - 2, y - 2);
-  if (long) place(sector, `${id}-straight-down`, 'F01b', x + 86, y - 2);
-  place(sector, `${id}-end-down`, 'F01c', x + (long ? 156 : 86), y - 2);
-  place(sector, `${id}-straight-right`, 'F01d', x - 2, y + 94);
-  place(sector, `${id}-end-right`, 'F01e', x - 2, y + 126);
+  const joint = { assembly: corner.id };
+  if (long) place(sector, `${id}-straight-down`, 'F01b', x + 86, y - 2, joint);
+  place(sector, `${id}-end-down`, 'F01c', x + (long ? 156 : 86), y - 2, joint);
+  place(sector, `${id}-straight-right`, 'F01d', x - 2, y + 94, joint);
+  place(sector, `${id}-end-right`, 'F01e', x - 2, y + 126, joint);
   cushions.forEach(([asset, px, py], i) =>
     mount(corner, `${id}-cushion-${i + 1}`, asset, [px, py], { offset: (i + 1) * layers.step }));
 }
 
 function border(id, x, y, plants) {
   const sector = 'lower-border';
-  const left = place(sector, `${id}-left`, 'V07-left', x - 2, y - 2);
-  const middle = place(sector, `${id}-middle`, 'V07-middle', x + 10, y - 2);
-  const right = place(sector, `${id}-right`, 'V07-right', x + 146, y - 2);
+  const group = `lower-${id}`;
+  const left = place(sector, `${id}-left`, 'V07-left', x - 2, y - 2, { group });
+  const joint = { group, assembly: left.id };
+  const middle = place(sector, `${id}-middle`, 'V07-middle', x + 10, y - 2, joint);
+  const right = place(sector, `${id}-right`, 'V07-right', x + 146, y - 2, joint);
   plants.forEach(([asset, px, py], i) =>
     mount(middle, `${id}-plant-${i + 1}`, asset, [px, py], { offset: (i + 1) * layers.step }));
   for (const part of [left, middle, right]) frontLip(part, 19);
@@ -133,10 +138,10 @@ border('border-middle', 210, 914, [
 border('border-east', 398, 925, [
   ['V05B', 32, 10], ['V04B', 76, 13], ['V04A', 116, 14],
 ]);
-atFeet('lower-border', 'border-west-bollard', 'L02', 198, 951);
-atFeet('lower-border', 'border-east-bollard', 'L02', 384, 949);
-planter('lower-border', 'border-tropical', 'V06A', 'V02B', 584, 939, [25, 14]);
-atFeet('lower-border', 'border-lantern', 'L01', 568, 952);
+atFeet('lower-border', 'border-west-bollard', 'L02', 198, 951, { group: 'lower-border-west' });
+atFeet('lower-border', 'border-east-bollard', 'L02', 384, 949, { group: 'lower-border-east' });
+planter('lower-border', 'border-tropical', 'V06A', 'V02B', 584, 939, [25, 14], { group: 'lower-border-east' });
+atFeet('lower-border', 'border-lantern', 'L01', 568, 952, { group: 'lower-border-east' });
 
 const poolside = 'pool-side';
 planter(poolside, 'pool-upper-tropical', 'V06A', 'V02B', pool.x - 52, pool.y - 62, [25, 14]);

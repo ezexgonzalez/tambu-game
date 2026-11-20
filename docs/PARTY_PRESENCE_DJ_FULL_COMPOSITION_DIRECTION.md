@@ -1,8 +1,10 @@
 # TAMBU GAME — DJ Environment Full Controlled Composition Pass
 
 **Fecha:** 2026-11-19  
-**Estado:** DJ FULL ENVIRONMENT COMPOSITION — INTEGRATED / MANUAL VISUAL QA REQUIRED
+**Estado:** DJ FULL ENVIRONMENT COMPOSITION — BASE INTEGRATED / NOT APPROVED AS FINAL
 **Scope:** composición final **de objetos ambientales**, no NPCs ni nueva arquitectura.
+
+La composición de este documento es la base histórica de la preview. Para ajustar el layout, usar el [editor visual](PARTY_PRESENCE_DJ_VISUAL_COMPOSITION_WORKFLOW.md#6-guía-de-uso--pass-01).
 
 ## Resultado aprobado y decisión
 
