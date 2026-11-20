@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { EventEmitter } from 'node:events';
 import { attachWorldCameraGeometry } from '../test-support/bathroomCameras.js';
 import assert from 'node:assert/strict';
 import { registerHooks } from 'node:module';
@@ -134,6 +135,7 @@ test('createPatioWorld propaga el único sprite real de puerta y su label desde 
     objects.push(object); return object;
   }
   const scene = {
+    events: new EventEmitter(),
     add: { graphics: () => display('graphics'), image: (x, y, key) => display('image', x, y, key),
       sprite: (x, y, key) => display('sprite', x, y, key),
       tileSprite: (x, y, width, height, key) => display('tileSprite', x, y, key), rectangle: (x, y) => display('rectangle', x, y),
@@ -158,8 +160,13 @@ test('createPatioWorld propaga el único sprite real de puerta y su label desde 
     'solo queda Graphics del deck aprobado; no ambientación provisional del patio');
   assert.ok(keys.every((key) => !key.startsWith('perimeter-')));
   const source = readFileSync('src/scenes/PatioScene.js', 'utf8');
-  assert.match(source, /this\.worldVisuals = createPatioWorld\(this\)/);
+  assert.match(source, /this\.worldVisuals = createPatioWorld\(this, this\.worldOptions\)/);
   assert.match(source, /bathroomDoor: this\.worldVisuals\.bathroomDoor/);
+  assert.equal(keys.filter((key) => key === 'dj-cup-red-v1').length, 0);
+  const beforePreview = objects.length;
+  const previewWorld = createPatioWorld(scene, { djEnvPreview: true });
+  assert.equal(previewWorld.bathroomDoor.sprite.key, 'house-door-bathroom');
+  assert.equal(objects.slice(beforePreview).filter(({ key }) => key === 'dj-cup-red-v1').length, 1);
 });
 
  test('approach clamps the complete zoomed viewport within the real world on every frame', () => {

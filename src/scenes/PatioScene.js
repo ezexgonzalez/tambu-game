@@ -30,6 +30,7 @@ import { createNormalEndUi } from '../ui/normalEndUi.js';
 import { createPerfectNightUi } from '../ui/perfectNightUi.js';
 import { createPatioCollisions } from '../world/createPatioCollisions.js';
 import { createPatioWorld, preloadPatioWorld } from '../world/createPatioWorld.js';
+import { isDjEnvironmentPreviewEnabled } from '../world/dj/djEnvironmentPreview.js';
 import { PATIO_LAYOUT } from '../world/patioLayout.js';
 
 export function getBathroomResistanceConfigForRun(gameState) {
@@ -51,7 +52,8 @@ export class PatioScene extends Phaser.Scene {
   }
 
   preload() {
-    preloadPatioWorld(this);
+    this.worldOptions = { djEnvPreview: isDjEnvironmentPreviewEnabled(globalThis.location?.search) };
+    preloadPatioWorld(this, this.worldOptions);
     preloadPlayer(this);
     preloadCharacters(this);
     preloadPortraitReactions(this);
@@ -62,7 +64,7 @@ export class PatioScene extends Phaser.Scene {
     this.runState = createRunState();
     this.configureWorld();
 
-    this.worldVisuals = createPatioWorld(this);
+    this.worldVisuals = createPatioWorld(this, this.worldOptions);
     this.interactables = createCharacters(this);
     this.player = createPlayer(this);
     this.obstacles = createPatioCollisions(this, this.player.sprite);

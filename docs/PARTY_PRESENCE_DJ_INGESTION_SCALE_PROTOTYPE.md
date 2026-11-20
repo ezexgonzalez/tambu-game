@@ -1,7 +1,7 @@
 # Tambu Game — DJ Environment — Asset Ingestion + Scale Prototype
 
 **Direction:** 2026-11-19  
-**Estado:** DIRECTION APPROVED / PENDING ENGINEERING / MANUAL SCALE QA REQUIRED  
+**Estado:** DJ ASSET INGESTION + SCALE PROTOTYPE INTEGRATED / AWAITING MANUAL VISUAL QA
 **Branch:** `main`  
 **Owner:** Integration Engineer  
 **Gate:** Prototipo técnico y óptico, NO integración ambiental definitiva.
@@ -19,7 +19,7 @@ Se eligió usar Phaser como compositor definitivo porque `PATIO_LAYOUT` define e
 - `docs/PARTY_PRESENCE_DJ_PACK_A_QA.md`, `...PACK_B_QA.md`, `...PACK_C_QA.md`, `...PACK_D_QA.md`.
 - `docs/ART_DIRECTION.md`, `docs/PIXEL_ART_STYLE_GUIDE.md`, `docs/HUMAN_SCALE.md`, `docs/ASSET_PRODUCTION.md`.
 - Código: `src/world/createPatioWorld.js`, `src/world/createPatioCollisions.js`, `src/world/patioLayout.js`, `src/world/dj/djBooth.js`, `src/scenes/PatioScene.js`; friend/woman/player depth helpers; tests relevantes.
-- **Bundle externo** `TAMBU_DJ_ENGINEER_HANDOFF_2026-11-19.zip` que Eze debe adjuntar/proveer explícitamente al Engineer: contiene los ZIPs definitivos A/B/C/D, 39 PNGs art-approved activos, 1 candidato L05 separado, la botella como referencia de path del repo, manifiesto SHA-256 y dos imágenes de referencia. **El bundle NO está en main** por el mero hecho de existir en un chat.
+- **Bundle externo** `TAMBU_DJ_ENGINEER_HANDOFF_2026-11-19.zip` que Eze debe adjuntar/proveer explícitamente al Engineer: contiene los ZIPs definitivos A/B/C/D, 39 PNGs art-approved activos, 1 candidato L05 separado, la botella como referencia de path del repo, manifiesto SHA-256 y dos imágenes de referencia. **El ZIP queda fuera de main**; solo se versionan los PNG aprobados y el catálogo.
 - Asset source: Pack A correction01 12 PNG, Pack B correction01 18 PNG, Pack C correction01 9 PNG **pero L05 deck lantern no aprobado para colocación DJ nueva**, Pack D 1 PNG rojo más botella existente `public/assets/props/deck/bottle.png`.
 - **39 PNG activos aprobados** a importar (12+18+8+1), **1 L05 excluido**; 40 PNG presentes en los ZIP fuente si se cuenta L05. No importar versiones antiguas ni sustituir assets históricos.
 - Target visual aprobado 1087×1447; SHA-256 `b77a8380f219d529f2291fc3c03b4d068fbb765a41c0188cf911401a70a3e418`; no tratarlo como spritesheet.
@@ -87,3 +87,25 @@ Idealmente configurar un flag de preview explícito, **apagado por defecto**. Si
 - En el siguiente bloque se resolverán instancias finales, depth, colliders físicos apropiados, emisiones/iluminación local y circulación. No adelantar esa etapa.
 
 **STOP tras entregar el prototipo.**
+
+## 8. Implementación y QA manual — 2026-11-19
+
+Los **39 PNG** importados bajo `public/assets/props/dj_environment/` coinciden en bytes, dimensiones RGBA y SHA-256 con los ZIP originales y el manifiesto del handoff. Distribución: `furniture/` 12, `vegetation/` 18, `lighting/` 8, `drinks/` 1. `C01` usa la textura `deck-bottle` que ya precarga el deck, sin otra copia ni otra key. L05 queda excluido del catálogo DJ; su copia histórica del deck permanece intacta. Los ZIP, capturas y hojas de QA no se publican como assets.
+
+- `src/world/dj/djEnvironmentAssets.js`: catálogo de 39 PNG nuevos + 1 reutilización. Dimensiones, origins, puntos locales de contacto, escala y hashes; superficies, encastres, emisores e intención de collider donde corresponden. Esos datos de colisión/emisión no crean físicas ni luces.
+- `src/world/dj/djEnvironmentPreview.js`: posiciones temporales, lógica de montaje, precarga de las diez texturas nuevas que usa la muestra y limpieza en shutdown. La textura reutilizada conserva su preload anterior. En restart se reutilizan las texturas de la muestra en caché.
+- `PatioScene` lee el flag en preload y pasa la misma opción al crear el patio. `createPatioWorld.js` queda con default OFF. **Activación:** abrir la URL habitual del juego agregando `?djEnvPreview=1` (o `&djEnvPreview=1` si ya hay query) y recargar. Ir al suroeste del DJ. Para volver al patio normal, quitar ese parámetro y recargar. Funciona también en el build de producción.
+
+Escala propuesta: **1× nativa**, con Tambu **32×48 @ 1.24** intacto. Área temporal de césped: canvases dentro de **x=32–282, y=370–567** (límites superiores exclusivos), frente al lado izquierdo del DJ. No son coordenadas de composición final.
+
+| Muestra | Posiciones temporales en world px | Montaje / depth |
+|---|---|---|
+| Sofá en L compacto | Top-left de contenido (34,372); PNG F01a (32,370), F01d (32,466), F01e (32,498), F01c (120,370) | Cuatro módulos independientes, encastres del handoff A y depth por contacto de cada pieza. |
+| Mesa F04 + C01 + C02 | Mesa PNG (144,473), apoyo (191,534); botella (197,491), vaso (214,504), ambos medidos por su base | Contactos (53,18) y (70,31) locales a la tapa, en depth de mesa +0.01/+0.02. |
+| V06A + V02A | Base del macetero (242,489); contacto de raíz (242,449) | Tierra del PNG original; inserción de 1 px. Maceta → planta → recorte frontal de la misma textura desde y=14, con depth común de base y offsets +0.01/+0.02. |
+| Farol L01 | Apoyo (251,535) | Solo sprite físico; depth 535. |
+| Alfombra F07 | Centro (136,496) | Suelo en depth −16. |
+
+`npm test`: **271/271**, sin fallos, cancelados ni omitidos. Cobertura: inventario/hashes, preload exclusivo y caché, encastres/soportes/depth, área protegida, creación opt-in y cleanup/restart. `npm run build`: correcto (65 módulos; advertencia de chunk >500 kB). Sin navegador ni sesiones de QA visual por Integración.
+
+Para el QA manual, acercar a Tambu a los extremos y al asiento para comprobar escala/costuras; pasar por delante y detrás de sofá, macetero y farol para revisar depth; mirar la tapa de la mesa y la raíz. El prototipo no tiene colliders propios: atravesar sus props es esperable. Las posiciones, la escala óptica y las oclusiones reales aún no están aprobadas. **STOP antes de composición, iluminación o población.**

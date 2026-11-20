@@ -4,14 +4,16 @@ import { createPatioGrassLayout } from './grass/grassLayout.js';
 import { preloadGrass } from './grass/preloadGrass.js';
 import { createDeckSurface, preloadDeckSurface } from './deck/deckSurface.js';
 import { createDjBooth, preloadDjBooth } from './dj/djBooth.js';
+import { createDjEnvironmentPreview, preloadDjEnvironmentPreview } from './dj/djEnvironmentPreview.js';
 import { createBar, preloadBar } from './bar/barStructure.js';
 import { createHouseFacade, preloadHouseFacade } from './house/houseFacade.js';
 import { createPool, preloadPool } from './pool/poolStructure.js';
 import { PATIO_LAYOUT } from './patioLayout.js';
 
-export function preloadPatioWorld(scene) {
+export function preloadPatioWorld(scene, { djEnvPreview = false } = {}) {
   preloadGrass(scene);
   preloadDeckSurface(scene);
+  if (djEnvPreview) preloadDjEnvironmentPreview(scene);
   preloadDjBooth(scene);
   preloadBar(scene);
   preloadHouseFacade(scene);
@@ -22,9 +24,11 @@ export function preloadPatioWorld(scene) {
   });
 }
 
-export function createPatioWorld(scene) {
+export function createPatioWorld(scene, { djEnvPreview = false } = {}) {
   drawTerrain(scene);
-  return drawArchitectureAndProps(scene);
+  const world = drawArchitectureAndProps(scene);
+  if (djEnvPreview) createDjEnvironmentPreview(scene);
+  return world;
 }
 
 function drawTerrain(scene) {
