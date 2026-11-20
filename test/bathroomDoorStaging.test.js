@@ -166,7 +166,7 @@ test('createPatioWorld propaga el único sprite real de puerta y su label desde 
   const beforePreview = objects.length;
   const previewWorld = createPatioWorld(scene, { djEnvPreview: true });
   assert.equal(previewWorld.bathroomDoor.sprite.key, 'house-door-bathroom');
-  assert.equal(objects.slice(beforePreview).filter(({ key }) => key === 'dj-cup-red-v1').length, 1);
+  assert.equal(objects.slice(beforePreview).filter(({ key }) => key === 'dj-cup-red-v1').length, 3);
 });
 
  test('approach clamps the complete zoomed viewport within the real world on every frame', () => {

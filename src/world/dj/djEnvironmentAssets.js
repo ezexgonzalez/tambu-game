@@ -195,7 +195,7 @@ const ASSETS = {
     originPx: [40, 65],
     contactPx: [40, 65],
     scale: 1.0,
-    sha256: "70ef4a5716e1ce4b02a5b809d8864e317cb6f5922671646b8055ada73973fecc",
+    sha256: "99d1f76301cf4396fd34ef7b7e0fb4ee751ca4c949f71997baf68d441782c6aa",
     depthBehavior: "host",
     colliderIntent: "NONE",
   },
