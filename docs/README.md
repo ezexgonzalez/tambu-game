@@ -35,6 +35,8 @@ Para cualquier tarea de HUD, diálogo, pantallas de estado, resultados, prompts 
 
 - [`PARTY_PRESENCE_DJ_VISUAL_LIBRARY_V21_DIRECTION.md`](./PARTY_PRESENCE_DJ_VISUAL_LIBRARY_V21_DIRECTION.md): corrección UX aprobada para hacer más evidente la biblioteca de props, ampliar miniaturas, renderizar previews de conjuntos y facilitar la selección visual de objetos existentes. No modifica el JSON V2 ni el gameplay.
 
+- [`PARTY_PRESENCE_CONCEPT_A_PERIMETER_EDITOR_TRIAL_DIRECTION.md`](./PARTY_PRESENCE_CONCEPT_A_PERIMETER_EDITOR_TRIAL_DIRECTION.md): incorporación **solo al catálogo editor V2.1** del pack Refinement01 de 21 PNG del perímetro residencial. La composición definitiva y la aprobación visual siguen pendientes; no habilitar en gameplay por defecto.
+
 ## Auditorías
 
 - [`PROJECT_AUDIT_2026-09-28.md`](./PROJECT_AUDIT_2026-09-28.md) es la auditoría estratégica más reciente y debe usarse como evidencia para priorización junto con `CURRENT_STATE.md`.
