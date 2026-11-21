@@ -4,7 +4,7 @@ import { EventEmitter } from 'node:events';
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync } from 'node:fs';
 import { DJ_ENVIRONMENT_ASSETS as assets } from '../src/world/dj/djEnvironmentAssets.js';
-import { createDjEnvironmentPreview, isDjEnvironmentPreviewEnabled } from '../src/world/dj/djEnvironmentPreview.js';
+import { createDjEnvironmentComposition, createDjEnvironmentPreview, isDjEnvironmentPreviewEnabled } from '../src/world/dj/djEnvironmentPreview.js';
 import { DJ_ENVIRONMENT_LAYOUT as layout } from '../src/world/dj/djEnvironmentLayout.js';
 import { getPatioCollisionZones } from '../src/world/createPatioCollisions.js';
 import { preloadPatioWorld } from '../src/world/createPatioWorld.js';
@@ -66,8 +66,11 @@ test('preview is opt-in; preload requests only used new textures with the deck b
     loaded.length = 0;
     preloadPatioWorld(scene, flags);
     const editorPaths = loaded.filter(([, path]) => path.includes('/dj_environment/')).map(([, path]) => path);
-    assert.deepEqual(new Set(editorPaths), expected);
-    assert.equal(editorPaths.length, expected.size);
+    const catalog = new Set(Object.values(assets).filter(({ key, reuse }) => !reuse && key !== assets.F04.key).map(({ path }) => path));
+    assert.deepEqual(new Set(editorPaths), catalog);
+    assert.equal(editorPaths.length, catalog.size);
+    assert.ok(editorPaths.includes(assets['L03-A0'].path));
+    assert.equal(loaded.filter(([key]) => key === 'deck-bottle').length, 1);
   }
 });
 
@@ -78,6 +81,8 @@ function mockScene() {
       setOrigin(x, y) { this.origin = [x, y]; return this; },
       setScale(scale) { this.scale = scale; return this; },
       setDepth(depth) { this.depth = depth; return this; },
+      setPosition(x, y) { this.x = x; this.y = y; return this; },
+      setVisible(visible) { this.visible = visible; return this; },
       setCrop(...crop) { this.crop = crop; return this; },
       destroy() { this.scene = null; this.calls++; },
     };
@@ -332,4 +337,27 @@ test('suggested ground footprints do not intersect the patio solids or other pro
       if (footprint.id !== other.id) assert.ok(!overlaps(footprint, other), `${footprint.id} hits ${other.id}`);
     }
   }
+});
+
+test('renderer reconciles stable IDs, new textures, crops and teardown by composition', () => {
+  const { scene, images } = mockScene();
+  const renderer = createDjEnvironmentComposition(scene);
+  const root = { id: 'dj-1', assetId: 'V06A', x: 100, y: 200, scale: 1, depth: 253, visible: true };
+  const lip = { ...root, id: 'dj-1.lip', crop: [0, 14, 50, 41], depth: 253.04, renderDepth: 253.0401 };
+  renderer.sync([root, lip]);
+  assert.equal(images.length, 2);
+  assert.deepEqual(images[1].crop, lip.crop);
+  assert.equal(images[1].depth, lip.renderDepth);
+  renderer.sync([{ ...root, x: 115, visible: false }]);
+  const [ox] = assets.V06A.originPx;
+  assert.equal(images[0].x, 115 + ox);
+  assert.equal(images[0].visible, false);
+  assert.equal(images[1].calls, 1);
+  assert.equal(images.length, 2, 'same ID does not create another image');
+  renderer.sync([{ ...root, assetId: 'L02' }]);
+  assert.equal(images[0].calls, 1, 'same ID with a different template changes texture');
+  assert.equal(images[2].key, assets.L02.key);
+  renderer.destroy();
+  renderer.destroy();
+  assert.ok(images.every(({ calls }) => calls === 1));
 });

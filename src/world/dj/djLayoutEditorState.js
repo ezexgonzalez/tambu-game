@@ -1,168 +1,182 @@
-import { PATIO_LAYOUT } from '../patioLayout.js';
 import { DJ_ENVIRONMENT_ASSETS as assets } from './djEnvironmentAssets.js';
-import { DJ_ENVIRONMENT_LAYOUT as baseline } from './djEnvironmentLayout.js';
+import {
+  createDjBaseComposition, DJ_LAYOUT_GROUPS, DJ_MAX_DEPTH_OFFSET, DJ_MAX_INSTANCE_ID, DJ_MAX_PLACEMENTS,
+  djSourceParts, exportDjLayout, fitDjTranslation, isDjCatalogSource, readDjLayout,
+  resolveDjComposition, resolveDjInstance,
+} from './djLayoutComposition.js';
 
-export const DJ_LAYOUT_GROUPS = Object.freeze({
-  'upper-dj-edge': 'Borde superior DJ',
-  'upper-lounge': 'Lounge superior',
-  'lower-lounge': 'Lounge inferior',
-  'lower-border-west': 'Borde inferior oeste',
-  'lower-border-middle': 'Borde inferior centro',
-  'lower-border-east': 'Borde inferior este',
-  'pool-side': 'Lateral de piscina',
-});
+export { DJ_LAYOUT_GROUPS, djPlacementBounds, pickDjLayoutObject } from './djLayoutComposition.js';
 
-const groups = Object.keys(DJ_LAYOUT_GROUPS);
-const rootById = new Map();
-for (const { id, parent, assembly } of baseline) {
-  rootById.set(id, rootById.get(parent ?? assembly) ?? id);
-}
-const objects = baseline.map(({ id }) => id);
-const roots = Object.freeze(objects.filter((id) => rootById.get(id) === id));
-const unchanged = Object.freeze({ dx: 0, dy: 0, visible: true });
-const world = PATIO_LAYOUT.world;
-const VERSION = 1;
-const invalid = () => new Error('JSON incompatible con el layout DJ base (versión 1).');
+const HISTORY_LIMIT = 50;
+const DEPTH_STEP = 4;
 
 export function isDjLayoutEditorEnabled(search = '') {
   return new URLSearchParams(search).get('djLayoutEdit') === '1';
 }
 
-function snapshot(groupOffsets, overrides) {
-  return baseline.map((item) => {
-    const group = groupOffsets.get(item.group) ?? unchanged;
-    const individual = overrides.get(rootById.get(item.id)) ?? unchanged;
-    const dy = group.dy + individual.dy;
-    return {
-      ...item,
-      x: item.x + group.dx + individual.dx,
-      y: item.y + dy,
-      depth: item.depthRule === 'ground' ? item.depth : item.depth + dy,
-      visible: group.visible && individual.visible,
-    };
-  });
-}
-
-function position({ x, y, visible }) {
-  return { x, y, ...(!visible && { visible: false }) };
-}
-
-function serializedOffset({ dx, dy, visible }) {
-  return { dx, dy, ...(!visible && { visible: false }) };
-}
-
-function readOffsets(raw, ids, required) {
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw invalid();
-  if ((required && Object.keys(raw).length !== ids.length)
-    || Object.keys(raw).some((id) => !ids.includes(id))) throw invalid();
-  const result = new Map();
-  for (const id of ids) {
-    if (!Object.hasOwn(raw, id)) continue;
-    const value = raw[id];
-    if (!value || !Number.isSafeInteger(value.dx) || !Number.isSafeInteger(value.dy)
-      || Math.abs(value.dx) > world.width || Math.abs(value.dy) > world.height
-      || (Object.hasOwn(value, 'visible') && typeof value.visible !== 'boolean')) throw invalid();
-    const { dx, dy, visible = true } = value;
-    if (dx || dy || !visible) result.set(id, { dx, dy, visible });
-  }
-  return result;
-}
-
-function extent({ assetId, x, y, scale }) {
-  return [x, y, x + assets[assetId].width * scale, y + assets[assetId].height * scale];
-}
-
-export function djPlacementBounds({ assetId, x, y, scale, crop }) {
-  const [left, top, w, h] = crop ?? [0, 0, assets[assetId].width, assets[assetId].height];
-  return { x: x + left * scale, y: y + top * scale, width: w * scale, height: h * scale };
-}
-
-export function pickDjLayoutObject(placements, x, y, isOpaque) {
-  let hit = null;
-  for (const item of placements) {
-    if (!item.visible || (hit && hit.depth > item.depth)) continue;
-    const box = djPlacementBounds(item);
-    if (x < box.x || x >= box.x + box.width || y < box.y || y >= box.y + box.height) continue;
-    if (isOpaque && !isOpaque(item.assetId, Math.floor((x - item.x) / item.scale),
-      Math.floor((y - item.y) / item.scale))) continue;
-    hit = item; // Later item wins in a Phaser depth tie.
-  }
-  return hit;
-}
-
 export function createDjLayoutEditorState() {
-  let groupOffsets = new Map(), overrides = new Map(), selection = null;
-  const getPlacements = () => snapshot(groupOffsets, overrides);
-  const isSelected = (item) => selection?.type === 'group'
-    ? selection.id === item.group
-    : selection?.id === rootById.get(item.id);
-  const selectedMap = () => selection.type === 'group' ? groupOffsets : overrides;
+  let value = createDjBaseComposition(), selection = null, cache, nextId = 1, dragStart = null;
+  const undoStack = [], redoStack = [];
+  const getPlacements = () => cache ??= resolveDjComposition(value);
+  const getInstance = () => selection?.type === 'object' ? value.instances.get(selection.id) : null;
+  const isSelected = (item) => Boolean(selection && (selection.type === 'group'
+    ? selection.id === item.group : selection.id === item.root));
+  const selectedParts = () => getPlacements().filter(isSelected);
+  const current = () => ({ value, selection });
+
+  function restore(snapshot) {
+    ({ value, selection } = snapshot);
+    cache = undefined;
+  }
+
+  function record(before) {
+    undoStack.push(before);
+    if (undoStack.length > HISTORY_LIMIT) undoStack.shift();
+    redoStack.length = 0;
+  }
+
+  function change(next, nextSelection = selection) {
+    if (!dragStart) record(current());
+    restore({ value: next, selection: nextSelection });
+  }
+
+  function endMove() {
+    if (!dragStart) return;
+    // One history entry per gesture, even when Phaser emits many pointer moves.
+    if ([...value.instances].some(([id, item]) => {
+      const start = dragStart.value.instances.get(id);
+      return start?.x !== item.x || start?.y !== item.y;
+    })) record(dragStart);
+    dragStart = null;
+  }
 
   function select(type, id) {
-    if (type === 'object') id = rootById.get(id);
-    selection = (type === 'group' && groups.includes(id)) || (type === 'object' && id)
+    endMove();
+    if (type === 'object' && !value.instances.has(id)) id = getPlacements().find((part) => part.id === id)?.root;
+    selection = (type === 'group' && Object.hasOwn(DJ_LAYOUT_GROUPS, id)) || (type === 'object' && value.instances.has(id))
       ? Object.freeze({ type, id }) : null;
     return selection;
   }
 
   function move(dx, dy) {
-    if (!selection || !Number.isFinite(dx) || !Number.isFinite(dy)) return;
-    let minX = -Infinity, maxX = Infinity, minY = -Infinity, maxY = Infinity;
-    for (const item of getPlacements().filter(isSelected)) {
-      const [left, top, right, bottom] = extent(item);
-      minX = Math.max(minX, world.x - left);
-      minY = Math.max(minY, world.y - top);
-      maxX = Math.min(maxX, world.x + world.width - right);
-      maxY = Math.min(maxY, world.y + world.height - bottom);
+    if (!selection || !Number.isFinite(dx) || !Number.isFinite(dy)) return [0, 0];
+    const parts = selectedParts();
+    if (!parts.length) return [0, 0];
+    const applied = fitDjTranslation(parts, dx, dy);
+    if (!applied[0] && !applied[1]) return applied;
+    const instances = new Map(value.instances);
+    for (const id of new Set(parts.map((part) => part.root))) {
+      const item = instances.get(id);
+      instances.set(id, { ...item, x: item.x + applied[0], y: item.y + applied[1] });
     }
-    dx = Math.min(maxX, Math.max(minX, Math.round(dx)));
-    dy = Math.min(maxY, Math.max(minY, Math.round(dy)));
-    const offset = selectedMap().get(selection.id) ?? unchanged;
-    selectedMap().set(selection.id, { ...offset, dx: offset.dx + dx, dy: offset.dy + dy });
+    change({ ...value, instances });
+    return applied;
   }
 
-  function exportLayout() {
-    return {
-      version: VERSION,
-      groups: Object.fromEntries(groups.map((id) => [id, serializedOffset(groupOffsets.get(id) ?? unchanged)])),
-      overrides: Object.fromEntries(roots.map((id) => [id, overrides.get(id)])
-        .filter(([, entry]) => entry && (entry.dx || entry.dy || !entry.visible))
-        .map(([id, entry]) => [id, serializedOffset(entry)])),
-      objects: Object.fromEntries(getPlacements().map((item) => [item.id, position(item)])),
-    };
+  function insert({ source, group, x, y, visible = true, depthOffset = 0 }) {
+    const size = djSourceParts(source)?.length;
+    if (!size || nextId > DJ_MAX_INSTANCE_ID || getPlacements().length + size > DJ_MAX_PLACEMENTS) return null;
+    const id = `dj-${nextId++}`;
+    const item = { id, source, group, x, y, visible, depthOffset };
+    const [dx, dy] = fitDjTranslation(resolveDjInstance(item, value.groups), 0, 0);
+    const instances = new Map(value.instances).set(id, { ...item, x: x + dx, y: y + dy });
+    change({ ...value, instances }, Object.freeze({ type: 'object', id }));
+    return id;
   }
 
-  function importLayout(data) {
-    if (!data || data.version !== VERSION) throw invalid();
-    const nextGroups = readOffsets(data.groups, groups, true);
-    const nextOverrides = readOffsets(data.overrides, roots, false);
-    const expected = snapshot(nextGroups, nextOverrides);
-    if (!data.objects || typeof data.objects !== 'object' || Array.isArray(data.objects)
-      || Object.keys(data.objects).length !== objects.length) throw invalid();
-    for (const item of expected) {
-      const actual = data.objects[item.id];
-      const [left, top, right, bottom] = extent(item);
-      if (!Object.hasOwn(data.objects, item.id) || actual?.x !== item.x || actual?.y !== item.y
-        || (Object.hasOwn(actual, 'visible') ? actual.visible : true) !== item.visible
-        || left < world.x || top < world.y || right > world.x + world.width
-        || bottom > world.y + world.height) throw invalid();
-    }
-    groupOffsets = nextGroups;
-    overrides = nextOverrides;
-    selection = null;
+  function add(source, group, x, y) {
+    endMove();
+    if (!isDjCatalogSource(source) || !Object.hasOwn(DJ_LAYOUT_GROUPS, group)
+      || !Number.isSafeInteger(Math.round(x)) || !Number.isSafeInteger(Math.round(y))) return null;
+    const root = djSourceParts(source)[0];
+    const [cx, cy] = assets[root.assetId].contactPx;
+    return insert({ source, group, x: Math.round(x - cx * root.scale), y: Math.round(y - cy * root.scale) });
+  }
+
+  function duplicate() {
+    endMove();
+    const item = getInstance();
+    if (!item) return null;
+    const parts = selectedParts();
+    let [dx, dy] = fitDjTranslation(parts, 12, 12);
+    if (!dx && !dy) [dx, dy] = fitDjTranslation(parts, -12, -12);
+    return insert({ ...item, x: item.x + dx, y: item.y + dy });
+  }
+
+  function editSelected(changes) {
+    endMove();
+    const item = getInstance();
+    if (!item || Object.entries(changes).every(([key, val]) => item[key] === val)) return false;
+    change({ ...value, instances: new Map(value.instances).set(item.id, { ...item, ...changes }) });
+    return true;
   }
 
   function toggleVisibility() {
+    endMove();
     if (!selection) return;
-    const offset = selectedMap().get(selection.id) ?? unchanged;
-    selectedMap().set(selection.id, { ...offset, visible: !offset.visible });
+    if (selection.type === 'object') {
+      editSelected({ visible: !getInstance().visible });
+      return;
+    }
+    const id = selection.id;
+    change({ ...value, groups: { ...value.groups, [id]: { visible: !value.groups[id].visible } } });
+  }
+
+  function deleteSelection() {
+    endMove();
+    const item = getInstance();
+    if (!item) return false;
+    const instances = new Map(value.instances);
+    instances.delete(item.id);
+    change({ ...value, instances }, null);
+    return true;
+  }
+
+  function adjustDepth(direction) {
+    if (![-1, 0, 1].includes(direction)) return false;
+    const before = getInstance()?.depthOffset ?? 0;
+    const depthOffset = direction === 0 ? 0
+      : Math.max(-DJ_MAX_DEPTH_OFFSET, Math.min(DJ_MAX_DEPTH_OFFSET, before + direction * DEPTH_STEP));
+    return editSelected({ depthOffset });
+  }
+
+  function importLayout(data) {
+    const next = readDjLayout(data); // Validate before touching edits, selection or history.
+    endMove();
+    for (const id of next.instances.keys()) {
+      if (/^dj-\d+$/.test(id)) nextId = Math.max(nextId, Number(id.slice(3)) + 1);
+    }
+    change(next, null);
   }
 
   return {
-    getPlacements, select, isSelected, move, exportLayout, importLayout, toggleVisibility,
-    editableObjectIds: roots,
+    getPlacements, select, isSelected, move, add, duplicate, deleteSelection, toggleVisibility, adjustDepth, importLayout,
+    changeGroup: (group) => Object.hasOwn(DJ_LAYOUT_GROUPS, group) && editSelected({ group }),
+    exportLayout: () => exportDjLayout(value),
     getSelection: () => selection,
-    getSelectionOffset: () => selection ? selectedMap().get(selection.id) ?? unchanged : unchanged,
-    reset() { groupOffsets.clear(); overrides.clear(); selection = null; },
+    getSelectedInstance: () => getInstance(),
+    getEditableObjects: () => [...value.instances.values()].map(({ id, group, source }) => ({
+      id, group, assetId: djSourceParts(source)[0].assetId,
+    })),
+    isSelectionVisible: () => selection?.type === 'group' ? value.groups[selection.id].visible : getInstance()?.visible ?? true,
+    reset() { endMove(); change(createDjBaseComposition(), null); },
+    beginMove() { if (!dragStart) dragStart = current(); },
+    endMove,
+    canUndo: () => undoStack.length > 0,
+    canRedo: () => redoStack.length > 0,
+    undo() {
+      endMove();
+      if (!undoStack.length) return false;
+      redoStack.push(current());
+      restore(undoStack.pop());
+      return true;
+    },
+    redo() {
+      endMove();
+      if (!redoStack.length) return false;
+      undoStack.push(current());
+      restore(redoStack.pop());
+      return true;
+    },
   };
 }

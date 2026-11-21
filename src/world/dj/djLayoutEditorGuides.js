@@ -2,7 +2,7 @@ import { patioFriends, patioWomen } from '../../data/patioCharacters.js';
 import { getPatioCollisionZones } from '../createPatioCollisions.js';
 import { PATIO_LAYOUT } from '../patioLayout.js';
 import { DJ_ENVIRONMENT_ASSETS as assets } from './djEnvironmentAssets.js';
-import { djPlacementBounds } from './djLayoutEditorState.js';
+import { djPlacementBounds } from './djLayoutComposition.js';
 
 const { dj, events: { bathroom } } = PATIO_LAYOUT;
 const box = (x, y, width, height) => ({ x, y, width, height });
@@ -52,10 +52,16 @@ export function getDjLayoutWarnings(placements) {
   for (const item of placements) {
     if (!item.visible || item.crop) continue;
     const art = djPlacementBounds(item);
-    if (cast.some((area) => overlaps(area, art))) warnings.add('Personaje o acceso');
+    const nearCast = cast.some((area) => overlaps(area, art));
+    const nearPool = overlaps(PATIO_LAYOUT.pool, art);
+    const nearRoute = crossesRoute(art);
+    if (nearCast) warnings.add('Personaje o acceso');
     if (overlaps(danceCore, art)) warnings.add('Pista reservada');
-    if (overlaps(PATIO_LAYOUT.pool, art)) warnings.add('Piscina');
-    if (crossesRoute(art)) warnings.add('Ruta al baño');
+    if (nearPool) warnings.add('Piscina');
+    if (nearRoute) warnings.add('Ruta al baño');
+    if (item.depthOffset && (nearCast || nearPool || nearRoute)) {
+      warnings.add('Profundidad manual en zona protegida');
+    }
 
     const asset = assets[item.assetId], { colliderIntent } = asset;
     if (item.depthRule === 'feet' && Array.isArray(colliderIntent) && colliderIntent.length) {

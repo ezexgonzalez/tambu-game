@@ -72,7 +72,7 @@ export class PatioScene extends Phaser.Scene {
     this.interactables = createCharacters(this);
     this.player = createPlayer(this, { readInput: !this.worldOptions?.djLayoutEdit });
     if (this.worldOptions?.djLayoutEdit) {
-      createDjLayoutEditor(this, this.worldVisuals.djEnvironmentImages);
+      createDjLayoutEditor(this);
       this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => destroyCharacterSprites(this.interactables));
       return;
     }

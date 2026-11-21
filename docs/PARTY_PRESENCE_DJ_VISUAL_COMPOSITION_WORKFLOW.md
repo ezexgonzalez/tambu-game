@@ -4,6 +4,8 @@
 **State:** DJ VISUAL COMPOSER INTEGRATED / MANUAL TOOL QA REQUIRED / BASE COMPOSITION NOT APPROVED
 **Scope:** correcting spatial composition workflow without creating new assets, NPCs or gameplay.
 
+Para el flujo actual, usá la [guía del editor V2](PARTY_PRESENCE_DJ_VISUAL_EDITOR_V2_DIRECTION.md#10-guía-de-uso-y-entrega). Este documento registra la decisión y el funcionamiento original de V1.
+
 ## 1. Diagnosis after manual preview
 
 Direction compared the real `?djEnvPreview=1` full DJ composition (75 placements and 16 front-lip visual clones, 91 images) with the reference image of 1087×1447. **Current screenshot is NOT APPROVED as final environmental composition.** Technically integrated art, valid tests and build are distinct from acceptable scene art direction.

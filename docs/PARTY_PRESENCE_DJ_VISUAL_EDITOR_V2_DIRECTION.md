@@ -1,6 +1,6 @@
 # TAMBU GAME — DJ Visual Environment Editor V2
 **Direction:** 2026-11-20
-**Status:** DIRECTION APPROVED / ENGINEERING NOT STARTED / MANUAL QA REQUIRED AFTER IMPLEMENTATION
+**Status:** V2 INTEGRATED / MANUAL TOOL QA REQUIRED / COMPOSITION NOT APPROVED
 **Scope:** dev-only DJ environmental composition editor. No changes to normal gameplay or to approved art.
 
 ## 1. Product decision and why now
@@ -75,3 +75,32 @@ The existing `djLayoutEditorState.js` works from an immutable baseline with `gro
 One implementation task may be divided internally into (A) dynamic model / schema and import migration, (B) catalog and create/delete/duplicate UI, (C) manual depth / history and polish, (D) tests/build/docs. Avoid tangential refactor. If implementing all features safely requires splitting the work, finish a coherent testable V2 editor feature set rather than half-working buttons.
 
 **Post-V2 design workflow:** Art Director delivers small approved asset kits + manifests -> Engineer registers/catalogues assets only when necessary -> Direction dresses scene by hand -> Direction exports approved V2 JSON -> Engineer integrates *exact* layout -> visual QA -> minimal lighting/colliders -> separate social population pass.
+
+## 10. Guía de uso y entrega
+
+1. Abrí la URL del juego con **`?djLayoutEdit=1`** (o **`&djLayoutEdit=1`** si ya tiene parámetros). Conserva el layout inicial en el patio real a 1×. Usá **Plegar** para despejar la vista y **Espacio + arrastre** para desplazar la cámara.
+2. En **Biblioteca**, buscá por nombre o ID y filtrá por categoría. Elegí el grupo de destino, seleccioná una miniatura y hacé clic en el patio donde quieras apoyar el objeto. La pieza queda seleccionada para moverla. Para agregar otra copia, repetí el proceso o usá **Duplicar**.
+3. En **Edición**, usá **Grupo** para mover un sector o **Pieza** para ajustar un objeto o conjunto. Seleccioná por clic en el mundo o buscá por nombre/ID. Arrastrá o usá **Flechas** (1 px) y **Shift + flechas** (8 px). Con **Esc** cancelás una colocación pendiente o deseleccionás sin perder los cambios. Cambiar el grupo de una pieza no la desplaza.
+4. **Duplicar** copia el conjunto completo con IDs nuevos. **Eliminar** (o **Supr**) saca la pieza y sus miembros; **Ocultar/Mostrar** mantiene la instancia y actúa también sobre grupos. Las piezas ocultas se pueden seleccionar por ID. Si un grupo está oculto, mostrar una pieza de ese grupo no vuelve visible al grupo.
+5. **Adelante/Atrás** aplica ±4 al orden por contacto, hasta un máximo de ±32. La alfombra ajusta en pasos de 0,04 dentro de su capa de suelo (±0,32). **Restablecer auto** vuelve al orden por apoyo; mesa, vasos, planta, macetero y labios conservan sus subcapas. **Guías y avisos de solapes** señala zonas protegidas; no aplica física.
+6. **Deshacer/Rehacer** guarda hasta 50 operaciones en memoria; cada arrastre completo cuenta como una. Atajos: **Ctrl/Cmd + Z** y **Ctrl/Cmd + Shift + Z** (también **Ctrl/Cmd + Y** para rehacer). Los atajos se ignoran al editar campos. **Reset** restaura la base y se puede deshacer.
+7. **Exportar JSON** descarga `tambu-dj-layout-v2.json`. Guardalo antes de recargar. **Importar JSON** abre V2 o migra un V1 válido conservando la colocación y visibilidad. Si la validación falla, tu composición queda intacta. Los cambios sólo se guardan en el archivo que descargás.
+
+**Alcance de la Biblioteca:** el catálogo contiene 40 entradas aprobadas entre las cuatro familias, 17 colocables de forma independiente. La vista inicial muestra esas piezas y nueve conjuntos. **Ver componentes** incluye miniaturas de piezas que necesitan soporte. Botellas, vasos y lámparas de mesa se pueden usar en **Mesa baja servida** o duplicando una mesa que ya los contiene; los cojines, en sofás completos; la copa del árbol, en conjuntos de árbol; y las tropicales, en sus maceteros. El cable recto `L03-A0`, que no está en la base, está disponible en **Árbol con guirnalda recta**. Esta pasada no ofrece un editor de anclajes internos ni permite subir PNG. Las nuevas familias entran registrando cada PNG aprobado, su hash, geometría, nombre, familia y `placeable` en `djEnvironmentAssets.js`, y opcionalmente su receta en `djEnvironmentCatalog.js`. No hay que modificar las opciones de la UI.
+
+### Contrato de entrega de Integración
+
+Entregar el **JSON V2 completo**, con estos campos:
+
+| Campo | Contenido |
+| --- | --- |
+| `version` | `2`. |
+| `baselineRevision` | SHA que identifica la base del editor. |
+| `manifest` | IDs de los assets usados → SHA-256 del PNG. |
+| `groups` y `instances` | Visibilidad por grupo; ID raíz, origen (base, asset o receta), grupo, posición absoluta, visibilidad propia y offset de depth por instancia. |
+| `removedBaseline` | IDs de todas las partes de base eliminadas explícitamente. |
+| `placements` | Representación completa resultante: IDs, referencias de asset, coordenadas de la esquina superior izquierda en píxeles de mundo, escala, visibilidad efectiva, profundidad automática, offset, profundidad efectiva y `renderDepth` para empates; referencias a raíz, ensamblaje, soporte, crop y anclaje cuando corresponda. |
+
+El lector `readDjLayout` valida revisión y manifest comparando el archivo con los miembros y relaciones que resuelve el catálogo. Rechaza IDs desconocidos o repetidos, enlaces inconsistentes, posiciones que no encajan en el mapa, profundidad fuera de rango y archivos de más de 512 imágenes (contando subcapas). Para integrar un layout aprobado, usar las colocaciones de `resolveDjComposition(readDjLayout(json))` con `createDjEnvironmentComposition`; respetar `renderDepth` y el catálogo sin reinterpretar posiciones ni reponer elementos eliminados. Esta pasada no aplica ningún export al juego normal.
+
+**Validación:** `npm test` 297/297; `npm run build` OK, con aviso de tamaño del bundle de Vite. Sin navegador ni capturas por Ingeniería. Estado: **MANUAL TOOL QA REQUIRED**. Probar altas, duplicado de un macetero y un sofá, orden contra otros props y Tambu, undo/redo y export/import antes de aprobar una composición. `?djEnvPreview=1` conserva la base sin edición.

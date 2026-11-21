@@ -31,7 +31,7 @@ Para cualquier tarea de HUD, diálogo, pantallas de estado, resultados, prompts 
 
 ## DJ Visual Environment Editor V2 (dirección vigente)
 
-- [`PARTY_PRESENCE_DJ_VISUAL_EDITOR_V2_DIRECTION.md`](./PARTY_PRESENCE_DJ_VISUAL_EDITOR_V2_DIRECTION.md): contrato aprobado para ampliar el editor opt-in DJ con biblioteca visual, altas/bajas, profundidad y JSON v2. Antes de ingeniería, leer también el workflow V1 y `CURRENT_STATE.md`. La composición DJ sigue sin QA visual aprobada.
+- [`PARTY_PRESENCE_DJ_VISUAL_EDITOR_V2_DIRECTION.md`](./PARTY_PRESENCE_DJ_VISUAL_EDITOR_V2_DIRECTION.md): contrato y guía del editor DJ V2 integrado: biblioteca visual, altas/bajas, profundidad y JSON V2 compatible con archivos V1. Antes de ingeniería, leer también el workflow V1 y `CURRENT_STATE.md`. La composición DJ sigue sin QA visual aprobada.
 
 ## Auditorías
 

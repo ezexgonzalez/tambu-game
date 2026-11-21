@@ -2,6 +2,8 @@
 // Collider intents are reference data only. The scale preview has no physics.
 const ASSETS = {
   "F01a": {
+    label: "Esquina de sofá",
+    placeable: false,
     key: "dj-sofa-corner-down-right-v1",
     path: "/assets/props/dj_environment/furniture/dj_sofa_corner_down_right_v1.png",
     family: "furniture",
@@ -15,6 +17,8 @@ const ASSETS = {
     colliderIntent: [[6, 44, 82, 40], [6, 84, 60, 12]],
   },
   "F01b": {
+    label: "Tramo de sofá",
+    placeable: false,
     key: "dj-sofa-straight-down-v1",
     path: "/assets/props/dj_environment/furniture/dj_sofa_straight_down_v1.png",
     family: "furniture",
@@ -28,6 +32,8 @@ const ASSETS = {
     colliderIntent: [[2, 44, 70, 40]],
   },
   "F01c": {
+    label: "Remate de sofá",
+    placeable: false,
     key: "dj-sofa-end-down-v1",
     path: "/assets/props/dj_environment/furniture/dj_sofa_end_down_v1.png",
     family: "furniture",
@@ -41,6 +47,8 @@ const ASSETS = {
     colliderIntent: [[2, 44, 80, 40]],
   },
   "F01d": {
+    label: "Retorno recto de sofá",
+    placeable: false,
     key: "dj-sofa-straight-right-v1",
     path: "/assets/props/dj_environment/furniture/dj_sofa_straight_right_v1.png",
     family: "furniture",
@@ -54,6 +62,8 @@ const ASSETS = {
     colliderIntent: [[6, 2, 60, 32]],
   },
   "F01e": {
+    label: "Remate de retorno",
+    placeable: false,
     key: "dj-sofa-end-right-v1",
     path: "/assets/props/dj_environment/furniture/dj_sofa_end_right_v1.png",
     family: "furniture",
@@ -67,6 +77,8 @@ const ASSETS = {
     colliderIntent: [[6, 2, 60, 61]],
   },
   "F03": {
+    label: "Mesa auxiliar",
+    placeable: true,
     key: "dj-side-table-square-v1",
     path: "/assets/props/dj_environment/furniture/dj_side_table_square_v1.png",
     family: "furniture",
@@ -81,6 +93,8 @@ const ASSETS = {
     usableSurface: {"shape": "rect", "bounds": [8, 7, 78, 46]},
   },
   "F04": {
+    label: "Mesa baja redonda",
+    placeable: true,
     key: "dj-coffee-table-round-v1",
     path: "/assets/props/dj_environment/furniture/dj_coffee_table_round_v1.png",
     family: "furniture",
@@ -95,6 +109,8 @@ const ASSETS = {
     usableSurface: {"shape": "ellipse", "center": [47, 25], "radii": [36, 18]},
   },
   "F05": {
+    label: "Mesa alta de cóctel",
+    placeable: true,
     key: "dj-cocktail-table-round-v1",
     path: "/assets/props/dj_environment/furniture/dj_cocktail_table_round_v1.png",
     family: "furniture",
@@ -109,6 +125,8 @@ const ASSETS = {
     usableSurface: {"shape": "ellipse", "center": [34, 17], "radii": [24, 10]},
   },
   "F02a": {
+    label: "Almohadón beige",
+    placeable: false,
     key: "dj-cushion-beige-v1",
     path: "/assets/props/dj_environment/furniture/dj_cushion_beige_v1.png",
     family: "furniture",
@@ -122,6 +140,8 @@ const ASSETS = {
     colliderIntent: [],
   },
   "F02b": {
+    label: "Almohadón azul",
+    placeable: false,
     key: "dj-cushion-blue-v1",
     path: "/assets/props/dj_environment/furniture/dj_cushion_blue_v1.png",
     family: "furniture",
@@ -135,6 +155,8 @@ const ASSETS = {
     colliderIntent: [],
   },
   "F06": {
+    label: "Puf",
+    placeable: true,
     key: "dj-pouf-round-v1",
     path: "/assets/props/dj_environment/furniture/dj_pouf_round_v1.png",
     family: "furniture",
@@ -148,6 +170,8 @@ const ASSETS = {
     colliderIntent: [[8, 33, 44, 16]],
   },
   "F07": {
+    label: "Alfombra",
+    placeable: true,
     key: "dj-rug-round-v1",
     path: "/assets/props/dj_environment/furniture/dj_rug_round_v1.png",
     family: "furniture",
@@ -161,6 +185,8 @@ const ASSETS = {
     colliderIntent: [],
   },
   "V01-trunk": {
+    label: "Tronco ornamental",
+    placeable: false,
     key: "dj-tree-ornamental-trunk-v1",
     path: "/assets/props/dj_environment/vegetation/dj_tree_ornamental_trunk_v1.png",
     family: "vegetation",
@@ -174,6 +200,8 @@ const ASSETS = {
     colliderIntent: [75, 119, 14, 8],
   },
   "V01-canopy": {
+    label: "Copa ornamental",
+    placeable: false,
     key: "dj-tree-ornamental-canopy-v1",
     path: "/assets/props/dj_environment/vegetation/dj_tree_ornamental_canopy_v1.png",
     family: "vegetation",
@@ -187,6 +215,8 @@ const ASSETS = {
     colliderIntent: "NONE",
   },
   "V02A": {
+    label: "Tropical de hojas anchas",
+    placeable: false,
     key: "dj-plant-tropical-wide-v1",
     path: "/assets/props/dj_environment/vegetation/dj_plant_tropical_wide_v1.png",
     family: "vegetation",
@@ -200,6 +230,8 @@ const ASSETS = {
     colliderIntent: "NONE",
   },
   "V02B": {
+    label: "Tropical vertical",
+    placeable: false,
     key: "dj-plant-tropical-upright-v1",
     path: "/assets/props/dj_environment/vegetation/dj_plant_tropical_upright_v1.png",
     family: "vegetation",
@@ -213,6 +245,8 @@ const ASSETS = {
     colliderIntent: "NONE",
   },
   "V06A": {
+    label: "Macetero cuadrado vacío",
+    placeable: true,
     key: "dj-planter-square-tall-v1",
     path: "/assets/props/dj_environment/vegetation/dj_planter_square_tall_v1.png",
     family: "vegetation",
@@ -226,6 +260,8 @@ const ASSETS = {
     colliderIntent: [4, 43, 42, 9],
   },
   "V06B": {
+    label: "Macetero rectangular vacío",
+    placeable: true,
     key: "dj-planter-rectangular-v1",
     path: "/assets/props/dj_environment/vegetation/dj_planter_rectangular_v1.png",
     family: "vegetation",
@@ -239,6 +275,8 @@ const ASSETS = {
     colliderIntent: [4, 18, 62, 9],
   },
   "V04A": {
+    label: "Arbusto ancho",
+    placeable: true,
     key: "dj-shrub-compact-wide-v1",
     path: "/assets/props/dj_environment/vegetation/dj_shrub_compact_wide_v1.png",
     family: "vegetation",
@@ -252,6 +290,8 @@ const ASSETS = {
     colliderIntent: "NONE",
   },
   "V04B": {
+    label: "Arbusto vertical",
+    placeable: true,
     key: "dj-shrub-compact-upright-v1",
     path: "/assets/props/dj_environment/vegetation/dj_shrub_compact_upright_v1.png",
     family: "vegetation",
@@ -265,6 +305,8 @@ const ASSETS = {
     colliderIntent: "NONE",
   },
   "V05A": {
+    label: "Arbusto con flores claras",
+    placeable: true,
     key: "dj-shrub-flowering-a-v1",
     path: "/assets/props/dj_environment/vegetation/dj_shrub_flowering_a_v1.png",
     family: "vegetation",
@@ -278,6 +320,8 @@ const ASSETS = {
     colliderIntent: "NONE",
   },
   "V05B": {
+    label: "Arbusto con flores rosas",
+    placeable: true,
     key: "dj-shrub-flowering-b-v1",
     path: "/assets/props/dj_environment/vegetation/dj_shrub_flowering_b_v1.png",
     family: "vegetation",
@@ -291,6 +335,8 @@ const ASSETS = {
     colliderIntent: "NONE",
   },
   "V09A": {
+    label: "Follaje vertical",
+    placeable: true,
     key: "dj-foliage-transition-a-v1",
     path: "/assets/props/dj_environment/vegetation/dj_foliage_transition_a_v1.png",
     family: "vegetation",
@@ -304,6 +350,8 @@ const ASSETS = {
     colliderIntent: "NONE",
   },
   "V07-left": {
+    label: "Jardinera, extremo izquierdo",
+    placeable: false,
     key: "dj-planter-border-left-v1",
     path: "/assets/props/dj_environment/vegetation/dj_planter_border_left_v1.png",
     family: "vegetation",
@@ -317,6 +365,8 @@ const ASSETS = {
     colliderIntent: [2, 21, 12, 11],
   },
   "V07-middle": {
+    label: "Jardinera, tramo central",
+    placeable: false,
     key: "dj-planter-border-middle-v1",
     path: "/assets/props/dj_environment/vegetation/dj_planter_border_middle_v1.png",
     family: "vegetation",
@@ -330,6 +380,8 @@ const ASSETS = {
     colliderIntent: [2, 21, 136, 11],
   },
   "V07-right": {
+    label: "Jardinera, extremo derecho",
+    placeable: false,
     key: "dj-planter-border-right-v1",
     path: "/assets/props/dj_environment/vegetation/dj_planter_border_right_v1.png",
     family: "vegetation",
@@ -343,6 +395,8 @@ const ASSETS = {
     colliderIntent: [2, 21, 12, 11],
   },
   "V03A": {
+    label: "Planta ornamental baja",
+    placeable: true,
     key: "dj-plant-flowering-a-v1",
     path: "/assets/props/dj_environment/vegetation/dj_plant_flowering_a_v1.png",
     family: "vegetation",
@@ -356,6 +410,8 @@ const ASSETS = {
     colliderIntent: "NONE",
   },
   "V03B": {
+    label: "Planta ornamental alta",
+    placeable: true,
     key: "dj-plant-flowering-b-v1",
     path: "/assets/props/dj_environment/vegetation/dj_plant_flowering_b_v1.png",
     family: "vegetation",
@@ -369,6 +425,8 @@ const ASSETS = {
     colliderIntent: "NONE",
   },
   "V08": {
+    label: "Planta de mesa",
+    placeable: false,
     key: "dj-table-plant-v1",
     path: "/assets/props/dj_environment/vegetation/dj_table_plant_v1.png",
     family: "vegetation",
@@ -382,6 +440,8 @@ const ASSETS = {
     colliderIntent: "NONE",
   },
   "V09B": {
+    label: "Follaje horizontal",
+    placeable: true,
     key: "dj-foliage-transition-b-v1",
     path: "/assets/props/dj_environment/vegetation/dj_foliage_transition_b_v1.png",
     family: "vegetation",
@@ -395,6 +455,8 @@ const ASSETS = {
     colliderIntent: "NONE",
   },
   "L01": {
+    label: "Farol de piso",
+    placeable: true,
     key: "dj-lantern-floor-v1",
     path: "/assets/props/dj_environment/lighting/dj_lantern_floor_v1.png",
     family: "lighting",
@@ -409,6 +471,8 @@ const ASSETS = {
     lightEmitter: {"localPx": [9, 27], "offsetPx": [-2, -17], "family": "warm_domestic", "role": "PRIMARY"},
   },
   "L02": {
+    label: "Baliza de patio",
+    placeable: true,
     key: "dj-bollard-short-v1",
     path: "/assets/props/dj_environment/lighting/dj_bollard_short_v1.png",
     family: "lighting",
@@ -423,6 +487,8 @@ const ASSETS = {
     lightEmitter: {"localPx": [6, 9], "offsetPx": [-1, -26], "family": "warm_domestic", "role": "PRIMARY"},
   },
   "L04": {
+    label: "Lámpara de mesa",
+    placeable: false,
     key: "dj-table-lamp-v1",
     path: "/assets/props/dj_environment/lighting/dj_table_lamp_v1.png",
     family: "lighting",
@@ -437,6 +503,8 @@ const ASSETS = {
     lightEmitter: {"localPx": [9, 13], "offsetPx": [0, -10], "family": "warm_domestic", "role": "SECONDARY"},
   },
   "L03-B": {
+    label: "Bombilla de guirnalda",
+    placeable: false,
     key: "dj-garland-bulb-v1",
     path: "/assets/props/dj_environment/lighting/dj_garland_bulb_v1.png",
     family: "lighting",
@@ -451,6 +519,8 @@ const ASSETS = {
     lightEmitter: {"localPx": [5, 10], "offsetPx": [0, 8], "family": "warm_domestic", "role": "SECONDARY"},
   },
   "L03-C": {
+    label: "Clip de guirnalda",
+    placeable: false,
     key: "dj-garland-anchor-v1",
     path: "/assets/props/dj_environment/lighting/dj_garland_anchor_v1.png",
     family: "lighting",
@@ -464,6 +534,8 @@ const ASSETS = {
     colliderIntent: null,
   },
   "L03-A0": {
+    label: "Cable recto de guirnalda",
+    placeable: false,
     key: "dj-garland-cable-flat-v1",
     path: "/assets/props/dj_environment/lighting/dj_garland_cable_flat_v1.png",
     family: "lighting",
@@ -478,6 +550,8 @@ const ASSETS = {
     joins: {"join_from_local_px": [2, 2], "join_to_local_px": [34, 2], "delta_px": [32, 0], "mirror_x_for_ascending": true},
   },
   "L03-A1": {
+    label: "Cable de guirnalda, pendiente 3",
+    placeable: false,
     key: "dj-garland-cable-slope3-v1",
     path: "/assets/props/dj_environment/lighting/dj_garland_cable_slope3_v1.png",
     family: "lighting",
@@ -492,6 +566,8 @@ const ASSETS = {
     joins: {"join_from_local_px": [2, 2], "join_to_local_px": [34, 5], "delta_px": [32, 3], "mirror_x_for_ascending": true},
   },
   "L03-A2": {
+    label: "Cable de guirnalda, pendiente 7",
+    placeable: false,
     key: "dj-garland-cable-slope7-v1",
     path: "/assets/props/dj_environment/lighting/dj_garland_cable_slope7_v1.png",
     family: "lighting",
@@ -506,6 +582,8 @@ const ASSETS = {
     joins: {"join_from_local_px": [2, 2], "join_to_local_px": [34, 9], "delta_px": [32, 7], "mirror_x_for_ascending": true},
   },
   "C01": {
+    label: "Botella verde",
+    placeable: false,
     key: "deck-bottle",
     path: "/assets/props/deck/bottle.png",
     family: "drinks",
@@ -521,6 +599,8 @@ const ASSETS = {
     reuse: true,
   },
   "C02": {
+    label: "Vaso rojo",
+    placeable: false,
     key: "dj-cup-red-v1",
     path: "/assets/props/dj_environment/drinks/dj_cup_red_v1.png",
     family: "drinks",
