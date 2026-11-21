@@ -29,6 +29,10 @@ Para cualquier tarea de HUD, diálogo, pantallas de estado, resultados, prompts 
 | [`TAMBU_SPRITE_V011.md`](./TAMBU_SPRITE_V011.md) | Especificación del spritesheet actual de Tambu | Escala general de objetos |
 | [`PROJECT_AUDIT_2026-09-28.md`](./PROJECT_AUDIT_2026-09-28.md) | Evidencia de la segunda auditoría integral, riesgos y recomendación de camino a V1 | Estado runtime por encima de `CURRENT_STATE.md` ni autorización automática de sus recomendaciones |
 
+## DJ Visual Environment Editor V2 (dirección vigente)
+
+- [`PARTY_PRESENCE_DJ_VISUAL_EDITOR_V2_DIRECTION.md`](./PARTY_PRESENCE_DJ_VISUAL_EDITOR_V2_DIRECTION.md): contrato aprobado para ampliar el editor opt-in DJ con biblioteca visual, altas/bajas, profundidad y JSON v2. Antes de ingeniería, leer también el workflow V1 y `CURRENT_STATE.md`. La composición DJ sigue sin QA visual aprobada.
+
 ## Auditorías
 
 - [`PROJECT_AUDIT_2026-09-28.md`](./PROJECT_AUDIT_2026-09-28.md) es la auditoría estratégica más reciente y debe usarse como evidencia para priorización junto con `CURRENT_STATE.md`.
