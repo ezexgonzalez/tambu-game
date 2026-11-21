@@ -1,6 +1,6 @@
 # TAMBU GAME — DJ Visual Library UX V2.1
 **Date:** 2026-11-20
-**Status:** DIRECTION APPROVED / IMPLEMENTATION PENDING
+**Status:** INTEGRATED / MANUAL TOOL QA REQUIRED
 **Mode:** TARGETED EDITOR UX REFINEMENT, NO STATE/SCHEMA REDESIGN
 
 ## 1. Creator feedback and validated current state
@@ -57,3 +57,13 @@ The creator should open the editor, recognize the available props by **real, lar
 
 ## 5. Design principle
 **The catalog is visual first, text second.** The user sees the actual asset *before* placing it. This is a polish pass on a functioning tool, not a new editor.
+
+
+## 6. Uso y validación
+
+- Abrí el juego con **`?djLayoutEdit=1`**. El editor arranca en **Agregar objetos**. Usá el buscador o la categoría, elegí una tarjeta y hacé clic en el patio. La vista ampliada te muestra lo que vas a colocar; **Esc** cancela.
+- Para reconocer objetos ya ubicados, entrá en **Edición → Pieza → Elegir pieza por imagen**. Los nombres, grupos e IDs distinguen copias del mismo prop. También podés elegir con el selector de teclado o hacer clic directamente en el patio.
+- **Plegar** despeja la vista. **Ver componentes** conserva el acceso a piezas que requieren soporte. Los conjuntos se muestran completos con los PNG, recortes, desplazamientos y orden de dibujo de su plantilla; las piezas que no carguen muestran un aviso.
+- La biblioteca y la vista ampliada sólo se montan en modo editor. No cambió ningún PNG, el juego normal ni el esquema JSON V2.
+
+**Verificación de Ingeniería:** `npm test` 299/299, `npm run build` OK (aviso de Vite por tamaño del bundle). Las pruebas comparan las nueve recetas con sus instancias colocadas y cubren selección visual, aislamiento de clics y limpieza. Sin navegador ni capturas. Dirección debe verificar legibilidad, tamaño y flujo de colocación en el juego; la composición DJ sigue sin aprobación visual.

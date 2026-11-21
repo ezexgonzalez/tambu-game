@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
 import { DJ_ENVIRONMENT_LAYOUT as baseline } from '../src/world/dj/djEnvironmentLayout.js';
 import { DJ_ENVIRONMENT_ASSETS as assets } from '../src/world/dj/djEnvironmentAssets.js';
+import { getDjThumbnail } from '../src/world/dj/djLayoutThumbnails.js';
 import { djAssetLibrary, filterDjAssetLibrary } from '../src/world/dj/djEnvironmentCatalog.js';
 import { DJ_LAYOUT_BASELINE_REVISION, DJ_MAX_DEPTH_OFFSET } from '../src/world/dj/djLayoutComposition.js';
 import { createDjLayoutEditor } from '../src/world/dj/djLayoutEditor.js';
@@ -137,7 +138,7 @@ function editorHarness() {
     if (tag !== 'aside') {
       const attrs = new Map();
       return {
-        click() {}, remove() {}, append(...nodes) { this.children = nodes; },
+        style: {}, click() {}, remove() {}, append(...nodes) { this.children = [...(this.children ?? []), ...nodes]; },
         setAttribute(key, value) { attrs.set(key, value); },
         getAttribute(key) { return attrs.get(key); },
         closest() { return tag === 'button' ? this : null; },
@@ -559,4 +560,65 @@ test('every offered preset fits as an assembly at the world edge and retains its
     accepted.importLayout(JSON.parse(JSON.stringify(state.exportLayout())));
     assert.deepEqual(accepted.exportLayout(), state.exportLayout());
   }
+});
+
+test('recipe thumbnails match the full placed assembly in relative positions, crops and visual ordering', () => {
+  const recipes = djAssetLibrary().filter(({ recipe }) => recipe);
+  assert.ok(recipes.length > 5);
+  for (const { source } of recipes) {
+    const state = createDjLayoutEditorState();
+    const root = state.add(source, 'upper-lounge', 490, 560);
+    const placed = state.getPlacements().filter((part) => part.root === root)
+      .sort((a, b) => a.renderDepth - b.renderDepth);
+    const thumb = getDjThumbnail(source);
+    assert.ok(thumb.width > 0 && thumb.height > 0);
+    assert.ok(thumb.layers.length > 1, source);
+    assert.deepEqual(thumb.layers.map((part) => [part.assetId, part.crop, part.scale]),
+      placed.map((part) => [part.assetId, part.crop, part.scale]), source);
+    for (const [i, part] of thumb.layers.entries()) {
+      assert.deepEqual(relative(part, thumb.layers[0]), relative(placed[i], placed[0]), source);
+    }
+  }
+  assert.equal(getDjThumbnail('asset:unknown'), null);
+});
+
+test('visual gallery opens first, panel clicks cannot place a prop, and selected assemblies are recognizable', async () => {
+  const { scene, win, camera, images, field, start } = editorHarness();
+  const editor = start();
+  assert.equal(field('library').hidden, false);
+  assert.ok(field('results').children.length > 1);
+  field('asset-search').value = 'tropical ancho';
+  await field('asset-search').fire('input');
+  const [card] = field('results').children;
+  const parts = card.children[0].children[0].children;
+  assert.deepEqual(parts.map((image) => image.src), [assets.V06A.path, assets.V02A.path, assets.V06A.path]);
+  assert.match(parts[2].style.clipPath, /^inset\(/);
+  await field('results').fire('click', { target: card });
+  assert.equal(field('inspector').hidden, false);
+  assert.equal(field('inspector').children[0].style.height, '116px');
+  const pointer = { id: 1, button: 0, x: 320, y: 600 - camera.scrollY };
+  const length = images.length;
+  scene.input.emit('pointerdown', { ...pointer, event: { target: Object.assign(field('results'), { nodeType: 1 }) } });
+  assert.equal(images.length, length);
+  await win.fire('keydown', { key: 'Escape' });
+  assert.equal(field('inspector').hidden, true);
+  await field('results').fire('click', { target: card });
+  scene.input.emit('pointerdown', pointer);
+  assert.equal(images.length, length + 3);
+  assert.equal(field('edit').hidden, false);
+  assert.equal(field('target').value, 'dj-1');
+  field('instances').open = true;
+  await field('instances').fire('toggle');
+  const first = field('instance-results').children.find((button) => button.getAttribute('data-instance') === 'dj-1');
+  await field('duplicate').fire('click');
+  const second = field('instance-results').children.find((button) => button.getAttribute('data-instance') === 'dj-2');
+  assert.match(first.children[2].textContent, /dj-1/);
+  assert.match(second.children[2].textContent, /dj-2/);
+  await field('instance-results').fire('click', { target: first });
+  assert.equal(field('target').value, 'dj-1');
+  assert.match(field('inspector').children[1].textContent, /dj-1/);
+  editor.destroy();
+  assert.equal(field('instance-results').listenerCount('click'), 0);
+  assert.equal(field('instances').listenerCount('toggle'), 0);
+  assert.ok(images.every(({ scene }) => !scene));
 });

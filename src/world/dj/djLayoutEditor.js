@@ -3,6 +3,7 @@ import { djAssetLibrary, filterDjAssetLibrary, DJ_CATALOG_FAMILIES } from './djE
 import { createDjEnvironmentComposition } from './djEnvironmentPreview.js';
 import { createDjLayoutEditorState, DJ_LAYOUT_GROUPS, djPlacementBounds, pickDjLayoutObject } from './djLayoutEditorState.js';
 import { drawDjLayoutGuides, getDjLayoutWarnings } from './djLayoutEditorGuides.js';
+import { createDjThumbnail } from './djLayoutThumbnails.js';
 import { createDjEditorPanel } from './djLayoutEditorPanel.js';
 
 const DIRECTIONS = new Map([
@@ -31,6 +32,7 @@ export function createDjLayoutEditor(scene) {
   const guides = get('guides'), pieceSearch = get('piece-search'), membership = get('membership');
   const assetSearch = get('asset-search'), family = get('family'), addGroup = get('add-group');
   const components = get('components'), results = get('results');
+  const instances = get('instances'), instanceResults = get('instance-results'), inspector = get('inspector');
   const library = djAssetLibrary();
   const libraryBySource = new Map(library.map((entry) => [entry.source, entry]));
   const guideInk = scene.add.graphics().setDepth(GUIDE_DEPTH);
@@ -41,7 +43,7 @@ export function createDjLayoutEditor(scene) {
   const removals = [], downloads = new Map();
   const focusCanvas = () => canvas.focus({ preventScroll: true });
   let placements, drag = null, spaceDown = false, destroyed = false, pendingImport = 0, armed = null;
-  let lastChoices = '', lastRenderedPlacements;
+  let lastChoices = '', lastCards = '', lastInspector = '', lastRenderedPlacements, showLibrary;
 
   function on(target, name, handler) {
     target.addEventListener(name, handler);
@@ -57,33 +59,56 @@ export function createDjLayoutEditor(scene) {
     }));
   }
 
-  function tabs(showLibrary) {
+  function tabs(libraryOpen) {
+    if (libraryOpen !== showLibrary) panel.scrollTop = 0;
+    showLibrary = libraryOpen;
     get('edit').hidden = showLibrary;
     get('library').hidden = !showLibrary;
     get('edit-tab').setAttribute('aria-pressed', String(!showLibrary));
     get('library-tab').setAttribute('aria-pressed', String(showLibrary));
+    renderInspector();
+  }
+
+  function renderInspector() {
+    const instance = state.getSelectedInstance();
+    const choice = showLibrary ? libraryBySource.get(armed) : instance;
+    const source = choice?.source;
+    const name = choice && (libraryBySource.get(source)?.label
+      ?? assets[placements.find((item) => item.id === instance.id).assetId].label);
+    const caption = choice && (showLibrary ? name : `${name} · ${instance.id}`);
+    const signature = JSON.stringify([source, caption]);
+    inspector.hidden = !choice;
+    if (signature !== lastInspector) {
+      lastInspector = signature;
+      if (!choice) inspector.replaceChildren();
+      else {
+        const label = doc.createElement('small');
+        label.textContent = caption;
+        inspector.replaceChildren(createDjThumbnail(doc, { source }, 116), label);
+      }
+    }
   }
 
   function renderLibrary() {
     const entries = filterDjAssetLibrary(library, family.value, assetSearch.value, components.checked);
+    const scrollTop = results.scrollTop;
     results.replaceChildren(...entries.map((entry) => {
       const button = doc.createElement('button');
       button.type = 'button';
       button.setAttribute('data-source', entry.source);
       button.setAttribute('aria-pressed', String(entry.source === armed));
       button.disabled = !entry.placeable;
-      button.title = entry.placeable ? entry.label : `${entry.label} · necesita soporte`;
-      const image = doc.createElement('img');
-      image.src = entry.path;
-      image.alt = '';
+      button.title = `${entry.label} · ${entry.id}${entry.placeable ? '' : ' · necesita soporte'}`;
       const label = doc.createElement('span');
       label.textContent = entry.label;
       const id = doc.createElement('span');
-      id.textContent = entry.recipe ? `Conjunto · ${entry.id}` : entry.id;
-      button.append(image, label, id);
+      id.textContent = entry.recipe ? 'Conjunto' : entry.placeable ? 'Pieza' : 'Componente';
+      button.append(createDjThumbnail(doc, entry), label, id);
       return button;
     }));
     if (!entries.length) results.textContent = 'Sin resultados.';
+    results.scrollTop = scrollTop;
+    renderInspector();
   }
 
   function syncSelectionList(selection) {
@@ -91,10 +116,33 @@ export function createDjLayoutEditor(scene) {
     const byPiece = mode.value === BY_PIECE;
     pieceSearch.hidden = !byPiece;
     const query = pieceSearch.value.trim().toLowerCase();
-    const choices = byPiece ? state.getEditableObjects()
-      .map(({ id, assetId }) => [id, `${assets[assetId].label ?? assetId} · ${id}`])
-      .filter(([id, label]) => id === selection?.id || label.toLowerCase().includes(query))
-      : GROUP_OPTIONS;
+    const cards = byPiece ? state.getEditableObjects()
+      .map((item) => ({ ...item, label: libraryBySource.get(item.source)?.label ?? assets[item.assetId].label ?? item.assetId }))
+      .filter(({ id, label, group }) => id === selection?.id
+        || `${label} ${id} ${DJ_LAYOUT_GROUPS[group]}`.toLowerCase().includes(query)) : [];
+    const choices = byPiece ? cards.map(({ id, label }) => [id, `${label} · ${id}`]) : GROUP_OPTIONS;
+    instances.hidden = !byPiece;
+    if (byPiece && instances.open) {
+      const signature = JSON.stringify([cards, selection?.id]);
+      if (signature !== lastCards) {
+        lastCards = signature;
+        const scrollTop = instanceResults.scrollTop;
+        instanceResults.replaceChildren(...cards.map(({ id, source, label, group }) => {
+          const button = doc.createElement('button');
+          button.type = 'button';
+          button.setAttribute('data-instance', id);
+          button.setAttribute('aria-pressed', String(id === selection?.id));
+          const title = doc.createElement('span');
+          title.textContent = label;
+          const detail = doc.createElement('small');
+          detail.textContent = `${id} · ${DJ_LAYOUT_GROUPS[group]}`;
+          button.append(createDjThumbnail(doc, { source }, 64), title, detail);
+          return button;
+        }));
+        if (!cards.length) instanceResults.textContent = 'Sin piezas que coincidan.';
+        instanceResults.scrollTop = scrollTop;
+      }
+    }
     const signature = JSON.stringify(choices);
     if (signature !== lastChoices) {
       options(target, [['', '—'], ...choices]);
@@ -112,6 +160,7 @@ export function createDjLayoutEditor(scene) {
     const selection = state.getSelection();
     const instance = state.getSelectedInstance();
     syncSelectionList(selection);
+    renderInspector();
     visibility.disabled = !selection;
     visibility.textContent = state.isSelectionVisible() ? 'Ocultar' : 'Mostrar';
     get('undo').disabled = !state.canUndo();
@@ -157,7 +206,8 @@ export function createDjLayoutEditor(scene) {
   }
 
   function pointerDown(pointer) {
-    if (pointer.button !== 0 || drag) return;
+    const targetNode = pointer.event?.target;
+    if (pointer.button !== 0 || drag || (targetNode?.nodeType && panel.contains(targetNode))) return;
     focusCanvas();
     if (spaceDown) {
       drag = { id: pointer.id, pan: true, x: pointer.x, y: pointer.y,
@@ -182,6 +232,7 @@ export function createDjLayoutEditor(scene) {
     const type = mode.value;
     const id = type === BY_PIECE ? hit?.id : hit?.group;
     if (state.select(type, id)) {
+      if (showLibrary) tabs(false);
       state.beginMove();
       drag = { id: pointer.id, x: point.x, y: point.y, dx: 0, dy: 0 };
     }
@@ -263,6 +314,11 @@ export function createDjLayoutEditor(scene) {
   on(mode, 'change', () => command(() => state.select(null)));
   on(target, 'change', () => command(() => state.select(mode.value, target.value)));
   on(pieceSearch, 'input', render);
+  on(instances, 'toggle', render);
+  on(instanceResults, 'click', (event) => {
+    const id = event.target.closest('button[data-instance]')?.getAttribute('data-instance');
+    if (id) command(() => state.select(BY_PIECE, id));
+  });
   on(membership, 'change', () => command(() => state.changeGroup(membership.value)));
 
   for (const [name, action] of [
@@ -355,7 +411,7 @@ export function createDjLayoutEditor(scene) {
   options(addGroup, GROUP_OPTIONS);
   options(membership, GROUP_OPTIONS);
   addGroup.value = 'upper-lounge';
-  tabs(false);
+  tabs(true);
   renderLibrary();
   render();
 

@@ -156,7 +156,7 @@ export function createDjLayoutEditorState() {
     getSelection: () => selection,
     getSelectedInstance: () => getInstance(),
     getEditableObjects: () => [...value.instances.values()].map(({ id, group, source }) => ({
-      id, group, assetId: djSourceParts(source)[0].assetId,
+      id, group, source, assetId: djSourceParts(source)[0].assetId,
     })),
     isSelectionVisible: () => selection?.type === 'group' ? value.groups[selection.id].visible : getInstance()?.visible ?? true,
     reset() { endMove(); change(createDjBaseComposition(), null); },
