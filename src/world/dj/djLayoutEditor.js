@@ -1,3 +1,4 @@
+import { getDjPerimeterAlignment } from './djPerimeterAlignment.js';
 import { DJ_ENVIRONMENT_ASSETS as assets } from './djEnvironmentAssets.js';
 import { djAssetLibrary, filterDjAssetLibrary, DJ_CATALOG_FAMILIES } from './djEnvironmentCatalog.js';
 import { createDjEnvironmentComposition } from './djEnvironmentPreview.js';
@@ -182,6 +183,7 @@ export function createDjLayoutEditor(scene) {
       position.textContent = selection ? 'Grupo vacío' : 'Sin selección';
     }
     const root = instance && selected.find(({ id }) => id === instance.id);
+    get('perimeter-align').hidden = !root || !assets[root.assetId].perimeter?.lowerEdge;
     get('depth').textContent = root
       ? `Profundidad: ${offset ? `${offset > 0 ? '+' : ''}${root.depthRule === 'ground' ? offset / 100 : offset}` : 'automática'} · ${root.depth.toFixed(2)}`
       : 'Profundidad: elegí una pieza';
@@ -329,6 +331,12 @@ export function createDjLayoutEditor(scene) {
     ['delete', state.deleteSelection], ['forward', () => state.adjustDepth(1)],
     ['backward', () => state.adjustDepth(-1)], ['auto', () => state.adjustDepth(0)],
     ['undo', state.undo], ['redo', state.redo],
+    ['perimeter-align', () => {
+      const selected = state.getSelectedInstance();
+      const root = state.getPlacements().find((part) => part.id === selected?.id);
+      const delta = root && getDjPerimeterAlignment(root, state.getPlacements());
+      if (delta) state.move(...delta);
+    }],
   ]) on(get(name), 'click', () => command(action));
 
   on(get('collapse'), 'click', () => {

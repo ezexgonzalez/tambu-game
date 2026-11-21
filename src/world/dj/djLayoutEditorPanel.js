@@ -72,6 +72,7 @@ export function createDjEditorPanel(doc, container) {
         <div class="dj-row">
           <button type="button" data-forward>Adelante</button><button type="button" data-backward>Atrás</button>
           <button type="button" data-auto>Restablecer auto</button>
+          <button type="button" data-perimeter-align hidden>Alinear borde inferior</button>
         </div>
       </section>
       <section data-library aria-label="Biblioteca">

@@ -1,3 +1,5 @@
+import { DJ_PERIMETER_ASSETS } from "./djPerimeterAssets.js";
+
 // Source: approved DJ handoff A/B/C Correction01 and D v1. Coordinates are local PNG pixels.
 // Collider intents are reference data only. The scale preview has no physics.
 const ASSETS = {
@@ -616,4 +618,4 @@ const ASSETS = {
   },
 };
 
-export const DJ_ENVIRONMENT_ASSETS = Object.freeze(ASSETS);
+export const DJ_ENVIRONMENT_ASSETS = Object.freeze({ ...ASSETS, ...DJ_PERIMETER_ASSETS });

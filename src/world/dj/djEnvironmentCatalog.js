@@ -61,7 +61,7 @@ export const DJ_ENVIRONMENT_RECIPES = Object.freeze({
 });
 
 export const DJ_CATALOG_FAMILIES = Object.freeze({
-  furniture: 'Mobiliario', vegetation: 'Vegetación', lighting: 'Luces físicas', drinks: 'Bebidas',
+  furniture: 'Mobiliario', vegetation: 'Vegetación', lighting: 'Luces físicas', drinks: 'Bebidas', perimeter: 'Perímetro / Concepto A',
 });
 
 export function djAssetLibrary(catalog = assets, recipes = DJ_ENVIRONMENT_RECIPES) {

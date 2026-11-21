@@ -11,10 +11,12 @@ import { preloadPatioWorld } from '../src/world/createPatioWorld.js';
 import { PATIO_LAYOUT } from '../src/world/patioLayout.js';
 import { patioFriends, patioWomen } from '../src/data/patioCharacters.js';
 
-test('DJ catalog verifies the 39 approved RGBA files and the single reused bottle', () => {
+test('DJ catalog verifies the 60 registered RGBA files and the single reused bottle', () => {
   const entries = Object.values(assets);
-  assert.equal(entries.length, 40);
-  for (const field of ['key', 'path', 'sha256']) assert.equal(new Set(entries.map((asset) => asset[field])).size, 40);
+  assert.equal(entries.length, 61);
+  for (const field of ['key', 'path']) assert.equal(new Set(entries.map((asset) => asset[field])).size, 61);
+  assert.equal(new Set(entries.map((asset) => asset.sha256)).size, 60);
+  assert.equal(assets.PA15.sha256, assets.PA16.sha256); // Same art, distinct connection ports.
   assert.equal(Object.hasOwn(assets, 'L05'), false);
   assert.deepEqual(entries.filter(({ reuse }) => reuse), [assets.C01]);
   assert.equal(assets.V02A.sha256, '99d1f76301cf4396fd34ef7b7e0fb4ee751ca4c949f71997baf68d441782c6aa');
@@ -22,10 +24,10 @@ test('DJ catalog verifies the 39 approved RGBA files and the single reused bottl
     [80, 67, [40, 65], [40, 65]]);
   assert.equal(assets.C01.path, '/assets/props/deck/bottle.png');
   const root = 'public/assets/props/dj_environment';
-  for (const [family, count] of Object.entries({ furniture: 12, vegetation: 18, lighting: 8, drinks: 1 })) {
+  for (const [family, count] of Object.entries({ furniture: 12, vegetation: 18, lighting: 8, drinks: 1, perimeter: 21 })) {
     const files = entries.filter((asset) => asset.family === family && !asset.reuse);
     assert.equal(files.length, count);
-    assert.deepEqual(readdirSync(`${root}/${family}`).sort(), files.map(({ path }) => path.split('/').at(-1)).sort());
+    assert.deepEqual(readdirSync(`${root}/${family === "perimeter" ? "perimeter_concept_a" : family}`).sort(), files.map(({ path }) => path.split('/').at(-1)).sort());
   }
 
   for (const [id, asset] of Object.entries(assets)) {

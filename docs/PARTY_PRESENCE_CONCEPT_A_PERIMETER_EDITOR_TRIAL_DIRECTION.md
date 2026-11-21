@@ -1,7 +1,7 @@
 # TAMBU GAME — CONCEPTO A / Perímetro Residencial Moderno
 ## Asset intake & DJ Editor V2.1 visual trial
 **Fecha:** 2026-11-20
-**Estado:** DIRECTION APPROVED FOR EDITOR TRIAL ONLY / ART NOT FROZEN / RUNTIME DEFAULT OFF
+**Estado:** PACK IN REPO / EDITOR QA PENDING / RUNTIME DEFAULT OFF
 **Responsable técnico:** Integration Engineer
 **Objetivo:** incorporar al repo los 21 sprites finales de `Tambu_Perimetro_Concepto_A_Refinement01(1).zip`, registrarlos en el catálogo de `?djLayoutEdit=1` y permitir composición manual por Dirección. NO integrar un perímetro fijo en gameplay.
 
@@ -60,3 +60,11 @@ Mundo actual `1680 × 960`. Los 19 módulos horizontales se apoyan en borde infe
 5. Dirección abre editor V2.1, filtra `Perímetro / Concepto A`, compone y valida capturas reales; **no integración fija** antes de esa aprobación.
 
 **STOP:** los 21 sprites reales están registrados y visualmente seleccionables en el editor, las operaciones JSON siguen estables y gameplay normal sigue intacto. A la espera de QA visual de Dirección.
+
+### 7. Colocación y validación
+
+Abrí `?djLayoutEdit=1` → **Agregar objetos** → **Perímetro / Concepto A**. Elegí una tarjeta y hacé clic en el patio. Para un módulo inferior seleccionado en **Edición → Pieza**, **Alinear borde inferior** lo apoya con su última fila en Y=959. Si hay un puerto horizontal compatible a 8 px o menos, ajusta X para encastrar sin solapamiento; si no, usa la grilla de 8 px. El ajuste es opcional y se puede deshacer.
+
+Las 19 piezas inferiores se alinean por su altura refinada. Para una esquina de cierre de mundo, PA17 parte en (0,888) y PA18 en (1648,888), medidas desde la esquina superior izquierda del PNG. Los laterales se ubican manualmente: PA19 en (0,856) sobre PA17, PA20 en (1664,856) sobre PA18; cada extensión sube otros 32 px. PA21 ofrece un puerto norte a +8 px para PA19. Usá las flechas para afinar y exportá el JSON V2 para guardar la composición.
+
+Se incorporaron sólo los PNG de `assets/`, no las láminas de QA. Se verificaron SHA-256, dimensiones RGBA, alfa binaria y las 18 filas inferiores opacas de las piezas de cierre. PA15 y PA16 comparten bytes en el ZIP, pero conservan IDs y puertos opuestos. Validación: 301 tests, build OK. Sin navegador ni capturas. No se añadió un layout fijo, iluminación ni colisiones.
