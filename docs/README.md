@@ -39,6 +39,8 @@ Para cualquier tarea de HUD, diálogo, pantallas de estado, resultados, prompts 
 
 - [`PARTY_PRESENCE_DJ_WORKING_LAYOUT_PERSISTENCE_DIRECTION.md`](./PARTY_PRESENCE_DJ_WORKING_LAYOUT_PERSISTENCE_DIRECTION.md): contrato de checkpoint del layout V2 exportado por Dirección, que deberá cargarse por defecto en el editor y recuperarse con Reset. Pendiente de implementación, no habilita decoración en gameplay.
 
+- [`PATIO_ENVIRONMENT_PROP_PACK_EXPANSION_DIRECTION.md`](./PATIO_ENVIRONMENT_PROP_PACK_EXPANSION_DIRECTION.md): extensión editor-first de la biblioteca de props al patio completo, packs P01 piscina/verano, P02 barra/bebidas y P03 ambiente/transiciones; conserva baseline DJ y JSON V2, sin activación en gameplay.
+
 ## Auditorías
 
 - [`PROJECT_AUDIT_2026-09-28.md`](./PROJECT_AUDIT_2026-09-28.md) es la auditoría estratégica más reciente y debe usarse como evidencia para priorización junto con `CURRENT_STATE.md`.
