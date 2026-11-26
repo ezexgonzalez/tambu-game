@@ -193,7 +193,7 @@ function editorHarness() {
   };
   const image = (id) => images.filter((entry) => entry.scene)[baseline.findIndex((item) => item.id === id)];
   const field = (id) => fields.get(`[data-${id}]`);
-  const start = () => createDjLayoutEditor(scene);
+  const start = (options = { checkpoint: null }) => createDjLayoutEditor(scene, options);
   return { scene, win, camera, image, images, doc, field, start, panel: () => panel, getTabindex: () => tabindex };
 }
 
@@ -621,4 +621,43 @@ test('visual gallery opens first, panel clicks cannot place a prop, and selected
   assert.equal(field('instance-results').listenerCount('click'), 0);
   assert.equal(field('instances').listenerCount('toggle'), 0);
   assert.ok(images.every(({ scene }) => !scene));
+});
+
+test('editor opens and restarts from the exact saved composition; reset is undoable', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { createHash } = await import('node:crypto');
+  const bytes = readFileSync(new URL('../src/world/dj/layouts/dj-direction-working-layout-v1.json', import.meta.url));
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), '752d5acb1591e39de6dba3500633fec914e4e5d9f8f3e1946f0ac63ebdd40bc9');
+  const saved = JSON.parse(bytes);
+  assert.equal(saved.instances.length, 34);
+  assert.equal(saved.placements.length, 65);
+  assert.equal(saved.removedBaseline.length, 51);
+  assert.equal(saved.instances.filter(({ source }) => /^asset:PA/.test(source)).length, 21);
+  const { start, field, win, scene, images } = editorHarness();
+  const exportCurrent = async () => {
+    await field('export').fire('click');
+    return JSON.parse(await win.download.text());
+  };
+  start({});
+  assert.equal(field('undo').disabled, true);
+  assert.equal(images.length, 65);
+  assert.deepEqual(await exportCurrent(), saved);
+  scene.events.emit('shutdown');
+  start({});
+  assert.deepEqual(await exportCurrent(), saved);
+
+  const state = createDjLayoutEditorState(saved);
+  const highest = Math.max(...saved.instances.filter(({ id }) => id.startsWith('dj-')).map(({ id }) => Number(id.slice(3))));
+  assert.equal(state.add('asset:L02', 'pool-side', 350, 600), `dj-${highest + 1}`);
+  const edited = state.exportLayout();
+  state.reset();
+  assert.deepEqual(state.exportLayout(), saved);
+  state.undo();
+  assert.deepEqual(state.exportLayout(), edited);
+  state.redo();
+  assert.deepEqual(state.exportLayout(), saved);
+  state.importLayout(edited);
+  assert.deepEqual(state.exportLayout(), edited);
+  assert.throws(() => createDjLayoutEditorState({ ...saved, baselineRevision: 'invalid' }), /incompatible/);
+  scene.events.emit('shutdown');
 });

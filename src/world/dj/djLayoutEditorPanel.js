@@ -89,7 +89,7 @@ export function createDjEditorPanel(doc, container) {
       <footer>
         <div class="dj-row">
           <button type="button" data-undo>Deshacer</button><button type="button" data-redo>Rehacer</button>
-          <button type="button" data-reset>Reset</button>
+          <button type="button" data-reset>Restaurar versión guardada</button>
         </div>
         <label><input type="checkbox" data-guides> Guías y avisos de solapes</label>
         <small data-warnings></small>

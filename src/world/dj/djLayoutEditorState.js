@@ -14,8 +14,9 @@ export function isDjLayoutEditorEnabled(search = '') {
   return new URLSearchParams(search).get('djLayoutEdit') === '1';
 }
 
-export function createDjLayoutEditorState() {
-  let value = createDjBaseComposition(), selection = null, cache, nextId = 1, dragStart = null;
+export function createDjLayoutEditorState(checkpoint = null) {
+  const initial = checkpoint === null ? createDjBaseComposition() : readDjLayout(checkpoint);
+  let value = initial, selection = null, cache, nextId = 1, dragStart = null;
   const undoStack = [], redoStack = [];
   const getPlacements = () => cache ??= resolveDjComposition(value);
   const getInstance = () => selection?.type === 'object' ? value.instances.get(selection.id) : null;
@@ -140,12 +141,17 @@ export function createDjLayoutEditorState() {
     return editSelected({ depthOffset });
   }
 
+  function reserveIds(composition) {
+    for (const id of composition.instances.keys()) {
+      if (/^dj-\d+$/.test(id)) nextId = Math.max(nextId, Number(id.slice(3)) + 1);
+    }
+  }
+  reserveIds(initial);
+
   function importLayout(data) {
     const next = readDjLayout(data); // Validate before touching edits, selection or history.
     endMove();
-    for (const id of next.instances.keys()) {
-      if (/^dj-\d+$/.test(id)) nextId = Math.max(nextId, Number(id.slice(3)) + 1);
-    }
+    reserveIds(next);
     change(next, null);
   }
 
@@ -159,7 +165,7 @@ export function createDjLayoutEditorState() {
       id, group, source, assetId: djSourceParts(source)[0].assetId,
     })),
     isSelectionVisible: () => selection?.type === 'group' ? value.groups[selection.id].visible : getInstance()?.visible ?? true,
-    reset() { endMove(); change(createDjBaseComposition(), null); },
+    reset() { endMove(); change(initial, null); },
     beginMove() { if (!dragStart) dragStart = current(); },
     endMove,
     canUndo: () => undoStack.length > 0,

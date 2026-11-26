@@ -1,3 +1,4 @@
+import workingLayout from './layouts/dj-direction-working-layout-v1.json' with { type: 'json' };
 import { getDjPerimeterAlignment } from './djPerimeterAlignment.js';
 import { DJ_ENVIRONMENT_ASSETS as assets } from './djEnvironmentAssets.js';
 import { djAssetLibrary, filterDjAssetLibrary, DJ_CATALOG_FAMILIES } from './djEnvironmentCatalog.js';
@@ -15,8 +16,8 @@ const GUIDE_DEPTH = 7000;
 const BY_PIECE = 'object';
 const GROUP_OPTIONS = Object.entries(DJ_LAYOUT_GROUPS);
 
-export function createDjLayoutEditor(scene) {
-  const state = createDjLayoutEditorState();
+export function createDjLayoutEditor(scene, { checkpoint = workingLayout } = {}) {
+  const state = createDjLayoutEditorState(checkpoint);
   const renderer = createDjEnvironmentComposition(scene);
   const canvas = scene.sys.game.canvas;
   const doc = canvas.ownerDocument, win = doc.defaultView;
@@ -368,7 +369,7 @@ export function createDjLayoutEditor(scene) {
   on(get('reset'), 'click', () => command(() => {
     pendingImport++;
     state.reset();
-    status.textContent = 'Layout base restaurado.';
+    status.textContent = 'Composición guardada restaurada.';
   }));
   on(guides, 'change', () => {
     guideInk.setVisible(guides.checked);
