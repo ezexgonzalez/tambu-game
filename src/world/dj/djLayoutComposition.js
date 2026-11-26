@@ -2,6 +2,7 @@ import { PATIO_LAYOUT } from '../patioLayout.js';
 import { DJ_ENVIRONMENT_ASSETS as assets } from './djEnvironmentAssets.js';
 import { DJ_ENVIRONMENT_LAYOUT as baseline } from './djEnvironmentLayout.js';
 import { djRootPart, DJ_ENVIRONMENT_RECIPES } from './djEnvironmentCatalog.js';
+import { PATIO_OPTIONAL_GROUPS } from './patioComposerAreas.js';
 
 export const DJ_LAYOUT_GROUPS = Object.freeze({
   'upper-dj-edge': 'Borde superior DJ',
@@ -12,6 +13,7 @@ export const DJ_LAYOUT_GROUPS = Object.freeze({
   'lower-border-east': 'Borde inferior este',
   'pool-side': 'Lateral de piscina',
 });
+export const PATIO_LAYOUT_GROUPS = Object.freeze({ ...DJ_LAYOUT_GROUPS, ...PATIO_OPTIONAL_GROUPS });
 
 export const DJ_LAYOUT_BASELINE_REVISION = 'f66fde61154d48624898fec713af7fbd0251966a';
 export const DJ_MAX_DEPTH_OFFSET = 32;
@@ -20,7 +22,7 @@ export const DJ_MAX_INSTANCE_ID = 999999;
 const NAME = /^dj-[1-9]\d{0,5}$/;
 const world = PATIO_LAYOUT.world;
 const groupIds = Object.keys(DJ_LAYOUT_GROUPS);
-const invalid = () => new Error('JSON incompatible con el layout DJ o sus assets.');
+const invalid = () => new Error('JSON incompatible con el layout del patio o sus assets.');
 const isRecord = (value) => value != null && typeof value === 'object' && !Array.isArray(value);
 const ordered = (object, keys) => Object.fromEntries(keys.map((key) => [key, object[key]]));
 
@@ -136,7 +138,9 @@ export function exportDjLayout(composition) {
     version: 2,
     baselineRevision: DJ_LAYOUT_BASELINE_REVISION,
     manifest: Object.fromEntries(used.map((id) => [id, assets[id].sha256])),
-    groups: ordered(composition.groups, groupIds),
+    // Keep the seven legacy keys and their order. New groups appear only once used.
+    groups: ordered(composition.groups, Object.keys(PATIO_LAYOUT_GROUPS)
+      .filter((id) => Object.hasOwn(composition.groups, id))),
     instances: [...composition.instances.values()].sort(compareInstances).map((item) => ({ ...item })),
     removedBaseline: baseline.filter(({ id }) => !composition.instances.has(rootById.get(id))).map(({ id }) => id),
     placements,
@@ -145,11 +149,13 @@ export function exportDjLayout(composition) {
 
 function readV2(data) {
   if (data.baselineRevision !== DJ_LAYOUT_BASELINE_REVISION || !isRecord(data.groups)
-    || Object.keys(data.groups).length !== groupIds.length || !Array.isArray(data.instances)
+    || !groupIds.every((id) => Object.hasOwn(data.groups, id))
+    || !Object.keys(data.groups).every((id) => Object.hasOwn(PATIO_LAYOUT_GROUPS, id))
+    || !Array.isArray(data.instances)
     || data.instances.length > DJ_MAX_PLACEMENTS || !Array.isArray(data.placements)
     || data.placements.length > DJ_MAX_PLACEMENTS) throw invalid();
   const groups = {};
-  for (const id of groupIds) {
+  for (const id of Object.keys(data.groups)) {
     const value = data.groups[id];
     if (!Object.hasOwn(data.groups, id) || !isRecord(value) || typeof value.visible !== 'boolean') throw invalid();
     groups[id] = { visible: value.visible };

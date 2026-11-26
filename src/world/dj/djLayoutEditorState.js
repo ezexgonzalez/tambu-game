@@ -1,11 +1,11 @@
 import { DJ_ENVIRONMENT_ASSETS as assets } from './djEnvironmentAssets.js';
 import {
-  createDjBaseComposition, DJ_LAYOUT_GROUPS, DJ_MAX_DEPTH_OFFSET, DJ_MAX_INSTANCE_ID, DJ_MAX_PLACEMENTS,
+  createDjBaseComposition, PATIO_LAYOUT_GROUPS, DJ_MAX_DEPTH_OFFSET, DJ_MAX_INSTANCE_ID, DJ_MAX_PLACEMENTS,
   djSourceParts, exportDjLayout, fitDjTranslation, isDjCatalogSource, readDjLayout,
   resolveDjComposition, resolveDjInstance,
 } from './djLayoutComposition.js';
 
-export { DJ_LAYOUT_GROUPS, djPlacementBounds, pickDjLayoutObject } from './djLayoutComposition.js';
+export { DJ_LAYOUT_GROUPS, PATIO_LAYOUT_GROUPS, djPlacementBounds, pickDjLayoutObject } from './djLayoutComposition.js';
 
 const HISTORY_LIMIT = 50;
 const DEPTH_STEP = 4;
@@ -54,7 +54,7 @@ export function createDjLayoutEditorState(checkpoint = null) {
   function select(type, id) {
     endMove();
     if (type === 'object' && !value.instances.has(id)) id = getPlacements().find((part) => part.id === id)?.root;
-    selection = (type === 'group' && Object.hasOwn(DJ_LAYOUT_GROUPS, id)) || (type === 'object' && value.instances.has(id))
+    selection = (type === 'group' && Object.hasOwn(value.groups, id)) || (type === 'object' && value.instances.has(id))
       ? Object.freeze({ type, id }) : null;
     return selection;
   }
@@ -79,15 +79,16 @@ export function createDjLayoutEditorState(checkpoint = null) {
     if (!size || nextId > DJ_MAX_INSTANCE_ID || getPlacements().length + size > DJ_MAX_PLACEMENTS) return null;
     const id = `dj-${nextId++}`;
     const item = { id, source, group, x, y, visible, depthOffset };
-    const [dx, dy] = fitDjTranslation(resolveDjInstance(item, value.groups), 0, 0);
+    const groups = withGroup(group);
+    const [dx, dy] = fitDjTranslation(resolveDjInstance(item, groups), 0, 0);
     const instances = new Map(value.instances).set(id, { ...item, x: x + dx, y: y + dy });
-    change({ ...value, instances }, Object.freeze({ type: 'object', id }));
+    change({ ...value, instances, groups }, Object.freeze({ type: 'object', id }));
     return id;
   }
 
   function add(source, group, x, y) {
     endMove();
-    if (!isDjCatalogSource(source) || !Object.hasOwn(DJ_LAYOUT_GROUPS, group)
+    if (!isDjCatalogSource(source) || !Object.hasOwn(PATIO_LAYOUT_GROUPS, group)
       || !Number.isSafeInteger(Math.round(x)) || !Number.isSafeInteger(Math.round(y))) return null;
     const root = djSourceParts(source)[0];
     const [cx, cy] = assets[root.assetId].contactPx;
@@ -104,11 +105,16 @@ export function createDjLayoutEditorState(checkpoint = null) {
     return insert({ ...item, x: item.x + dx, y: item.y + dy });
   }
 
+  function withGroup(group) {
+    return Object.hasOwn(value.groups, group) ? value.groups : { ...value.groups, [group]: { visible: true } };
+  }
+
   function editSelected(changes) {
     endMove();
     const item = getInstance();
     if (!item || Object.entries(changes).every(([key, val]) => item[key] === val)) return false;
-    change({ ...value, instances: new Map(value.instances).set(item.id, { ...item, ...changes }) });
+    const groups = changes.group ? withGroup(changes.group) : value.groups;
+    change({ ...value, groups, instances: new Map(value.instances).set(item.id, { ...item, ...changes }) });
     return true;
   }
 
@@ -157,10 +163,11 @@ export function createDjLayoutEditorState(checkpoint = null) {
 
   return {
     getPlacements, select, isSelected, move, add, duplicate, deleteSelection, toggleVisibility, adjustDepth, importLayout,
-    changeGroup: (group) => Object.hasOwn(DJ_LAYOUT_GROUPS, group) && editSelected({ group }),
+    changeGroup: (group) => Object.hasOwn(PATIO_LAYOUT_GROUPS, group) && editSelected({ group }),
     exportLayout: () => exportDjLayout(value),
     getSelection: () => selection,
     getSelectedInstance: () => getInstance(),
+    getGroupIds: () => Object.keys(PATIO_LAYOUT_GROUPS).filter((id) => Object.hasOwn(value.groups, id)),
     getEditableObjects: () => [...value.instances.values()].map(({ id, group, source }) => ({
       id, group, source, assetId: djSourceParts(source)[0].assetId,
     })),

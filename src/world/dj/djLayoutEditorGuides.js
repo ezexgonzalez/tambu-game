@@ -4,10 +4,19 @@ import { PATIO_LAYOUT } from '../patioLayout.js';
 import { DJ_ENVIRONMENT_ASSETS as assets } from './djEnvironmentAssets.js';
 import { djPlacementBounds } from './djLayoutComposition.js';
 
-const { dj, events: { bathroom } } = PATIO_LAYOUT;
+const { dj, house, terrain: { entry }, events: { bathroom } } = PATIO_LAYOUT;
 const box = (x, y, width, height) => ({ x, y, width, height });
 const solids = getPatioCollisionZones()
-  .map(({ x, y, width, height }) => box(x - width / 2, y - height / 2, width, height));
+  .map(({ id, x, y, width, height }) => ({ id, ...box(x - width / 2, y - height / 2, width, height) }));
+const houseFront = house.y + house.height;
+const doorApproach = ({ x, width }) => box(x - 12, houseFront - 8, width + 24, 48);
+const barBody = solids.find(({ id }) => id === 'bar-body');
+const approaches = [
+  { area: doorApproach(house.secondaryDoor), warning: 'Acceso a la casa' },
+  { area: doorApproach(house.bathroom), warning: 'Acceso al baño' },
+  { area: box(barBody.x, barBody.y + barBody.height, barBody.width, 48), warning: 'Frente de servicio de la barra' },
+  { area: box(entry.x, entry.y, entry.width, entry.height), warning: 'Entrada al patio' },
+];
 const cast = [...patioFriends, ...patioWomen].map(({ x, y }) => box(x - 28, y - 66, 56, 114));
 const danceCore = box(260, dj.y + 205, 175, 350);
 const paths = [
@@ -39,7 +48,10 @@ function crossesRoute(bounds) {
 }
 
 export function drawDjLayoutGuides(graphics) {
-  for (const [color, rects] of [[0xff968a, solids], [0x9bdeff, cast], [0xb5eb9a, [danceCore]]]) {
+  for (const [color, rects] of [
+    [0xff968a, solids], [0x9bdeff, cast], [0xb5eb9a, [danceCore]],
+    [0xe5b1ff, approaches.map(({ area }) => area)],
+  ]) {
     graphics.lineStyle(1, color, 0.85);
     for (const { x, y, width, height } of rects) graphics.strokeRect(x, y, width, height);
   }
@@ -55,11 +67,13 @@ export function getDjLayoutWarnings(placements) {
     const nearCast = cast.some((area) => overlaps(area, art));
     const nearPool = overlaps(PATIO_LAYOUT.pool, art);
     const nearRoute = crossesRoute(art);
+    const blockingAccess = approaches.filter(({ area }) => overlaps(area, art));
     if (nearCast) warnings.add('Personaje o acceso');
     if (overlaps(danceCore, art)) warnings.add('Pista reservada');
     if (nearPool) warnings.add('Piscina');
     if (nearRoute) warnings.add('Ruta al baño');
-    if (item.depthOffset && (nearCast || nearPool || nearRoute)) {
+    for (const { warning } of blockingAccess) warnings.add(warning);
+    if (item.depthOffset && (nearCast || nearPool || nearRoute || blockingAccess.length)) {
       warnings.add('Profundidad manual en zona protegida');
     }
 

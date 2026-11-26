@@ -1,4 +1,4 @@
-import { DJ_ENVIRONMENT_ASSETS as assets } from './djEnvironmentAssets.js';
+import { DJ_ENVIRONMENT_ASSETS as assets, patioCatalog } from './djEnvironmentAssets.js';
 
 const GROUND_DEPTH = -16;
 
@@ -42,7 +42,7 @@ function furnishedTable() {
 }
 
 // Each entry either describes its native assembly or reuses an existing full assembly.
-export const DJ_ENVIRONMENT_RECIPES = Object.freeze({
+const baseRecipes = {
   'tropical-wide-pot': { label: 'Macetero tropical ancho', assetId: 'V02A',
     parts: planted('V06A', 'V02A', [25, 13], 14) },
   'tropical-tall-pot': { label: 'Macetero tropical alto', assetId: 'V02B',
@@ -58,22 +58,35 @@ export const DJ_ENVIRONMENT_RECIPES = Object.freeze({
   'sofa-short': { label: 'Sofá modular corto', assetId: 'F01a', baseline: 'upper-sofa-corner' },
   'sofa-long': { label: 'Sofá modular largo', assetId: 'F01b', baseline: 'lower-sofa-corner' },
   'garden-border': { label: 'Jardinera modular plantada', assetId: 'V07-middle', baseline: 'border-middle-left' },
-});
+};
+for (const id of Object.keys(patioCatalog.recipes)) {
+  if (Object.hasOwn(baseRecipes, id)) throw new Error(`Receta duplicada: ${id}`);
+}
+export const DJ_ENVIRONMENT_RECIPES = Object.freeze({ ...baseRecipes, ...patioCatalog.recipes });
 
 export const DJ_CATALOG_FAMILIES = Object.freeze({
+  ...patioCatalog.families,
   furniture: 'Mobiliario', vegetation: 'Vegetación', lighting: 'Luces físicas', drinks: 'Bebidas', perimeter: 'Perímetro / Concepto A',
 });
+
+function sectors(asset) {
+  if (asset.sectors) return asset.sectors;
+  if (asset.family === 'perimeter') return ['perimeter'];
+  if (asset.family === 'vegetation' || asset.family === 'lighting') return ['DJ', 'poolside', 'deck', 'perimeter'];
+  return ['DJ', 'poolside', 'bar', 'deck'];
+}
 
 export function djAssetLibrary(catalog = assets, recipes = DJ_ENVIRONMENT_RECIPES) {
   const entries = Object.entries(catalog).map(([id, asset]) => ({
     id, source: `asset:${id}`, label: asset.label ?? id, family: asset.family, path: asset.path,
-    placeable: asset.placeable === true,
+    placeable: asset.placeable === true, sectors: sectors(asset), pack: asset.pack,
   }));
   for (const [id, recipe] of Object.entries(recipes)) {
     const asset = catalog[recipe.assetId];
     if (!asset) continue;
     entries.push({ id, source: `recipe:${id}`, label: recipe.label, family: recipe.family ?? asset.family,
       path: asset.path, placeable: true, recipe: true,
+      sectors: recipe.sectors ?? sectors(asset), pack: recipe.pack ?? asset.pack,
       supportSearch: (recipe.parts ?? []).map(({ assetId }) => `${assetId} ${catalog[assetId]?.label ?? ''}`).join(' '),
     });
   }
@@ -82,11 +95,12 @@ export function djAssetLibrary(catalog = assets, recipes = DJ_ENVIRONMENT_RECIPE
 
 const normalize = (value) => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 
-export function filterDjAssetLibrary(entries, family, query, includeParts = false) {
+export function filterDjAssetLibrary(entries, family, query, includeParts = false, area = '') {
   const terms = normalize(query).trim().split(/\s+/);
   return entries.filter((entry) => {
-    if ((!includeParts && !entry.placeable) || (family && entry.family !== family)) return false;
-    const searchable = normalize(`${entry.id} ${entry.label} ${entry.supportSearch ?? ''}`);
+    if ((!includeParts && !entry.placeable) || (family && entry.family !== family)
+      || (area && !entry.sectors.includes(area))) return false;
+    const searchable = normalize(`${entry.id} ${entry.label} ${entry.pack ?? ''} ${entry.supportSearch ?? ''}`);
     return terms.every((term) => searchable.includes(term));
   });
 }

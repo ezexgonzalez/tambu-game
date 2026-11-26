@@ -48,7 +48,7 @@ export function createDjEditorPanel(doc, container) {
       #dj-layout-editor [data-inspector] { border: 1px solid #46566b; padding: 4px; margin-bottom: 6px; text-align: center; }
       #dj-layout-editor summary { cursor: pointer; margin-bottom: 4px; }
     </style>
-    <header><strong>Composición DJ</strong><button type="button" data-collapse aria-expanded="true">Plegar</button></header>
+    <header><strong>Compositor del patio</strong><button type="button" data-collapse aria-expanded="true">Plegar</button></header>
     <div data-body>
       <nav aria-label="Modos del editor">
         <button type="button" data-library-tab>Agregar objetos</button>
@@ -76,6 +76,8 @@ export function createDjEditorPanel(doc, container) {
         </div>
       </section>
       <section data-library aria-label="Biblioteca">
+        <label>Zona del patio <select data-area></select></label>
+        <small data-area-hint>Todas las piezas aprobadas. Movete con Espacio + arrastre.</small>
         <input type="search" placeholder="Buscar por nombre o ID" aria-label="Buscar assets" data-asset-search>
         <div class="dj-row">
           <select data-family aria-label="Categoría"></select>
@@ -92,6 +94,7 @@ export function createDjEditorPanel(doc, container) {
           <button type="button" data-reset>Restaurar versión guardada</button>
         </div>
         <label><input type="checkbox" data-guides> Guías y avisos de solapes</label>
+        <small>Coral: estructuras y piscina · Lila: accesos · Naranja: rutas al baño · Celeste: personajes · Verde: pista</small>
         <small data-warnings></small>
         <div class="dj-row"><button type="button" data-export>Exportar JSON</button><button type="button" data-import>Importar JSON</button></div>
         <input hidden type="file" accept=".json,application/json" data-file>

@@ -1,4 +1,5 @@
 import { DJ_PERIMETER_ASSETS } from "./djPerimeterAssets.js";
+import { extendPatioCatalog } from "./patioPropPacks.js";
 
 // Source: approved DJ handoff A/B/C Correction01 and D v1. Coordinates are local PNG pixels.
 // Collider intents are reference data only. The scale preview has no physics.
@@ -618,4 +619,5 @@ const ASSETS = {
   },
 };
 
-export const DJ_ENVIRONMENT_ASSETS = Object.freeze({ ...ASSETS, ...DJ_PERIMETER_ASSETS });
+export const patioCatalog = extendPatioCatalog({ ...ASSETS, ...DJ_PERIMETER_ASSETS });
+export const DJ_ENVIRONMENT_ASSETS = patioCatalog.assets;

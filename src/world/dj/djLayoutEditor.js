@@ -3,7 +3,8 @@ import { getDjPerimeterAlignment } from './djPerimeterAlignment.js';
 import { DJ_ENVIRONMENT_ASSETS as assets } from './djEnvironmentAssets.js';
 import { djAssetLibrary, filterDjAssetLibrary, DJ_CATALOG_FAMILIES } from './djEnvironmentCatalog.js';
 import { createDjEnvironmentComposition } from './djEnvironmentPreview.js';
-import { createDjLayoutEditorState, DJ_LAYOUT_GROUPS, djPlacementBounds, pickDjLayoutObject } from './djLayoutEditorState.js';
+import { createDjLayoutEditorState, PATIO_LAYOUT_GROUPS, djPlacementBounds, pickDjLayoutObject } from './djLayoutEditorState.js';
+import { PATIO_COMPOSER_AREAS } from './patioComposerAreas.js';
 import { drawDjLayoutGuides, getDjLayoutWarnings } from './djLayoutEditorGuides.js';
 import { createDjThumbnail } from './djLayoutThumbnails.js';
 import { createDjEditorPanel } from './djLayoutEditorPanel.js';
@@ -14,7 +15,7 @@ const DIRECTIONS = new Map([
 const FILE_NAME = 'tambu-dj-layout-v2.json';
 const GUIDE_DEPTH = 7000;
 const BY_PIECE = 'object';
-const GROUP_OPTIONS = Object.entries(DJ_LAYOUT_GROUPS);
+const GROUP_OPTIONS = Object.entries(PATIO_LAYOUT_GROUPS);
 
 export function createDjLayoutEditor(scene, { checkpoint = workingLayout } = {}) {
   const state = createDjLayoutEditorState(checkpoint);
@@ -33,6 +34,7 @@ export function createDjLayoutEditor(scene, { checkpoint = workingLayout } = {})
   const visibility = get('visibility'), status = get('status'), file = get('file');
   const guides = get('guides'), pieceSearch = get('piece-search'), membership = get('membership');
   const assetSearch = get('asset-search'), family = get('family'), addGroup = get('add-group');
+  const area = get('area');
   const components = get('components'), results = get('results');
   const instances = get('instances'), instanceResults = get('instance-results'), inspector = get('inspector');
   const library = djAssetLibrary();
@@ -92,7 +94,7 @@ export function createDjLayoutEditor(scene, { checkpoint = workingLayout } = {})
   }
 
   function renderLibrary() {
-    const entries = filterDjAssetLibrary(library, family.value, assetSearch.value, components.checked);
+    const entries = filterDjAssetLibrary(library, family.value, assetSearch.value, components.checked, area.value);
     const scrollTop = results.scrollTop;
     results.replaceChildren(...entries.map((entry) => {
       const button = doc.createElement('button');
@@ -104,13 +106,22 @@ export function createDjLayoutEditor(scene, { checkpoint = workingLayout } = {})
       const label = doc.createElement('span');
       label.textContent = entry.label;
       const id = doc.createElement('span');
-      id.textContent = entry.recipe ? 'Conjunto' : entry.placeable ? 'Pieza' : 'Componente';
+      const type = entry.recipe ? 'Conjunto' : entry.placeable ? 'Pieza' : 'Componente';
+      id.textContent = entry.pack ? `${type} · ${entry.pack}` : type;
       button.append(createDjThumbnail(doc, entry), label, id);
       return button;
     }));
-    if (!entries.length) results.textContent = 'Sin resultados.';
+    if (!entries.length) results.textContent = 'Sin resultados. Probá con otra categoría o Todo el patio.';
     results.scrollTop = scrollTop;
     renderInspector();
+  }
+
+  function updateFamilies() {
+    const value = family.value;
+    const scoped = filterDjAssetLibrary(library, '', '', true, area.value);
+    const ids = [...new Set(scoped.map((entry) => entry.family))];
+    options(family, [['', 'Todas las categorías'], ...ids.map((id) => [id, DJ_CATALOG_FAMILIES[id] ?? id])]);
+    family.value = ids.includes(value) ? value : '';
   }
 
   function syncSelectionList(selection) {
@@ -121,8 +132,9 @@ export function createDjLayoutEditor(scene, { checkpoint = workingLayout } = {})
     const cards = byPiece ? state.getEditableObjects()
       .map((item) => ({ ...item, label: libraryBySource.get(item.source)?.label ?? assets[item.assetId].label ?? item.assetId }))
       .filter(({ id, label, group }) => id === selection?.id
-        || `${label} ${id} ${DJ_LAYOUT_GROUPS[group]}`.toLowerCase().includes(query)) : [];
-    const choices = byPiece ? cards.map(({ id, label }) => [id, `${label} · ${id}`]) : GROUP_OPTIONS;
+        || `${label} ${id} ${PATIO_LAYOUT_GROUPS[group]}`.toLowerCase().includes(query)) : [];
+    const choices = byPiece ? cards.map(({ id, label }) => [id, `${label} · ${id}`])
+      : state.getGroupIds().map((id) => [id, PATIO_LAYOUT_GROUPS[id]]);
     instances.hidden = !byPiece;
     if (byPiece && instances.open) {
       const signature = JSON.stringify([cards, selection?.id]);
@@ -137,7 +149,7 @@ export function createDjLayoutEditor(scene, { checkpoint = workingLayout } = {})
           const title = doc.createElement('span');
           title.textContent = label;
           const detail = doc.createElement('small');
-          detail.textContent = `${id} · ${DJ_LAYOUT_GROUPS[group]}`;
+          detail.textContent = `${id} · ${PATIO_LAYOUT_GROUPS[group]}`;
           button.append(createDjThumbnail(doc, { source }, 64), title, detail);
           return button;
         }));
@@ -350,7 +362,7 @@ export function createDjLayoutEditor(scene, { checkpoint = workingLayout } = {})
   on(get('edit-tab'), 'click', () => { stopPlacing(); tabs(false); });
   on(get('library-tab'), 'click', () => {
     const selection = state.getSelection();
-    if (selection?.type === 'group') addGroup.value = selection.id;
+    if (!area.value && selection?.type === 'group') addGroup.value = selection.id;
     tabs(true);
   });
   on(results, 'click', (event) => {
@@ -365,6 +377,15 @@ export function createDjLayoutEditor(scene, { checkpoint = workingLayout } = {})
   on(assetSearch, 'input', renderLibrary);
   on(family, 'change', renderLibrary);
   on(components, 'change', renderLibrary);
+  on(area, 'change', () => {
+    stopPlacing();
+    const zone = PATIO_COMPOSER_AREAS[area.value];
+    if (zone) addGroup.value = zone.group;
+    get('area-hint').textContent = zone?.hint ?? 'Todas las piezas aprobadas. Movete con Espacio + arrastre.';
+    updateFamilies();
+    renderLibrary();
+    focusCanvas();
+  });
 
   on(get('reset'), 'click', () => command(() => {
     pendingImport++;
@@ -410,13 +431,13 @@ export function createDjLayoutEditor(scene, { checkpoint = workingLayout } = {})
       status.textContent = data.version === 1 ? 'Layout V1 importado; ahora se exporta como V2.' : 'Layout V2 importado.';
     } catch {
       if (destroyed || request !== pendingImport) return;
-      status.textContent = 'No se importó: elegí un JSON compatible con este layout DJ.';
+      status.textContent = 'No se importó: elegí un JSON compatible con este patio.';
     }
     focusCanvas();
   });
 
-  options(family, [['', 'Todas las categorías'], ...[...new Set(library.map((entry) => entry.family))]
-    .map((id) => [id, DJ_CATALOG_FAMILIES[id] ?? id])]);
+  options(area, [['', 'Todo el patio'], ...Object.entries(PATIO_COMPOSER_AREAS).map(([id, zone]) => [id, zone.label])]);
+  updateFamilies();
   options(addGroup, GROUP_OPTIONS);
   options(membership, GROUP_OPTIONS);
   addGroup.value = 'upper-lounge';

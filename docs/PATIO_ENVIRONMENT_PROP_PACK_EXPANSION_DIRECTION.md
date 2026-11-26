@@ -91,3 +91,18 @@ Do not recreate Concept A, old rejected hedge/fence, thin repeated planters or f
 - Direction can build an engaging, complete-feeling patio scene using the editor, not multiple rounds of numeric adjustments.
 
 **STOP:** Stage one is the P01 art pack and a compatible technical preparation; no automatic activation or full V1 release claim.
+
+## 9. Compositor del patio — uso y registro
+
+La preparación del editor está implementada, pendiente de QA manual de Dirección. El checkpoint del DJ y sus assets se conservan tal como están.
+
+1. Abrí el juego con **`?djLayoutEdit=1`**. En **Agregar objetos → Zona del patio**, elegí **DJ / Lounge**, **Piscina / Poolside**, **Barra**, **Casa / Deck** o **Perímetro**. **Todo el patio** muestra la biblioteca completa. La zona filtra sugerencias y propone el grupo para la siguiente alta; no mueve la cámara, no cambia piezas colocadas y no limita el lugar de colocación.
+2. Usá **Espacio + arrastre** para recorrer el patio. Elegí una categoría o buscá por nombre, ID o pack. Elegí la tarjeta con preview del PNG real y hacé clic para colocarla. **Agregar al grupo** permite elegir otro destino. En **Edición → Pieza → Grupo de la pieza** se cambia la pertenencia de forma explícita; arrastrar no reclasifica.
+3. Activá **Guías y avisos de solapes** para ver estructuras y piscina (coral), puertas, frente de la barra y entrada (lila), rutas al baño (naranja), personajes (celeste) y pista (verde). Los avisos no son bloqueos ni colisiones. En una pieza de perímetro, el botón **Alinear borde inferior** sigue disponible.
+4. Usá **Exportar JSON** para guardar cambios y **Importar JSON** para retomarlos. **Restaurar versión guardada** recarga el checkpoint versionado. La selección de zona es una preferencia de la sesión: no se agrega al JSON.
+
+**Compatibilidad:** la versión sigue siendo V2. Los siete grupos históricos son obligatorios y conservan sus IDs, contenido y orden de exportación. El checkpoint sin editar se reexporta byte por byte. Solo una colocación o reasignación a Barra / Casa–Deck crea las claves opcionales `bar-side` / `house-deck`; desde entonces su visibilidad y membresía se guardan en V2. El editor ampliado importa V1, V2 anteriores y los V2 ampliados. Un editor anterior que valide exactamente siete grupos no abre un export nuevo que use grupos opcionales. No se migran ni se mueven piezas existentes automáticamente.
+
+**Registrar un pack aprobado:** incorporar sus PNG versionados a `public/assets/props/<pack>/` e incluir un registro en `PATIO_PROP_PACKS` de `src/world/dj/patioPropPacks.js`. El registro es estático, revisado en repo: ID de pack, mapa opcional `families` (ID → etiqueta), mapa `assets` (ID → metadata del catálogo existente) y mapa opcional `recipes` (ID → receta con `label`, `assetId`, `parts` y, opcionalmente, `sectors`). Cada asset declara `sectors`: `DJ`, `poolside`, `bar`, `deck` o `perimeter`. Para recetas, los miembros siguen el mismo contrato de apoyo, recorte, profundidad y relativo a raíz del catálogo V2.1. Los componentes `host` no se colocan sueltos; se montan con recetas. El catálogo, precarga del editor, thumbnails, plantillas y validador de JSON usan el mismo registro. Los PNG de un pack se cargan al abrir el editor, no en juego normal ni en la preview histórica.
+
+La preparación no registra el pack P01 ni promueve arte: se incorpora en su entrega de integración después de la aprobación de Dirección.

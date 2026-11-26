@@ -8,6 +8,8 @@ import { djAssetLibrary, filterDjAssetLibrary } from '../src/world/dj/djEnvironm
 import { DJ_LAYOUT_BASELINE_REVISION, DJ_MAX_DEPTH_OFFSET } from '../src/world/dj/djLayoutComposition.js';
 import { createDjLayoutEditor } from '../src/world/dj/djLayoutEditor.js';
 import { getDjLayoutWarnings } from '../src/world/dj/djLayoutEditorGuides.js';
+import { PATIO_COMPOSER_AREAS } from '../src/world/dj/patioComposerAreas.js';
+import { extendPatioCatalog } from '../src/world/dj/patioPropPacks.js';
 import {
   createDjLayoutEditorState, DJ_LAYOUT_GROUPS, isDjLayoutEditorEnabled, pickDjLayoutObject,
 } from '../src/world/dj/djLayoutEditorState.js';
@@ -642,6 +644,7 @@ test('editor opens and restarts from the exact saved composition; reset is undoa
   assert.equal(field('undo').disabled, true);
   assert.equal(images.length, 65);
   assert.deepEqual(await exportCurrent(), saved);
+  assert.equal(await win.download.text(), bytes.toString(), 'unedited checkpoint exports the same bytes');
   scene.events.emit('shutdown');
   start({});
   assert.deepEqual(await exportCurrent(), saved);
@@ -660,4 +663,133 @@ test('editor opens and restarts from the exact saved composition; reset is undoa
   assert.deepEqual(state.exportLayout(), edited);
   assert.throws(() => createDjLayoutEditorState({ ...saved, baselineRevision: 'invalid' }), /incompatible/);
   scene.events.emit('shutdown');
+});
+
+test('choosing a patio zone filters approved cards and sets an explicit placement group without moving the camera or saved props', async () => {
+  const { start, field, camera, images, win, scene } = editorHarness();
+  const editor = start({});
+  const exportCurrent = async () => {
+    await field('export').fire('click');
+    return win.download.text();
+  };
+  const same = await exportCurrent();
+  const scroll = [camera.scrollX, camera.scrollY];
+  assert.deepEqual(field('area').children.map(({ value }) => value), ['', ...Object.keys(PATIO_COMPOSER_AREAS)]);
+  for (const [area, zone] of Object.entries(PATIO_COMPOSER_AREAS)) {
+    field('area').value = area;
+    await field('area').fire('change');
+    assert.equal(field('add-group').value, zone.group);
+    assert.deepEqual([camera.scrollX, camera.scrollY], scroll);
+    const cards = field('results').children;
+    assert.ok(cards.length > 0);
+    assert.deepEqual(cards.map((c) => c.getAttribute('data-source')),
+      filterDjAssetLibrary(djAssetLibrary(), '', '', false, area).map(({ source }) => source));
+  }
+  assert.equal(await exportCurrent(), same);
+
+  field('area').value = 'bar';
+  await field('area').fire('change');
+  const card = field('results').children.find((c) => c.getAttribute('data-source') === 'asset:F06');
+  assert.equal(card.children[0].src, assets.F06.path);
+  await field('results').fire('click', { target: card });
+  scene.input.emit('pointerdown', { id: 1, button: 0, x: 1450, y: 540 - camera.scrollY });
+  assert.equal(images.at(-1).key, assets.F06.key);
+  const [cx, cy] = assets.F06.contactPx, [ox, oy] = assets.F06.originPx;
+  assert.deepEqual([images.at(-1).x + cx - ox, images.at(-1).y + cy - oy], [1450, 540]);
+  assert.equal(JSON.parse(await exportCurrent()).instances.at(-1).group, 'bar-side');
+  await field('undo').fire('click');
+  assert.equal(await exportCurrent(), same);
+  editor.destroy();
+  assert.equal(field('area').listenerCount('change'), 0);
+});
+
+test('props can be moved, duplicated and reloaded in each patio zone with optional groups and no reassignment on drag', () => {
+  const state = createDjLayoutEditorState();
+  const old = state.exportLayout(), original = new Set(old.placements.map(({ id }) => id));
+  const locations = [[240, 600], [750, 833], [1500, 590], [550, 240], [1300, 930]];
+  Object.values(PATIO_COMPOSER_AREAS).forEach(({ group }, i) => {
+    const [x, y] = locations[i], id = state.add(i === 1 ? 'recipe:table-served' : 'asset:F06', group, x, y);
+    const root = state.getPlacements().find((p) => p.id === id);
+    assert.deepEqual([root.x + assets[root.assetId].contactPx[0], root.autoDepth, root.group], [x, y, group]);
+  });
+  assert.deepEqual(state.getPlacements().filter(({ id }) => original.has(id)), old.placements);
+  state.select('group', 'bar-side');
+  assert.deepEqual(state.move(-680, 200), [-680, 200]);
+  const moved = state.getPlacements().find(({ id }) => id === 'dj-3');
+  assert.equal(moved.group, 'bar-side');
+  state.toggleVisibility();
+  assert.equal(state.getPlacements().find(({ id }) => id === moved.id).visible, false);
+  assert.equal(state.getPlacements().find(({ id }) => id === 'dj-4').visible, true);
+  state.undo();
+  state.redo();
+  state.select('object', 'dj-4');
+  const copy = state.duplicate();
+  assert.equal(state.getSelectedInstance().group, 'house-deck');
+  state.adjustDepth(1);
+  const edited = state.exportLayout();
+  const reload = createDjLayoutEditorState();
+  reload.importLayout(JSON.parse(JSON.stringify(edited)));
+  assert.equal(JSON.stringify(reload.exportLayout()), JSON.stringify(edited));
+  assert.equal(reload.exportLayout().placements.find(({ id }) => id === copy).depthOffset, 4);
+  // The importer does not accept arbitrary groups, missing optional-group records or rewritten memberships.
+  for (const edit of [
+    (d) => { d.groups['arbitrary-group'] = { visible: true }; },
+    (d) => { delete d.groups['bar-side']; },
+    (d) => { d.instances.find(({ id }) => id === 'dj-3').group = 'house-deck'; },
+  ]) {
+    const bad = structuredClone(edited);
+    edit(bad);
+    assert.throws(() => reload.importLayout(bad), /incompatible/);
+    assert.deepEqual(reload.exportLayout(), edited);
+  }
+  assert.ok(state.deleteSelection());
+  state.undo();
+  assert.deepEqual(state.exportLayout(), edited);
+  reload.importLayout(old);
+  assert.deepEqual(reload.exportLayout(), old);
+  reload.select('object', 'upper-pouf');
+  reload.changeGroup('house-deck');
+  assert.equal(reload.getSelectedInstance().group, 'house-deck');
+  reload.undo();
+  assert.deepEqual(reload.exportLayout(), old);
+});
+
+test('versioned pack registration exposes category, zone and recipe cards using real approved PNG paths', () => {
+  // Test metadata only: use existing game textures and do not register any new art in production.
+  const original = { cup: assets.C02 };
+  const pack = {
+    id: 'P00-test', families: { 'test-equipment': 'Equipamiento' },
+    assets: { 'P00-T': { ...assets.F04, family: 'test-equipment', sectors: ['poolside', 'bar'], placeable: true } },
+    recipes: { served: { label: 'Mesa de prueba', assetId: 'P00-T',
+      parts: [{ assetId: 'P00-T' }, { assetId: 'cup' }], sectors: ['bar'] } },
+  };
+  const { assets: combined, recipes, families } = extendPatioCatalog(original, [pack]);
+  assert.equal(families['test-equipment'], 'Equipamiento');
+  assert.equal(combined.cup, assets.C02);
+  const cards = djAssetLibrary(combined, recipes);
+  assert.deepEqual(filterDjAssetLibrary(cards, 'test-equipment', 'p00-test', false, 'bar')
+    .map(({ source, path }) => [source, path]), [['asset:P00-T', assets.F04.path], ['recipe:served', assets.F04.path]]);
+  assert.deepEqual(filterDjAssetLibrary(cards, 'test-equipment', '', false, 'poolside').map(({ id }) => id), ['P00-T']);
+  assert.deepEqual(filterDjAssetLibrary(cards, 'test-equipment', '', false, 'deck'), []);
+  assert.throws(() => extendPatioCatalog(original, [pack, pack]), /duplicado/);
+  assert.throws(() => extendPatioCatalog(original, [{ ...pack, assets: {
+    'P00-T': { ...pack.assets['P00-T'], path: 'https://example.com/texture.png' },
+  } }]), /inválido/);
+  assert.throws(() => extendPatioCatalog(original, [{ ...pack, assets: {} }]), /Receta de patio inválida/);
+});
+
+test('guides warn on doors, bar service and patio entry without blocking placement', () => {
+  const state = createDjLayoutEditorState();
+  for (const [x, y, group, warning] of [
+    [918, 183, 'house-deck', 'Acceso a la casa'],
+    [1338, 183, 'house-deck', 'Acceso al baño'],
+    [1380, 463, 'bar-side', 'Frente de servicio de la barra'],
+    [1500, 880, 'lower-border-east', 'Entrada al patio'],
+  ]) {
+    const id = state.add('asset:L02', group, x, y);
+    const item = state.getPlacements().find((p) => p.id === id);
+    assert.ok(item, group);
+    assert.ok(getDjLayoutWarnings([item]).includes(warning), warning);
+    assert.ok(!getDjLayoutWarnings([{ ...item, visible: false }]).includes(warning));
+  }
 });
