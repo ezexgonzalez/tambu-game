@@ -37,6 +37,8 @@ Para cualquier tarea de HUD, diálogo, pantallas de estado, resultados, prompts 
 
 - [`PARTY_PRESENCE_CONCEPT_A_PERIMETER_EDITOR_TRIAL_DIRECTION.md`](./PARTY_PRESENCE_CONCEPT_A_PERIMETER_EDITOR_TRIAL_DIRECTION.md): incorporación **solo al catálogo editor V2.1** del pack Refinement01 de 21 PNG del perímetro residencial. La composición definitiva y la aprobación visual siguen pendientes; no habilitar en gameplay por defecto.
 
+- [`PARTY_PRESENCE_DJ_WORKING_LAYOUT_PERSISTENCE_DIRECTION.md`](./PARTY_PRESENCE_DJ_WORKING_LAYOUT_PERSISTENCE_DIRECTION.md): contrato de checkpoint del layout V2 exportado por Dirección, que deberá cargarse por defecto en el editor y recuperarse con Reset. Pendiente de implementación, no habilita decoración en gameplay.
+
 ## Auditorías
 
 - [`PROJECT_AUDIT_2026-09-28.md`](./PROJECT_AUDIT_2026-09-28.md) es la auditoría estratégica más reciente y debe usarse como evidencia para priorización junto con `CURRENT_STATE.md`.
